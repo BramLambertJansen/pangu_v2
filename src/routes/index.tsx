@@ -3,10 +3,12 @@ import { createBrowserRouter, redirect } from 'react-router-dom'
 import AppLayout from '@/layouts/AppLayout'
 import AuthLayout from '@/layouts/AuthLayout'
 import { Spinner } from '@/components/ui/Spinner'
+import { supabase } from '@/lib/supabase'
 
 const LoginPage = lazy(() => import('@/pages/LoginPage'))
 const RegisterPage = lazy(() => import('@/pages/RegisterPage'))
 const DashboardPage = lazy(() => import('@/pages/DashboardPage'))
+const AdminPage = lazy(() => import('@/pages/AdminPage'))
 
 function PageLoader() {
   return (
@@ -24,6 +26,26 @@ function wrap(Page: React.ComponentType) {
   )
 }
 
+async function requireAuth() {
+  const { data: { session } } = await supabase.auth.getSession()
+  if (!session) return redirect('/login')
+  return null
+}
+
+async function requireAdmin() {
+  const { data: { session } } = await supabase.auth.getSession()
+  if (!session) return redirect('/login')
+
+  const { data: profile } = await supabase
+    .from('profiles')
+    .select('role')
+    .eq('id', session.user.id)
+    .single()
+
+  if (profile?.role !== 'admin') return redirect('/dashboard')
+  return null
+}
+
 export const router = createBrowserRouter([
   {
     path: '/',
@@ -39,7 +61,16 @@ export const router = createBrowserRouter([
   {
     element: <AppLayout />,
     children: [
-      { path: '/dashboard', element: wrap(DashboardPage) },
+      {
+        path: '/dashboard',
+        loader: requireAuth,
+        element: wrap(DashboardPage),
+      },
+      {
+        path: '/admin',
+        loader: requireAdmin,
+        element: wrap(AdminPage),
+      },
     ],
   },
 ])
