@@ -105,7 +105,7 @@ export default function AppLayout() {
   const navigate = useNavigate()
 
   const navItems = profile?.role === 'admin'
-    ? [...baseNavItems, adminNavItem]
+    ? [adminNavItem]
     : baseNavItems
 
   async function handleSignOut() {
