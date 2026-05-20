@@ -215,11 +215,18 @@ npm run type-check   # tsc --noEmit
 - [x] `Avatar`
 
 ### Authenticatie
-- [ ] Login pagina
+- [x] Login pagina (email + wachtwoord, redirect op rol)
 - [ ] Registratie pagina
-- [ ] Supabase Auth integratie
-- [ ] Protected routes
-- [x] Auth store (Zustand)
+- [x] Supabase Auth integratie (`signInWithPassword`, `signOut`)
+- [x] Protected routes (loaders: `requireAuth`, `requireAdmin`)
+- [x] Auth store (Zustand) — uitgebreid met `profile` + `signOut`
+
+### Admin
+- [x] Profiles tabel + RLS (`supabase/migrations/001_profiles.sql`)
+- [x] Vercel serverless API (`api/admin/users.ts`, `api/admin/users/[id].ts`)
+- [x] Admin pagina `/admin` — accountbeheer (lijst, aanmaken, bewerken, verwijderen)
+- [x] Rol-gebaseerde navigatie (Accountbeheer zichtbaar voor admins)
+- [x] Uitloggen via sidebar
 
 ### Campaign Management (DM)
 - [ ] Campaign overzicht / dashboard

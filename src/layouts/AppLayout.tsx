@@ -1,5 +1,8 @@
-import { Outlet, NavLink } from 'react-router-dom'
+import { Outlet, NavLink, useNavigate } from 'react-router-dom'
 import { useUIStore } from '@/stores/ui.store'
+import { useAuthStore } from '@/stores/auth.store'
+import { supabase } from '@/lib/supabase'
+import { toast } from 'sonner'
 import { useMemo } from 'react'
 
 interface Star {
@@ -60,7 +63,7 @@ function Starfield() {
   )
 }
 
-const navItems = [
+const baseNavItems = [
   {
     to: '/dashboard',
     label: 'Dashboard',
@@ -83,8 +86,34 @@ const navItems = [
   },
 ]
 
+const adminNavItem = {
+  to: '/admin',
+  label: 'Accountbeheer',
+  icon: (
+    <svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
+      <circle cx="9" cy="7" r="4" />
+      <path d="M23 21v-2a4 4 0 0 0-3-3.87" />
+      <path d="M16 3.13a4 4 0 0 1 0 7.75" />
+    </svg>
+  ),
+}
+
 export default function AppLayout() {
   const { sidebarOpen, toggleSidebar } = useUIStore()
+  const { profile, signOut } = useAuthStore()
+  const navigate = useNavigate()
+
+  const navItems = profile?.role === 'admin'
+    ? [adminNavItem]
+    : baseNavItems
+
+  async function handleSignOut() {
+    await supabase.auth.signOut()
+    signOut()
+    toast.success('Uitgelogd')
+    navigate('/login', { replace: true })
+  }
 
   return (
     <div className="flex h-screen overflow-hidden" style={{ background: 'var(--void)', color: 'var(--ink)' }}>
@@ -183,6 +212,18 @@ export default function AppLayout() {
             {/* Footer */}
             <div className="flex flex-col shrink-0" style={{ gap: 'var(--sp-2)' }}>
               <div aria-hidden="true" style={{ height: '1px', background: 'var(--hairline)', margin: '0 8px' }} />
+              <button
+                onClick={handleSignOut}
+                className="nav-item"
+                aria-label="Uitloggen"
+              >
+                <svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+                  <polyline points="16 17 21 12 16 7" />
+                  <line x1="21" y1="12" x2="9" y2="12" />
+                </svg>
+                <span>Uitloggen</span>
+              </button>
               <button
                 onClick={toggleSidebar}
                 className="nav-item"

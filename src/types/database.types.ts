@@ -8,11 +8,55 @@ export type Json =
   | { [key: string]: Json | undefined }
   | Json[]
 
-export interface Database {
+export type ProfileRole = 'user' | 'admin'
+
+export type Database = {
   public: {
-    Tables: Record<string, never>
-    Views: Record<string, never>
-    Functions: Record<string, never>
-    Enums: Record<string, never>
+    Tables: {
+      profiles: {
+        Row: {
+          id: string
+          email: string
+          display_name: string | null
+          role: string
+          created_at: string
+        }
+        Insert: {
+          id: string
+          email: string
+          display_name?: string | null
+          role?: string
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          email?: string
+          display_name?: string | null
+          role?: string
+          created_at?: string
+        }
+        Relationships: []
+      }
+    }
+    Views: {
+      [_ in never]: never
+    }
+    Functions: {
+      [_ in never]: never
+    }
+    Enums: {
+      [_ in never]: never
+    }
+    CompositeTypes: {
+      [_ in never]: never
+    }
   }
+}
+
+export interface Profile {
+  id: string
+  email: string
+  display_name: string | null
+  role: ProfileRole
+  created_at: string
 }

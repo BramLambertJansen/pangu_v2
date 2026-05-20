@@ -13,21 +13,30 @@ export interface ModalProps {
 export function Modal({ open, onClose, title, children, className }: ModalProps) {
   const dialogRef = useRef<HTMLDivElement>(null)
   const previousFocusRef = useRef<HTMLElement | null>(null)
+  const onCloseRef = useRef(onClose)
   const titleId = useId()
+
+  useEffect(() => { onCloseRef.current = onClose }, [onClose])
 
   useEffect(() => {
     if (!open) return
 
     previousFocusRef.current = document.activeElement as HTMLElement
 
-    const focusable = dialogRef.current?.querySelectorAll<HTMLElement>(
-      'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])',
-    )
-    focusable?.[0]?.focus()
+    // Focus the dialog container itself (tabIndex={-1}).
+    // This is the correct a11y pattern: screen readers announce the dialog title,
+    // and the user Tabs naturally to the first form field from there.
+    // Focusing a child input here causes re-renders from form state to steal focus.
+    dialogRef.current?.focus()
 
     function onKeyDown(e: KeyboardEvent) {
-      if (e.key === 'Escape') { onClose(); return }
-      if (e.key !== 'Tab' || !focusable?.length) return
+      if (e.key === 'Escape') { onCloseRef.current(); return }
+      if (e.key !== 'Tab') return
+
+      const focusable = dialogRef.current?.querySelectorAll<HTMLElement>(
+        'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])',
+      )
+      if (!focusable?.length) return
 
       const first = focusable[0]
       const last = focusable[focusable.length - 1]
@@ -44,22 +53,23 @@ export function Modal({ open, onClose, title, children, className }: ModalProps)
       document.removeEventListener('keydown', onKeyDown)
       previousFocusRef.current?.focus()
     }
-  }, [open, onClose])
+  }, [open])
 
   if (!open) return null
 
   return createPortal(
     <div
       className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 px-4"
-      onClick={(e) => { if (e.target === e.currentTarget) onClose() }}
+      onClick={(e) => { if (e.target === e.currentTarget) onCloseRef.current() }}
     >
       <div
         ref={dialogRef}
         role="dialog"
         aria-modal="true"
         aria-labelledby={titleId}
+        tabIndex={-1}
         className={cn(
-          'w-full max-w-lg rounded-lg border border-gray-700 bg-gray-900 p-6 shadow-xl',
+          'w-full max-w-lg rounded-lg border border-gray-700 bg-gray-900 p-6 shadow-xl outline-none',
           className,
         )}
       >
@@ -68,7 +78,7 @@ export function Modal({ open, onClose, title, children, className }: ModalProps)
             {title}
           </h2>
           <button
-            onClick={onClose}
+            onClick={() => onCloseRef.current()}
             aria-label="Sluiten"
             className="rounded p-1.5 text-gray-400 hover:text-gray-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500"
           >
