@@ -417,7 +417,7 @@ export default function SettingsPage() {
   ]
 
   return (
-    <div style={{ maxWidth: 820, width: '100%', margin: '0 auto' }}>
+    <div style={{ display: 'flex', justifyContent: 'center', width: '100%' }}><div style={{ maxWidth: 820, width: '100%' }}>
       {/* Page header */}
       <header style={{ marginBottom: 40 }}>
         <p className="pangu-eyebrow">Configuration</p>
@@ -457,6 +457,6 @@ export default function SettingsPage() {
         {activeTab === 'prefs' && <VoorkeurenTab />}
         {activeTab === 'about' && <OverTab />}
       </div>
-    </div>
+    </div></div>
   )
 }
