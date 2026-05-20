@@ -3,6 +3,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { toast } from 'sonner'
 import { supabase } from '@/lib/supabase'
 import { queryKeys } from '@/lib/queryKeys'
+import { getApiError } from '@/utils/apiError'
 import { Modal } from '@/components/ui/Modal'
 import { Input } from '@/components/ui/Input'
 import { Button } from '@/components/ui/Button'
@@ -29,8 +30,7 @@ async function createUser(body: FormState): Promise<void> {
     body: JSON.stringify({ ...body, role: 'user' }),
   })
   if (!res.ok) {
-    const json = await res.json() as { error?: string }
-    throw new Error(json.error ?? 'Account aanmaken mislukt')
+    throw new Error(await getApiError(res, 'Account aanmaken mislukt'))
   }
 }
 

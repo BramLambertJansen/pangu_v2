@@ -4,6 +4,7 @@ import { toast } from 'sonner'
 import { supabase } from '@/lib/supabase'
 import { queryKeys } from '@/lib/queryKeys'
 import { useAuthStore } from '@/stores/auth.store'
+import { getApiError } from '@/utils/apiError'
 import { Avatar } from '@/components/ui/Avatar'
 import { Badge } from '@/components/ui/Badge'
 import { Button } from '@/components/ui/Button'
@@ -27,8 +28,7 @@ async function deleteUser(id: string): Promise<void> {
     headers: { Authorization: `Bearer ${session?.access_token ?? ''}` },
   })
   if (!res.ok) {
-    const json = await res.json() as { error?: string }
-    throw new Error(json.error ?? 'Verwijderen mislukt')
+    throw new Error(await getApiError(res, 'Verwijderen mislukt'))
   }
 }
 

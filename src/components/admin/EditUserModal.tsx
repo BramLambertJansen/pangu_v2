@@ -3,6 +3,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { toast } from 'sonner'
 import { supabase } from '@/lib/supabase'
 import { queryKeys } from '@/lib/queryKeys'
+import { getApiError } from '@/utils/apiError'
 import { Modal } from '@/components/ui/Modal'
 import { Button } from '@/components/ui/Button'
 import type { Profile, ProfileRole } from '@/types/database.types'
@@ -23,8 +24,7 @@ async function updateUser(id: string, role: ProfileRole): Promise<void> {
     body: JSON.stringify({ role }),
   })
   if (!res.ok) {
-    const json = await res.json() as { error?: string }
-    throw new Error(json.error ?? 'Opslaan mislukt')
+    throw new Error(await getApiError(res, 'Opslaan mislukt'))
   }
 }
 
