@@ -16,7 +16,6 @@ export function Modal({ open, onClose, title, children, className }: ModalProps)
   const onCloseRef = useRef(onClose)
   const titleId = useId()
 
-  // Keep ref in sync without making it an effect dependency
   useEffect(() => { onCloseRef.current = onClose }, [onClose])
 
   useEffect(() => {
@@ -24,14 +23,11 @@ export function Modal({ open, onClose, title, children, className }: ModalProps)
 
     previousFocusRef.current = document.activeElement as HTMLElement
 
-    // Prefer focusing the first input/select/textarea over the close button
-    const firstInput = dialogRef.current?.querySelector<HTMLElement>(
-      'input, select, textarea',
-    )
-    const firstFocusable = dialogRef.current?.querySelector<HTMLElement>(
-      'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])',
-    )
-    ;(firstInput ?? firstFocusable)?.focus()
+    // Focus the dialog container itself (tabIndex={-1}).
+    // This is the correct a11y pattern: screen readers announce the dialog title,
+    // and the user Tabs naturally to the first form field from there.
+    // Focusing a child input here causes re-renders from form state to steal focus.
+    dialogRef.current?.focus()
 
     function onKeyDown(e: KeyboardEvent) {
       if (e.key === 'Escape') { onCloseRef.current(); return }
@@ -57,7 +53,7 @@ export function Modal({ open, onClose, title, children, className }: ModalProps)
       document.removeEventListener('keydown', onKeyDown)
       previousFocusRef.current?.focus()
     }
-  }, [open]) // onClose intentionally excluded — tracked via ref above
+  }, [open])
 
   if (!open) return null
 
@@ -71,8 +67,9 @@ export function Modal({ open, onClose, title, children, className }: ModalProps)
         role="dialog"
         aria-modal="true"
         aria-labelledby={titleId}
+        tabIndex={-1}
         className={cn(
-          'w-full max-w-lg rounded-lg border border-gray-700 bg-gray-900 p-6 shadow-xl',
+          'w-full max-w-lg rounded-lg border border-gray-700 bg-gray-900 p-6 shadow-xl outline-none',
           className,
         )}
       >
