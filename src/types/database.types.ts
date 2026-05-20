@@ -13,6 +13,45 @@ export type ProfileRole = 'user' | 'admin'
 export type Database = {
   public: {
     Tables: {
+      worlds: {
+        Row: {
+          id: string
+          user_id: string
+          name: string
+          subtitle: string | null
+          quote: string | null
+          description: string | null
+          header_image: string | null
+          status: string
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          user_id: string
+          name?: string
+          subtitle?: string | null
+          quote?: string | null
+          description?: string | null
+          header_image?: string | null
+          status?: string
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          user_id?: string
+          name?: string
+          subtitle?: string | null
+          quote?: string | null
+          description?: string | null
+          header_image?: string | null
+          status?: string
+          created_at?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           id: string
