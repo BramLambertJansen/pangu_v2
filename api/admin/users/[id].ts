@@ -36,22 +36,32 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     const client = createAdminClient()
 
     if (req.method === 'PATCH') {
-      const { role, display_name } = req.body as {
-        role?: 'user' | 'admin'
+      const { display_name, email, password } = req.body as {
         display_name?: string
+        email?: string
+        password?: string
       }
 
-      // Prevent admins from demoting their own account
-      if (role !== undefined && id === adminId) {
-        return res.status(400).json({ error: 'Je kunt je eigen rol niet aanpassen' })
+      // Update auth (email / password) via admin API
+      const authUpdates: { email?: string; password?: string } = {}
+      if (email !== undefined) authUpdates.email = email
+      if (password) authUpdates.password = password
+
+      if (Object.keys(authUpdates).length > 0) {
+        const { error: authError } = await client.auth.admin.updateUserById(id, authUpdates)
+        if (authError) return res.status(400).json({ error: authError.message })
       }
 
-      const updates: Record<string, unknown> = {}
-      if (role !== undefined) updates.role = role
-      if (display_name !== undefined) updates.display_name = display_name
+      // Update profile columns
+      const profileUpdates: Record<string, unknown> = {}
+      if (display_name !== undefined) profileUpdates.display_name = display_name
+      if (email !== undefined) profileUpdates.email = email
 
-      const { error } = await client.from('profiles').update(updates).eq('id', id)
-      if (error) return res.status(400).json({ error: error.message })
+      if (Object.keys(profileUpdates).length > 0) {
+        const { error } = await client.from('profiles').update(profileUpdates).eq('id', id)
+        if (error) return res.status(400).json({ error: error.message })
+      }
+
       return res.json({ success: true })
     }
 

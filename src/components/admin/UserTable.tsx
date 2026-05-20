@@ -10,6 +10,7 @@ import { Badge } from '@/components/ui/Badge'
 import { Button } from '@/components/ui/Button'
 import { Spinner } from '@/components/ui/Spinner'
 import { EditUserModal } from './EditUserModal'
+import { DeleteUserModal } from './DeleteUserModal'
 import type { Profile } from '@/types/database.types'
 
 async function fetchUsers(): Promise<Profile[]> {
@@ -52,7 +53,7 @@ export function UserTable() {
   const queryClient = useQueryClient()
   const currentUserId = useAuthStore((s) => s.user?.id)
   const [editTarget, setEditTarget] = useState<Profile | null>(null)
-  const [deletingId, setDeletingId] = useState<string | null>(null)
+  const [deleteTarget, setDeleteTarget] = useState<Profile | null>(null)
 
   const { data: users, isLoading, isError } = useQuery({
     queryKey: queryKeys.admin.users,
@@ -64,19 +65,13 @@ export function UserTable() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: queryKeys.admin.users })
       toast.success('Account verwijderd')
-      setDeletingId(null)
+      setDeleteTarget(null)
     },
     onError: (err: Error) => {
       toast.error(err.message)
-      setDeletingId(null)
+      setDeleteTarget(null)
     },
   })
-
-  function handleDeleteClick(user: Profile) {
-    if (!window.confirm(`Account van "${user.display_name ?? user.email}" verwijderen?`)) return
-    setDeletingId(user.id)
-    deleteMutation.mutate(user.id)
-  }
 
   if (isLoading) {
     return (
@@ -164,8 +159,7 @@ export function UserTable() {
                       <Button
                         variant="danger"
                         size="sm"
-                        loading={deletingId === user.id}
-                        onClick={() => handleDeleteClick(user)}
+                        onClick={() => setDeleteTarget(user)}
                         aria-label={`Account van ${user.display_name ?? user.email} verwijderen`}
                       >
                         Verwijderen
@@ -180,6 +174,12 @@ export function UserTable() {
       </div>
 
       <EditUserModal user={editTarget} onClose={() => setEditTarget(null)} />
+      <DeleteUserModal
+        user={deleteTarget}
+        loading={deleteMutation.isPending}
+        onClose={() => setDeleteTarget(null)}
+        onConfirm={() => deleteMutation.mutate(deleteTarget!.id)}
+      />
     </>
   )
 }

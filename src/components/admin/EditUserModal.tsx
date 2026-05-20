@@ -5,15 +5,22 @@ import { supabase } from '@/lib/supabase'
 import { queryKeys } from '@/lib/queryKeys'
 import { getApiError } from '@/utils/apiError'
 import { Modal } from '@/components/ui/Modal'
+import { Input } from '@/components/ui/Input'
 import { Button } from '@/components/ui/Button'
-import type { Profile, ProfileRole } from '@/types/database.types'
+import type { Profile } from '@/types/database.types'
 
 interface Props {
   user: Profile | null
   onClose: () => void
 }
 
-async function updateUser(id: string, role: ProfileRole): Promise<void> {
+interface FormState {
+  display_name: string
+  email: string
+  password: string
+}
+
+async function updateUser(id: string, body: Partial<FormState>): Promise<void> {
   const { data: { session } } = await supabase.auth.getSession()
   const res = await fetch(`/api/admin/users/${id}`, {
     method: 'PATCH',
@@ -21,7 +28,7 @@ async function updateUser(id: string, role: ProfileRole): Promise<void> {
       'Content-Type': 'application/json',
       Authorization: `Bearer ${session?.access_token ?? ''}`,
     },
-    body: JSON.stringify({ role }),
+    body: JSON.stringify(body),
   })
   if (!res.ok) {
     throw new Error(await getApiError(res, 'Opslaan mislukt'))
@@ -30,14 +37,24 @@ async function updateUser(id: string, role: ProfileRole): Promise<void> {
 
 export function EditUserModal({ user, onClose }: Props) {
   const queryClient = useQueryClient()
-  const [role, setRole] = useState<ProfileRole>('user')
+  const [form, setForm] = useState<FormState>({ display_name: '', email: '', password: '' })
+  const [errors, setErrors] = useState<Partial<Record<keyof FormState, string>>>({})
 
   useEffect(() => {
-    if (user) setRole(user.role)
+    if (user) {
+      setForm({ display_name: user.display_name ?? '', email: user.email, password: '' })
+      setErrors({})
+    }
   }, [user])
 
   const mutation = useMutation({
-    mutationFn: () => updateUser(user!.id, role),
+    mutationFn: () => {
+      const body: Partial<FormState> = {}
+      if (form.display_name !== (user!.display_name ?? '')) body.display_name = form.display_name
+      if (form.email !== user!.email) body.email = form.email
+      if (form.password) body.password = form.password
+      return updateUser(user!.id, body)
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: queryKeys.admin.users })
       toast.success('Account bijgewerkt')
@@ -48,42 +65,68 @@ export function EditUserModal({ user, onClose }: Props) {
     },
   })
 
+  function handleClose() {
+    setErrors({})
+    onClose()
+  }
+
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
+    const newErrors: typeof errors = {}
+    if (!form.display_name.trim()) newErrors.display_name = 'Naam is verplicht'
+    if (!form.email.trim()) newErrors.email = 'E-mailadres is verplicht'
+    if (form.password && form.password.length < 8) {
+      newErrors.password = 'Wachtwoord moet minimaal 8 tekens bevatten'
+    }
+    if (Object.keys(newErrors).length > 0) { setErrors(newErrors); return }
+    setErrors({})
     mutation.mutate()
   }
 
+  function field(key: keyof FormState) {
+    return {
+      value: form[key],
+      onChange: (e: React.ChangeEvent<HTMLInputElement>) =>
+        setForm((prev) => ({ ...prev, [key]: e.target.value })),
+    }
+  }
+
+  const hasChanges =
+    form.display_name !== (user?.display_name ?? '') ||
+    form.email !== (user?.email ?? '') ||
+    form.password.length > 0
+
   return (
-    <Modal open={user !== null} onClose={onClose} title="Account bewerken">
+    <Modal open={user !== null} onClose={handleClose} title="Account bewerken">
       {user && (
         <form onSubmit={handleSubmit} noValidate className="flex flex-col gap-4">
-          <div className="flex flex-col gap-1">
-            <p className="text-sm text-gray-400">
-              Account van <span className="font-medium text-gray-200">{user.display_name ?? user.email}</span>
-            </p>
-            <p className="text-xs" style={{ color: 'var(--muted)' }}>{user.email}</p>
-          </div>
-
-          <div className="flex flex-col gap-1">
-            <label htmlFor="edit-role-select" className="text-sm font-medium text-gray-200">
-              Rol
-            </label>
-            <select
-              id="edit-role-select"
-              value={role}
-              onChange={(e) => setRole(e.target.value as ProfileRole)}
-              className="h-10 w-full rounded-md border border-gray-700 bg-gray-900 px-3 text-sm text-gray-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500"
-            >
-              <option value="user">Gebruiker</option>
-              <option value="admin">Beheerder</option>
-            </select>
-          </div>
-
+          <Input
+            label="Naam"
+            type="text"
+            autoComplete="name"
+            error={errors.display_name}
+            {...field('display_name')}
+          />
+          <Input
+            label="E-mailadres"
+            type="email"
+            autoComplete="off"
+            error={errors.email}
+            {...field('email')}
+          />
+          <Input
+            label="Nieuw wachtwoord"
+            type="password"
+            autoComplete="new-password"
+            placeholder="Laat leeg om niet te wijzigen"
+            error={errors.password}
+            {...field('password')}
+          />
           <div className="mt-2 flex justify-end gap-2">
-            <Button type="button" variant="ghost" onClick={onClose}>
+            <Button type="button" variant="ghost" onClick={handleClose}>
               Annuleren
             </Button>
-            <Button type="submit" loading={mutation.isPending} disabled={role === user.role}>
+            <Button type="submit" loading={mutation.isPending} disabled={!hasChanges}>
               Opslaan
             </Button>
           </div>
