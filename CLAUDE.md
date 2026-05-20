@@ -196,30 +196,30 @@ npm run type-check   # tsc --noEmit
 > Bijhouden welke features beschikbaar zijn in de app. Elke keer dat iets wordt afgerond, direct hier bijwerken.
 
 ### Infrastructuur
-- [ ] Vite + React 19 + TypeScript setup
-- [ ] TailwindCSS v4 configuratie
-- [ ] Supabase client + types
-- [ ] TanStack Query client
-- [ ] Zustand stores scaffold
-- [ ] react-router-dom v7 routing
-- [ ] Sonner toasts (`<Toaster />` in `App.tsx`)
-- [ ] PWA-configuratie (vite-plugin-pwa)
+- [x] Vite + React 19 + TypeScript setup
+- [x] TailwindCSS v4 configuratie
+- [x] Supabase client + types
+- [x] TanStack Query client
+- [x] Zustand stores scaffold
+- [x] react-router-dom v7 routing
+- [x] Sonner toasts (`<Toaster />` in `App.tsx`)
+- [x] PWA-configuratie (vite-plugin-pwa)
 
 ### UI Basis-componenten (`src/components/ui/`)
-- [ ] `Button`
-- [ ] `Input`
-- [ ] `Modal` (focus trap)
-- [ ] `Spinner`
-- [ ] `Badge`
-- [ ] `Card`
-- [ ] `Avatar`
+- [x] `Button`
+- [x] `Input`
+- [x] `Modal` (focus trap)
+- [x] `Spinner`
+- [x] `Badge`
+- [x] `Card`
+- [x] `Avatar`
 
 ### Authenticatie
 - [ ] Login pagina
 - [ ] Registratie pagina
 - [ ] Supabase Auth integratie
 - [ ] Protected routes
-- [ ] Auth store (Zustand)
+- [x] Auth store (Zustand)
 
 ### Campaign Management (DM)
 - [ ] Campaign overzicht / dashboard
