@@ -113,6 +113,12 @@ body {
   outline-offset: 2px;
 }
 
+.nav-item--icon-only {
+  justify-content: center;
+  padding: 11px;
+  gap: 0;
+}
+
 /* ── Surfaces ──────────────────────────────────────────── */
 
 .pangu-surface {
