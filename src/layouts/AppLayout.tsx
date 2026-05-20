@@ -268,7 +268,7 @@ export default function AppLayout() {
         style={{
           position: 'relative',
           zIndex: 10,
-          padding: 'var(--sp-8) clamp(var(--sp-6), 4vw, var(--sp-10)) 100px',
+          padding: 'var(--sp-10) clamp(var(--sp-8), 5vw, var(--sp-14)) 100px',
         }}
       >
         <Outlet />

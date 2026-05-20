@@ -417,7 +417,7 @@ export default function SettingsPage() {
   ]
 
   return (
-    <div style={{ maxWidth: 820, width: '100%' }}>
+    <div style={{ maxWidth: 820, width: '100%', margin: '0 auto' }}>
       {/* Page header */}
       <header style={{ marginBottom: 40 }}>
         <p className="pangu-eyebrow">Configuration</p>
