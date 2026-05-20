@@ -16,36 +16,51 @@ export type Database = {
       worlds: {
         Row: {
           id: string
-          user_id: string
+          owner_id: string
           name: string
           subtitle: string | null
           quote: string | null
           description: string | null
-          header_image: string | null
+          system: string | null
+          tone: string | null
+          genre: string | null
+          language: string
+          theme_id: string | null
+          banner_url: string | null
           status: string
           created_at: string
           updated_at: string
         }
         Insert: {
-          id?: string
-          user_id: string
+          id: string
+          owner_id: string
           name?: string
           subtitle?: string | null
           quote?: string | null
           description?: string | null
-          header_image?: string | null
+          system?: string | null
+          tone?: string | null
+          genre?: string | null
+          language?: string
+          theme_id?: string | null
+          banner_url?: string | null
           status?: string
           created_at?: string
           updated_at?: string
         }
         Update: {
           id?: string
-          user_id?: string
+          owner_id?: string
           name?: string
           subtitle?: string | null
           quote?: string | null
           description?: string | null
-          header_image?: string | null
+          system?: string | null
+          tone?: string | null
+          genre?: string | null
+          language?: string
+          theme_id?: string | null
+          banner_url?: string | null
           status?: string
           created_at?: string
           updated_at?: string
