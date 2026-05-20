@@ -1,0 +1,158 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 450" width="400" height="450">
+  <defs>
+    <radialGradient id="bgGrad" cx="50%" cy="40%" r="60%">
+      <stop offset="0%" stop-color="#0d1526"/>
+      <stop offset="100%" stop-color="#060a12"/>
+    </radialGradient>
+    <linearGradient id="goldGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#e8c96a"/>
+      <stop offset="30%" stop-color="#c9a227"/>
+      <stop offset="60%" stop-color="#f0d77a"/>
+      <stop offset="100%" stop-color="#a07818"/>
+    </linearGradient>
+    <linearGradient id="goldGrad2" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#f0d77a"/>
+      <stop offset="50%" stop-color="#c9a227"/>
+      <stop offset="100%" stop-color="#8a6010"/>
+    </linearGradient>
+    <filter id="glow">
+      <feGaussianBlur stdDeviation="2" result="coloredBlur"/>
+      <feMerge>
+        <feMergeNode in="coloredBlur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+    <filter id="softGlow">
+      <feGaussianBlur stdDeviation="4" result="coloredBlur"/>
+      <feMerge>
+        <feMergeNode in="coloredBlur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+
+  <!-- Background -->
+  <rect width="400" height="450" fill="url(#bgGrad)"/>
+
+  <!-- Compass circles -->
+  <g transform="translate(200, 185)" opacity="0.35" stroke="url(#goldGrad)" fill="none">
+    <circle r="118" stroke-width="0.5"/>
+    <circle r="105" stroke-width="0.3"/>
+    <circle r="90" stroke-width="0.8"/>
+    <circle r="70" stroke-width="0.3"/>
+  </g>
+
+  <!-- Subtle wave lines inside circle -->
+  <g transform="translate(200, 185)" opacity="0.12" stroke="#c9a227" fill="none" stroke-width="0.6">
+    <path d="M-60,20 Q-30,0 0,20 Q30,40 60,20"/>
+    <path d="M-70,35 Q-35,15 0,35 Q35,55 70,35"/>
+    <path d="M-55,5 Q-28,-12 0,5 Q28,22 55,5"/>
+  </g>
+
+  <!-- Compass spikes (cardinal directions) -->
+  <g transform="translate(200, 185)" fill="url(#goldGrad)" filter="url(#glow)" opacity="0.9">
+    <!-- Top spike -->
+    <polygon points="0,-88 -5,-70 0,-118 5,-70" opacity="0.95"/>
+    <!-- Bottom spike -->
+    <polygon points="0,88 -5,70 0,118 5,70" opacity="0.95"/>
+    <!-- Left spike -->
+    <polygon points="-88,0 -70,-5 -118,0 -70,5" opacity="0.95"/>
+    <!-- Right spike -->
+    <polygon points="88,0 70,-5 118,0 70,5" opacity="0.95"/>
+  </g>
+
+  <!-- Small diamond accents at intercardinal positions -->
+  <g transform="translate(200, 185)" fill="url(#goldGrad)" opacity="0.7">
+    <polygon points="0,-4 4,0 0,4 -4,0" transform="translate(63,-63)"/>
+    <polygon points="0,-4 4,0 0,4 -4,0" transform="translate(-63,-63)"/>
+    <polygon points="0,-4 4,0 0,4 -4,0" transform="translate(63,63)"/>
+    <polygon points="0,-4 4,0 0,4 -4,0" transform="translate(-63,63)"/>
+  </g>
+
+  <!-- Tiny dots on circle -->
+  <g transform="translate(200, 185)" fill="url(#goldGrad)" opacity="0.5">
+    <circle r="2" cx="0" cy="-90"/>
+    <circle r="2" cx="0" cy="90"/>
+    <circle r="2" cx="-90" cy="0"/>
+    <circle r="2" cx="90" cy="0"/>
+    <circle r="1.5" cx="64" cy="-64"/>
+    <circle r="1.5" cx="-64" cy="-64"/>
+    <circle r="1.5" cx="64" cy="64"/>
+    <circle r="1.5" cx="-64" cy="64"/>
+  </g>
+
+  <!-- 8-pointed star in upper portion of P bowl -->
+  <g transform="translate(218, 162)" fill="url(#goldGrad)" filter="url(#softGlow)">
+    <!-- Cardinal points -->
+    <polygon points="0,-18 2.5,-2.5 0,18 -2.5,-2.5"/>
+    <polygon points="-18,0 -2.5,2.5 18,0 -2.5,-2.5"/>
+    <!-- Diagonal points -->
+    <polygon points="0,-18 12.7,-12.7 18,0 2.5,-2.5" opacity="0.7"/>
+    <polygon points="18,0 12.7,12.7 0,18 2.5,2.5" opacity="0.7"/>
+    <polygon points="0,18 -12.7,12.7 -18,0 -2.5,2.5" opacity="0.7"/>
+    <polygon points="-18,0 -12.7,-12.7 0,-18 -2.5,-2.5" opacity="0.7"/>
+    <!-- Center -->
+    <circle r="2.5" fill="url(#goldGrad2)"/>
+  </g>
+
+  <!-- P letterform - ornate serif style -->
+  <g transform="translate(200, 185)" fill="url(#goldGrad2)" filter="url(#glow)">
+    <!-- Vertical stem of P -->
+    <path d="M-18,-75 L-18,75 L-8,75 L-8,-75 Z"/>
+    <!-- Left serif top -->
+    <path d="M-26,-75 L-26,-68 L10,-68 L10,-75 Z"/>
+    <!-- Left serif bottom -->
+    <path d="M-26,68 L-26,75 L-8,75 L-8,68 Z"/>
+    <!-- P bowl (right side) - rounded -->
+    <path d="M-8,-75 L-8,-68 L12,-68 Q40,-68 40,-45 Q40,-22 12,-22 L-8,-22 L-8,-15 L14,-15 Q52,-15 52,-45 Q52,-75 14,-75 Z"/>
+    <!-- Bowl fill shape -->
+    <path d="M-8,-68 L12,-68 Q38,-68 38,-45 Q38,-22 12,-22 L-8,-22 Z" fill="url(#bgGrad)" opacity="0.6"/>
+    <!-- Decorative notch at bowl junction bottom -->
+    <path d="M-18,-22 L-18,-15 L-8,-15 L-8,-22 Z"/>
+    <!-- Small top serif decorations -->
+    <path d="M-8,-75 L-8,-70 L12,-70 L12,-75 Z" opacity="0.6"/>
+    <!-- Pointed foot on stem -->
+    <path d="M-18,75 L-26,82 L-18,78 L-8,78 L0,82 L-8,75 Z" opacity="0.8"/>
+    <!-- Pointed top on stem -->
+    <path d="M-18,-75 L-18,-80 L-13,-88 L-8,-80 L-8,-75 Z" opacity="0.8"/>
+  </g>
+
+  <!-- "Pangu" text -->
+  <text
+    x="200"
+    y="340"
+    text-anchor="middle"
+    font-family="Cinzel, 'Times New Roman', serif"
+    font-size="52"
+    font-weight="400"
+    letter-spacing="3"
+    fill="url(#goldGrad)"
+    filter="url(#glow)"
+  >Pangu</text>
+
+  <!-- Decorative line above SANCTUM II -->
+  <g transform="translate(200, 362)" fill="url(#goldGrad)" opacity="0.7">
+    <rect x="-70" y="0" width="50" height="0.8"/>
+    <polygon points="0,-3 3,0 0,3 -3,0" transform="translate(-16,0)"/>
+    <rect x="20" y="0" width="50" height="0.8"/>
+    <polygon points="0,-3 3,0 0,3 -3,0" transform="translate(16,0)"/>
+  </g>
+
+  <!-- "SANCTUM II" subtitle -->
+  <text
+    x="200"
+    y="382"
+    text-anchor="middle"
+    font-family="Cinzel, 'Times New Roman', serif"
+    font-size="13"
+    font-weight="400"
+    letter-spacing="6"
+    fill="url(#goldGrad)"
+    opacity="0.85"
+  >SANCTUM II</text>
+
+  <!-- Bottom diamond accent -->
+  <g transform="translate(200, 398)" fill="url(#goldGrad)" opacity="0.6">
+    <polygon points="0,-4 4,0 0,4 -4,0"/>
+  </g>
+</svg>
