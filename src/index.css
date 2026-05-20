@@ -1,1 +1,114 @@
 @import "tailwindcss";
+
+:root {
+  --void: #0a0a14;
+  --void-2: #0f0e1c;
+  --surface: #15142a;
+  --surface-2: #1c1a35;
+  --surface-3: #252243;
+  --surface-hover: #2d2950;
+  --violet: #9b8aff;
+  --violet-soft: #b5a7ff;
+  --violet-deep: #6b58d6;
+  --violet-glow: rgba(155, 138, 255, 0.35);
+  --gold: #f5c842;
+  --gold-soft: #ffd968;
+  --gold-deep: #c9a02e;
+  --gold-glow: rgba(245, 200, 66, 0.3);
+  --teal: #3ecfb2;
+  --crimson: #ff6b6b;
+  --azure: #6ba7ff;
+  --ink: #f0ecf7;
+  --ink-soft: #c8c2dc;
+  --muted: #8079a0;
+  --subtle: #4a4565;
+  --hairline: rgba(155, 138, 255, 0.14);
+  --hairline-strong: rgba(155, 138, 255, 0.28);
+  --sp-1: 4px;
+  --sp-2: 8px;
+  --sp-3: 12px;
+  --sp-4: 16px;
+  --sp-5: 20px;
+  --sp-6: 24px;
+  --sp-7: 28px;
+  --sp-8: 32px;
+  --sp-10: 40px;
+  --sp-12: 48px;
+  --sp-14: 56px;
+  --sp-16: 64px;
+  --sp-20: 80px;
+  --r-xs: 4px;
+  --r-sm: 6px;
+  --r-md: 8px;
+  --r-lg: 12px;
+  --r-xl: 16px;
+  --r-full: 9999px;
+  --font-display: 'Cinzel', Georgia, serif;
+  --font-body: 'Manrope', system-ui, sans-serif;
+  --font-mono: 'JetBrains Mono', ui-monospace, monospace;
+  --ease-out: cubic-bezier(0.2, 0.7, 0.2, 1);
+  --t-fast: 180ms;
+  --t-base: 220ms;
+  --t-slow: 280ms;
+}
+
+body {
+  background: var(--void);
+  color: var(--ink);
+  font-family: var(--font-body);
+}
+
+/* ── Nav item ──────────────────────────────────────────── */
+
+.nav-item {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 11px 14px;
+  border-radius: var(--r-sm);
+  color: var(--muted);
+  font-size: 14px;
+  font-weight: 500;
+  font-family: var(--font-body);
+  text-decoration: none;
+  position: relative;
+  transition: background var(--t-fast), color var(--t-fast);
+  cursor: pointer;
+  background: transparent;
+  border: none;
+  width: 100%;
+  text-align: left;
+}
+
+.nav-item:hover {
+  background: var(--surface-hover);
+  color: var(--ink-soft);
+}
+
+.nav-item--active {
+  background: linear-gradient(90deg, rgba(155, 138, 255, 0.12), transparent);
+  color: var(--violet-soft);
+}
+
+.nav-item--active:hover {
+  background: linear-gradient(90deg, rgba(155, 138, 255, 0.18), transparent);
+  color: var(--violet-soft);
+}
+
+/* Gold indicator bar on the left edge for the active item */
+.nav-item--active::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 25%;
+  bottom: 25%;
+  width: 2px;
+  border-radius: var(--r-full);
+  background: var(--gold);
+  box-shadow: 0 0 8px var(--gold-glow);
+}
+
+.nav-item:focus-visible {
+  outline: 2px solid var(--violet);
+  outline-offset: 2px;
+}
