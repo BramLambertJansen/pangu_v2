@@ -1,5 +1,31 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node'
-import { createAdminClient, verifyAdmin } from './_auth.js'
+import { createClient } from '@supabase/supabase-js'
+
+function createAdminClient() {
+  const url = process.env.VITE_SUPABASE_URL
+  const key = process.env.SUPABASE_SERVICE_ROLE_KEY
+  if (!url || !key) throw new Error('Missing Supabase environment variables')
+  return createClient(url, key, {
+    auth: { autoRefreshToken: false, persistSession: false },
+  })
+}
+
+async function verifyAdmin(authHeader: string | undefined): Promise<string | null> {
+  if (!authHeader?.startsWith('Bearer ')) return null
+  const token = authHeader.slice(7)
+  const client = createAdminClient()
+
+  const { data: { user }, error } = await client.auth.getUser(token)
+  if (error || !user) return null
+
+  const { data: profile } = await client
+    .from('profiles')
+    .select('role')
+    .eq('id', user.id)
+    .single()
+
+  return profile?.role === 'admin' ? user.id : null
+}
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   try {
