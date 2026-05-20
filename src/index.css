@@ -503,6 +503,10 @@ body {
   display: none;
 }
 
+.sidebar-collapse-btn {
+  display: flex;
+}
+
 .main-content {
   padding: var(--sp-10) clamp(var(--sp-8), 5vw, var(--sp-14)) 100px;
 }
@@ -549,6 +553,10 @@ body {
 
   .sidebar-close-btn {
     display: flex;
+  }
+
+  .sidebar-collapse-btn {
+    display: none;
   }
 
   .main-content {

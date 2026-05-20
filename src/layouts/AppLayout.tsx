@@ -261,7 +261,7 @@ export default function AppLayout() {
             </button>
             <button
               onClick={toggleSidebar}
-              className={sidebarCollapsed ? iconOnly : 'nav-item'}
+              className={`sidebar-collapse-btn ${sidebarCollapsed ? iconOnly : 'nav-item'}`}
               aria-label={sidebarCollapsed ? 'Navigatie uitklappen' : 'Navigatie inklappen'}
               title={sidebarCollapsed ? 'Uitklappen' : undefined}
             >
