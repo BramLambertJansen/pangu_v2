@@ -1,5 +1,5 @@
 import { useState, useEffect, useId } from 'react'
-import { useParams, useNavigate } from 'react-router-dom'
+import { useParams, useNavigate, useLocation } from 'react-router-dom'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { toast } from 'sonner'
 import { supabase } from '@/lib/supabase'
@@ -17,12 +17,15 @@ const statusOptions: { value: WorldStatus; label: string }[] = [
 export default function WorldDetailPage() {
   const { id } = useParams<{ id: string }>()
   const navigate = useNavigate()
+  const location = useLocation()
   const queryClient = useQueryClient()
   const descriptionId = useId()
   const quoteId = useId()
   const statusId = useId()
   const headerImageId = useId()
 
+  const isNew = (location.state as { isNew?: boolean } | null)?.isNew ?? false
+  const [committed, setCommitted] = useState(!isNew)
   const [deleteOpen, setDeleteOpen] = useState(false)
   const [form, setForm] = useState<Partial<World>>({})
   const [dirty, setDirty] = useState(false)
@@ -68,6 +71,7 @@ export default function WorldDetailPage() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: queryKeys.worlds.all })
       queryClient.invalidateQueries({ queryKey: queryKeys.worlds.detail(id!) })
+      setCommitted(true)
       setDirty(false)
     },
     onError: () => {
@@ -92,6 +96,29 @@ export default function WorldDetailPage() {
   function set<K extends keyof World>(key: K, value: World[K]) {
     setForm((prev) => ({ ...prev, [key]: value }))
     setDirty(true)
+  }
+
+  async function abandon() {
+    await supabase.from('worlds').delete().eq('id', id!)
+    queryClient.invalidateQueries({ queryKey: queryKeys.worlds.all })
+    navigate('/worlds')
+  }
+
+  function handleCancel() {
+    if (!committed) {
+      abandon()
+    } else {
+      setForm(world!)
+      setDirty(false)
+    }
+  }
+
+  function handleBack() {
+    if (!committed) {
+      abandon()
+    } else {
+      navigate('/worlds')
+    }
   }
 
   function handleSave() {
@@ -137,7 +164,7 @@ export default function WorldDetailPage() {
         {/* Back link */}
         <button
           type="button"
-          onClick={() => navigate('/worlds')}
+          onClick={handleBack}
           aria-label="Terug naar werelden"
           style={{
             display: 'inline-flex', alignItems: 'center', gap: 6,
@@ -263,8 +290,8 @@ export default function WorldDetailPage() {
             <button
               type="button"
               className="pangu-btn pangu-btn-ghost"
-              onClick={() => { setForm(world); setDirty(false) }}
-              disabled={!dirty}
+              onClick={handleCancel}
+              disabled={committed && !dirty}
             >
               Annuleren
             </button>
