@@ -268,12 +268,10 @@ export default function AppLayout() {
         style={{
           position: 'relative',
           zIndex: 10,
-          padding: 'var(--sp-12) clamp(var(--sp-6), 4vw, var(--sp-12)) 100px',
+          padding: 'var(--sp-8) clamp(var(--sp-6), 4vw, var(--sp-10)) 100px',
         }}
       >
-        <div style={{ maxWidth: '1320px', margin: '0 auto' }}>
-          <Outlet />
-        </div>
+        <Outlet />
       </main>
     </div>
   )
