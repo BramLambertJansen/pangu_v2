@@ -14,6 +14,11 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       display_name?: string
     }
 
+    // Prevent admins from demoting their own account
+    if (role !== undefined && id === adminId) {
+      return res.status(400).json({ error: 'Je kunt je eigen rol niet aanpassen' })
+    }
+
     const updates: Record<string, unknown> = {}
     if (role !== undefined) updates.role = role
     if (display_name !== undefined) updates.display_name = display_name
