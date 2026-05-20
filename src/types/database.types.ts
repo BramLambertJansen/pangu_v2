@@ -20,7 +20,7 @@ export type Database = {
           display_name: string | null
           pronouns: string | null
           bio: string | null
-          role: string
+          role: ProfileRole
           created_at: string
         }
         Insert: {
@@ -29,7 +29,7 @@ export type Database = {
           display_name?: string | null
           pronouns?: string | null
           bio?: string | null
-          role?: string
+          role?: ProfileRole
           created_at?: string
         }
         Update: {
@@ -38,7 +38,7 @@ export type Database = {
           display_name?: string | null
           pronouns?: string | null
           bio?: string | null
-          role?: string
+          role?: ProfileRole
           created_at?: string
         }
         Relationships: []

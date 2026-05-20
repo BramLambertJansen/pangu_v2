@@ -126,7 +126,7 @@ function ProfielTab() {
       return data
     },
     onSuccess: (data) => {
-      setProfile({ ...profile!, ...data, role: profile!.role })
+      setProfile({ ...profile!, ...data })
       toast.success('Profiel opgeslagen')
     },
     onError: (err: Error) => {
