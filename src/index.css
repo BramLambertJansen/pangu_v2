@@ -112,3 +112,372 @@ body {
   outline: 2px solid var(--violet);
   outline-offset: 2px;
 }
+
+.nav-item--icon-only {
+  justify-content: center;
+  padding: 11px;
+  gap: 0;
+}
+
+/* ── Surfaces ──────────────────────────────────────────── */
+
+.pangu-surface {
+  background: var(--surface);
+  border: 1px solid var(--hairline);
+  border-radius: var(--r-lg);
+}
+
+.pangu-surface-glow {
+  background: linear-gradient(180deg, var(--surface) 0%, var(--surface-2) 100%);
+  border: 1px solid var(--hairline-strong);
+  border-radius: var(--r-xl);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.03);
+}
+
+/* ── Tab bar ────────────────────────────────────────────── */
+
+.pangu-tab-bar {
+  display: flex;
+  gap: 2px;
+  padding: 4px;
+  background: var(--void-2);
+  border: 1px solid var(--hairline);
+  border-radius: var(--r-sm);
+}
+
+.pangu-tab {
+  flex: 1 0 auto;
+  padding: 10px 18px;
+  border-radius: 6px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--muted);
+  white-space: nowrap;
+  transition: all var(--t-fast);
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  font-family: var(--font-body);
+}
+
+.pangu-tab:hover {
+  color: var(--ink-soft);
+}
+
+.pangu-tab[aria-selected='true'] {
+  background: var(--violet);
+  color: var(--void);
+}
+
+.pangu-tab:focus-visible {
+  outline: 2px solid var(--violet);
+  outline-offset: 2px;
+}
+
+/* ── Settings avatar ────────────────────────────────────── */
+
+.settings-avatar {
+  width: 80px;
+  height: 80px;
+  flex-shrink: 0;
+  border-radius: 50%;
+  background: radial-gradient(circle, var(--surface-3), var(--surface));
+  border: 1px solid var(--hairline-strong);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-display);
+  font-size: 28px;
+  font-weight: 700;
+  color: var(--violet);
+  letter-spacing: 0.05em;
+  box-shadow: 0 0 16px var(--violet-glow);
+  user-select: none;
+}
+
+/* ── Form elements ──────────────────────────────────────── */
+
+.pangu-label {
+  display: block;
+  font-size: 10.5px;
+  font-weight: 700;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--gold);
+  margin-bottom: 8px;
+  font-family: var(--font-body);
+}
+
+.pangu-input {
+  display: block;
+  width: 100%;
+  padding: 11px 16px;
+  background: var(--surface-2);
+  border: 1px solid var(--hairline);
+  border-radius: var(--r-md);
+  color: var(--ink);
+  font-family: var(--font-body);
+  font-size: 14px;
+  outline: none;
+  transition: border-color 200ms, box-shadow 200ms;
+}
+
+.pangu-input::placeholder {
+  color: var(--muted);
+}
+
+.pangu-input:focus {
+  border-color: rgba(155, 138, 255, 0.5);
+  box-shadow: 0 0 0 3px rgba(155, 138, 255, 0.12), 0 2px 16px rgba(155, 138, 255, 0.07);
+}
+
+.pangu-input:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.pangu-textarea {
+  display: block;
+  width: 100%;
+  padding: 11px 16px;
+  background: var(--surface-2);
+  border: 1px solid var(--hairline);
+  border-radius: var(--r-md);
+  color: var(--ink);
+  font-family: var(--font-body);
+  font-size: 14px;
+  outline: none;
+  transition: border-color 200ms, box-shadow 200ms;
+  resize: vertical;
+  min-height: 100px;
+  line-height: 1.6;
+}
+
+.pangu-textarea::placeholder {
+  color: var(--muted);
+}
+
+.pangu-textarea:focus {
+  border-color: rgba(155, 138, 255, 0.5);
+  box-shadow: 0 0 0 3px rgba(155, 138, 255, 0.12), 0 2px 16px rgba(155, 138, 255, 0.07);
+}
+
+.pangu-select {
+  display: block;
+  width: 100%;
+  padding: 11px 16px;
+  background: var(--surface-2);
+  border: 1px solid var(--hairline);
+  border-radius: var(--r-md);
+  color: var(--ink);
+  font-family: var(--font-body);
+  font-size: 14px;
+  outline: none;
+  transition: border-color 200ms, box-shadow 200ms;
+  cursor: pointer;
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%238079a0' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 14px center;
+  padding-right: 36px;
+}
+
+.pangu-select:focus {
+  border-color: rgba(155, 138, 255, 0.5);
+  box-shadow: 0 0 0 3px rgba(155, 138, 255, 0.12);
+}
+
+/* ── Buttons ────────────────────────────────────────────── */
+
+.pangu-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 11px 20px;
+  border-radius: var(--r-full);
+  font-family: var(--font-body);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  border: 1px solid transparent;
+  transition: all var(--t-fast) var(--ease-out);
+  user-select: none;
+  cursor: pointer;
+  min-height: 44px;
+}
+
+.pangu-btn:disabled {
+  opacity: 0.4;
+  pointer-events: none;
+}
+
+.pangu-btn:focus-visible {
+  outline: 2px solid var(--violet);
+  outline-offset: 2px;
+}
+
+.pangu-btn-primary {
+  background: var(--violet);
+  color: var(--void);
+  box-shadow: 0 4px 20px var(--violet-glow), inset 0 1px 0 rgba(255, 255, 255, 0.2);
+}
+
+.pangu-btn-primary:hover {
+  background: var(--violet-soft);
+  transform: translateY(-1px);
+  box-shadow: 0 6px 24px var(--violet-glow);
+}
+
+.pangu-btn-ghost {
+  background: transparent;
+  color: var(--ink-soft);
+  border-color: var(--hairline);
+}
+
+.pangu-btn-ghost:hover {
+  background: rgba(155, 138, 255, 0.06);
+  border-color: var(--hairline-strong);
+  color: var(--ink);
+}
+
+.pangu-btn-violet-soft {
+  background: rgba(155, 138, 255, 0.08);
+  color: var(--violet);
+  border-color: rgba(155, 138, 255, 0.25);
+}
+
+.pangu-btn-violet-soft:hover {
+  background: rgba(155, 138, 255, 0.14);
+}
+
+.pangu-btn-crimson {
+  background: transparent;
+  color: var(--crimson);
+  border-color: rgba(255, 107, 107, 0.25);
+}
+
+.pangu-btn-crimson:hover {
+  background: rgba(255, 107, 107, 0.06);
+  border-color: rgba(255, 107, 107, 0.4);
+}
+
+.pangu-btn-sm {
+  padding: 7px 14px;
+  font-size: 11px;
+  letter-spacing: 0.16em;
+  min-height: 36px;
+}
+
+/* ── Toggle switch ──────────────────────────────────────── */
+
+.pangu-toggle {
+  position: relative;
+  width: 44px;
+  height: 24px;
+  flex-shrink: 0;
+  border-radius: var(--r-full);
+  border: none;
+  cursor: pointer;
+  transition: background var(--t-fast);
+  background: var(--surface-3);
+  padding: 0;
+}
+
+.pangu-toggle[aria-checked='true'] {
+  background: var(--violet);
+  box-shadow: 0 0 10px var(--violet-glow);
+}
+
+.pangu-toggle:focus-visible {
+  outline: 2px solid var(--violet);
+  outline-offset: 2px;
+}
+
+.pangu-toggle-knob {
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: var(--ink-soft);
+  transition: transform var(--t-fast) var(--ease-out), background var(--t-fast);
+}
+
+.pangu-toggle[aria-checked='true'] .pangu-toggle-knob {
+  transform: translateX(20px);
+  background: var(--void);
+}
+
+/* ── Page header ────────────────────────────────────────── */
+
+.pangu-eyebrow {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-family: var(--font-body);
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.32em;
+  text-transform: uppercase;
+  color: var(--gold);
+  margin-bottom: 12px;
+}
+
+.pangu-eyebrow::before {
+  content: '';
+  display: block;
+  width: 32px;
+  height: 1px;
+  background: var(--gold);
+  opacity: 0.6;
+}
+
+.pangu-display {
+  font-family: var(--font-display);
+  font-size: clamp(28px, 3.5vw, 40px);
+  font-weight: 600;
+  line-height: 1.15;
+  letter-spacing: 0.035em;
+  color: var(--ink);
+}
+
+.pangu-display-lg {
+  font-family: var(--font-display);
+  font-size: clamp(36px, 5vw, 56px);
+  font-weight: 600;
+  line-height: 1.05;
+  letter-spacing: 0.04em;
+  color: var(--ink);
+}
+
+.pangu-display-xl {
+  font-family: var(--font-display);
+  font-size: clamp(64px, 10vw, 108px);
+  font-weight: 600;
+  line-height: 0.95;
+  letter-spacing: 0.02em;
+  color: var(--ink);
+}
+
+.pangu-quote {
+  font-family: 'Cormorant Garamond', Georgia, serif;
+  font-style: italic;
+  font-size: 19px;
+  line-height: 1.55;
+  color: var(--ink-soft);
+}
+
+.pangu-section-title {
+  font-family: var(--font-display);
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--muted);
+}

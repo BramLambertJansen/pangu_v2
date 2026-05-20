@@ -18,21 +18,27 @@ export type Database = {
           id: string
           email: string
           display_name: string | null
-          role: string
+          pronouns: string | null
+          bio: string | null
+          role: ProfileRole
           created_at: string
         }
         Insert: {
           id: string
           email: string
           display_name?: string | null
-          role?: string
+          pronouns?: string | null
+          bio?: string | null
+          role?: ProfileRole
           created_at?: string
         }
         Update: {
           id?: string
           email?: string
           display_name?: string | null
-          role?: string
+          pronouns?: string | null
+          bio?: string | null
+          role?: ProfileRole
           created_at?: string
         }
         Relationships: []
@@ -57,6 +63,8 @@ export interface Profile {
   id: string
   email: string
   display_name: string | null
+  pronouns: string | null
+  bio: string | null
   role: ProfileRole
   created_at: string
 }
