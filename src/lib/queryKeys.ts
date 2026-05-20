@@ -11,6 +11,10 @@ export const queryKeys = {
     all: ['characters'] as const,
     detail: (id: string) => ['characters', id] as const,
   },
+  worlds: {
+    all: ['worlds'] as const,
+    detail: (id: string) => ['worlds', id] as const,
+  },
   admin: {
     users: ['admin', 'users'] as const,
   },
