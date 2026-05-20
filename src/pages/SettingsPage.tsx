@@ -5,13 +5,8 @@ import { useNavigate } from 'react-router-dom'
 import { supabase } from '@/lib/supabase'
 import { useAuthStore } from '@/stores/auth.store'
 import { usePreferencesStore, type PreferencesLanguage } from '@/stores/preferences.store'
-import { Avatar } from '@/components/ui/Avatar'
-import { Button } from '@/components/ui/Button'
-import { Card } from '@/components/ui/Card'
-import { Input } from '@/components/ui/Input'
-import { cn } from '@/utils/cn'
 
-type Tab = 'profiel' | 'voorkeuren' | 'over'
+type Tab = 'profile' | 'prefs' | 'about'
 
 interface ProfileForm {
   display_name: string
@@ -19,63 +14,99 @@ interface ProfileForm {
   bio: string
 }
 
-interface PasswordForm {
-  newPassword: string
-  confirmPassword: string
-}
+// ── Compass rose SVG ─────────────────────────────────────
 
-function Toggle({
-  checked,
-  onChange,
-  id,
-}: {
-  checked: boolean
-  onChange: (val: boolean) => void
-  id: string
-}) {
+function CompassRose({ size = 80, opacity = 0.7 }: { size?: number; opacity?: number }) {
   return (
-    <button
-      role="switch"
-      id={id}
-      aria-checked={checked}
-      onClick={() => onChange(!checked)}
-      className={cn(
-        'relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors',
-        'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2 focus-visible:ring-offset-gray-950',
-        checked ? 'bg-indigo-600' : 'bg-gray-700',
-      )}
-      type="button"
+    <svg
+      aria-hidden="true"
+      width={size}
+      height={size}
+      viewBox="0 0 80 80"
+      fill="none"
+      style={{ opacity }}
     >
-      <span
-        aria-hidden="true"
-        className={cn(
-          'pointer-events-none inline-block h-5 w-5 rounded-full bg-white shadow transition-transform',
-          checked ? 'translate-x-5' : 'translate-x-0',
-        )}
-      />
-    </button>
+      <circle cx="40" cy="40" r="38" stroke="var(--violet)" strokeWidth="0.75" strokeOpacity="0.4" />
+      <circle cx="40" cy="40" r="24" stroke="var(--violet)" strokeWidth="0.5" strokeOpacity="0.3" />
+      <circle cx="40" cy="40" r="4" fill="var(--violet)" fillOpacity="0.8" />
+      {/* N */}
+      <polygon points="40,2 44,30 40,26 36,30" fill="var(--violet)" />
+      {/* S */}
+      <polygon points="40,78 44,50 40,54 36,50" fill="var(--ink-soft)" fillOpacity="0.5" />
+      {/* E */}
+      <polygon points="78,40 50,36 54,40 50,44" fill="var(--ink-soft)" fillOpacity="0.5" />
+      {/* W */}
+      <polygon points="2,40 30,44 26,40 30,36" fill="var(--ink-soft)" fillOpacity="0.5" />
+      {/* NE */}
+      <polygon points="67,13 48,36 44,32 57,23" fill="var(--gold)" fillOpacity="0.4" />
+      {/* SW */}
+      <polygon points="13,67 32,44 36,48 23,57" fill="var(--gold)" fillOpacity="0.2" />
+      {/* NW */}
+      <polygon points="13,13 32,36 28,32 23,23" fill="var(--gold)" fillOpacity="0.2" />
+      {/* SE */}
+      <polygon points="67,67 48,44 52,48 57,57" fill="var(--gold)" fillOpacity="0.2" />
+      {/* tick marks */}
+      {[0, 30, 60, 90, 120, 150, 180, 210, 240, 270, 300, 330].map((deg) => {
+        const rad = (deg * Math.PI) / 180
+        const x1 = 40 + 34 * Math.sin(rad)
+        const y1 = 40 - 34 * Math.cos(rad)
+        const x2 = 40 + 37 * Math.sin(rad)
+        const y2 = 40 - 37 * Math.cos(rad)
+        return (
+          <line
+            key={deg}
+            x1={x1} y1={y1} x2={x2} y2={y2}
+            stroke="var(--violet)"
+            strokeWidth="0.75"
+            strokeOpacity="0.35"
+          />
+        )
+      })}
+    </svg>
   )
 }
 
-function ToggleRow({
+// ── SettingToggle ─────────────────────────────────────────
+
+function SettingToggle({
   label,
+  desc,
   checked,
   onChange,
 }: {
   label: string
+  desc: string
   checked: boolean
-  onChange: (val: boolean) => void
+  onChange: (v: boolean) => void
 }) {
   const id = useId()
   return (
-    <div className="flex items-center justify-between gap-4 py-3">
-      <label htmlFor={id} className="text-sm text-gray-200 cursor-pointer select-none">
-        {label}
-      </label>
-      <Toggle id={id} checked={checked} onChange={onChange} />
+    <div className="flex items-center justify-between gap-6 py-4" style={{ borderBottom: '1px solid var(--hairline)' }}>
+      <div className="flex flex-col gap-0.5 min-w-0">
+        <label
+          htmlFor={id}
+          className="text-sm font-medium cursor-pointer"
+          style={{ color: 'var(--ink-soft)' }}
+        >
+          {label}
+        </label>
+        <span className="text-xs" style={{ color: 'var(--muted)' }}>{desc}</span>
+      </div>
+      <button
+        role="switch"
+        id={id}
+        aria-checked={checked}
+        onClick={() => onChange(!checked)}
+        className="pangu-toggle"
+        type="button"
+      >
+        <span className="pangu-toggle-knob" />
+      </button>
     </div>
   )
 }
+
+// ── Profile tab ───────────────────────────────────────────
 
 function ProfielTab() {
   const { profile, setProfile } = useAuthStore()
@@ -87,22 +118,17 @@ function ProfielTab() {
     bio: profile?.bio ?? '',
   })
   const [errors, setErrors] = useState<Partial<Record<keyof ProfileForm, string>>>({})
-  const [passwordForm, setPasswordForm] = useState<PasswordForm>({
-    newPassword: '',
-    confirmPassword: '',
-  })
-  const [passwordErrors, setPasswordErrors] = useState<Partial<Record<keyof PasswordForm, string>>>({})
-  const [showPassword, setShowPassword] = useState(false)
 
-  const field = (key: keyof ProfileForm) => ({
-    value: form[key],
-    onChange: (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-      setForm((f) => ({ ...f, [key]: e.target.value }))
-      if (errors[key]) setErrors((e) => ({ ...e, [key]: undefined }))
-    },
-  })
+  const initials = (profile?.display_name ?? profile?.email ?? '?')
+    .split(' ')
+    .map((w) => w[0])
+    .join('')
+    .slice(0, 2)
+    .toUpperCase()
 
-  const profileMutation = useMutation({
+  const bioId = useId()
+
+  const mutation = useMutation({
     mutationFn: async () => {
       const newErrors: Partial<Record<keyof ProfileForm, string>> = {}
       if (!form.display_name.trim()) newErrors.display_name = 'Weergavenaam is verplicht'
@@ -110,7 +136,6 @@ function ProfielTab() {
         setErrors(newErrors)
         throw new Error('validation')
       }
-
       const { data, error } = await supabase
         .from('profiles')
         .update({
@@ -121,7 +146,6 @@ function ProfielTab() {
         .eq('id', profile!.id)
         .select()
         .single()
-
       if (error) throw error
       return data
     },
@@ -134,31 +158,6 @@ function ProfielTab() {
     },
   })
 
-  const passwordMutation = useMutation({
-    mutationFn: async () => {
-      const newErrors: Partial<Record<keyof PasswordForm, string>> = {}
-      if (passwordForm.newPassword.length < 8)
-        newErrors.newPassword = 'Minimaal 8 tekens'
-      if (passwordForm.newPassword !== passwordForm.confirmPassword)
-        newErrors.confirmPassword = 'Wachtwoorden komen niet overeen'
-      if (Object.keys(newErrors).length) {
-        setPasswordErrors(newErrors)
-        throw new Error('validation')
-      }
-
-      const { error } = await supabase.auth.updateUser({ password: passwordForm.newPassword })
-      if (error) throw error
-    },
-    onSuccess: () => {
-      setPasswordForm({ newPassword: '', confirmPassword: '' })
-      toast.success('Wachtwoord gewijzigd')
-      setShowPassword(false)
-    },
-    onError: (err: Error) => {
-      if (err.message !== 'validation') toast.error('Wachtwoord wijzigen mislukt')
-    },
-  })
-
   async function handleSignOut() {
     await supabase.auth.signOut()
     useAuthStore.getState().signOut()
@@ -166,160 +165,137 @@ function ProfielTab() {
     navigate('/login', { replace: true })
   }
 
-  const initials = (profile?.display_name ?? profile?.email ?? '?')
-    .split(' ')
-    .map((w) => w[0])
-    .join('')
-    .slice(0, 2)
-    .toUpperCase()
-
-  const bioId = useId()
+  function handleCancel() {
+    setForm({
+      display_name: profile?.display_name ?? '',
+      pronouns: profile?.pronouns ?? '',
+      bio: profile?.bio ?? '',
+    })
+    setErrors({})
+  }
 
   return (
-    <div className="space-y-6">
+    <div className="pangu-surface" style={{ padding: 28 }}>
       {/* Avatar row */}
-      <div className="flex items-center gap-4">
-        <Avatar size="lg" fallback={initials} alt={profile?.display_name ?? 'Gebruiker'} />
+      <div className="flex items-center gap-5" style={{ marginBottom: 32 }}>
+        <div className="settings-avatar" aria-hidden="true">{initials}</div>
         <div>
-          <p className="text-base font-semibold text-gray-100">
+          <h3 className="pangu-display" style={{ fontSize: 20 }}>
             {profile?.display_name ?? '—'}
+          </h3>
+          <p className="mt-1" style={{ fontSize: 13, color: 'var(--muted)' }}>
+            Lid sinds ster-jaar {new Date(profile?.created_at ?? '').getFullYear()}
           </p>
-          <p className="text-xs text-gray-400">
-            Lid sinds {new Date(profile?.created_at ?? '').getFullYear()}
-          </p>
+          <button className="pangu-btn pangu-btn-violet-soft pangu-btn-sm mt-3" type="button">
+            Foto wijzigen
+          </button>
         </div>
       </div>
 
-      {/* Profile form */}
-      <Card className="space-y-4">
-        <h2 className="text-sm font-semibold uppercase tracking-widest text-gray-400">
-          Accountgegevens
-        </h2>
-        <Input
-          label="Weergavenaam"
-          value={form.display_name}
-          onChange={field('display_name').onChange}
-          error={errors.display_name}
-          autoComplete="name"
-        />
-        <Input
-          label="Voornaamwoorden"
-          value={form.pronouns}
-          onChange={field('pronouns').onChange}
-          placeholder="bijv. zij/haar"
-          autoComplete="off"
-        />
-        <Input
-          label="E-mailadres"
-          value={profile?.email ?? ''}
-          disabled
-          aria-readonly="true"
-        />
-        <div className="flex flex-col gap-1">
-          <label htmlFor={bioId} className="text-sm font-medium text-gray-200">
+      {/* Form grid */}
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
+        <div>
+          <label
+            className="pangu-label"
+            htmlFor="settings-display-name"
+          >
+            Weergavenaam
+          </label>
+          <input
+            id="settings-display-name"
+            className="pangu-input"
+            value={form.display_name}
+            onChange={(e) => {
+              setForm((f) => ({ ...f, display_name: e.target.value }))
+              if (errors.display_name) setErrors((e) => ({ ...e, display_name: undefined }))
+            }}
+            autoComplete="name"
+            aria-describedby={errors.display_name ? 'settings-display-name-error' : undefined}
+            aria-invalid={errors.display_name ? true : undefined}
+          />
+          {errors.display_name && (
+            <p id="settings-display-name-error" role="alert" style={{ fontSize: 12, color: 'var(--crimson)', marginTop: 4 }}>
+              {errors.display_name}
+            </p>
+          )}
+        </div>
+        <div>
+          <label className="pangu-label" htmlFor="settings-pronouns">
+            Voornaamwoorden
+          </label>
+          <input
+            id="settings-pronouns"
+            className="pangu-input"
+            value={form.pronouns}
+            onChange={(e) => setForm((f) => ({ ...f, pronouns: e.target.value }))}
+            placeholder="bijv. zij/haar"
+            autoComplete="off"
+          />
+        </div>
+        <div style={{ gridColumn: 'span 2' }}>
+          <label className="pangu-label" htmlFor="settings-email">
+            E-mailadres
+          </label>
+          <input
+            id="settings-email"
+            className="pangu-input"
+            value={profile?.email ?? ''}
+            disabled
+            aria-readonly="true"
+          />
+        </div>
+        <div style={{ gridColumn: 'span 2' }}>
+          <label className="pangu-label" htmlFor={bioId}>
             Bio
           </label>
           <textarea
             id={bioId}
-            rows={3}
+            className="pangu-textarea"
             value={form.bio}
-            onChange={field('bio').onChange}
-            placeholder="Vertel iets over jezelf..."
-            className={cn(
-              'w-full rounded-md border border-gray-700 bg-gray-900 px-3 py-2 text-sm text-gray-100',
-              'placeholder:text-gray-500 resize-none',
-              'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500',
-            )}
+            onChange={(e) => setForm((f) => ({ ...f, bio: e.target.value }))}
+            placeholder="Een zachte hand aan het stuur. Een zwaar duim op de dobbelstenen."
+            rows={4}
           />
         </div>
-        <div className="flex justify-end gap-3">
-          <Button
-            variant="secondary"
-            onClick={() =>
-              setForm({
-                display_name: profile?.display_name ?? '',
-                pronouns: profile?.pronouns ?? '',
-                bio: profile?.bio ?? '',
-              })
-            }
-          >
-            Annuleren
-          </Button>
-          <Button
-            variant="primary"
-            loading={profileMutation.isPending}
-            onClick={() => profileMutation.mutate()}
-          >
-            Opslaan
-          </Button>
-        </div>
-      </Card>
+      </div>
 
-      {/* Password change */}
-      <Card className="space-y-4">
-        <div className="flex items-center justify-between">
-          <h2 className="text-sm font-semibold uppercase tracking-widest text-gray-400">
-            Wachtwoord wijzigen
-          </h2>
+      {/* Action row */}
+      <div className="flex items-center justify-between gap-3" style={{ marginTop: 24 }}>
+        <button
+          type="button"
+          className="pangu-btn pangu-btn-crimson"
+          onClick={handleSignOut}
+        >
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+            <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+            <polyline points="16 17 21 12 16 7" />
+            <line x1="21" y1="12" x2="9" y2="12" />
+          </svg>
+          Uitloggen
+        </button>
+        <div className="flex gap-3">
           <button
             type="button"
-            onClick={() => setShowPassword((v) => !v)}
-            className="text-xs text-indigo-400 hover:text-indigo-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 rounded"
+            className="pangu-btn pangu-btn-ghost"
+            onClick={handleCancel}
           >
-            {showPassword ? 'Verbergen' : 'Wijzigen'}
+            Annuleren
+          </button>
+          <button
+            type="button"
+            className="pangu-btn pangu-btn-primary"
+            onClick={() => mutation.mutate()}
+            disabled={mutation.isPending}
+          >
+            {mutation.isPending ? 'Opslaan...' : 'Opslaan'}
           </button>
         </div>
-        {showPassword && (
-          <div className="space-y-4">
-            <Input
-              label="Nieuw wachtwoord"
-              type="password"
-              value={passwordForm.newPassword}
-              onChange={(e) => {
-                setPasswordForm((f) => ({ ...f, newPassword: e.target.value }))
-                if (passwordErrors.newPassword)
-                  setPasswordErrors((e) => ({ ...e, newPassword: undefined }))
-              }}
-              error={passwordErrors.newPassword}
-              autoComplete="new-password"
-            />
-            <Input
-              label="Bevestig wachtwoord"
-              type="password"
-              value={passwordForm.confirmPassword}
-              onChange={(e) => {
-                setPasswordForm((f) => ({ ...f, confirmPassword: e.target.value }))
-                if (passwordErrors.confirmPassword)
-                  setPasswordErrors((e) => ({ ...e, confirmPassword: undefined }))
-              }}
-              error={passwordErrors.confirmPassword}
-              autoComplete="new-password"
-            />
-            <div className="flex justify-end">
-              <Button
-                variant="primary"
-                loading={passwordMutation.isPending}
-                onClick={() => passwordMutation.mutate()}
-              >
-                Wachtwoord opslaan
-              </Button>
-            </div>
-          </div>
-        )}
-      </Card>
-
-      {/* Danger zone */}
-      <Card className="space-y-3">
-        <h2 className="text-sm font-semibold uppercase tracking-widest text-gray-400">
-          Sessie
-        </h2>
-        <Button variant="danger" onClick={handleSignOut} className="w-full sm:w-auto">
-          Uitloggen
-        </Button>
-      </Card>
+      </div>
     </div>
   )
 }
+
+// ── Preferences tab ───────────────────────────────────────
 
 function VoorkeurenTab() {
   const {
@@ -334,145 +310,143 @@ function VoorkeurenTab() {
   const langId = useId()
 
   const languages: { value: PreferencesLanguage; label: string }[] = [
-    { value: 'nl', label: 'Nederlands' },
     { value: 'en', label: 'English' },
+    { value: 'nl', label: 'Nederlands' },
     { value: 'de', label: 'Deutsch' },
     { value: 'fr', label: 'Français' },
   ]
 
   return (
-    <div className="space-y-6">
-      <Card className="space-y-1">
-        <h2 className="text-sm font-semibold uppercase tracking-widest text-gray-400 mb-2">
-          Meldingen
-        </h2>
-        <div className="divide-y divide-gray-800">
-          <ToggleRow
-            label="Sessieherinneringen"
-            checked={sessionReminders}
-            onChange={(v) => setPreference('sessionReminders', v)}
-          />
-          <ToggleRow
-            label="Geluidseffecten"
-            checked={soundEffects}
-            onChange={(v) => setPreference('soundEffects', v)}
-          />
-          <ToggleRow
+    <div className="flex flex-col gap-4">
+      <div className="pangu-surface" style={{ padding: 24 }}>
+        <p className="pangu-section-title" style={{ marginBottom: 4 }}>Meldingen</p>
+        <SettingToggle
+          label="Sessieherinneringen"
+          desc="Herinner me voor mijn volgende sessie."
+          checked={sessionReminders}
+          onChange={(v) => setPreference('sessionReminders', v)}
+        />
+        <SettingToggle
+          label="Geluidseffecten"
+          desc="Rollende dobbelstenen, kaarsvlam, etc."
+          checked={soundEffects}
+          onChange={(v) => setPreference('soundEffects', v)}
+        />
+        <div style={{ borderBottom: 'none' }}>
+          <SettingToggle
             label="Aantekeningen automatisch opslaan"
+            desc="Sla sessielogboeken elke 30 seconden op."
             checked={autosaveNotes}
             onChange={(v) => setPreference('autosaveNotes', v)}
           />
         </div>
-      </Card>
-
-      <Card className="space-y-4">
-        <h2 className="text-sm font-semibold uppercase tracking-widest text-gray-400">
-          AI-instellingen
-        </h2>
-        <div className="divide-y divide-gray-800">
-          <ToggleRow
-            label="Lore-suggesties"
-            checked={loreSuggestions}
-            onChange={(v) => setPreference('loreSuggestions', v)}
-          />
-        </div>
-        <div className="flex flex-col gap-1">
-          <label htmlFor={langId} className="text-sm font-medium text-gray-200">
-            Taal
-          </label>
+      </div>
+      <div className="pangu-surface" style={{ padding: 24 }}>
+        <p className="pangu-section-title" style={{ marginBottom: 4 }}>AI</p>
+        <SettingToggle
+          label="Lore-suggesties"
+          desc="Laat de kosmos ideeën fluisteren in de kantlijn."
+          checked={loreSuggestions}
+          onChange={(v) => setPreference('loreSuggestions', v)}
+        />
+        <div style={{ paddingTop: 16, marginTop: 16, borderTop: '1px solid var(--hairline)' }}>
+          <label className="pangu-label" htmlFor={langId}>Taal</label>
           <select
             id={langId}
+            className="pangu-select"
             value={language}
             onChange={(e) => setPreference('language', e.target.value as PreferencesLanguage)}
-            className={cn(
-              'h-10 rounded-md border border-gray-700 bg-gray-900 px-3 text-sm text-gray-100',
-              'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500',
-            )}
           >
             {languages.map((l) => (
-              <option key={l.value} value={l.value}>
-                {l.label}
-              </option>
+              <option key={l.value} value={l.value}>{l.label}</option>
             ))}
           </select>
         </div>
-      </Card>
+      </div>
     </div>
   )
 }
+
+// ── About tab ─────────────────────────────────────────────
 
 function OverTab() {
   return (
-    <div className="flex justify-center">
-      <Card className="w-full max-w-sm text-center space-y-6 py-8">
-        {/* Compass rose icon */}
-        <div className="flex justify-center">
-          <svg
-            aria-hidden="true"
-            width="56"
-            height="56"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="1.25"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            className="text-indigo-400"
-          >
-            <circle cx="12" cy="12" r="10" />
-            <polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76" />
-          </svg>
-        </div>
-        <div>
-          <p className="text-xs uppercase tracking-[0.25em] text-gray-400 mb-1">
-            SANCTUM EDITION · II
-          </p>
-          <h2 className="text-2xl font-bold tracking-widest text-gray-100">PANGU</h2>
-        </div>
-        <p className="text-sm text-gray-400 leading-relaxed px-2">
-          Een levende wereld voor verhalen die blijven. Bouw, verken en vertel met de hulp van een
-          intelligente kampagneassistent.
-        </p>
-        <div className="grid grid-cols-3 gap-4 border-t border-gray-800 pt-6">
-          {[
-            { label: 'Versie', value: 'v2.0' },
-            { label: 'Status', value: 'BETA' },
-            { label: 'Licentie', value: 'MIT' },
-          ].map(({ label, value }) => (
-            <div key={label} className="flex flex-col gap-1">
-              <span className="text-xs text-gray-500 uppercase tracking-wider">{label}</span>
-              <span className="text-sm font-semibold text-gray-200">{value}</span>
+    <div className="pangu-surface-glow flex flex-col items-center" style={{ padding: 32, textAlign: 'center' }}>
+      <CompassRose size={80} opacity={0.7} />
+      <h2 className="pangu-display-lg" style={{ marginTop: 24 }}>PANGU</h2>
+      <p className="pangu-eyebrow" style={{ marginTop: 8, justifyContent: 'center' }}>
+        SANCTUM EDITION · II
+      </p>
+      <p
+        className="pangu-quote"
+        style={{ maxWidth: 480, margin: '24px auto 0' }}
+      >
+        "Gebouwd voor Dungeon Masters die liever verhalen vertellen dan bijhouden."
+      </p>
+      <div
+        style={{
+          display: 'grid',
+          gridTemplateColumns: 'repeat(3, 1fr)',
+          gap: 16,
+          maxWidth: 480,
+          width: '100%',
+          margin: '32px auto 0',
+          paddingTop: 24,
+          borderTop: '1px solid var(--hairline)',
+        }}
+      >
+        {[
+          { label: 'Versie', value: 'v2.0', color: 'var(--violet)' },
+          { label: 'Status', value: 'BETA', color: 'var(--gold)' },
+          { label: 'Licentie', value: 'MIT', color: 'var(--ink-soft)' },
+        ].map(({ label, value, color }) => (
+          <div key={label}>
+            <div style={{ fontSize: 11, color: 'var(--muted)', textTransform: 'uppercase', letterSpacing: '0.12em' }}>
+              {label}
             </div>
-          ))}
-        </div>
-      </Card>
+            <div
+              style={{
+                fontFamily: 'var(--font-mono)',
+                fontWeight: 700,
+                color,
+                marginTop: 4,
+                fontSize: 14,
+              }}
+            >
+              {value}
+            </div>
+          </div>
+        ))}
+      </div>
     </div>
   )
 }
 
+// ── Settings page ─────────────────────────────────────────
+
 export default function SettingsPage() {
-  const [activeTab, setActiveTab] = useState<Tab>('profiel')
+  const [activeTab, setActiveTab] = useState<Tab>('profile')
 
   const tabs: { id: Tab; label: string }[] = [
-    { id: 'profiel', label: 'Profiel' },
-    { id: 'voorkeuren', label: 'Voorkeuren' },
-    { id: 'over', label: 'Over' },
+    { id: 'profile', label: 'Profile' },
+    { id: 'prefs', label: 'Preferences' },
+    { id: 'about', label: 'About' },
   ]
 
   return (
-    <main className="mx-auto w-full max-w-[820px] px-4 py-8">
-      <header className="mb-8">
-        <p className="text-xs uppercase tracking-widest text-gray-500 mb-1">Instellingen</p>
-        <h1 className="text-2xl font-bold text-gray-100">Jouw account</h1>
-        <p className="mt-1 text-sm text-gray-400">Beheer je profiel en voorkeuren.</p>
+    <main style={{ maxWidth: 820, padding: '40px 24px', width: '100%' }}>
+      {/* Page header */}
+      <header style={{ marginBottom: 40 }}>
+        <p className="pangu-eyebrow">Configuration</p>
+        <h1 className="pangu-display-xl">Settings</h1>
+        <p style={{ marginTop: 8, fontSize: 14, color: 'var(--ink-soft)' }}>
+          Tune the Sanctum to your liking.
+        </p>
       </header>
 
-      {/* Tab navigation */}
-      <nav aria-label="Instellingen tabbladen" className="mb-6">
-        <div
-          role="tablist"
-          className="flex gap-1 border-b border-gray-800"
-        >
+      {/* Tab bar */}
+      <nav aria-label="Instellingen tabbladen" style={{ maxWidth: 400, marginBottom: 32 }}>
+        <div role="tablist" className="pangu-tab-bar">
           {tabs.map((tab) => (
             <button
               key={tab.id}
@@ -482,12 +456,7 @@ export default function SettingsPage() {
               id={`tab-${tab.id}`}
               onClick={() => setActiveTab(tab.id)}
               type="button"
-              className={cn(
-                'px-4 py-2.5 text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 rounded-t',
-                activeTab === tab.id
-                  ? 'border-b-2 border-indigo-400 text-indigo-300'
-                  : 'text-gray-400 hover:text-gray-200',
-              )}
+              className="pangu-tab"
             >
               {tab.label}
             </button>
@@ -501,9 +470,9 @@ export default function SettingsPage() {
         id={`tabpanel-${activeTab}`}
         aria-labelledby={`tab-${activeTab}`}
       >
-        {activeTab === 'profiel' && <ProfielTab />}
-        {activeTab === 'voorkeuren' && <VoorkeurenTab />}
-        {activeTab === 'over' && <OverTab />}
+        {activeTab === 'profile' && <ProfielTab />}
+        {activeTab === 'prefs' && <VoorkeurenTab />}
+        {activeTab === 'about' && <OverTab />}
       </div>
     </main>
   )
