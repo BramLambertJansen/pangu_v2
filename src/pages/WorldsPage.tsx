@@ -4,7 +4,6 @@ import { toast } from 'sonner'
 import { supabase } from '@/lib/supabase'
 import { queryKeys } from '@/lib/queryKeys'
 import { useAuthStore } from '@/stores/auth.store'
-import { Button } from '@/components/ui/Button'
 import { Spinner } from '@/components/ui/Spinner'
 import { WorldCard } from '@/components/world/WorldCard'
 import type { World } from '@/types/world.types'
@@ -56,44 +55,45 @@ export default function WorldsPage() {
   }
 
   return (
-    <section aria-labelledby="worlds-heading" style={{ padding: 'var(--sp-8) var(--sp-6)' }}>
+    <div>
       {/* Page header */}
-      <div className="mb-8 flex flex-wrap items-start justify-between gap-4">
-        <div>
-          <h1
-            id="worlds-heading"
-            style={{
-              fontFamily: 'var(--font-display)',
-              fontSize: '22px',
-              fontWeight: 600,
-              letterSpacing: '0.1em',
-              color: 'var(--ink)',
-              margin: 0,
-            }}
+      <header style={{ marginBottom: 40 }}>
+        <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', flexWrap: 'wrap', gap: 16 }}>
+          <div>
+            <p className="pangu-eyebrow">Overzicht</p>
+            <h1 className="pangu-display">Mijn Werelden</h1>
+            <p style={{ marginTop: 8, fontSize: 14, color: 'var(--ink-soft)' }}>
+              Jouw speelwerelden en campagnes.
+            </p>
+          </div>
+          <button
+            type="button"
+            className="pangu-btn pangu-btn-primary"
+            onClick={handleCreate}
+            disabled={createWorld.isPending}
+            aria-label="Creëer een nieuwe wereld"
+            style={{ marginTop: 8 }}
           >
-            MIJN WERELDEN
-          </h1>
-          <p className="mt-1 text-sm" style={{ color: 'var(--muted)' }}>
-            Jouw speelwerelden en campagnes
-          </p>
+            {createWorld.isPending ? 'Aanmaken...' : '+ Creëer een wereld'}
+          </button>
         </div>
-        <Button
-          onClick={handleCreate}
-          loading={createWorld.isPending}
-          aria-label="Creëer een nieuwe wereld"
-        >
-          Creëer een wereld
-        </Button>
-      </div>
+      </header>
 
       {/* Content */}
       {isLoading ? (
-        <div className="flex items-center justify-center py-20" aria-live="polite" aria-label="Werelden laden...">
+        <div style={{ display: 'flex', justifyContent: 'center', padding: '80px 0' }} aria-live="polite" aria-label="Werelden laden...">
           <Spinner size="lg" />
         </div>
       ) : worlds && worlds.length > 0 ? (
         <ul
-          className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3"
+          style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))',
+            gap: 'var(--sp-5)',
+            listStyle: 'none',
+            padding: 0,
+            margin: 0,
+          }}
           role="list"
           aria-label="Overzicht werelden"
         >
@@ -105,48 +105,55 @@ export default function WorldsPage() {
         </ul>
       ) : (
         <div
-          className="flex flex-col items-center justify-center rounded-lg border border-dashed py-20 text-center"
-          style={{ borderColor: 'var(--hairline)' }}
+          className="pangu-surface-glow"
+          style={{
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            justifyContent: 'center',
+            padding: '80px 32px',
+            textAlign: 'center',
+          }}
           aria-live="polite"
         >
           <svg
             aria-hidden="true"
-            width="48"
-            height="48"
+            width="56"
+            height="56"
             viewBox="0 0 24 24"
             fill="none"
             stroke="currentColor"
-            strokeWidth="1"
+            strokeWidth="0.9"
             strokeLinecap="round"
             strokeLinejoin="round"
-            style={{ color: 'var(--muted)', marginBottom: '16px' }}
+            style={{ color: 'var(--subtle)', marginBottom: 20 }}
           >
             <circle cx="12" cy="12" r="10" />
             <line x1="2" y1="12" x2="22" y2="12" />
             <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z" />
           </svg>
-          <p
-            style={{
-              fontFamily: 'var(--font-display)',
-              fontSize: '15px',
-              letterSpacing: '0.08em',
-              color: 'var(--muted)',
-              margin: '0 0 8px',
-            }}
-          >
+          <p style={{
+            fontFamily: 'var(--font-display)',
+            fontSize: 16,
+            letterSpacing: '0.1em',
+            color: 'var(--ink-soft)',
+            margin: '0 0 8px',
+          }}>
             Geen werelden gevonden
           </p>
-          <p className="mb-6 text-sm" style={{ color: 'var(--muted)' }}>
+          <p style={{ fontSize: 14, color: 'var(--muted)', marginBottom: 28 }}>
             Maak je eerste wereld aan om te beginnen.
           </p>
-          <Button
+          <button
+            type="button"
+            className="pangu-btn pangu-btn-primary"
             onClick={handleCreate}
-            loading={createWorld.isPending}
+            disabled={createWorld.isPending}
           >
-            Creëer een wereld
-          </Button>
+            {createWorld.isPending ? 'Aanmaken...' : '+ Creëer een wereld'}
+          </button>
         </div>
       )}
-    </section>
+    </div>
   )
 }

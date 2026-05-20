@@ -4,47 +4,15 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { toast } from 'sonner'
 import { supabase } from '@/lib/supabase'
 import { queryKeys } from '@/lib/queryKeys'
-import { Button } from '@/components/ui/Button'
-import { Input } from '@/components/ui/Input'
 import { Modal } from '@/components/ui/Modal'
 import { Spinner } from '@/components/ui/Spinner'
-import { Badge } from '@/components/ui/Badge'
 import type { World, WorldStatus } from '@/types/world.types'
 
-const statusLabel: Record<WorldStatus, string> = {
-  draft: 'Concept',
-  active: 'Actief',
-  archived: 'Gearchiveerd',
-}
-
-const statusVariant: Record<WorldStatus, 'default' | 'success' | 'warning'> = {
-  draft: 'default',
-  active: 'success',
-  archived: 'warning',
-}
-
-function FormField({ label, id, children }: { label: string; id: string; children: React.ReactNode }) {
-  return (
-    <div className="flex flex-col gap-1">
-      <label htmlFor={id} className="text-sm font-medium" style={{ color: 'var(--ink)' }}>
-        {label}
-      </label>
-      {children}
-    </div>
-  )
-}
-
-const textareaClass = [
-  'w-full rounded-md border border-gray-700 bg-gray-900 px-3 py-2 text-sm text-gray-100',
-  'placeholder:text-gray-500 resize-y',
-  'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500',
-  'disabled:cursor-not-allowed disabled:opacity-50',
-].join(' ')
-
-const selectClass = [
-  'h-10 w-full rounded-md border border-gray-700 bg-gray-900 px-3 text-sm text-gray-100',
-  'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500',
-].join(' ')
+const statusOptions: { value: WorldStatus; label: string }[] = [
+  { value: 'draft',    label: 'Concept'       },
+  { value: 'active',   label: 'Actief'        },
+  { value: 'archived', label: 'Gearchiveerd'  },
+]
 
 export default function WorldDetailPage() {
   const { id } = useParams<{ id: string }>()
@@ -114,7 +82,6 @@ export default function WorldDetailPage() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: queryKeys.worlds.all })
-      toast.success('Wereld verwijderd')
       navigate('/worlds')
     },
     onError: () => {
@@ -146,7 +113,7 @@ export default function WorldDetailPage() {
 
   if (isLoading) {
     return (
-      <div className="flex h-full items-center justify-center py-20" aria-live="polite" aria-label="Wereld laden...">
+      <div style={{ display: 'flex', justifyContent: 'center', padding: '80px 0' }} aria-live="polite" aria-label="Wereld laden...">
         <Spinner size="lg" />
       </div>
     )
@@ -154,172 +121,212 @@ export default function WorldDetailPage() {
 
   if (!world) {
     return (
-      <section style={{ padding: 'var(--sp-8) var(--sp-6)' }}>
+      <div>
         <p style={{ color: 'var(--muted)' }}>Wereld niet gevonden.</p>
-        <Button variant="ghost" onClick={() => navigate('/worlds')} className="mt-4">
+        <button type="button" className="pangu-btn pangu-btn-ghost" onClick={() => navigate('/worlds')} style={{ marginTop: 16 }}>
           ← Terug naar werelden
-        </Button>
-      </section>
+        </button>
+      </div>
     )
   }
 
   return (
-    <section aria-labelledby="world-detail-heading" style={{ padding: 'var(--sp-8) var(--sp-6)' }}>
-      {/* Header */}
-      <div className="mb-8 flex flex-wrap items-start justify-between gap-4">
-        <div className="flex flex-wrap items-center gap-3">
-          <button
-            onClick={() => navigate('/worlds')}
-            aria-label="Terug naar werelden"
-            className="rounded p-1 text-gray-400 hover:text-gray-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500"
-          >
-            <svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M19 12H5" />
-              <path d="M12 19l-7-7 7-7" />
-            </svg>
-          </button>
+    <div style={{ maxWidth: 860, width: '100%' }}>
+      {/* Page header */}
+      <header style={{ marginBottom: 40 }}>
+        <button
+          type="button"
+          onClick={() => navigate('/worlds')}
+          aria-label="Terug naar werelden"
+          style={{
+            display: 'inline-flex', alignItems: 'center', gap: 6,
+            background: 'none', border: 'none', cursor: 'pointer',
+            color: 'var(--muted)', fontSize: 12, fontWeight: 700,
+            letterSpacing: '0.18em', textTransform: 'uppercase',
+            fontFamily: 'var(--font-body)',
+            marginBottom: 20, padding: 0,
+            transition: 'color var(--t-fast)',
+          }}
+          onMouseEnter={(e) => (e.currentTarget.style.color = 'var(--ink-soft)')}
+          onMouseLeave={(e) => (e.currentTarget.style.color = 'var(--muted)')}
+        >
+          <svg aria-hidden="true" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M19 12H5" /><path d="M12 19l-7-7 7-7" />
+          </svg>
+          Werelden
+        </button>
+
+        <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'flex-start', justifyContent: 'space-between', gap: 16 }}>
           <div>
-            <h1
-              id="world-detail-heading"
-              style={{
-                fontFamily: 'var(--font-display)',
-                fontSize: '22px',
-                fontWeight: 600,
-                letterSpacing: '0.1em',
-                color: 'var(--ink)',
-                margin: 0,
-              }}
+            <p className="pangu-eyebrow">Wereld bewerken</p>
+            <h1 className="pangu-display">{world.name}</h1>
+          </div>
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginTop: 8 }}>
+            <button
+              type="button"
+              className="pangu-btn pangu-btn-crimson"
+              onClick={() => setDeleteOpen(true)}
             >
-              {world.name}
-            </h1>
-            <div className="mt-1 flex items-center gap-2">
-              <Badge variant={statusVariant[world.status]}>
-                {statusLabel[world.status]}
-              </Badge>
-            </div>
+              Verwijderen
+            </button>
+            <button
+              type="button"
+              className="pangu-btn pangu-btn-ghost"
+              onClick={() => { setForm(world); setDirty(false) }}
+              disabled={!dirty}
+            >
+              Annuleren
+            </button>
+            <button
+              type="button"
+              className="pangu-btn pangu-btn-primary"
+              onClick={handleSave}
+              disabled={!dirty || saveWorld.isPending}
+            >
+              {saveWorld.isPending ? 'Opslaan...' : 'Opslaan'}
+            </button>
           </div>
         </div>
-
-        <div className="flex flex-wrap gap-2">
-          <Button variant="danger" onClick={() => setDeleteOpen(true)}>
-            Verwijder wereld
-          </Button>
-          <Button
-            onClick={handleSave}
-            loading={saveWorld.isPending}
-            disabled={!dirty}
-          >
-            Opslaan
-          </Button>
-        </div>
-      </div>
+      </header>
 
       {/* Header image preview */}
       {form.header_image && (
         <div
-          className="mb-6 w-full overflow-hidden rounded-lg"
-          style={{ height: '200px' }}
+          style={{
+            marginBottom: 32,
+            borderRadius: 'var(--r-lg)',
+            overflow: 'hidden',
+            height: 220,
+            border: '1px solid var(--hairline)',
+          }}
           aria-hidden="true"
         >
-          <img
-            src={form.header_image}
-            alt=""
-            className="h-full w-full object-cover"
-          />
+          <img src={form.header_image} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
         </div>
       )}
 
       {/* Form */}
-      <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
-        <Input
-          label="Naam"
-          value={form.name ?? ''}
-          onChange={(e) => set('name', e.target.value)}
-          placeholder="Naam van de wereld"
-        />
+      <div className="pangu-surface" style={{ padding: 28 }}>
+        <div className="settings-form-grid">
+          {/* Naam */}
+          <div>
+            <label className="pangu-label" htmlFor="world-name">Naam</label>
+            <input
+              id="world-name"
+              className="pangu-input"
+              value={form.name ?? ''}
+              onChange={(e) => set('name', e.target.value)}
+              placeholder="Naam van de wereld"
+            />
+          </div>
 
-        <Input
-          label="Subtitel"
-          value={form.subtitle ?? ''}
-          onChange={(e) => set('subtitle', e.target.value || null as unknown as string)}
-          placeholder="Korte beschrijving of tagline"
-        />
+          {/* Subtitel */}
+          <div>
+            <label className="pangu-label" htmlFor="world-subtitle">Subtitel</label>
+            <input
+              id="world-subtitle"
+              className="pangu-input"
+              value={form.subtitle ?? ''}
+              onChange={(e) => set('subtitle', e.target.value || null as unknown as string)}
+              placeholder="Korte beschrijving of tagline"
+            />
+          </div>
 
-        <FormField label="Status" id={statusId}>
-          <select
-            id={statusId}
-            value={form.status ?? 'draft'}
-            onChange={(e) => set('status', e.target.value as WorldStatus)}
-            className={selectClass}
-            aria-label="Status van de wereld"
+          {/* Status */}
+          <div>
+            <label className="pangu-label" htmlFor={statusId}>Status</label>
+            <select
+              id={statusId}
+              className="pangu-select"
+              value={form.status ?? 'draft'}
+              onChange={(e) => set('status', e.target.value as WorldStatus)}
+            >
+              {statusOptions.map((o) => (
+                <option key={o.value} value={o.value}>{o.label}</option>
+              ))}
+            </select>
+          </div>
+
+          {/* Header afbeelding */}
+          <div>
+            <label className="pangu-label" htmlFor={headerImageId}>Header afbeelding (URL)</label>
+            <input
+              id={headerImageId}
+              className="pangu-input"
+              type="url"
+              value={form.header_image ?? ''}
+              onChange={(e) => set('header_image', e.target.value || null as unknown as string)}
+              placeholder="https://..."
+            />
+          </div>
+
+          {/* Quote */}
+          <div style={{ gridColumn: 'span 2' }}>
+            <label className="pangu-label" htmlFor={quoteId}>Quote</label>
+            <textarea
+              id={quoteId}
+              className="pangu-textarea"
+              value={form.quote ?? ''}
+              onChange={(e) => set('quote', e.target.value || null as unknown as string)}
+              placeholder="Een passende quote voor deze wereld..."
+              rows={2}
+              style={{ minHeight: 'auto' }}
+            />
+          </div>
+
+          {/* Beschrijving */}
+          <div style={{ gridColumn: 'span 2' }}>
+            <label className="pangu-label" htmlFor={descriptionId}>Beschrijving</label>
+            <textarea
+              id={descriptionId}
+              className="pangu-textarea"
+              value={form.description ?? ''}
+              onChange={(e) => set('description', e.target.value || null as unknown as string)}
+              placeholder="Beschrijf de wereld, haar sfeer en achtergrond..."
+              rows={5}
+            />
+          </div>
+        </div>
+
+        {/* Mobile save */}
+        <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: 24, gap: 8 }}>
+          <button
+            type="button"
+            className="pangu-btn pangu-btn-ghost"
+            onClick={() => { setForm(world); setDirty(false) }}
+            disabled={!dirty}
           >
-            <option value="draft">Concept</option>
-            <option value="active">Actief</option>
-            <option value="archived">Gearchiveerd</option>
-          </select>
-        </FormField>
-
-        <Input
-          label="Header afbeelding (URL)"
-          id={headerImageId}
-          value={form.header_image ?? ''}
-          onChange={(e) => set('header_image', e.target.value || null as unknown as string)}
-          placeholder="https://..."
-          type="url"
-        />
-
-        <FormField label="Quote" id={quoteId}>
-          <textarea
-            id={quoteId}
-            value={form.quote ?? ''}
-            onChange={(e) => set('quote', e.target.value || null as unknown as string)}
-            placeholder="Een passende quote voor deze wereld..."
-            rows={2}
-            className={textareaClass}
-          />
-        </FormField>
-
-        <FormField label="Beschrijving" id={descriptionId}>
-          <textarea
-            id={descriptionId}
-            value={form.description ?? ''}
-            onChange={(e) => set('description', e.target.value || null as unknown as string)}
-            placeholder="Beschrijf de wereld, haar sfeer en achtergrond..."
-            rows={5}
-            className={textareaClass}
-          />
-        </FormField>
+            Annuleren
+          </button>
+          <button
+            type="button"
+            className="pangu-btn pangu-btn-primary"
+            onClick={handleSave}
+            disabled={!dirty || saveWorld.isPending}
+          >
+            {saveWorld.isPending ? 'Opslaan...' : 'Opslaan'}
+          </button>
+        </div>
       </div>
 
-      {/* Mobile save button */}
-      <div className="mt-8 flex justify-end lg:hidden">
-        <Button
-          onClick={handleSave}
-          loading={saveWorld.isPending}
-          disabled={!dirty}
-        >
-          Opslaan
-        </Button>
-      </div>
-
-      {/* Delete confirmation modal */}
+      {/* Delete modal */}
       <Modal
         open={deleteOpen}
         onClose={() => setDeleteOpen(false)}
         title="Wereld verwijderen"
       >
-        <p className="mb-6 text-sm" style={{ color: 'var(--muted)' }}>
+        <p style={{ fontSize: 14, color: 'var(--ink-soft)', marginBottom: 24 }}>
           Weet je zeker dat je <strong style={{ color: 'var(--ink)' }}>{world.name}</strong> wilt verwijderen? Dit kan niet ongedaan worden gemaakt.
         </p>
-        <div className="flex flex-wrap justify-end gap-3">
-          <Button variant="ghost" onClick={() => setDeleteOpen(false)}>
+        <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 8 }}>
+          <button type="button" className="pangu-btn pangu-btn-ghost" onClick={() => setDeleteOpen(false)}>
             Annuleren
-          </Button>
-          <Button variant="danger" onClick={handleDelete} loading={deleteWorld.isPending}>
-            Verwijder wereld
-          </Button>
+          </button>
+          <button type="button" className="pangu-btn pangu-btn-crimson" onClick={handleDelete} disabled={deleteWorld.isPending}>
+            {deleteWorld.isPending ? 'Verwijderen...' : 'Verwijder wereld'}
+          </button>
         </div>
       </Modal>
-    </section>
+    </div>
   )
 }
