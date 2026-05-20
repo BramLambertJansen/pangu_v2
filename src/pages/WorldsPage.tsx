@@ -30,16 +30,17 @@ export default function WorldsPage() {
   const createWorld = useMutation({
     mutationFn: async () => {
       if (!user) throw new Error('Niet ingelogd')
-      const newId = crypto.randomUUID()
-      const { error } = await supabase
+      const { data, error } = await supabase
         .from('worlds')
-        .insert({ id: newId, owner_id: user.id })
+        .insert({ user_id: user.id })
+        .select('id')
+        .single()
       if (error) throw error
-      return newId
+      return data.id as string
     },
-    onSuccess: (newId) => {
+    onSuccess: (id) => {
       queryClient.invalidateQueries({ queryKey: queryKeys.worlds.all })
-      navigate(`/worlds/${newId}`)
+      navigate(`/worlds/${id}`)
     },
     onError: () => {
       toast.error('Wereld aanmaken mislukt')

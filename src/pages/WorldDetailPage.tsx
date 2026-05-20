@@ -90,7 +90,7 @@ export default function WorldDetailPage() {
           subtitle: form.subtitle,
           quote: form.quote,
           description: form.description,
-          banner_url: form.banner_url,
+          header_image: form.header_image,
           status: form.status,
           updated_at: new Date().toISOString(),
         })
@@ -215,14 +215,14 @@ export default function WorldDetailPage() {
       </div>
 
       {/* Header image preview */}
-      {form.banner_url && (
+      {form.header_image && (
         <div
           className="mb-6 w-full overflow-hidden rounded-lg"
           style={{ height: '200px' }}
           aria-hidden="true"
         >
           <img
-            src={form.banner_url}
+            src={form.header_image}
             alt=""
             className="h-full w-full object-cover"
           />
@@ -262,8 +262,8 @@ export default function WorldDetailPage() {
         <Input
           label="Header afbeelding (URL)"
           id={headerImageId}
-          value={form.banner_url ?? ''}
-          onChange={(e) => set('banner_url', e.target.value || null as unknown as string)}
+          value={form.header_image ?? ''}
+          onChange={(e) => set('header_image', e.target.value || null as unknown as string)}
           placeholder="https://..."
           type="url"
         />

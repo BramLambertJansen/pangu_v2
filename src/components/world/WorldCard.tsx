@@ -43,11 +43,11 @@ export function WorldCard({ world }: Props) {
       style={{ minHeight: '180px' }}
     >
       {/* Header image or gradient placeholder */}
-      {world.banner_url ? (
+      {world.header_image ? (
         <div
           className="absolute inset-0"
           style={{
-            backgroundImage: `url(${world.banner_url})`,
+            backgroundImage: `url(${world.header_image})`,
             backgroundSize: 'cover',
             backgroundPosition: 'center',
           }}
