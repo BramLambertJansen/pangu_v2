@@ -86,23 +86,26 @@ export default function WorldsPage() {
         <>
           {/* Section divider */}
           {(worlds?.length ?? 0) > 0 && (
-            <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 36 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 0, marginBottom: 36 }} aria-hidden="true">
+              <div style={{ flex: 1, height: 1, background: 'linear-gradient(to right, transparent, var(--hairline-strong))' }} />
               <div style={{
                 display: 'inline-flex', alignItems: 'center', gap: 10,
-                padding: '8px 20px',
+                padding: '7px 18px',
                 border: '1px solid var(--hairline-strong)',
                 borderRadius: 'var(--r-full)',
                 background: 'var(--void-2)',
+                flexShrink: 0,
               }}>
-                <span style={{ color: 'var(--violet)', fontSize: 10 }} aria-hidden="true">✦</span>
+                <span style={{ color: 'var(--gold)', fontSize: 9 }}>✦</span>
                 <span style={{
                   fontFamily: 'var(--font-body)', fontSize: 10, fontWeight: 700,
-                  letterSpacing: '0.28em', textTransform: 'uppercase', color: 'var(--ink-soft)',
+                  letterSpacing: '0.28em', textTransform: 'uppercase', color: 'var(--gold)',
                 }}>
                   Known Worlds
                 </span>
-                <span style={{ color: 'var(--violet)', fontSize: 10 }} aria-hidden="true">✦</span>
+                <span style={{ color: 'var(--gold)', fontSize: 9 }}>✦</span>
               </div>
+              <div style={{ flex: 1, height: 1, background: 'linear-gradient(to left, transparent, var(--hairline-strong))' }} />
             </div>
           )}
 
