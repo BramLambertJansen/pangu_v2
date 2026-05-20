@@ -13,6 +13,7 @@ export default defineConfig({
     tailwindcss(),
     VitePWA({
       registerType: 'autoUpdate',
+      includeAssets: ['favicon.ico', 'pangu.svg', 'apple-touch-icon-180x180.png'],
       manifest: {
         name: 'PANGU',
         short_name: 'PANGU',
@@ -20,9 +21,15 @@ export default defineConfig({
         theme_color: '#1e1b4b',
         background_color: '#0f0e1a',
         display: 'standalone',
+        start_url: '/',
+        scope: '/',
+        orientation: 'portrait',
         icons: [
-          { src: '/icons/icon-192.png', sizes: '192x192', type: 'image/png' },
-          { src: '/icons/icon-512.png', sizes: '512x512', type: 'image/png' },
+          { src: '/pwa-64x64.png', sizes: '64x64', type: 'image/png' },
+          { src: '/pwa-192x192.png', sizes: '192x192', type: 'image/png' },
+          { src: '/pwa-512x512.png', sizes: '512x512', type: 'image/png' },
+          { src: '/maskable-icon-192x192.png', sizes: '192x192', type: 'image/png', purpose: 'maskable' },
+          { src: '/maskable-icon-512x512.png', sizes: '512x512', type: 'image/png', purpose: 'maskable' },
         ],
       },
     }),
