@@ -1,0 +1,55 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <!-- Background -->
+  <rect width="512" height="512" rx="80" fill="#0f0e1a"/>
+
+  <!-- Outer magical ring -->
+  <circle cx="256" cy="256" r="210" fill="none" stroke="#4c1d95" stroke-width="4" opacity="0.6"/>
+  <circle cx="256" cy="256" r="195" fill="none" stroke="#6d28d9" stroke-width="2" opacity="0.4"/>
+
+  <!-- Rune marks on ring -->
+  <g stroke="#7c3aed" stroke-width="2" opacity="0.7">
+    <line x1="256" y1="46" x2="256" y2="66"/>
+    <line x1="256" y1="446" x2="256" y2="466"/>
+    <line x1="46" y1="256" x2="66" y2="256"/>
+    <line x1="446" y1="256" x2="466" y2="256"/>
+    <line x1="107" y1="107" x2="121" y2="121"/>
+    <line x1="391" y1="391" x2="405" y2="405"/>
+    <line x1="405" y1="107" x2="391" y2="121"/>
+    <line x1="121" y1="391" x2="107" y2="405"/>
+  </g>
+
+  <!-- Inner glow circle -->
+  <circle cx="256" cy="256" r="160" fill="url(#innerGlow)"/>
+
+  <!-- The letter P - bold, fantasy style -->
+  <text
+    x="256"
+    y="330"
+    text-anchor="middle"
+    font-family="Georgia, 'Times New Roman', serif"
+    font-size="240"
+    font-weight="bold"
+    fill="url(#letterGrad)"
+    letter-spacing="-5"
+  >P</text>
+
+  <!-- Subtle star points -->
+  <g fill="#a78bfa" opacity="0.5">
+    <polygon points="256,72 262,90 256,86 250,90" />
+    <polygon points="256,440 262,422 256,426 250,422" />
+    <polygon points="72,256 90,250 86,256 90,262" />
+    <polygon points="440,256 422,250 426,256 422,262" />
+  </g>
+
+  <defs>
+    <radialGradient id="innerGlow" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#1e1b4b" stop-opacity="1"/>
+      <stop offset="100%" stop-color="#0f0e1a" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="letterGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#c4b5fd"/>
+      <stop offset="50%" stop-color="#8b5cf6"/>
+      <stop offset="100%" stop-color="#4c1d95"/>
+    </linearGradient>
+  </defs>
+</svg>
