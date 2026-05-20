@@ -9,9 +9,9 @@ import { Spinner } from '@/components/ui/Spinner'
 import type { World, WorldStatus } from '@/types/world.types'
 
 const statusOptions: { value: WorldStatus; label: string }[] = [
-  { value: 'draft',    label: 'Concept'       },
-  { value: 'active',   label: 'Actief'        },
-  { value: 'archived', label: 'Gearchiveerd'  },
+  { value: 'draft',    label: 'Concept'      },
+  { value: 'active',   label: 'Actief'       },
+  { value: 'archived', label: 'Gearchiveerd' },
 ]
 
 export default function WorldDetailPage() {
@@ -131,9 +131,10 @@ export default function WorldDetailPage() {
   }
 
   return (
-    <div style={{ maxWidth: 860, width: '100%' }}>
-      {/* Page header */}
-      <header style={{ marginBottom: 40 }}>
+    <div style={{ display: 'flex', justifyContent: 'center', width: '100%' }}>
+      <div style={{ maxWidth: 820, width: '100%' }}>
+
+        {/* Back link */}
         <button
           type="button"
           onClick={() => navigate('/worlds')}
@@ -144,7 +145,7 @@ export default function WorldDetailPage() {
             color: 'var(--muted)', fontSize: 12, fontWeight: 700,
             letterSpacing: '0.18em', textTransform: 'uppercase',
             fontFamily: 'var(--font-body)',
-            marginBottom: 20, padding: 0,
+            marginBottom: 24, padding: 0,
             transition: 'color var(--t-fast)',
           }}
           onMouseEnter={(e) => (e.currentTarget.style.color = 'var(--ink-soft)')}
@@ -156,19 +157,109 @@ export default function WorldDetailPage() {
           Werelden
         </button>
 
-        <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'flex-start', justifyContent: 'space-between', gap: 16 }}>
-          <div>
-            <p className="pangu-eyebrow">Wereld bewerken</p>
-            <h1 className="pangu-display">{world.name}</h1>
+        {/* Page header */}
+        <header style={{ marginBottom: 40 }}>
+          <p className="pangu-eyebrow">Wereld bewerken</p>
+          <h1 className="pangu-display-xl">{world.name}</h1>
+          <p style={{ marginTop: 8, fontSize: 14, color: 'var(--ink-soft)' }}>
+            Pas de details van deze wereld aan.
+          </p>
+        </header>
+
+        {/* Header image preview */}
+        {form.header_image && (
+          <div
+            style={{
+              marginBottom: 32,
+              borderRadius: 'var(--r-lg)',
+              overflow: 'hidden',
+              height: 220,
+              border: '1px solid var(--hairline)',
+            }}
+            aria-hidden="true"
+          >
+            <img src={form.header_image} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
           </div>
-          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginTop: 8 }}>
-            <button
-              type="button"
-              className="pangu-btn pangu-btn-crimson"
-              onClick={() => setDeleteOpen(true)}
-            >
-              Verwijderen
-            </button>
+        )}
+
+        {/* Form */}
+        <div className="pangu-surface" style={{ padding: 28 }}>
+          <div className="settings-form-grid">
+            <div>
+              <label className="pangu-label" htmlFor="world-name">Naam</label>
+              <input
+                id="world-name"
+                className="pangu-input"
+                value={form.name ?? ''}
+                onChange={(e) => set('name', e.target.value)}
+                placeholder="Naam van de wereld"
+              />
+            </div>
+
+            <div>
+              <label className="pangu-label" htmlFor="world-subtitle">Subtitel</label>
+              <input
+                id="world-subtitle"
+                className="pangu-input"
+                value={form.subtitle ?? ''}
+                onChange={(e) => set('subtitle', e.target.value || null as unknown as string)}
+                placeholder="Korte beschrijving of tagline"
+              />
+            </div>
+
+            <div>
+              <label className="pangu-label" htmlFor={statusId}>Status</label>
+              <select
+                id={statusId}
+                className="pangu-select"
+                value={form.status ?? 'draft'}
+                onChange={(e) => set('status', e.target.value as WorldStatus)}
+              >
+                {statusOptions.map((o) => (
+                  <option key={o.value} value={o.value}>{o.label}</option>
+                ))}
+              </select>
+            </div>
+
+            <div>
+              <label className="pangu-label" htmlFor={headerImageId}>Header afbeelding (URL)</label>
+              <input
+                id={headerImageId}
+                className="pangu-input"
+                type="url"
+                value={form.header_image ?? ''}
+                onChange={(e) => set('header_image', e.target.value || null as unknown as string)}
+                placeholder="https://..."
+              />
+            </div>
+
+            <div style={{ gridColumn: 'span 2' }}>
+              <label className="pangu-label" htmlFor={quoteId}>Quote</label>
+              <textarea
+                id={quoteId}
+                className="pangu-textarea"
+                value={form.quote ?? ''}
+                onChange={(e) => set('quote', e.target.value || null as unknown as string)}
+                placeholder="Een passende quote voor deze wereld..."
+                rows={2}
+                style={{ minHeight: 'auto' }}
+              />
+            </div>
+
+            <div style={{ gridColumn: 'span 2' }}>
+              <label className="pangu-label" htmlFor={descriptionId}>Beschrijving</label>
+              <textarea
+                id={descriptionId}
+                className="pangu-textarea"
+                value={form.description ?? ''}
+                onChange={(e) => set('description', e.target.value || null as unknown as string)}
+                placeholder="Beschrijf de wereld, haar sfeer en achtergrond..."
+                rows={5}
+              />
+            </div>
+          </div>
+
+          <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 8, marginTop: 24 }}>
             <button
               type="button"
               className="pangu-btn pangu-btn-ghost"
@@ -187,126 +278,30 @@ export default function WorldDetailPage() {
             </button>
           </div>
         </div>
-      </header>
 
-      {/* Header image preview */}
-      {form.header_image && (
+        {/* Danger zone */}
         <div
-          style={{
-            marginBottom: 32,
-            borderRadius: 'var(--r-lg)',
-            overflow: 'hidden',
-            height: 220,
-            border: '1px solid var(--hairline)',
-          }}
-          aria-hidden="true"
+          className="pangu-surface"
+          style={{ marginTop: 24, padding: 28, borderColor: 'rgba(255,107,107,0.18)' }}
         >
-          <img src={form.header_image} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-        </div>
-      )}
-
-      {/* Form */}
-      <div className="pangu-surface" style={{ padding: 28 }}>
-        <div className="settings-form-grid">
-          {/* Naam */}
-          <div>
-            <label className="pangu-label" htmlFor="world-name">Naam</label>
-            <input
-              id="world-name"
-              className="pangu-input"
-              value={form.name ?? ''}
-              onChange={(e) => set('name', e.target.value)}
-              placeholder="Naam van de wereld"
-            />
-          </div>
-
-          {/* Subtitel */}
-          <div>
-            <label className="pangu-label" htmlFor="world-subtitle">Subtitel</label>
-            <input
-              id="world-subtitle"
-              className="pangu-input"
-              value={form.subtitle ?? ''}
-              onChange={(e) => set('subtitle', e.target.value || null as unknown as string)}
-              placeholder="Korte beschrijving of tagline"
-            />
-          </div>
-
-          {/* Status */}
-          <div>
-            <label className="pangu-label" htmlFor={statusId}>Status</label>
-            <select
-              id={statusId}
-              className="pangu-select"
-              value={form.status ?? 'draft'}
-              onChange={(e) => set('status', e.target.value as WorldStatus)}
+          <p className="pangu-section-title" style={{ marginBottom: 4 }}>Gevarenzone</p>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 16, paddingTop: 16, borderTop: '1px solid var(--hairline)' }}>
+            <div>
+              <p style={{ fontSize: 14, color: 'var(--ink-soft)', margin: 0 }}>Wereld verwijderen</p>
+              <p style={{ fontSize: 13, color: 'var(--muted)', margin: '2px 0 0' }}>
+                Dit verwijdert de wereld permanent en kan niet ongedaan worden gemaakt.
+              </p>
+            </div>
+            <button
+              type="button"
+              className="pangu-btn pangu-btn-crimson pangu-btn-sm"
+              onClick={() => setDeleteOpen(true)}
             >
-              {statusOptions.map((o) => (
-                <option key={o.value} value={o.value}>{o.label}</option>
-              ))}
-            </select>
-          </div>
-
-          {/* Header afbeelding */}
-          <div>
-            <label className="pangu-label" htmlFor={headerImageId}>Header afbeelding (URL)</label>
-            <input
-              id={headerImageId}
-              className="pangu-input"
-              type="url"
-              value={form.header_image ?? ''}
-              onChange={(e) => set('header_image', e.target.value || null as unknown as string)}
-              placeholder="https://..."
-            />
-          </div>
-
-          {/* Quote */}
-          <div style={{ gridColumn: 'span 2' }}>
-            <label className="pangu-label" htmlFor={quoteId}>Quote</label>
-            <textarea
-              id={quoteId}
-              className="pangu-textarea"
-              value={form.quote ?? ''}
-              onChange={(e) => set('quote', e.target.value || null as unknown as string)}
-              placeholder="Een passende quote voor deze wereld..."
-              rows={2}
-              style={{ minHeight: 'auto' }}
-            />
-          </div>
-
-          {/* Beschrijving */}
-          <div style={{ gridColumn: 'span 2' }}>
-            <label className="pangu-label" htmlFor={descriptionId}>Beschrijving</label>
-            <textarea
-              id={descriptionId}
-              className="pangu-textarea"
-              value={form.description ?? ''}
-              onChange={(e) => set('description', e.target.value || null as unknown as string)}
-              placeholder="Beschrijf de wereld, haar sfeer en achtergrond..."
-              rows={5}
-            />
+              Verwijder wereld
+            </button>
           </div>
         </div>
 
-        {/* Mobile save */}
-        <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: 24, gap: 8 }}>
-          <button
-            type="button"
-            className="pangu-btn pangu-btn-ghost"
-            onClick={() => { setForm(world); setDirty(false) }}
-            disabled={!dirty}
-          >
-            Annuleren
-          </button>
-          <button
-            type="button"
-            className="pangu-btn pangu-btn-primary"
-            onClick={handleSave}
-            disabled={!dirty || saveWorld.isPending}
-          >
-            {saveWorld.isPending ? 'Opslaan...' : 'Opslaan'}
-          </button>
-        </div>
       </div>
 
       {/* Delete modal */}

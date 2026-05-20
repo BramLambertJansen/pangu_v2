@@ -61,7 +61,7 @@ export default function WorldsPage() {
         <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', flexWrap: 'wrap', gap: 16 }}>
           <div>
             <p className="pangu-eyebrow">Overzicht</p>
-            <h1 className="pangu-display">Mijn Werelden</h1>
+            <h1 className="pangu-display-xl">Mijn Werelden</h1>
             <p style={{ marginTop: 8, fontSize: 14, color: 'var(--ink-soft)' }}>
               Jouw speelwerelden en campagnes.
             </p>
