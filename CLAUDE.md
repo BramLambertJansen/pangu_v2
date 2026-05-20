@@ -228,6 +228,14 @@ npm run type-check   # tsc --noEmit
 - [x] Rol-gebaseerde navigatie (Accountbeheer zichtbaar voor admins)
 - [x] Uitloggen via sidebar
 
+### Werelden (DM)
+- [x] Werelden tabel + RLS (`supabase/migrations/003_worlds.sql`)
+- [x] Werelden overzicht `/worlds` — grid met WorldCard, lege staat, responsief
+- [x] Wereld aanmaken — direct aanmaken + redirect naar bewerken
+- [x] Wereld bewerken `/worlds/:id` — naam, subtitle, quote, beschrijving, header image, status
+- [x] Wereld verwijderen — met bevestigingsdialoog
+- [x] Navigatie-item "Werelden" in sidebar
+
 ### Campaign Management (DM)
 - [ ] Campaign overzicht / dashboard
 - [ ] Campaign aanmaken

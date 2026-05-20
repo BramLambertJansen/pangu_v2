@@ -10,6 +10,8 @@ const RegisterPage = lazy(() => import('@/pages/RegisterPage'))
 const DashboardPage = lazy(() => import('@/pages/DashboardPage'))
 const AdminPage = lazy(() => import('@/pages/AdminPage'))
 const SettingsPage = lazy(() => import('@/pages/SettingsPage'))
+const WorldsPage = lazy(() => import('@/pages/WorldsPage'))
+const WorldDetailPage = lazy(() => import('@/pages/WorldDetailPage'))
 
 function PageLoader() {
   return (
@@ -77,6 +79,16 @@ export const router = createBrowserRouter([
         path: '/settings',
         loader: requireAuth,
         element: wrap(SettingsPage),
+      },
+      {
+        path: '/worlds',
+        loader: requireAuth,
+        element: wrap(WorldsPage),
+      },
+      {
+        path: '/worlds/:id',
+        loader: requireAuth,
+        element: wrap(WorldDetailPage),
       },
     ],
   },
