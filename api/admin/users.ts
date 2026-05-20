@@ -38,14 +38,19 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
     if (error) return res.status(400).json({ error: error.message })
 
-    // Ensure role and display_name are set correctly (trigger defaults to 'user')
+    // Upsert the profile so role and display_name are always correct,
+    // regardless of trigger timing or default values.
     const { error: profileError } = await client
       .from('profiles')
-      .update({ role, display_name })
-      .eq('id', data.user.id)
+      .upsert({
+        id: data.user.id,
+        email,
+        display_name: display_name || email.split('@')[0],
+        role,
+      }, { onConflict: 'id' })
 
     if (profileError) {
-      // Auth user was created but profile update failed — roll back
+      // Profile could not be set — roll back the auth user
       await client.auth.admin.deleteUser(data.user.id)
       return res.status(500).json({ error: 'Account aanmaken mislukt: ' + profileError.message })
     }

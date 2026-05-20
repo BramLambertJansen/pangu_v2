@@ -9,24 +9,25 @@ CREATE TABLE public.profiles (
 
 ALTER TABLE public.profiles ENABLE ROW LEVEL SECURITY;
 
--- Restrict UPDATE to display_name only for regular authenticated users
--- (service_role bypasses this and is used by the admin API)
-REVOKE UPDATE ON public.profiles FROM authenticated;
-GRANT UPDATE (display_name) ON public.profiles TO authenticated;
-
 -- Users may read their own profile
 CREATE POLICY "self_read"
   ON public.profiles
   FOR SELECT
   USING (auth.uid() = id);
 
--- Users may update only their own display_name (column-level grant above
--- already prevents touching role/email/created_at)
+-- Users may update only display_name on their own row.
+-- The WITH CHECK ensures role, email, and created_at cannot be changed
+-- by a regular user; only service_role (admin API) can touch those columns.
 CREATE POLICY "self_update_name"
   ON public.profiles
   FOR UPDATE
   USING (auth.uid() = id)
-  WITH CHECK (auth.uid() = id);
+  WITH CHECK (
+    auth.uid() = id
+    AND role        = (SELECT role        FROM public.profiles p WHERE p.id = auth.uid())
+    AND email       = (SELECT email       FROM public.profiles p WHERE p.id = auth.uid())
+    AND created_at  = (SELECT created_at  FROM public.profiles p WHERE p.id = auth.uid())
+  );
 
 -- Auto-create a profile row whenever a new auth user is created.
 -- Role is always 'user'; elevation only happens through the admin API.

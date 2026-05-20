@@ -3,6 +3,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { toast } from 'sonner'
 import { supabase } from '@/lib/supabase'
 import { queryKeys } from '@/lib/queryKeys'
+import { useAuthStore } from '@/stores/auth.store'
 import { Avatar } from '@/components/ui/Avatar'
 import { Badge } from '@/components/ui/Badge'
 import { Button } from '@/components/ui/Button'
@@ -49,6 +50,7 @@ function getInitials(profile: Profile) {
 
 export function UserTable() {
   const queryClient = useQueryClient()
+  const currentUserId = useAuthStore((s) => s.user?.id)
   const [editTarget, setEditTarget] = useState<Profile | null>(null)
   const [deletingId, setDeletingId] = useState<string | null>(null)
 
@@ -145,25 +147,31 @@ export function UserTable() {
                   {formatDate(user.created_at)}
                 </td>
                 <td className="px-4 py-3">
-                  <div className="flex items-center justify-end gap-2">
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => setEditTarget(user)}
-                      aria-label={`Account van ${user.display_name ?? user.email} bewerken`}
-                    >
-                      Bewerken
-                    </Button>
-                    <Button
-                      variant="danger"
-                      size="sm"
-                      loading={deletingId === user.id}
-                      onClick={() => handleDeleteClick(user)}
-                      aria-label={`Account van ${user.display_name ?? user.email} verwijderen`}
-                    >
-                      Verwijderen
-                    </Button>
-                  </div>
+                  {user.id === currentUserId ? (
+                    <span className="flex justify-end pr-1 text-xs" style={{ color: 'var(--muted)' }}>
+                      Uw account
+                    </span>
+                  ) : (
+                    <div className="flex items-center justify-end gap-2">
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => setEditTarget(user)}
+                        aria-label={`Account van ${user.display_name ?? user.email} bewerken`}
+                      >
+                        Bewerken
+                      </Button>
+                      <Button
+                        variant="danger"
+                        size="sm"
+                        loading={deletingId === user.id}
+                        onClick={() => handleDeleteClick(user)}
+                        aria-label={`Account van ${user.display_name ?? user.email} verwijderen`}
+                      >
+                        Verwijderen
+                      </Button>
+                    </div>
+                  )}
                 </td>
               </tr>
             ))}
