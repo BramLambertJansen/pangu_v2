@@ -1,7 +1,6 @@
 import { useState, useId } from 'react'
 import { useMutation } from '@tanstack/react-query'
 import { toast } from 'sonner'
-import { useNavigate } from 'react-router-dom'
 import { supabase } from '@/lib/supabase'
 import { useAuthStore } from '@/stores/auth.store'
 import { usePreferencesStore, type PreferencesLanguage } from '@/stores/preferences.store'
@@ -110,7 +109,6 @@ function SettingToggle({
 
 function ProfielTab() {
   const { profile, setProfile } = useAuthStore()
-  const navigate = useNavigate()
 
   const [form, setForm] = useState<ProfileForm>({
     display_name: profile?.display_name ?? '',
@@ -118,6 +116,11 @@ function ProfielTab() {
     bio: profile?.bio ?? '',
   })
   const [errors, setErrors] = useState<Partial<Record<keyof ProfileForm, string>>>({})
+
+  const hasChanges =
+    form.display_name !== (profile?.display_name ?? '') ||
+    form.pronouns !== (profile?.pronouns ?? '') ||
+    form.bio !== (profile?.bio ?? '')
 
   const initials = (profile?.display_name ?? profile?.email ?? '?')
     .split(' ')
@@ -157,13 +160,6 @@ function ProfielTab() {
       if (err.message !== 'validation') toast.error('Opslaan mislukt')
     },
   })
-
-  async function handleSignOut() {
-    await supabase.auth.signOut()
-    useAuthStore.getState().signOut()
-    toast.success('Uitgelogd')
-    navigate('/login', { replace: true })
-  }
 
   function handleCancel() {
     setForm({
@@ -260,36 +256,23 @@ function ProfielTab() {
       </div>
 
       {/* Action row */}
-      <div className="flex items-center justify-between gap-3" style={{ marginTop: 24 }}>
+      <div className="flex items-center justify-end gap-3" style={{ marginTop: 24 }}>
         <button
           type="button"
-          className="pangu-btn pangu-btn-crimson"
-          onClick={handleSignOut}
+          className="pangu-btn pangu-btn-ghost"
+          onClick={handleCancel}
+          disabled={!hasChanges}
         >
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-            <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
-            <polyline points="16 17 21 12 16 7" />
-            <line x1="21" y1="12" x2="9" y2="12" />
-          </svg>
-          Uitloggen
+          Annuleren
         </button>
-        <div className="flex gap-3">
-          <button
-            type="button"
-            className="pangu-btn pangu-btn-ghost"
-            onClick={handleCancel}
-          >
-            Annuleren
-          </button>
-          <button
-            type="button"
-            className="pangu-btn pangu-btn-primary"
-            onClick={() => mutation.mutate()}
-            disabled={mutation.isPending}
-          >
-            {mutation.isPending ? 'Opslaan...' : 'Opslaan'}
-          </button>
-        </div>
+        <button
+          type="button"
+          className="pangu-btn pangu-btn-primary"
+          onClick={() => mutation.mutate()}
+          disabled={!hasChanges || mutation.isPending}
+        >
+          {mutation.isPending ? 'Opslaan...' : 'Opslaan'}
+        </button>
       </div>
     </div>
   )
@@ -349,7 +332,7 @@ function VoorkeurenTab() {
           checked={loreSuggestions}
           onChange={(v) => setPreference('loreSuggestions', v)}
         />
-        <div style={{ paddingTop: 16, marginTop: 16, borderTop: '1px solid var(--hairline)' }}>
+        <div style={{ paddingTop: 16, marginTop: 4 }}>
           <label className="pangu-label" htmlFor={langId}>Taal</label>
           <select
             id={langId}
@@ -434,7 +417,7 @@ export default function SettingsPage() {
   ]
 
   return (
-    <main style={{ maxWidth: 820, padding: '40px 24px', width: '100%' }}>
+    <main style={{ maxWidth: 820, padding: '40px 24px', width: '100%', margin: '0 auto' }}>
       {/* Page header */}
       <header style={{ marginBottom: 40 }}>
         <p className="pangu-eyebrow">Configuration</p>
