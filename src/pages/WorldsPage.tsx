@@ -5,7 +5,7 @@ import { supabase } from '@/lib/supabase'
 import { queryKeys } from '@/lib/queryKeys'
 import { useAuthStore } from '@/stores/auth.store'
 import { Spinner } from '@/components/ui/Spinner'
-import { WorldCard } from '@/components/world/WorldCard'
+import { WorldCard, ForgeWorldCard } from '@/components/world/WorldCard'
 import type { World } from '@/types/world.types'
 
 export default function WorldsPage() {
@@ -57,102 +57,78 @@ export default function WorldsPage() {
   return (
     <div>
       {/* Page header */}
-      <header style={{ marginBottom: 40 }}>
-        <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', flexWrap: 'wrap', gap: 16 }}>
-          <div>
-            <p className="pangu-eyebrow">Overzicht</p>
-            <h1 className="pangu-display-xl">Mijn Werelden</h1>
-            <p style={{ marginTop: 8, fontSize: 14, color: 'var(--ink-soft)' }}>
-              Jouw speelwerelden en campagnes.
-            </p>
-          </div>
+      <header style={{ marginBottom: 48 }}>
+        <p className="pangu-eyebrow">The Cradle of Every Story</p>
+        <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', flexWrap: 'wrap', gap: 24 }}>
+          <h1 className="pangu-display-xl">Worlds</h1>
           <button
             type="button"
             className="pangu-btn pangu-btn-primary"
             onClick={handleCreate}
             disabled={createWorld.isPending}
             aria-label="Creëer een nieuwe wereld"
-            style={{ marginTop: 8 }}
+            style={{ marginBottom: 8, flexShrink: 0 }}
           >
-            {createWorld.isPending ? 'Aanmaken...' : '+ Creëer een wereld'}
+            {createWorld.isPending ? 'Aanmaken...' : '+ Forge a World'}
           </button>
         </div>
+        <p style={{ marginTop: 16, fontSize: 15, color: 'var(--ink-soft)', maxWidth: 560, lineHeight: 1.65 }}>
+          A world is where everything lives — the cities, the lonely roads, the people, and the beasts. Choose one to enter.
+        </p>
       </header>
 
-      {/* Content */}
+      {/* Loading */}
       {isLoading ? (
         <div style={{ display: 'flex', justifyContent: 'center', padding: '80px 0' }} aria-live="polite" aria-label="Werelden laden...">
           <Spinner size="lg" />
         </div>
-      ) : worlds && worlds.length > 0 ? (
-        <ul
-          style={{
-            display: 'grid',
-            gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))',
-            gap: 'var(--sp-5)',
-            listStyle: 'none',
-            padding: 0,
-            margin: 0,
-          }}
-          role="list"
-          aria-label="Overzicht werelden"
-        >
-          {worlds.map((world) => (
-            <li key={world.id}>
-              <WorldCard world={world} />
-            </li>
-          ))}
-        </ul>
       ) : (
-        <div
-          className="pangu-surface-glow"
-          style={{
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'center',
-            justifyContent: 'center',
-            padding: '80px 32px',
-            textAlign: 'center',
-          }}
-          aria-live="polite"
-        >
-          <svg
-            aria-hidden="true"
-            width="56"
-            height="56"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="0.9"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            style={{ color: 'var(--subtle)', marginBottom: 20 }}
+        <>
+          {/* Section divider */}
+          {(worlds?.length ?? 0) > 0 && (
+            <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 36 }}>
+              <div style={{
+                display: 'inline-flex', alignItems: 'center', gap: 10,
+                padding: '8px 20px',
+                border: '1px solid var(--hairline-strong)',
+                borderRadius: 'var(--r-full)',
+                background: 'var(--void-2)',
+              }}>
+                <span style={{ color: 'var(--violet)', fontSize: 10 }} aria-hidden="true">✦</span>
+                <span style={{
+                  fontFamily: 'var(--font-body)', fontSize: 10, fontWeight: 700,
+                  letterSpacing: '0.28em', textTransform: 'uppercase', color: 'var(--ink-soft)',
+                }}>
+                  Known Worlds
+                </span>
+                <span style={{ color: 'var(--violet)', fontSize: 10 }} aria-hidden="true">✦</span>
+              </div>
+            </div>
+          )}
+
+          {/* Grid */}
+          <ul
+            style={{
+              display: 'grid',
+              gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))',
+              gap: 'var(--sp-5)',
+              listStyle: 'none',
+              padding: 0,
+              margin: 0,
+            }}
+            role="list"
+            aria-label="Overzicht werelden"
           >
-            <circle cx="12" cy="12" r="10" />
-            <line x1="2" y1="12" x2="22" y2="12" />
-            <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z" />
-          </svg>
-          <p style={{
-            fontFamily: 'var(--font-display)',
-            fontSize: 16,
-            letterSpacing: '0.1em',
-            color: 'var(--ink-soft)',
-            margin: '0 0 8px',
-          }}>
-            Geen werelden gevonden
-          </p>
-          <p style={{ fontSize: 14, color: 'var(--muted)', marginBottom: 28 }}>
-            Maak je eerste wereld aan om te beginnen.
-          </p>
-          <button
-            type="button"
-            className="pangu-btn pangu-btn-primary"
-            onClick={handleCreate}
-            disabled={createWorld.isPending}
-          >
-            {createWorld.isPending ? 'Aanmaken...' : '+ Creëer een wereld'}
-          </button>
-        </div>
+            {worlds?.map((world) => (
+              <li key={world.id}>
+                <WorldCard world={world} />
+              </li>
+            ))}
+            <li>
+              <ForgeWorldCard onClick={handleCreate} loading={createWorld.isPending} />
+            </li>
+          </ul>
+        </>
       )}
     </div>
   )
