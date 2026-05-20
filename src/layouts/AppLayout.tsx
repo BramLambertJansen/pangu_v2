@@ -3,7 +3,7 @@ import { useUIStore } from '@/stores/ui.store'
 import { useAuthStore } from '@/stores/auth.store'
 import { supabase } from '@/lib/supabase'
 import { toast } from 'sonner'
-import { useMemo } from 'react'
+import { useMemo, useState } from 'react'
 
 interface Star {
   id: number
@@ -108,6 +108,7 @@ export default function AppLayout() {
   const { sidebarCollapsed, toggleSidebar } = useUIStore()
   const { profile, signOut } = useAuthStore()
   const navigate = useNavigate()
+  const [mobileOpen, setMobileOpen] = useState(false)
 
   const navItems = [
     ...(profile?.role === 'admin' ? [adminNavItem] : baseNavItems),
@@ -126,6 +127,13 @@ export default function AppLayout() {
 
   return (
     <div className="flex h-screen overflow-hidden" style={{ background: 'var(--void)', color: 'var(--ink)' }}>
+
+      {/* ── Mobile backdrop ── */}
+      <div
+        aria-hidden="true"
+        className={`sidebar-backdrop${mobileOpen ? '' : ' is-hidden'}`}
+        onClick={() => setMobileOpen(false)}
+      />
 
       {/* ── Background layers ── */}
       <div
@@ -155,7 +163,7 @@ export default function AppLayout() {
       {/* ── Sidebar ── */}
       <nav
         aria-label="Hoofdnavigatie"
-        className="relative flex flex-col h-full shrink-0"
+        className={`sidebar-nav relative flex flex-col h-full shrink-0${mobileOpen ? ' is-open' : ''}`}
         style={{
           width: sidebarWidth,
           zIndex: 10,
@@ -210,6 +218,7 @@ export default function AppLayout() {
                 <NavLink
                   to={item.to}
                   title={sidebarCollapsed ? item.label : undefined}
+                  onClick={() => setMobileOpen(false)}
                   className={({ isActive }) =>
                     sidebarCollapsed
                       ? `${iconOnly}${isActive ? ' nav-item--active' : ''}`
@@ -227,6 +236,17 @@ export default function AppLayout() {
           <div className="flex flex-col shrink-0" style={{ gap: 'var(--sp-2)' }}>
             <div aria-hidden="true" style={{ height: '1px', background: 'var(--hairline)', margin: '0 8px' }} />
             <button
+              onClick={() => setMobileOpen(false)}
+              className="sidebar-close-btn nav-item"
+              aria-label="Menu sluiten"
+            >
+              <svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round">
+                <line x1="18" y1="6" x2="6" y2="18" />
+                <line x1="6" y1="6" x2="18" y2="18" />
+              </svg>
+              <span>Sluiten</span>
+            </button>
+            <button
               onClick={handleSignOut}
               className={sidebarCollapsed ? iconOnly : 'nav-item'}
               aria-label="Uitloggen"
@@ -241,7 +261,7 @@ export default function AppLayout() {
             </button>
             <button
               onClick={toggleSidebar}
-              className={sidebarCollapsed ? iconOnly : 'nav-item'}
+              className={`sidebar-collapse-btn ${sidebarCollapsed ? iconOnly : 'nav-item'}`}
               aria-label={sidebarCollapsed ? 'Navigatie uitklappen' : 'Navigatie inklappen'}
               title={sidebarCollapsed ? 'Uitklappen' : undefined}
             >
@@ -264,13 +284,23 @@ export default function AppLayout() {
 
       {/* ── Main content ── */}
       <main
-        className="flex-1 overflow-auto"
-        style={{
-          position: 'relative',
-          zIndex: 10,
-          padding: 'var(--sp-10) clamp(var(--sp-8), 5vw, var(--sp-14)) 100px',
-        }}
+        className="main-content flex-1 overflow-auto"
+        style={{ position: 'relative', zIndex: 10 }}
       >
+        <button
+          onClick={() => setMobileOpen(true)}
+          className="mobile-menu-btn nav-item"
+          aria-label="Menu openen"
+          aria-expanded={mobileOpen}
+          aria-controls="sidebar-nav"
+        >
+          <svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round">
+            <line x1="3" y1="6" x2="21" y2="6" />
+            <line x1="3" y1="12" x2="21" y2="12" />
+            <line x1="3" y1="18" x2="21" y2="18" />
+          </svg>
+          <span>Menu</span>
+        </button>
         <Outlet />
       </main>
     </div>

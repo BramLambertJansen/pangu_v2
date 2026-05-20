@@ -189,7 +189,7 @@ function ProfielTab() {
       </div>
 
       {/* Form grid */}
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
+      <div className="settings-form-grid">
         <div>
           <label
             className="pangu-label"
@@ -228,7 +228,7 @@ function ProfielTab() {
             autoComplete="off"
           />
         </div>
-        <div style={{ gridColumn: 'span 2' }}>
+        <div className="span-2" style={{ gridColumn: 'span 2' }}>
           <label className="pangu-label" htmlFor="settings-email">
             E-mailadres
           </label>
@@ -240,7 +240,7 @@ function ProfielTab() {
             aria-readonly="true"
           />
         </div>
-        <div style={{ gridColumn: 'span 2' }}>
+        <div className="span-2" style={{ gridColumn: 'span 2' }}>
           <label className="pangu-label" htmlFor={bioId}>
             Bio
           </label>
@@ -367,10 +367,8 @@ function OverTab() {
         "Gebouwd voor Dungeon Masters die liever verhalen vertellen dan bijhouden."
       </p>
       <div
+        className="about-stats-grid"
         style={{
-          display: 'grid',
-          gridTemplateColumns: 'repeat(3, 1fr)',
-          gap: 16,
           maxWidth: 480,
           width: '100%',
           margin: '32px auto 0',
