@@ -18,6 +18,8 @@ export type Database = {
           id: string
           email: string
           display_name: string | null
+          pronouns: string | null
+          bio: string | null
           role: string
           created_at: string
         }
@@ -25,6 +27,8 @@ export type Database = {
           id: string
           email: string
           display_name?: string | null
+          pronouns?: string | null
+          bio?: string | null
           role?: string
           created_at?: string
         }
@@ -32,6 +36,8 @@ export type Database = {
           id?: string
           email?: string
           display_name?: string | null
+          pronouns?: string | null
+          bio?: string | null
           role?: string
           created_at?: string
         }
@@ -57,6 +63,8 @@ export interface Profile {
   id: string
   email: string
   display_name: string | null
+  pronouns: string | null
+  bio: string | null
   role: ProfileRole
   created_at: string
 }

@@ -9,6 +9,7 @@ const LoginPage = lazy(() => import('@/pages/LoginPage'))
 const RegisterPage = lazy(() => import('@/pages/RegisterPage'))
 const DashboardPage = lazy(() => import('@/pages/DashboardPage'))
 const AdminPage = lazy(() => import('@/pages/AdminPage'))
+const SettingsPage = lazy(() => import('@/pages/SettingsPage'))
 
 function PageLoader() {
   return (
@@ -71,6 +72,11 @@ export const router = createBrowserRouter([
         path: '/admin',
         loader: requireAdmin,
         element: wrap(AdminPage),
+      },
+      {
+        path: '/settings',
+        loader: requireAuth,
+        element: wrap(SettingsPage),
       },
     ],
   },
