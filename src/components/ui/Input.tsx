@@ -14,9 +14,9 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
     const errorId = `${id}-error`
 
     return (
-      <div className="flex flex-col gap-1">
+      <div className="flex flex-col gap-1.5">
         {label && (
-          <label htmlFor={id} className="text-sm font-medium text-gray-200">
+          <label htmlFor={id} className="text-sm font-medium" style={{ color: 'var(--ink-soft)' }}>
             {label}
           </label>
         )}
@@ -26,17 +26,18 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
           aria-describedby={error ? errorId : undefined}
           aria-invalid={error ? true : undefined}
           className={cn(
-            'h-10 w-full rounded-md border border-gray-700 bg-gray-900 px-3 text-sm text-gray-100',
-            'placeholder:text-gray-500',
-            'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500',
+            'h-10 w-full rounded-md border px-3 text-sm transition-colors',
+            'bg-[var(--surface-2)] border-[var(--hairline)] text-[var(--ink)]',
+            'placeholder:text-[var(--subtle)]',
+            'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--violet)] focus-visible:border-[var(--violet)]',
             'disabled:cursor-not-allowed disabled:opacity-50',
-            error && 'border-red-500 focus-visible:ring-red-500',
+            error && 'border-[var(--crimson)] focus-visible:ring-[var(--crimson)]',
             className,
           )}
           {...props}
         />
         {error && (
-          <p id={errorId} role="alert" className="text-xs text-red-400">
+          <p id={errorId} role="alert" className="text-xs" style={{ color: 'var(--crimson)' }}>
             {error}
           </p>
         )}
