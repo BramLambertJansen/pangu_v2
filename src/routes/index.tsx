@@ -50,6 +50,7 @@ export const router = createBrowserRouter([
   {
     path: '/',
     loader: () => redirect('/dashboard'),
+    element: null,
   },
   {
     element: <AuthLayout />,
