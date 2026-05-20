@@ -184,7 +184,7 @@ export default function WorldDetailPage() {
 
         {/* Form */}
         <div className="pangu-surface" style={{ padding: 28 }}>
-          <div className="settings-form-grid">
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             <div>
               <label className="pangu-label" htmlFor="world-name">Naam</label>
               <input
@@ -233,7 +233,7 @@ export default function WorldDetailPage() {
               />
             </div>
 
-            <div style={{ gridColumn: 'span 2' }}>
+            <div className="sm:col-span-2">
               <label className="pangu-label" htmlFor={quoteId}>Quote</label>
               <textarea
                 id={quoteId}
@@ -246,7 +246,7 @@ export default function WorldDetailPage() {
               />
             </div>
 
-            <div style={{ gridColumn: 'span 2' }}>
+            <div className="sm:col-span-2">
               <label className="pangu-label" htmlFor={descriptionId}>Beschrijving</label>
               <textarea
                 id={descriptionId}
@@ -259,7 +259,7 @@ export default function WorldDetailPage() {
             </div>
           </div>
 
-          <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 8, marginTop: 24 }}>
+          <div className="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end" style={{ marginTop: 24 }}>
             <button
               type="button"
               className="pangu-btn pangu-btn-ghost"
@@ -313,7 +313,7 @@ export default function WorldDetailPage() {
         <p style={{ fontSize: 14, color: 'var(--ink-soft)', marginBottom: 24 }}>
           Weet je zeker dat je <strong style={{ color: 'var(--ink)' }}>{world.name}</strong> wilt verwijderen? Dit kan niet ongedaan worden gemaakt.
         </p>
-        <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 8 }}>
+        <div className="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
           <button type="button" className="pangu-btn pangu-btn-ghost" onClick={() => setDeleteOpen(false)}>
             Annuleren
           </button>
