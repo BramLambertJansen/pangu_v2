@@ -8,6 +8,7 @@ export interface World {
   quote: string | null
   description: string | null
   header_image: string | null
+  header_image_position: string | null
   header_image_position: string
   status: WorldStatus
   created_at: string
