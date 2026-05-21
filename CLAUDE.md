@@ -82,13 +82,84 @@ Verplichte componenten vóór feature-werk:
 - `Input` — met label, foutmelding en aria-koppeling
 - `Modal` — met focus trap, `role="dialog"`, `aria-modal="true"`
 - `Spinner` — laadstatus-indicator
-- `Badge` — status-labels
-- `Card` — content-containers
-- `Avatar` — voor NPCs, spelers
+- `Badge` — status-labels (varianten: `default`, `success`, `warning`, `danger`, `info`)
+- `Card` — content-containers (sub-components: `CardHeader`, `CardTitle`, `CardContent`)
+- `Avatar` — voor NPCs, spelers (met fallback-initialen, 3 maten)
 
 ### Feature-componenten (`src/components/[feature]/`)
 
-Gegroepeerd per domein: `campaign/`, `character/`, `location/`, `npc/`, `session/`, `lore/`.
+Gegroepeerd per domein:
+
+| Map | Componenten |
+|---|---|
+| `world/` | `WorldCard`, `WorldDetailHeader`, `WorldDetailDivider`, `CompassRose` |
+| `campaign/` | `CampaignCard` |
+| `session/` | `SessionCard` |
+| `admin/` | `UserTable`, `CreateUserModal`, `EditUserModal`, `DeleteUserModal` |
+
+Geplande mappen (nog leeg): `character/`, `location/`, `npc/`, `lore/`.
+
+---
+
+## Design System
+
+Alle design tokens zijn gedefinieerd als CSS custom properties in `src/index.css`.
+
+### Kleuren
+```css
+/* Achtergronden (donkerste → lichtste) */
+--void: #0a0a14        /* body achtergrond */
+--void-2: #0f0e1c
+--surface: #15142a
+--surface-2: #1c1a35
+--surface-3: #252243
+--surface-hover: #2d2950
+
+/* Accent */
+--violet: #9b8aff       /* primaire accentkleur */
+--violet-soft: #b5a7ff
+--violet-deep: #6b58d6
+--violet-glow: rgba(155, 138, 255, 0.35)
+--gold: #f5c842         /* highlights, titels */
+--gold-soft: #ffd968
+--gold-deep: #c9a02e
+--teal: #3ecfb2         /* succes / actief */
+--crimson: #ff6b6b      /* fout / gevaar */
+--azure: #6ba7ff        /* info / link */
+
+/* Tekst */
+--ink: #f0ecf7          /* primaire tekst */
+--ink-soft: #c8c2dc     /* secondaire tekst */
+--muted: #8079a0        /* placeholder / uitgeschakeld */
+--subtle: #4a4565       /* borders, separators */
+
+/* Borders */
+--hairline: rgba(155, 138, 255, 0.14)
+--hairline-strong: rgba(155, 138, 255, 0.28)
+```
+
+### Typografie
+```css
+--font-display: 'Cinzel', Georgia, serif      /* titels, headings */
+--font-body: 'Manrope', system-ui, sans-serif  /* lopende tekst */
+--font-mono: 'JetBrains Mono', ui-monospace   /* code */
+```
+
+### Spacing (4px grid)
+`--sp-1` (4px) · `--sp-2` (8px) · `--sp-3` (12px) · `--sp-4` (16px) · `--sp-5` (20px) · `--sp-6` (24px) · `--sp-8` (32px) · `--sp-10` (40px) · `--sp-12` (48px) · `--sp-16` (64px) · `--sp-20` (80px)
+
+### Border radius
+`--r-xs` (4px) · `--r-sm` (6px) · `--r-md` (8px) · `--r-lg` (12px) · `--r-xl` (16px) · `--r-full` (9999px)
+
+### Animatie
+```css
+--ease-out: cubic-bezier(0.2, 0.7, 0.2, 1)
+--t-fast: 180ms    /* hover-states */
+--t-base: 220ms    /* standaard overgangen */
+--t-slow: 280ms    /* modals, panels */
+```
+
+Gebruik altijd de tokens in plaats van hardcoded waarden. TailwindCSS v4 heeft geen aparte config-file — alles gaat via CSS custom properties en `@theme`.
 
 ---
 
@@ -124,7 +195,8 @@ Regels:
 - Één store per domein: `useAuthStore`, `useCampaignStore`, `useUIStore`, `usePreferencesStore`
 - Persist alleen wat nodig is (geen gevoelige data)
 - Store-bestanden: `src/stores/[domain].store.ts`
-- `usePreferencesStore` isoleert per gebruiker via auth user ID
+- `usePreferencesStore` isoleert per gebruiker via auth user ID (localStorage key bevat user ID)
+- `useUIStore` is **niet** gepersisteerd (sidebarCollapsed reset bij refresh)
 
 ### TanStack Query (server state)
 
@@ -132,6 +204,33 @@ Regels:
 - Mutations invalideren altijd de relevante queries na succes
 - Optimistic updates voor snelle UI-feedback waar zinvol
 - `staleTime` instellen per query-type (geen globale standaard van 0)
+
+```ts
+// src/lib/queryKeys.ts — huidige structuur
+export const queryKeys = {
+  campaigns: {
+    all: ['campaigns'],
+    detail: (id: string) => ['campaigns', id],
+    byWorld: (worldId: string) => ['campaigns', 'world', worldId],
+    locations: (id: string) => ['campaigns', id, 'locations'],
+    npcs: (id: string) => ['campaigns', id, 'npcs'],
+    lore: (id: string) => ['campaigns', id, 'lore'],
+    sessions: (campaignId: string) => ['campaigns', campaignId, 'sessions'],
+    sessionDetail: (sessionId: string) => ['sessions', sessionId],
+  },
+  characters: {
+    all: ['characters'],
+    detail: (id: string) => ['characters', id],
+  },
+  worlds: {
+    all: ['worlds'],
+    detail: (id: string) => ['worlds', id],
+  },
+  admin: {
+    users: ['admin', 'users'],
+  },
+}
+```
 
 ---
 
@@ -145,12 +244,32 @@ Regels:
 ### Migraties (chronologisch)
 | # | Bestand | Inhoud |
 |---|---|---|
-| 001 | `001_profiles.sql` | Profiles tabel + RLS |
-| 002 | `002_profile_settings.sql` | Profile settings (voorkeuren) |
+| 001 | `001_profiles.sql` | Profiles tabel + RLS + auto-create trigger bij nieuwe auth user |
+| 002 | `002_profile_settings.sql` | `pronouns` en `bio` kolommen aan profiles |
 | 003 | `003_worlds.sql` | Worlds tabel + RLS |
-| 004 | `004_worlds_header_image_position.sql` | Header image positie voor worlds |
-| 005 | `005_campaigns.sql` | Campaigns tabel + RLS |
-| 006 | `006_campaigns_header_image.sql` | Header image voor campaigns |
+| 004 | `004_worlds_header_image_position.sql` | `header_image_position` kolom voor worlds |
+| 005 | `005_campaigns.sql` | Campaigns tabel + RLS + index op (world_id, created_at DESC) |
+| 006 | `006_campaigns_header_image.sql` | `header_image` en `header_image_position` voor campaigns |
+| 007 | `007_sessions.sql` | Sessions tabel + RLS + index op (campaign_id, created_at DESC) + updated_at trigger |
+
+### Status-enums per entiteit
+
+| Entiteit | Statussen |
+|---|---|
+| World | `draft` · `active` · `archived` |
+| Campaign | `draft` · `active` · `archived` · `completed` |
+| Session | `planned` · `active` · `completed` · `archived` |
+
+---
+
+## Image Positioning Pattern
+
+Worlds en campaigns ondersteunen versleepbare header-images. De positie wordt opgeslagen als CSS `object-position` string (bijv. `"45% 30%"`).
+
+- Drag-interactie: mouse- en touch-events op het preview-element
+- Positie als `"X% Y%"` in `header_image_position` kolom
+- Rendering: `style={{ objectPosition: header_image_position }}`
+- Gebruik dit patroon consistent voor alle toekomstige entiteiten met header-images
 
 ---
 
@@ -184,6 +303,25 @@ Geplande routes (nog niet geïmplementeerd):
 /characters/:id          → spelersperspectief
 ```
 
+### Route loaders
+- `requireAuth` — redirect naar `/login` als niet ingelogd
+- `requireAdmin` — redirect naar `/dashboard` als niet admin
+
+---
+
+## Vercel Serverless API (`api/admin/`)
+
+Alle endpoints vereisen een geldig admin-JWT in de `Authorization: Bearer <token>` header.
+
+| Methode | Endpoint | Actie |
+|---|---|---|
+| GET | `/api/admin/users` | Lijst alle profielen |
+| POST | `/api/admin/users` | Maak nieuwe gebruiker aan |
+| PATCH | `/api/admin/users/:id` | Bewerk gebruiker (naam, email, wachtwoord) |
+| DELETE | `/api/admin/users/:id` | Verwijder gebruiker (niet zichzelf) |
+
+`_auth.ts` exporteert `createAdminClient()` (service_role key) en `verifyAdmin(authHeader)`.
+
 ---
 
 ## A11Y-checklist
@@ -209,6 +347,8 @@ Elke feature is pas **klaar** als alle punten gehaald zijn:
 4. **Foutafhandeling alleen aan systeemgrenzen** — gebruikersinput, externe APIs. Vertrouw interne code en framework-garanties.
 5. **TypeScript strict** — geen `any`, geen `@ts-ignore` zonder uitleg.
 6. **Elke nieuwe feature documenteren** in de Feature Status hieronder.
+7. **Design tokens** — gebruik altijd CSS custom properties uit `index.css`, nooit hardcoded hex-waarden.
+8. **Nieuwe migraties** — voeg altijd toe aan de migratietabel in dit bestand; nummering is chronologisch en aaneengesloten.
 
 ---
 
@@ -224,13 +364,23 @@ npm run type-check   # tsc --noEmit
 
 ---
 
+## Omgevingsvariabelen
+
+```bash
+VITE_SUPABASE_URL=          # Supabase project URL (frontend)
+VITE_SUPABASE_ANON_KEY=     # Supabase anon key (frontend)
+SUPABASE_SERVICE_ROLE_KEY=  # Service role key (server-side only, nooit in VITE_*)
+```
+
+---
+
 ## Feature Status
 
 > Bijhouden welke features beschikbaar zijn in de app. Elke keer dat iets wordt afgerond, direct hier bijwerken.
 
 ### Infrastructuur
 - [x] Vite + React 19 + TypeScript setup
-- [x] TailwindCSS v4 configuratie
+- [x] TailwindCSS v4 configuratie + design tokens (`src/index.css`)
 - [x] Supabase client + types
 - [x] TanStack Query client + gecentraliseerde query keys
 - [x] Zustand stores scaffold (auth, campaign, ui, preferences)
@@ -240,13 +390,13 @@ npm run type-check   # tsc --noEmit
 - [x] Vercel serverless API (`api/admin/`)
 
 ### UI Basis-componenten (`src/components/ui/`)
-- [x] `Button`
-- [x] `Input`
-- [x] `Modal` (focus trap)
-- [x] `Spinner`
-- [x] `Badge`
-- [x] `Card`
-- [x] `Avatar`
+- [x] `Button` (varianten: primary, secondary, ghost, danger; maten: sm, md, lg)
+- [x] `Input` (label, foutmelding, aria-koppeling)
+- [x] `Modal` (focus trap, escape-toets, click-outside)
+- [x] `Spinner` (3 maten, role="status")
+- [x] `Badge` (varianten: default, success, warning, danger, info)
+- [x] `Card` (CardHeader, CardTitle, CardContent)
+- [x] `Avatar` (fallback-initialen, 3 maten)
 
 ### Authenticatie
 - [x] Login pagina (email + wachtwoord, validatie, redirect op rol)
@@ -265,8 +415,8 @@ npm run type-check   # tsc --noEmit
 
 ### Instellingen
 - [x] Instellingen pagina `/settings` (3 tabs: Profiel, Voorkeuren, Info)
-- [x] Profiel-tab — naam/avatar formulier
-- [x] Voorkeuren-tab — sessieherinneringen, geluidseffecten, autosave, lore-suggesties, taal
+- [x] Profiel-tab — naam/avatar formulier (display_name, pronouns, bio)
+- [x] Voorkeuren-tab — sessieherinneringen, geluidseffecten, autosave, lore-suggesties, taal (nl/en/de/fr)
 - [x] Preferences store (Zustand, per-gebruiker geïsoleerd via user ID)
 
 ### Werelden (DM)
