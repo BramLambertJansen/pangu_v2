@@ -1,4 +1,4 @@
-import { useState, useEffect, useId } from 'react'
+import { useState, useEffect, useId, useRef } from 'react'
 import { useParams, useNavigate, useLocation } from 'react-router-dom'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { toast } from 'sonner'
@@ -22,6 +22,7 @@ export default function CampaignEditPage() {
   const queryClient = useQueryClient()
   const descriptionId = useId()
   const statusId = useId()
+  const headerImageId = useId()
 
   const locationState = location.state as { isNew?: boolean; worldId?: string } | null
   const isNew = locationState?.isNew ?? false
@@ -31,6 +32,70 @@ export default function CampaignEditPage() {
   const [deleteOpen, setDeleteOpen] = useState(false)
   const [form, setForm] = useState<Partial<Campaign>>({})
   const [dirty, setDirty] = useState(false)
+
+  const [imagePos, setImagePos] = useState<{ x: number; y: number }>({ x: 50, y: 50 })
+  const [isDragging, setIsDragging] = useState(false)
+  const dragStartRef = useRef<{ mouseX: number; mouseY: number; posX: number; posY: number } | null>(null)
+  const containerRef = useRef<HTMLDivElement>(null)
+
+  function parsePosition(pos: string | null | undefined): { x: number; y: number } {
+    if (!pos || pos === 'center') return { x: 50, y: 50 }
+    const m = pos.match(/^([\d.]+)%\s+([\d.]+)%$/)
+    return m ? { x: parseFloat(m[1]), y: parseFloat(m[2]) } : { x: 50, y: 50 }
+  }
+
+  function serializePosition(pos: { x: number; y: number }): string {
+    return `${pos.x.toFixed(1)}% ${pos.y.toFixed(1)}%`
+  }
+
+  function handleImageMouseDown(e: React.MouseEvent) {
+    e.preventDefault()
+    dragStartRef.current = { mouseX: e.clientX, mouseY: e.clientY, posX: imagePos.x, posY: imagePos.y }
+    setIsDragging(true)
+  }
+
+  function handleImageTouchStart(e: React.TouchEvent) {
+    const t = e.touches[0]
+    dragStartRef.current = { mouseX: t.clientX, mouseY: t.clientY, posX: imagePos.x, posY: imagePos.y }
+    setIsDragging(true)
+  }
+
+  useEffect(() => {
+    if (!isDragging) return
+
+    function onMove(e: MouseEvent | TouchEvent) {
+      if (!dragStartRef.current || !containerRef.current) return
+      const clientX = 'touches' in e ? e.touches[0].clientX : e.clientX
+      const clientY = 'touches' in e ? e.touches[0].clientY : e.clientY
+      const rect = containerRef.current.getBoundingClientRect()
+      const dx = clientX - dragStartRef.current.mouseX
+      const dy = clientY - dragStartRef.current.mouseY
+      const newX = Math.max(0, Math.min(100, dragStartRef.current.posX - (dx / rect.width) * 100))
+      const newY = Math.max(0, Math.min(100, dragStartRef.current.posY - (dy / rect.height) * 100))
+      const newPos = { x: newX, y: newY }
+      setImagePos(newPos)
+      setForm((prev) => ({ ...prev, header_image_position: serializePosition(newPos) }))
+      setDirty(true)
+    }
+
+    function onUp() {
+      setIsDragging(false)
+      dragStartRef.current = null
+    }
+
+    document.addEventListener('mousemove', onMove)
+    document.addEventListener('mouseup', onUp)
+    document.addEventListener('touchmove', onMove, { passive: true })
+    document.addEventListener('touchend', onUp)
+    document.addEventListener('touchcancel', onUp)
+    return () => {
+      document.removeEventListener('mousemove', onMove)
+      document.removeEventListener('mouseup', onUp)
+      document.removeEventListener('touchmove', onMove)
+      document.removeEventListener('touchend', onUp)
+      document.removeEventListener('touchcancel', onUp)
+    }
+  }, [isDragging])
 
   const { data: campaign, isLoading } = useQuery<Campaign>({
     queryKey: queryKeys.campaigns.detail(id!),
@@ -50,6 +115,7 @@ export default function CampaignEditPage() {
   useEffect(() => {
     if (campaign) {
       setForm(campaign)
+      setImagePos(parsePosition(campaign.header_image_position))
       setDirty(false)
     }
   }, [campaign])
@@ -62,6 +128,8 @@ export default function CampaignEditPage() {
           name: form.name,
           subtitle: form.subtitle,
           description: form.description,
+          header_image: form.header_image,
+          header_image_position: form.header_image_position ?? 'center',
           status: form.status,
           updated_at: new Date().toISOString(),
         })
@@ -71,10 +139,9 @@ export default function CampaignEditPage() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: queryKeys.campaigns.all })
       queryClient.invalidateQueries({ queryKey: queryKeys.campaigns.detail(id!) })
-      if (campaign?.world_id) {
-        queryClient.invalidateQueries({ queryKey: queryKeys.campaigns.byWorld(campaign.world_id) })
-      } else if (worldIdFromState) {
-        queryClient.invalidateQueries({ queryKey: queryKeys.campaigns.byWorld(worldIdFromState) })
+      const worldId = campaign?.world_id ?? worldIdFromState
+      if (worldId) {
+        queryClient.invalidateQueries({ queryKey: queryKeys.campaigns.byWorld(worldId) })
       }
       setCommitted(true)
       setDirty(false)
@@ -125,6 +192,7 @@ export default function CampaignEditPage() {
       abandon()
     } else {
       setForm(campaign!)
+      setImagePos(parsePosition(campaign!.header_image_position))
       setDirty(false)
       navigate(`/campaigns/${id}`)
     }
@@ -210,6 +278,75 @@ export default function CampaignEditPage() {
           </p>
         </header>
 
+        {/* Header image — draggable preview */}
+        {form.header_image && (
+          <div style={{ marginBottom: 32 }}>
+            <p style={{
+              fontSize: 11, fontWeight: 700, letterSpacing: '0.14em',
+              textTransform: 'uppercase', color: 'var(--muted)',
+              marginBottom: 8, userSelect: 'none',
+            }}>
+              Sleep om uitsnede aan te passen
+            </p>
+            <div
+              ref={containerRef}
+              role="img"
+              aria-label={`Afbeeldingsuitsnede: positie ${Math.round(imagePos.x)}% horizontaal, ${Math.round(imagePos.y)}% verticaal. Gebruik pijltjestoetsen om bij te stellen.`}
+              tabIndex={0}
+              onMouseDown={handleImageMouseDown}
+              onTouchStart={handleImageTouchStart}
+              onKeyDown={(e) => {
+                const step = 5
+                const dirs: Record<string, { dx: number; dy: number }> = {
+                  ArrowLeft:  { dx: -step, dy: 0 },
+                  ArrowRight: { dx:  step, dy: 0 },
+                  ArrowUp:    { dx: 0, dy: -step },
+                  ArrowDown:  { dx: 0, dy:  step },
+                }
+                const delta = dirs[e.key]
+                if (!delta) return
+                e.preventDefault()
+                setImagePos((prev) => {
+                  const newPos = {
+                    x: Math.max(0, Math.min(100, prev.x + delta.dx)),
+                    y: Math.max(0, Math.min(100, prev.y + delta.dy)),
+                  }
+                  setForm((f) => ({ ...f, header_image_position: serializePosition(newPos) }))
+                  setDirty(true)
+                  return newPos
+                })
+              }}
+              style={{
+                position: 'relative',
+                cursor: isDragging ? 'grabbing' : 'grab',
+                borderRadius: 'var(--r-lg)',
+                overflow: 'hidden',
+                height: 220,
+                border: '1px solid var(--hairline)',
+                userSelect: 'none',
+                touchAction: 'none',
+                outline: 'none',
+              }}
+              onFocus={(e) => { e.currentTarget.style.boxShadow = '0 0 0 2px var(--violet)' }}
+              onBlur={(e) => { e.currentTarget.style.boxShadow = 'none' }}
+            >
+              <img
+                src={form.header_image}
+                alt=""
+                draggable={false}
+                style={{
+                  width: '100%',
+                  height: '100%',
+                  objectFit: 'cover',
+                  objectPosition: `${imagePos.x}% ${imagePos.y}%`,
+                  pointerEvents: 'none',
+                  display: 'block',
+                }}
+              />
+            </div>
+          </div>
+        )}
+
         {/* Form */}
         <div className="pangu-surface" style={{ padding: 28 }}>
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
@@ -247,6 +384,18 @@ export default function CampaignEditPage() {
                   <option key={o.value} value={o.value}>{o.label}</option>
                 ))}
               </select>
+            </div>
+
+            <div>
+              <label className="pangu-label" htmlFor={headerImageId}>Header afbeelding (URL)</label>
+              <input
+                id={headerImageId}
+                className="pangu-input"
+                type="url"
+                value={form.header_image ?? ''}
+                onChange={(e) => set('header_image', e.target.value || null as unknown as string)}
+                placeholder="https://..."
+              />
             </div>
 
             <div className="sm:col-span-2">

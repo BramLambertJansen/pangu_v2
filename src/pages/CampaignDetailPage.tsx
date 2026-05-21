@@ -13,6 +13,21 @@ const statusLabel: Record<CampaignStatus, string> = {
   completed: 'Voltooid',
 }
 
+const cardGradients = [
+  'radial-gradient(ellipse 70% 55% at 30% 40%, rgba(155,138,255,0.55) 0%, rgba(80,50,200,0.28) 45%, var(--void) 78%)',
+  'radial-gradient(ellipse 65% 52% at 28% 42%, rgba(220,90,80,0.4) 0%, rgba(155,138,255,0.22) 50%, var(--void) 78%)',
+  'radial-gradient(ellipse 65% 52% at 30% 42%, rgba(62,207,178,0.32) 0%, rgba(60,80,200,0.28) 50%, var(--void) 78%)',
+  'radial-gradient(ellipse 65% 50% at 25% 40%, rgba(245,180,50,0.28) 0%, rgba(155,138,255,0.32) 50%, var(--void) 78%)',
+]
+
+function pickGradient(id: string): string {
+  const code = (id.charCodeAt(0) ?? 0) + (id.charCodeAt(id.length - 1) ?? 0)
+  return cardGradients[code % cardGradients.length]
+}
+
+const scrimGradient =
+  'linear-gradient(to top, var(--void) 0%, rgba(10,10,22,0.97) 20%, rgba(10,10,22,0.72) 40%, rgba(10,10,22,0.18) 62%, transparent 82%)'
+
 export default function CampaignDetailPage() {
   const { id } = useParams<{ id: string }>()
   const navigate = useNavigate()
@@ -50,6 +65,9 @@ export default function CampaignDetailPage() {
       </div>
     )
   }
+
+  const initial = campaign.name.trim()[0]?.toUpperCase() ?? '?'
+  const gradient = campaign.header_image ? undefined : pickGradient(campaign.id)
 
   return (
     <div>
@@ -97,20 +115,65 @@ export default function CampaignDetailPage() {
         </Link>
       </div>
 
-      {/* Campaign header */}
+      {/* Campaign header — full-bleed like WorldDetailHeader */}
       <div
         style={{
           position: 'relative',
           borderRadius: 'var(--r-xl)',
           border: '1px solid var(--hairline)',
           overflow: 'hidden',
-          background: 'var(--void-2)',
-          padding: 'clamp(28px, 4vw, 48px)',
-          marginBottom: 0,
+          display: 'flex',
+          flexDirection: 'column',
+          minHeight: 320,
         }}
       >
+        {/* Background */}
+        {campaign.header_image ? (
+          <div
+            aria-hidden="true"
+            style={{
+              position: 'absolute', inset: 0,
+              backgroundImage: `url(${campaign.header_image})`,
+              backgroundSize: 'cover',
+              backgroundPosition: campaign.header_image_position ?? 'center',
+            }}
+          />
+        ) : (
+          <div
+            aria-hidden="true"
+            style={{ position: 'absolute', inset: 0, background: `${gradient}, var(--void)` }}
+          />
+        )}
+
+        {/* Scrim */}
+        <div
+          aria-hidden="true"
+          style={{
+            position: 'absolute', inset: 0,
+            background: scrimGradient,
+          }}
+        />
+
+        {/* Watermark */}
+        <div
+          aria-hidden="true"
+          style={{
+            position: 'absolute',
+            top: '8%', left: '50%',
+            transform: 'translateX(-50%)',
+            fontFamily: 'var(--font-display)',
+            fontSize: 'clamp(120px, 26vw, 260px)',
+            fontWeight: 600,
+            color: 'var(--ink)', opacity: 0.09,
+            lineHeight: 1, userSelect: 'none', pointerEvents: 'none',
+            whiteSpace: 'nowrap',
+          }}
+        >
+          {initial}
+        </div>
+
         {/* Status badge */}
-        <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: 16 }}>
+        <div style={{ display: 'flex', justifyContent: 'flex-end', padding: '20px 28px 0', position: 'relative' }}>
           <span style={{
             display: 'inline-flex', alignItems: 'center',
             padding: '4px 12px',
@@ -125,36 +188,39 @@ export default function CampaignDetailPage() {
           </span>
         </div>
 
-        {campaign.subtitle && (
-          <p style={{
-            fontFamily: "'Cormorant Garamond', Georgia, serif",
-            fontStyle: 'italic',
-            fontSize: 14, letterSpacing: '0.03em',
-            color: 'var(--gold)', margin: '0 0 10px',
-          }}>
-            {campaign.subtitle}
-          </p>
-        )}
+        <div style={{ flex: 1 }} />
 
-        <h1 style={{
-          fontFamily: 'var(--font-display)',
-          fontSize: 'clamp(36px, 6vw, 72px)',
-          fontWeight: 600, lineHeight: 0.92,
-          letterSpacing: '0.04em', textTransform: 'uppercase',
-          color: 'var(--ink)', margin: '0 0 20px',
-        }}>
-          {campaign.name}
-        </h1>
-
-        {campaign.description && (
-          <p style={{
-            fontSize: 14, lineHeight: 1.7,
-            color: 'var(--ink-soft)', margin: 0,
-            maxWidth: 640,
+        {/* Content at bottom */}
+        <div style={{ position: 'relative', padding: '0 clamp(28px, 4vw, 48px) 36px' }}>
+          {campaign.subtitle && (
+            <p style={{
+              fontFamily: "'Cormorant Garamond', Georgia, serif",
+              fontStyle: 'italic',
+              fontSize: 14, letterSpacing: '0.03em',
+              color: 'var(--gold)', margin: '0 0 10px',
+            }}>
+              {campaign.subtitle}
+            </p>
+          )}
+          <h1 style={{
+            fontFamily: 'var(--font-display)',
+            fontSize: 'clamp(40px, 6vw, 80px)',
+            fontWeight: 600, lineHeight: 0.92,
+            letterSpacing: '0.04em', textTransform: 'uppercase',
+            color: 'var(--ink)', margin: '0 0 16px',
           }}>
-            {campaign.description}
-          </p>
-        )}
+            {campaign.name}
+          </h1>
+          {campaign.description && (
+            <p style={{
+              fontSize: 14, lineHeight: 1.7,
+              color: 'var(--ink-soft)', margin: 0,
+              maxWidth: 560,
+            }}>
+              {campaign.description}
+            </p>
+          )}
+        </div>
       </div>
 
       <WorldDetailDivider label="Sessies in deze kroniek" />

@@ -21,6 +21,8 @@ export type Database = {
           name: string
           subtitle: string | null
           description: string | null
+          header_image: string | null
+          header_image_position: string
           status: string
           created_at: string
           updated_at: string
@@ -32,6 +34,8 @@ export type Database = {
           name?: string
           subtitle?: string | null
           description?: string | null
+          header_image?: string | null
+          header_image_position?: string
           status?: string
           created_at?: string
           updated_at?: string
@@ -43,6 +47,8 @@ export type Database = {
           name?: string
           subtitle?: string | null
           description?: string | null
+          header_image?: string | null
+          header_image_position?: string
           status?: string
           created_at?: string
           updated_at?: string
