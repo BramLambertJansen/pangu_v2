@@ -178,16 +178,13 @@ export default function CampaignDetailPage() {
         </Link>
       </nav>
 
-      {/* Campaign header — full-bleed like WorldDetailHeader */}
+      {/* Campaign header — full-bleed, same responsive layout as WorldDetailHeader */}
       <div
         style={{
           position: 'relative',
           borderRadius: 'var(--r-xl)',
           border: '1px solid var(--hairline)',
           overflow: 'hidden',
-          display: 'flex',
-          flexDirection: 'column',
-          minHeight: 320,
         }}
       >
         {/* Background */}
@@ -209,84 +206,75 @@ export default function CampaignDetailPage() {
         )}
 
         {/* Scrim */}
-        <div
-          aria-hidden="true"
-          style={{
-            position: 'absolute', inset: 0,
-            background: scrimGradient,
-          }}
-        />
+        <div aria-hidden="true" className="wdh-scrim" style={{ background: scrimGradient }} />
 
-        {/* Watermark */}
-        <div
-          aria-hidden="true"
-          style={{
-            position: 'absolute',
-            top: '8%', left: '50%',
-            transform: 'translateX(-50%)',
-            fontFamily: 'var(--font-display)',
-            fontSize: 'clamp(120px, 26vw, 260px)',
-            fontWeight: 600,
-            color: 'var(--ink)', opacity: 0.09,
-            lineHeight: 1, userSelect: 'none', pointerEvents: 'none',
-            whiteSpace: 'nowrap',
-          }}
-        >
-          {initial}
-        </div>
+        {/* ── MOBILE LAYOUT ── */}
+        <div className="wdh-mobile">
+          {/* Watermark */}
+          <div
+            aria-hidden="true"
+            style={{
+              position: 'absolute',
+              top: '8%', left: '50%',
+              transform: 'translateX(-50%)',
+              fontFamily: 'var(--font-display)',
+              fontSize: 'clamp(120px, 38vw, 180px)',
+              fontWeight: 600,
+              color: 'var(--ink)', opacity: 0.09,
+              lineHeight: 1, userSelect: 'none', pointerEvents: 'none',
+              whiteSpace: 'nowrap',
+            }}
+          >
+            {initial}
+          </div>
 
-        {/* Status badge */}
-        <div style={{ display: 'flex', justifyContent: 'flex-end', padding: '20px 28px 0', position: 'relative' }}>
-          <span style={{
-            display: 'inline-flex', alignItems: 'center',
-            padding: '4px 12px',
-            background: 'var(--gold)',
-            borderRadius: 'var(--r-full)',
-            fontFamily: 'var(--font-body)',
-            fontSize: 10, fontWeight: 700,
-            letterSpacing: '0.16em', textTransform: 'uppercase',
-            color: 'var(--void)',
-          }}>
-            {statusLabel[campaign.status]}
-          </span>
-        </div>
-
-        <div style={{ flex: 1 }} />
-
-        {/* Content at bottom */}
-        <div style={{ position: 'relative', padding: '0 clamp(28px, 4vw, 48px) 36px' }}>
-          {campaign.subtitle && (
-            <p style={{
-              fontFamily: "'Cormorant Garamond', Georgia, serif",
-              fontStyle: 'italic',
-              fontSize: 14, letterSpacing: '0.03em',
-              color: 'var(--gold)', margin: '0 0 10px',
+          {/* Status badge */}
+          <div style={{ display: 'flex', justifyContent: 'flex-end', padding: '16px 20px 0' }}>
+            <span style={{
+              display: 'inline-flex', alignItems: 'center',
+              padding: '4px 12px',
+              background: 'var(--gold)',
+              borderRadius: 'var(--r-full)',
+              fontFamily: 'var(--font-body)',
+              fontSize: 10, fontWeight: 700,
+              letterSpacing: '0.16em', textTransform: 'uppercase',
+              color: 'var(--void)',
             }}>
-              {campaign.subtitle}
-            </p>
-          )}
-          <h1 style={{
-            fontFamily: 'var(--font-display)',
-            fontSize: 'clamp(40px, 6vw, 80px)',
-            fontWeight: 600, lineHeight: 0.92,
-            letterSpacing: '0.04em', textTransform: 'uppercase',
-            color: 'var(--ink)', margin: '0 0 16px',
-          }}>
-            {campaign.name}
-          </h1>
+              {statusLabel[campaign.status]}
+            </span>
+          </div>
 
-          {/* Description + action buttons */}
-          <div style={{ display: 'flex', alignItems: 'flex-end', gap: 32, flexWrap: 'wrap' }}>
+          <div style={{ flex: 1 }} />
+
+          <div style={{ padding: '0 24px 28px' }}>
+            {campaign.subtitle && (
+              <p style={{
+                fontFamily: "'Cormorant Garamond', Georgia, serif",
+                fontStyle: 'italic',
+                fontSize: 13, letterSpacing: '0.03em',
+                color: 'var(--gold)', margin: '0 0 10px',
+              }}>
+                {campaign.subtitle}
+              </p>
+            )}
+            <h1 style={{
+              fontFamily: 'var(--font-display)',
+              fontSize: 'clamp(40px, 12vw, 56px)',
+              fontWeight: 600, lineHeight: 0.92,
+              letterSpacing: '0.04em', textTransform: 'uppercase',
+              color: 'var(--ink)', margin: '0 0 14px',
+            }}>
+              {campaign.name}
+            </h1>
             {campaign.description && (
               <p style={{
-                fontSize: 14, lineHeight: 1.7,
-                color: 'var(--ink-soft)', margin: 0,
-                maxWidth: 560, flex: '1 1 auto',
+                fontSize: 13, lineHeight: 1.7,
+                color: 'var(--ink-soft)', margin: '0 0 18px',
               }}>
                 {campaign.description}
               </p>
             )}
-            <div style={{ flexShrink: 0, display: 'flex', gap: 10, flexWrap: 'wrap', marginLeft: 'auto' }}>
+            <div className="wdh-btns">
               <button
                 type="button"
                 className="pangu-btn pangu-btn-primary"
@@ -302,6 +290,98 @@ export default function CampaignDetailPage() {
               >
                 ✦ Lore Forge
               </button>
+            </div>
+          </div>
+        </div>
+
+        {/* ── DESKTOP LAYOUT ── */}
+        <div className="wdh-desktop">
+          {/* Watermark */}
+          <div
+            aria-hidden="true"
+            style={{
+              position: 'absolute',
+              top: '8%', left: '50%',
+              transform: 'translateX(-50%)',
+              fontFamily: 'var(--font-display)',
+              fontSize: 'clamp(180px, 26vw, 320px)',
+              fontWeight: 600,
+              color: 'var(--ink)', opacity: 0.09,
+              lineHeight: 1, userSelect: 'none', pointerEvents: 'none',
+              whiteSpace: 'nowrap',
+            }}
+          >
+            {initial}
+          </div>
+
+          {/* Status badge */}
+          <div style={{ display: 'flex', justifyContent: 'flex-end', padding: '20px 28px 0' }}>
+            <span style={{
+              display: 'inline-flex', alignItems: 'center',
+              padding: '4px 12px',
+              background: 'var(--gold)',
+              borderRadius: 'var(--r-full)',
+              fontFamily: 'var(--font-body)',
+              fontSize: 10, fontWeight: 700,
+              letterSpacing: '0.16em', textTransform: 'uppercase',
+              color: 'var(--void)',
+            }}>
+              {statusLabel[campaign.status]}
+            </span>
+          </div>
+
+          <div style={{ flex: 1 }} />
+
+          <div style={{ padding: '0 clamp(28px, 4vw, 48px) 36px' }}>
+            {campaign.subtitle && (
+              <p style={{
+                fontFamily: "'Cormorant Garamond', Georgia, serif",
+                fontStyle: 'italic',
+                fontSize: 15, letterSpacing: '0.03em',
+                color: 'var(--gold)', margin: '0 0 12px',
+              }}>
+                {campaign.subtitle}
+              </p>
+            )}
+            <h1 style={{
+              fontFamily: 'var(--font-display)',
+              fontSize: 'clamp(56px, 6.5vw, 96px)',
+              fontWeight: 600, lineHeight: 0.92,
+              letterSpacing: '0.04em', textTransform: 'uppercase',
+              color: 'var(--ink)', margin: '0 0 18px',
+            }}>
+              {campaign.name}
+            </h1>
+
+            {/* Description left, buttons right */}
+            <div style={{ display: 'flex', alignItems: 'flex-end', gap: 32 }}>
+              <div style={{ flex: 1, minWidth: 0 }}>
+                {campaign.description && (
+                  <p style={{
+                    fontSize: 14, lineHeight: 1.7,
+                    color: 'var(--ink-soft)', margin: 0,
+                  }}>
+                    {campaign.description}
+                  </p>
+                )}
+              </div>
+              <div style={{ flexShrink: 0, display: 'flex', gap: 10 }}>
+                <button
+                  type="button"
+                  className="pangu-btn pangu-btn-primary"
+                  aria-label="Sessie starten"
+                  onClick={() => navigate(`/campaigns/${id}/sessions`)}
+                >
+                  ▶ Sessie starten
+                </button>
+                <button
+                  type="button"
+                  className="pangu-btn pangu-btn-gold"
+                  aria-label="Lore Forge — AI lore genereren"
+                >
+                  ✦ Lore Forge
+                </button>
+              </div>
             </div>
           </div>
         </div>
