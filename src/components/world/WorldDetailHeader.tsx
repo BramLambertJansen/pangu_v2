@@ -148,25 +148,21 @@ export function WorldDetailHeader({ world }: Props) {
             </p>
           )}
 
-          {/* Buttons — icon-only on portrait (<sm), full text on wider */}
-          <div style={{ display: 'flex', gap: 8 }}>
+          {/* Buttons — stacked in portrait, side-by-side in landscape */}
+          <div className="flex flex-col landscape:flex-row" style={{ gap: 8 }}>
             <button
               type="button"
-              className="pangu-btn pangu-btn-primary"
-              style={{ flex: 1 }}
+              className="pangu-btn pangu-btn-primary w-full landscape:flex-1"
               aria-label={`Nieuwe kroniek aanmaken in ${world.name}`}
             >
-              <span aria-hidden="true">+</span>
-              <span className="hidden sm:inline"> Nieuwe kroniek</span>
+              + Nieuwe kroniek
             </button>
             <button
               type="button"
-              className="pangu-btn pangu-btn-gold"
-              style={{ flex: 1 }}
+              className="pangu-btn pangu-btn-gold w-full landscape:flex-1"
               aria-label="Lore Forge — AI lore genereren"
             >
-              <span aria-hidden="true">✦</span>
-              <span className="hidden sm:inline"> Lore Forge</span>
+              ✦ Lore Forge
             </button>
           </div>
         </div>
