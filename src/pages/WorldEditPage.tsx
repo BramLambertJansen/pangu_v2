@@ -1,4 +1,4 @@
-import { useState, useEffect, useId, useRef, useCallback } from 'react'
+import { useState, useEffect, useId, useRef } from 'react'
 import { useParams, useNavigate, useLocation } from 'react-router-dom'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { toast } from 'sonner'
@@ -117,13 +117,6 @@ export default function WorldEditPage() {
     }
   }, [world])
 
-  const handleFocalClick = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
-    const rect = e.currentTarget.getBoundingClientRect()
-    const x = Math.round(((e.clientX - rect.left) / rect.width) * 100)
-    const y = Math.round(((e.clientY - rect.top) / rect.height) * 100)
-    set('header_image_position', `${x}% ${y}%`)
-  }, [])
-
   const saveWorld = useMutation({
     mutationFn: async () => {
       const { error } = await supabase
@@ -137,7 +130,7 @@ export default function WorldEditPage() {
           header_image_position: form.header_image_position ?? 'center',
           status: form.status,
           updated_at: new Date().toISOString(),
-        })D
+        })
         .eq('id', id!)
       if (error) throw error
     },
@@ -306,26 +299,12 @@ export default function WorldEditPage() {
                 })
               }}
               style={{
-        {/* Focal point picker — only shown when there's a header image */}
-        {form.header_image && (
-          <div style={{ marginBottom: 32 }}>
-            <p className="pangu-label" style={{ marginBottom: 4 }}>Focuspunt banner</p>
-            <p style={{ fontSize: 12, color: 'var(--muted)', margin: '0 0 8px' }}>
-              Klik op de afbeelding om in te stellen welk gedeelte altijd zichtbaar blijft.
-            </p>
-            <div
-              role="button"
-              tabIndex={0}
-              aria-label="Stel focuspunt in door op de afbeelding te klikken"
-              onClick={handleFocalClick}
-              style={{
                 position: 'relative',
-                cursor: 'crosshair',
+                cursor: isDragging ? 'grabbing' : 'grab',
                 borderRadius: 'var(--r-lg)',
                 overflow: 'hidden',
                 height: 220,
                 border: '1px solid var(--hairline)',
-                cursor: isDragging ? 'grabbing' : 'grab',
                 userSelect: 'none',
                 touchAction: 'none',
                 outline: 'none',
@@ -346,36 +325,6 @@ export default function WorldEditPage() {
                   display: 'block',
                 }}
               />
-                backgroundImage: `url(${form.header_image})`,
-                backgroundSize: 'cover',
-                backgroundPosition: form.header_image_position ?? 'center',
-                userSelect: 'none',
-              }}
-            >
-              {/* Focal point dot */}
-              {(() => {
-                const pos = form.header_image_position ?? 'center'
-                const parts = pos === 'center' ? ['50%', '50%'] : pos.split(' ')
-                const x = parseFloat(parts[0]) || 50
-                const y = parseFloat(parts[1]) || 50
-                return (
-                  <div
-                    aria-hidden="true"
-                    style={{
-                      position: 'absolute',
-                      left: `${x}%`,
-                      top: `${y}%`,
-                      transform: 'translate(-50%, -50%)',
-                      width: 22,
-                      height: 22,
-                      borderRadius: '50%',
-                      border: '2.5px solid white',
-                      boxShadow: '0 0 0 1.5px rgba(0,0,0,0.55), 0 2px 8px rgba(0,0,0,0.4)',
-                      pointerEvents: 'none',
-                    }}
-                  />
-                )
-              })()}
             </div>
           </div>
         )}
