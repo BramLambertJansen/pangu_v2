@@ -31,6 +31,7 @@ PANGU is een AI-ondersteund campaign management platform voor tabletop RPGs (PWA
 | Toasts | Sonner |
 | Backend | Supabase (auth, database, storage, realtime) |
 | PWA | vite-plugin-pwa |
+| API | Vercel serverless functions (`api/admin/`) |
 
 ---
 
@@ -46,12 +47,22 @@ src/
 ├── layouts/             # Pagina-layouts (AppLayout, AuthLayout)
 ├── lib/
 │   ├── supabase.ts      # Supabase client
-│   └── queryClient.ts   # TanStack Query client
+│   ├── queryClient.ts   # TanStack Query client
+│   └── queryKeys.ts     # Gecentraliseerde query key constanten
 ├── pages/               # Route-componenten (één per route)
 ├── routes/              # Route-definities
 ├── stores/              # Zustand stores (één per domein)
 ├── types/               # Gedeelde TypeScript types/interfaces
-└── utils/               # Pure utility-functies
+└── utils/               # Pure utility-functies (cn.ts, apiError.ts)
+
+api/
+└── admin/
+    ├── _auth.ts         # Auth middleware (Vercel serverless)
+    ├── users.ts         # User CRUD
+    └── users/[id].ts    # Dynamisch user endpoint
+
+supabase/
+└── migrations/          # SQL-migraties (genummerd, chronologisch)
 ```
 
 ---
@@ -110,9 +121,10 @@ Regels:
 
 ### Zustand (client state)
 
-- Één store per domein: `useCampaignStore`, `useCharacterStore`, `useUIStore`
+- Één store per domein: `useAuthStore`, `useCampaignStore`, `useUIStore`, `usePreferencesStore`
 - Persist alleen wat nodig is (geen gevoelige data)
 - Store-bestanden: `src/stores/[domain].store.ts`
+- `usePreferencesStore` isoleert per gebruiker via auth user ID
 
 ### TanStack Query (server state)
 
@@ -130,25 +142,45 @@ Regels:
 - Migraties in `supabase/migrations/`
 - Types genereren via: `npx supabase gen types typescript --local > src/types/database.types.ts`
 
+### Migraties (chronologisch)
+| # | Bestand | Inhoud |
+|---|---|---|
+| 001 | `001_profiles.sql` | Profiles tabel + RLS |
+| 002 | `002_profile_settings.sql` | Profile settings (voorkeuren) |
+| 003 | `003_worlds.sql` | Worlds tabel + RLS |
+| 004 | `004_worlds_header_image_position.sql` | Header image positie voor worlds |
+| 005 | `005_campaigns.sql` | Campaigns tabel + RLS |
+| 006 | `006_campaigns_header_image.sql` | Header image voor campaigns |
+
 ---
 
 ## Routing
 
-Routes zijn gedefinieerd in `src/routes/index.tsx`. Lazy-loading voor alle pagina-routes.
+Routes zijn gedefinieerd in `src/routes/index.tsx`. Lazy-loading voor alle pagina-routes via React Suspense.
 
-Routestructuur:
+Routestructuur (huidige staat):
 ```
 /                        → redirect naar /dashboard of /login
 /login                   → AuthLayout
-/register                → AuthLayout
-/dashboard               → AppLayout
-/campaigns               → AppLayout
+/register                → AuthLayout  ⚠️ pagina is nog een stub
+/dashboard               → AppLayout  ⚠️ pagina is nog een stub
+/admin                   → AppLayout (requireAdmin loader)
+/settings                → AppLayout
+/worlds                  → AppLayout
+/worlds/:id              → AppLayout
+/worlds/:id/edit         → AppLayout
 /campaigns/:id           → AppLayout
-/campaigns/:id/locations → AppLayout
-/campaigns/:id/npcs      → AppLayout
-/campaigns/:id/lore      → AppLayout
-/campaigns/:id/sessions  → AppLayout
-/characters/:id          → AppLayout (spelersperspectief)
+/campaigns/:id/edit      → AppLayout
+```
+
+Geplande routes (nog niet geïmplementeerd):
+```
+/campaigns               → overzicht
+/campaigns/:id/locations → locaties
+/campaigns/:id/npcs      → NPCs
+/campaigns/:id/lore      → lore
+/campaigns/:id/sessions  → sessies
+/characters/:id          → spelersperspectief
 ```
 
 ---
@@ -199,11 +231,12 @@ npm run type-check   # tsc --noEmit
 - [x] Vite + React 19 + TypeScript setup
 - [x] TailwindCSS v4 configuratie
 - [x] Supabase client + types
-- [x] TanStack Query client
-- [x] Zustand stores scaffold
-- [x] react-router-dom v7 routing
+- [x] TanStack Query client + gecentraliseerde query keys
+- [x] Zustand stores scaffold (auth, campaign, ui, preferences)
+- [x] react-router-dom v7 routing (lazy-loaded, auth guards)
 - [x] Sonner toasts (`<Toaster />` in `App.tsx`)
-- [x] PWA-configuratie (vite-plugin-pwa)
+- [x] PWA-configuratie (vite-plugin-pwa, manifest, icons)
+- [x] Vercel serverless API (`api/admin/`)
 
 ### UI Basis-componenten (`src/components/ui/`)
 - [x] `Button`
@@ -215,31 +248,47 @@ npm run type-check   # tsc --noEmit
 - [x] `Avatar`
 
 ### Authenticatie
-- [x] Login pagina (email + wachtwoord, redirect op rol)
-- [ ] Registratie pagina
+- [x] Login pagina (email + wachtwoord, validatie, redirect op rol)
+- [ ] Registratie pagina ⚠️ stub — formulier nog te bouwen
 - [x] Supabase Auth integratie (`signInWithPassword`, `signOut`)
 - [x] Protected routes (loaders: `requireAuth`, `requireAdmin`)
-- [x] Auth store (Zustand) — uitgebreid met `profile` + `signOut`
+- [x] Auth store (Zustand) — `user`, `profile`, `setUser`, `setProfile`, `signOut`
 
 ### Admin
-- [x] Profiles tabel + RLS (`supabase/migrations/001_profiles.sql`)
+- [x] Profiles tabel + RLS (`001_profiles.sql`)
+- [x] Profile settings tabel (`002_profile_settings.sql`)
 - [x] Vercel serverless API (`api/admin/users.ts`, `api/admin/users/[id].ts`)
 - [x] Admin pagina `/admin` — accountbeheer (lijst, aanmaken, bewerken, verwijderen)
 - [x] Rol-gebaseerde navigatie (Accountbeheer zichtbaar voor admins)
 - [x] Uitloggen via sidebar
 
+### Instellingen
+- [x] Instellingen pagina `/settings` (3 tabs: Profiel, Voorkeuren, Info)
+- [x] Profiel-tab — naam/avatar formulier
+- [x] Voorkeuren-tab — sessieherinneringen, geluidseffecten, autosave, lore-suggesties, taal
+- [x] Preferences store (Zustand, per-gebruiker geïsoleerd via user ID)
+
 ### Werelden (DM)
-- [x] Werelden tabel + RLS (`supabase/migrations/003_worlds.sql`)
+- [x] Worlds tabel + RLS (`003_worlds.sql`)
+- [x] Header image positie (`004_worlds_header_image_position.sql`)
 - [x] Werelden overzicht `/worlds` — grid met WorldCard, lege staat, responsief
 - [x] Wereld aanmaken — direct aanmaken + redirect naar bewerken
-- [x] Wereld bewerken `/worlds/:id` — naam, subtitle, quote, beschrijving, header image, status
+- [x] Wereld bewerken `/worlds/:id/edit` — naam, subtitle, quote, beschrijving, header image + positie, status
 - [x] Wereld verwijderen — met bevestigingsdialoog
+- [x] Wereld detail `/worlds/:id` — WorldDetailHeader, WorldDetailDivider, CompassRose
 - [x] Navigatie-item "Werelden" in sidebar
 
-### Campaign Management (DM)
-- [ ] Campaign overzicht / dashboard
+### Campaigns (DM)
+- [x] Campaigns tabel + RLS (`005_campaigns.sql`)
+- [x] Campaign header image (`006_campaigns_header_image.sql`)
 - [x] Campaign aanmaken (vanuit wereld detail, "+ Nieuwe kroniek")
-- [x] Campaign bewerken / verwijderen
+- [x] Campaign bewerken `/campaigns/:id/edit` — volledig formulier, image positioning, status
+- [x] Campaign verwijderen — met bevestigingsdialoog
+- [x] Campaign detail `/campaigns/:id` — breadcrumbs, header, status badge, actieknoppen
+- [ ] Campaign overzicht `/campaigns` — lijst/dashboard
+
+### Dashboard
+- [ ] Dashboard pagina `/dashboard` ⚠️ stub — inhoud nog te bepalen en bouwen
 
 ### Wereld — Locaties
 - [ ] Locatie-overzicht per campaign
