@@ -12,6 +12,7 @@ const AdminPage = lazy(() => import('@/pages/AdminPage'))
 const SettingsPage = lazy(() => import('@/pages/SettingsPage'))
 const WorldsPage = lazy(() => import('@/pages/WorldsPage'))
 const WorldDetailPage = lazy(() => import('@/pages/WorldDetailPage'))
+const WorldEditPage = lazy(() => import('@/pages/WorldEditPage'))
 
 function PageLoader() {
   return (
@@ -89,6 +90,11 @@ export const router = createBrowserRouter([
         path: '/worlds/:id',
         loader: requireAuth,
         element: wrap(WorldDetailPage),
+      },
+      {
+        path: '/worlds/:id/edit',
+        loader: requireAuth,
+        element: wrap(WorldEditPage),
       },
     ],
   },

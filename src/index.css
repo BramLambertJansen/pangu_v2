@@ -355,6 +355,18 @@ body {
   background: rgba(155, 138, 255, 0.14);
 }
 
+.pangu-btn-gold {
+  background: var(--gold);
+  color: var(--void);
+  box-shadow: 0 4px 20px var(--gold-glow), inset 0 1px 0 rgba(255, 255, 255, 0.2);
+}
+
+.pangu-btn-gold:hover {
+  background: var(--gold-soft);
+  transform: translateY(-1px);
+  box-shadow: 0 6px 24px var(--gold-glow);
+}
+
 .pangu-btn-crimson {
   background: transparent;
   color: var(--crimson);
