@@ -16,23 +16,14 @@ CREATE INDEX IF NOT EXISTS campaigns_world_id_created_at_idx
 
 ALTER TABLE public.campaigns ENABLE ROW LEVEL SECURITY;
 
-DO $$
-BEGIN
-  IF NOT EXISTS (
-    SELECT 1 FROM pg_policies
-    WHERE schemaname = 'public'
-      AND tablename  = 'campaigns'
-      AND policyname = 'own_campaigns'
-  ) THEN
-    CREATE POLICY "own_campaigns" ON public.campaigns
-      USING (user_id = auth.uid())
-      WITH CHECK (
-        user_id = auth.uid()
-        AND EXISTS (
-          SELECT 1 FROM public.worlds
-          WHERE id = world_id
-            AND user_id = auth.uid()
-        )
-      );
-  END IF;
-END $$;
+DROP POLICY IF EXISTS "own_campaigns" ON public.campaigns;
+CREATE POLICY "own_campaigns" ON public.campaigns
+  USING (user_id = auth.uid())
+  WITH CHECK (
+    user_id = auth.uid()
+    AND EXISTS (
+      SELECT 1 FROM public.worlds
+      WHERE id = world_id
+        AND user_id = auth.uid()
+    )
+  );
