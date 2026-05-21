@@ -28,7 +28,7 @@
     "@types/node": "^22.15.18",
     "@types/react": "^19.1.2",
     "@types/react-dom": "^19.1.2",
-    "@vercel/node": "^5.8.3",
+    "@vercel/node": "^4.0.0",
     "@vite-pwa/assets-generator": "^0.2.6",
     "@vitejs/plugin-react": "^4.4.1",
     "eslint": "^9.22.0",
