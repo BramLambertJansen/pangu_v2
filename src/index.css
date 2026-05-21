@@ -619,7 +619,7 @@ body {
 }
 
 @media (min-width: 768px) {
-  .wdh-scrim   { display: none; }
-  .wdh-mobile  { display: none; }
-  .wdh-desktop { display: flex; align-items: stretch; }
+  .wdh-scrim   { display: none !important; }
+  .wdh-mobile  { display: none !important; }
+  .wdh-desktop { display: flex !important; align-items: stretch; }
 }
