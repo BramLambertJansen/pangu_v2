@@ -47,7 +47,8 @@ export function WorldDetailHeader({ world }: Props) {
           style={{
             position: 'absolute', inset: 0,
             backgroundImage: `url(${world.header_image})`,
-            backgroundSize: 'cover', backgroundPosition: 'center',
+            backgroundSize: 'cover',
+            backgroundPosition: world.header_image_position ?? 'center',
           }}
         />
       ) : (
