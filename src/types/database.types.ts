@@ -104,6 +104,58 @@ export type Database = {
         }
         Relationships: []
       }
+      sessions: {
+        Row: {
+          id: string
+          campaign_id: string
+          user_id: string
+          name: string
+          subtitle: string | null
+          description: string | null
+          notes: string | null
+          status: string
+          session_date: string | null
+          session_number: number | null
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          campaign_id: string
+          user_id: string
+          name?: string
+          subtitle?: string | null
+          description?: string | null
+          notes?: string | null
+          status?: string
+          session_date?: string | null
+          session_number?: number | null
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          campaign_id?: string
+          user_id?: string
+          name?: string
+          subtitle?: string | null
+          description?: string | null
+          notes?: string | null
+          status?: string
+          session_date?: string | null
+          session_number?: number | null
+          created_at?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: 'sessions_campaign_id_fkey'
+            columns: ['campaign_id']
+            referencedRelation: 'campaigns'
+            referencedColumns: ['id']
+          }
+        ]
+      }
       profiles: {
         Row: {
           id: string
