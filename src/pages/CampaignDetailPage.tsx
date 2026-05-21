@@ -241,7 +241,7 @@ export default function CampaignDetailPage() {
                 {campaign.description}
               </p>
             )}
-            <div style={{ flexShrink: 0, display: 'flex', gap: 10, flexWrap: 'wrap' }}>
+            <div style={{ flexShrink: 0, display: 'flex', gap: 10, flexWrap: 'wrap', marginLeft: 'auto' }}>
               <button
                 type="button"
                 className="pangu-btn pangu-btn-primary"
