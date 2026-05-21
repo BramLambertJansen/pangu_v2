@@ -7,8 +7,10 @@ import { useAuthStore } from '@/stores/auth.store'
 import { Spinner } from '@/components/ui/Spinner'
 import { WorldDetailDivider } from '@/components/world/WorldDetailDivider'
 import { SessionCard, ForgeSessionCard } from '@/components/session/SessionCard'
+import { LocationCard, ForgeLocationCard } from '@/components/location/LocationCard'
 import type { Campaign, CampaignStatus } from '@/types/campaign.types'
 import type { Session } from '@/types/session.types'
+import type { Location } from '@/types/location.types'
 
 type CampaignWithWorld = Campaign & { worlds: { name: string } | null }
 
@@ -99,6 +101,41 @@ export default function CampaignDetailPage() {
     },
     onError: () => {
       toast.error('Sessie aanmaken mislukt')
+    },
+  })
+
+  const { data: locations, isLoading: isLoadingLocations } = useQuery<Location[]>({
+    queryKey: queryKeys.campaigns.locations(id!),
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('locations')
+        .select('*')
+        .eq('campaign_id', id!)
+        .order('created_at', { ascending: false })
+      if (error) throw error
+      return data as Location[]
+    },
+    enabled: !!id,
+    staleTime: 1000 * 30,
+  })
+
+  const createLocation = useMutation({
+    mutationFn: async () => {
+      if (!user) throw new Error('Niet ingelogd')
+      const { data, error } = await supabase
+        .from('locations')
+        .insert({ campaign_id: id!, user_id: user.id, name: 'Nieuwe locatie', status: 'draft' })
+        .select()
+        .single()
+      if (error) throw error
+      return data as Location
+    },
+    onSuccess: (newLocation) => {
+      queryClient.invalidateQueries({ queryKey: queryKeys.campaigns.locations(id!) })
+      navigate(`/locations/${newLocation.id}/edit`, { state: { isNew: true, campaignId: id } })
+    },
+    onError: () => {
+      toast.error('Locatie aanmaken mislukt')
     },
   })
 
@@ -418,6 +455,50 @@ export default function CampaignDetailPage() {
             <ForgeSessionCard onClick={() => createSession.mutate()} loading={createSession.isPending} />
           </li>
         </ul>
+      )}
+
+      <WorldDetailDivider label={`Locaties in deze kroniek${locations && locations.length > 0 ? ` (${locations.length})` : ''}`} />
+
+      {/* Location list */}
+      {isLoadingLocations ? (
+        <div style={{ display: 'flex', justifyContent: 'center', padding: '40px 0' }} aria-live="polite" aria-label="Locaties laden...">
+          <Spinner size="md" />
+        </div>
+      ) : (
+        <>
+          <ul
+            style={{
+              display: 'grid',
+              gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))',
+              gap: 'var(--sp-5)',
+              listStyle: 'none',
+              padding: 0,
+              margin: 0,
+            }}
+            role="list"
+            aria-label="Locaties in deze kroniek"
+          >
+            {locations?.map((loc) => (
+              <li key={loc.id}>
+                <LocationCard location={loc} />
+              </li>
+            ))}
+            <li>
+              <ForgeLocationCard onClick={() => createLocation.mutate()} loading={createLocation.isPending} />
+            </li>
+          </ul>
+          {locations && locations.length > 0 && (
+            <div style={{ marginTop: 16, display: 'flex', justifyContent: 'flex-end' }}>
+              <button
+                type="button"
+                className="pangu-btn pangu-btn-ghost pangu-btn-sm"
+                onClick={() => navigate(`/campaigns/${id}/locations`)}
+              >
+                Alle locaties bekijken →
+              </button>
+            </div>
+          )}
+        </>
       )}
     </div>
   )

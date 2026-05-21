@@ -292,8 +292,8 @@ npm run type-check   # tsc --noEmit
 - [ ] Dashboard pagina `/dashboard` ⚠️ stub — inhoud nog te bepalen en bouwen
 
 ### Wereld — Locaties
-- [ ] Locatie-overzicht per campaign
-- [ ] Locatie aanmaken / bewerken / verwijderen
+- [x] Locatie-overzicht per campaign (`/campaigns/:id/locations`)
+- [x] Locatie aanmaken / bewerken / verwijderen
 - [ ] Locatie-detailpagina
 
 ### Wereld — NPCs
