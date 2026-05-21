@@ -82,6 +82,7 @@ function ProfielTab() {
 
   const mutation = useMutation({
     mutationFn: async () => {
+      if (!profile) throw new Error('no_profile')
       const newErrors: Partial<Record<keyof ProfileForm, string>> = {}
       if (!form.display_name.trim()) newErrors.display_name = 'Weergavenaam is verplicht'
       if (Object.keys(newErrors).length) {
@@ -95,7 +96,7 @@ function ProfielTab() {
           pronouns: form.pronouns.trim() || null,
           bio: form.bio.trim() || null,
         })
-        .eq('id', profile!.id)
+        .eq('id', profile.id)
         .select()
         .single()
       if (error) throw error
@@ -106,7 +107,7 @@ function ProfielTab() {
       toast.success('Profiel opgeslagen')
     },
     onError: (err: Error) => {
-      if (err.message !== 'validation') toast.error('Opslaan mislukt')
+      if (err.message !== 'validation' && err.message !== 'no_profile') toast.error('Opslaan mislukt')
     },
   })
 

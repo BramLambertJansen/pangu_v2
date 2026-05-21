@@ -130,9 +130,17 @@ export function WorldDetailHeader({ world, onCreateCampaign, isCreatingCampaign 
               fontFamily: "'Cormorant Garamond', Georgia, serif",
               fontStyle: 'italic',
               fontSize: 15, lineHeight: 1.55,
-              color: 'var(--ink-soft)', margin: '0 0 18px',
+              color: 'var(--ink-soft)', margin: '0 0 10px',
             }}>
               "{world.quote}"
+            </p>
+          )}
+          {world.description && (
+            <p style={{
+              fontSize: 13, lineHeight: 1.7,
+              color: 'var(--muted)', margin: '0 0 18px',
+            }}>
+              {world.description}
             </p>
           )}
           <div className="wdh-btns">
