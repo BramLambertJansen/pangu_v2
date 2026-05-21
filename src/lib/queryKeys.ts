@@ -1,6 +1,7 @@
 export const queryKeys = {
   campaigns: {
     all: ['campaigns'] as const,
+    active: ['campaigns', 'active'] as const,
     detail: (id: string) => ['campaigns', id] as const,
     byWorld: (worldId: string) => ['campaigns', 'world', worldId] as const,
     locations: (id: string) => ['campaigns', id, 'locations'] as const,
@@ -16,6 +17,9 @@ export const queryKeys = {
   worlds: {
     all: ['worlds'] as const,
     detail: (id: string) => ['worlds', id] as const,
+  },
+  sessions: {
+    planned: ['sessions', 'planned'] as const,
   },
   admin: {
     users: ['admin', 'users'] as const,
