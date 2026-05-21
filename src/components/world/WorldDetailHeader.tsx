@@ -1,10 +1,10 @@
 import type { World, WorldStatus } from '@/types/world.types'
 
 const cardGradients = [
-  'radial-gradient(ellipse 70% 55% at 50% 32%, rgba(155,138,255,0.55) 0%, rgba(80,50,200,0.28) 45%, var(--void) 78%)',
-  'radial-gradient(ellipse 65% 52% at 50% 35%, rgba(220,90,80,0.4) 0%, rgba(155,138,255,0.22) 50%, var(--void) 78%)',
-  'radial-gradient(ellipse 65% 52% at 50% 35%, rgba(62,207,178,0.32) 0%, rgba(60,80,200,0.28) 50%, var(--void) 78%)',
-  'radial-gradient(ellipse 65% 50% at 45% 35%, rgba(245,180,50,0.28) 0%, rgba(155,138,255,0.32) 50%, var(--void) 78%)',
+  'radial-gradient(ellipse 70% 55% at 30% 40%, rgba(155,138,255,0.55) 0%, rgba(80,50,200,0.28) 45%, var(--void) 78%)',
+  'radial-gradient(ellipse 65% 52% at 28% 42%, rgba(220,90,80,0.4) 0%, rgba(155,138,255,0.22) 50%, var(--void) 78%)',
+  'radial-gradient(ellipse 65% 52% at 30% 42%, rgba(62,207,178,0.32) 0%, rgba(60,80,200,0.28) 50%, var(--void) 78%)',
+  'radial-gradient(ellipse 65% 50% at 25% 40%, rgba(245,180,50,0.28) 0%, rgba(155,138,255,0.32) 50%, var(--void) 78%)',
 ]
 
 function pickGradient(id: string): string {
@@ -42,73 +42,86 @@ export function WorldDetailHeader({ world }: Props) {
   return (
     <div
       style={{
-        display: 'flex',
+        position: 'relative',
         borderRadius: 'var(--r-xl)',
         border: '1px solid var(--hairline)',
         overflow: 'hidden',
-        minHeight: 480,
+        minHeight: 520,
+        display: 'flex',
+        alignItems: 'stretch',
       }}
     >
-      {/* Left: atmospheric background */}
-      <div
-        aria-hidden="true"
-        style={{
-          position: 'relative',
-          flex: '0 0 42%',
-          minHeight: 420,
-          overflow: 'hidden',
-        }}
-      >
-        {world.header_image ? (
-          <div style={{
+      {/* Full-bleed background */}
+      {world.header_image ? (
+        <div
+          aria-hidden="true"
+          style={{
             position: 'absolute', inset: 0,
             backgroundImage: `url(${world.header_image})`,
             backgroundSize: 'cover', backgroundPosition: 'center',
-          }} />
-        ) : (
-          <div style={{
+          }}
+        />
+      ) : (
+        <div
+          aria-hidden="true"
+          style={{
             position: 'absolute', inset: 0,
             background: `${gradient}, var(--void)`,
-          }} />
-        )}
+          }}
+        />
+      )}
 
-        {/* Watermark initial */}
-        <div style={{
+      {/* Watermark initial — anchored left */}
+      <div
+        aria-hidden="true"
+        style={{
           position: 'absolute',
-          top: '10%', left: 0, right: 0,
-          textAlign: 'center',
+          top: '50%', left: '3%',
+          transform: 'translateY(-50%)',
           fontFamily: 'var(--font-display)',
-          fontSize: 'clamp(120px, 18vw, 180px)',
+          fontSize: 'clamp(140px, 22vw, 220px)',
           fontWeight: 600,
           color: 'var(--ink)',
           opacity: 0.06,
           lineHeight: 1,
           userSelect: 'none',
           pointerEvents: 'none',
-        }}>
-          {initial}
-        </div>
-
-        {/* Right-edge fade into panel */}
-        <div style={{
-          position: 'absolute', inset: 0,
-          background: 'linear-gradient(to right, transparent 55%, var(--void-2) 100%)',
-        }} />
+        }}
+      >
+        {initial}
       </div>
 
-      {/* Right: content panel */}
+      {/* Scrim: transparent left → dark right */}
+      <div
+        aria-hidden="true"
+        style={{
+          position: 'absolute', inset: 0,
+          background: 'linear-gradient(to right, transparent 15%, rgba(10,10,20,0.72) 48%, rgba(10,10,20,0.97) 72%)',
+        }}
+      />
+      {/* Scrim: subtle bottom vignette */}
+      <div
+        aria-hidden="true"
+        style={{
+          position: 'absolute', inset: 0,
+          background: 'linear-gradient(to top, rgba(10,10,20,0.55) 0%, transparent 40%)',
+        }}
+      />
+
+      {/* Content — right side, full height */}
       <div style={{
-        flex: 1,
-        background: 'var(--void-2)',
-        padding: 'clamp(28px, 4vw, 48px)',
+        position: 'relative',
+        marginLeft: 'auto',
+        width: '62%',
+        padding: 'clamp(32px, 4vw, 52px) clamp(28px, 4vw, 52px)',
         display: 'flex',
         flexDirection: 'column',
         justifyContent: 'center',
         gap: 0,
       }}>
         {/* Subtitle + status badge */}
-        <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 12, marginBottom: 12 }}>
-          {world.subtitle && (
+        <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 12, marginBottom: 10 }}>
+          {world.subtitle ? (
             <p style={{
               fontFamily: 'var(--font-body)',
               fontSize: 10, fontWeight: 700,
@@ -118,7 +131,7 @@ export function WorldDetailHeader({ world }: Props) {
             }}>
               {world.subtitle}
             </p>
-          )}
+          ) : <span />}
           <span style={{
             flexShrink: 0,
             display: 'inline-flex', alignItems: 'center',
@@ -138,7 +151,7 @@ export function WorldDetailHeader({ world }: Props) {
         {/* World name */}
         <h1 style={{
           fontFamily: 'var(--font-display)',
-          fontSize: 'clamp(40px, 6vw, 80px)',
+          fontSize: 'clamp(40px, 6vw, 82px)',
           fontWeight: 600,
           lineHeight: 0.95,
           letterSpacing: '0.04em',
@@ -182,7 +195,7 @@ export function WorldDetailHeader({ world }: Props) {
           flexWrap: 'wrap',
           marginBottom: 32,
           paddingBottom: 28,
-          borderBottom: '1px solid var(--hairline)',
+          borderBottom: '1px solid rgba(255,255,255,0.08)',
         }}>
           {[
             { label: 'Kronieken', value: 0 },

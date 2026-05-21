@@ -72,10 +72,22 @@ export default function WorldDetailPage() {
 
         <Link
           to={`/worlds/${id}/edit`}
-          className="pangu-btn pangu-btn-ghost pangu-btn-sm"
           aria-label={`${world.name} bewerken`}
+          style={{
+            display: 'inline-flex', alignItems: 'center', gap: 6,
+            color: 'var(--muted)', fontSize: 12, fontWeight: 700,
+            letterSpacing: '0.18em', textTransform: 'uppercase',
+            fontFamily: 'var(--font-body)',
+            textDecoration: 'none',
+            transition: 'color var(--t-fast)',
+          }}
+          onMouseEnter={(e) => (e.currentTarget.style.color = 'var(--ink-soft)')}
+          onMouseLeave={(e) => (e.currentTarget.style.color = 'var(--muted)')}
         >
-          ✏ Bewerken
+          <svg aria-hidden="true" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z" />
+          </svg>
+          Bewerken
         </Link>
       </div>
 
