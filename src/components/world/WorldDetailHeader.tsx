@@ -35,12 +35,12 @@ export function WorldDetailHeader({ world }: Props) {
         overflow: 'hidden',
         minHeight: 420,
         display: 'flex',
-        flexDirection: 'column',
-        justifyContent: 'flex-end',
+        alignItems: 'stretch',
         padding: 16,
+        gap: 0,
       }}
     >
-      {/* Full-bleed background */}
+      {/* Full-bleed background — no scrim */}
       {world.header_image ? (
         <div
           aria-hidden="true"
@@ -60,18 +60,18 @@ export function WorldDetailHeader({ world }: Props) {
         />
       )}
 
-      {/* Watermark initial */}
+      {/* Watermark initial — left side */}
       <div
         aria-hidden="true"
         style={{
           position: 'absolute',
-          top: '50%', left: '3%',
+          top: '50%', left: '2%',
           transform: 'translateY(-55%)',
           fontFamily: 'var(--font-display)',
           fontSize: 'clamp(140px, 22vw, 220px)',
           fontWeight: 600,
           color: 'var(--ink)',
-          opacity: 0.06,
+          opacity: 0.07,
           lineHeight: 1,
           userSelect: 'none',
           pointerEvents: 'none',
@@ -80,28 +80,27 @@ export function WorldDetailHeader({ world }: Props) {
         {initial}
       </div>
 
-      {/* Glass card */}
+      {/* Left spacer — image shows through freely */}
+      <div style={{ flex: '0 0 38%' }} aria-hidden="true" />
+
+      {/* Glass card — right side, full height */}
       <div
         style={{
           position: 'relative',
-          background: 'rgba(10, 10, 22, 0.58)',
-          backdropFilter: 'blur(18px)',
-          WebkitBackdropFilter: 'blur(18px)',
+          flex: 1,
+          background: 'rgba(10, 10, 22, 0.30)',
+          backdropFilter: 'blur(16px)',
+          WebkitBackdropFilter: 'blur(16px)',
           border: '1px solid rgba(255, 255, 255, 0.07)',
           borderRadius: 'var(--r-lg)',
-          padding: 'clamp(20px, 3vw, 32px) clamp(20px, 3vw, 32px)',
+          padding: 'clamp(20px, 3vw, 32px)',
           display: 'flex',
           flexDirection: 'column',
-          gap: 0,
+          justifyContent: 'space-between',
         }}
       >
-        {/* Subtitle row: italic serif left · hairline · badge right */}
-        <div style={{
-          display: 'flex',
-          alignItems: 'center',
-          gap: 14,
-          marginBottom: 10,
-        }}>
+        {/* Top: subtitle · hairline · badge */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: 14, marginBottom: 12 }}>
           {world.subtitle ? (
             <p style={{
               fontFamily: "'Cormorant Garamond', Georgia, serif",
@@ -131,49 +130,48 @@ export function WorldDetailHeader({ world }: Props) {
           </span>
         </div>
 
-        {/* World name */}
-        <h1 style={{
-          fontFamily: 'var(--font-display)',
-          fontSize: 'clamp(48px, 7.5vw, 96px)',
-          fontWeight: 600,
-          lineHeight: 0.92,
-          letterSpacing: '0.04em',
-          color: 'var(--ink)',
-          margin: '0 0 16px',
-          textTransform: 'uppercase',
-        }}>
-          {world.name}
-        </h1>
-
-        {/* Quote */}
-        {world.quote && (
-          <p style={{
-            fontFamily: "'Cormorant Garamond', Georgia, serif",
-            fontStyle: 'italic',
-            fontSize: 17,
-            lineHeight: 1.55,
-            color: 'var(--ink-soft)',
-            margin: '0 0 10px',
+        {/* Middle: title + quote + description */}
+        <div style={{ flex: 1 }}>
+          <h1 style={{
+            fontFamily: 'var(--font-display)',
+            fontSize: 'clamp(44px, 6.5vw, 88px)',
+            fontWeight: 600,
+            lineHeight: 0.92,
+            letterSpacing: '0.04em',
+            color: 'var(--ink)',
+            margin: '0 0 16px',
+            textTransform: 'uppercase',
           }}>
-            "{world.quote}"
-          </p>
-        )}
+            {world.name}
+          </h1>
 
-        {/* Description */}
-        {world.description && (
-          <p style={{
-            fontSize: 14,
-            lineHeight: 1.7,
-            color: 'var(--muted)',
-            margin: '0 0 20px',
-            maxWidth: 680,
-          }}>
-            {world.description}
-          </p>
-        )}
+          {world.quote && (
+            <p style={{
+              fontFamily: "'Cormorant Garamond', Georgia, serif",
+              fontStyle: 'italic',
+              fontSize: 17,
+              lineHeight: 1.55,
+              color: 'var(--ink-soft)',
+              margin: '0 0 10px',
+            }}>
+              "{world.quote}"
+            </p>
+          )}
 
-        {/* Buttons — right-aligned */}
-        <div style={{ display: 'flex', gap: 10, justifyContent: 'flex-end', flexWrap: 'wrap' }}>
+          {world.description && (
+            <p style={{
+              fontSize: 13,
+              lineHeight: 1.7,
+              color: 'var(--muted)',
+              margin: 0,
+            }}>
+              {world.description}
+            </p>
+          )}
+        </div>
+
+        {/* Bottom: buttons right-aligned */}
+        <div style={{ display: 'flex', gap: 10, justifyContent: 'flex-end', flexWrap: 'wrap', marginTop: 24 }}>
           <button
             type="button"
             className="pangu-btn pangu-btn-primary"
