@@ -84,11 +84,13 @@ export default function WorldEditPage() {
     document.addEventListener('mouseup', onUp)
     document.addEventListener('touchmove', onMove, { passive: true })
     document.addEventListener('touchend', onUp)
+    document.addEventListener('touchcancel', onUp)
     return () => {
       document.removeEventListener('mousemove', onMove)
       document.removeEventListener('mouseup', onUp)
       document.removeEventListener('touchmove', onMove)
       document.removeEventListener('touchend', onUp)
+      document.removeEventListener('touchcancel', onUp)
     }
   }, [isDragging])
 
@@ -270,8 +272,32 @@ export default function WorldEditPage() {
             </p>
             <div
               ref={containerRef}
+              role="img"
+              aria-label={`Afbeeldingsuitsnede: positie ${Math.round(imagePos.x)}% horizontaal, ${Math.round(imagePos.y)}% verticaal. Gebruik pijltjestoetsen om bij te stellen.`}
+              tabIndex={0}
               onMouseDown={handleImageMouseDown}
               onTouchStart={handleImageTouchStart}
+              onKeyDown={(e) => {
+                const step = 5
+                const dirs: Record<string, { dx: number; dy: number }> = {
+                  ArrowLeft:  { dx: -step, dy: 0 },
+                  ArrowRight: { dx:  step, dy: 0 },
+                  ArrowUp:    { dx: 0, dy: -step },
+                  ArrowDown:  { dx: 0, dy:  step },
+                }
+                const delta = dirs[e.key]
+                if (!delta) return
+                e.preventDefault()
+                setImagePos((prev) => {
+                  const newPos = {
+                    x: Math.max(0, Math.min(100, prev.x + delta.dx)),
+                    y: Math.max(0, Math.min(100, prev.y + delta.dy)),
+                  }
+                  setForm((f) => ({ ...f, header_image_position: serializePosition(newPos) }))
+                  setDirty(true)
+                  return newPos
+                })
+              }}
               style={{
                 borderRadius: 'var(--r-lg)',
                 overflow: 'hidden',
@@ -280,8 +306,10 @@ export default function WorldEditPage() {
                 cursor: isDragging ? 'grabbing' : 'grab',
                 userSelect: 'none',
                 touchAction: 'none',
+                outline: 'none',
               }}
-              aria-hidden="true"
+              onFocus={(e) => { e.currentTarget.style.boxShadow = '0 0 0 2px var(--violet)' }}
+              onBlur={(e) => { e.currentTarget.style.boxShadow = 'none' }}
             >
               <img
                 src={form.header_image}
