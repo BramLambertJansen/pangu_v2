@@ -56,25 +56,17 @@ export function WorldDetailHeader({ world }: Props) {
         />
       )}
 
-      {/* Mobile scrim — cinematic fade, solid at bottom for text legibility */}
+      {/* Mobile scrim — cinematic fade, hidden on desktop via .wdh-scrim */}
       <div
         aria-hidden="true"
-        className="md:hidden"
+        className="wdh-scrim"
         style={{
-          position: 'absolute', inset: 0, zIndex: 1,
           background: 'linear-gradient(to top, var(--void) 0%, rgba(10,10,22,0.97) 20%, rgba(10,10,22,0.72) 40%, rgba(10,10,22,0.18) 62%, transparent 82%)',
         }}
       />
 
-      {/* ── MOBILE LAYOUT ── */}
-      <div
-        className="md:hidden"
-        style={{
-          position: 'relative', zIndex: 2,
-          minHeight: 520,
-          display: 'flex', flexDirection: 'column',
-        }}
-      >
+      {/* ── MOBILE LAYOUT — hidden on desktop via .wdh-mobile ── */}
+      <div className="wdh-mobile">
         {/* Watermark — centered in upper half */}
         <div
           aria-hidden="true"
@@ -112,7 +104,7 @@ export function WorldDetailHeader({ world }: Props) {
         {/* Spacer — pushes content to bottom */}
         <div style={{ flex: 1 }} />
 
-        {/* Content floats on the scrim — no hard panel edge */}
+        {/* Content floats on the scrim */}
         <div style={{ padding: '0 24px 28px' }}>
           {world.subtitle && (
             <p style={{
@@ -149,18 +141,18 @@ export function WorldDetailHeader({ world }: Props) {
             </p>
           )}
 
-          {/* Buttons — stacked in portrait, side-by-side in landscape */}
-          <div className="flex flex-col landscape:flex-row" style={{ gap: 8 }}>
+          {/* Buttons — stacked in portrait, row in landscape via .wdh-btns */}
+          <div className="wdh-btns">
             <button
               type="button"
-              className="pangu-btn pangu-btn-primary w-full landscape:flex-1"
+              className="pangu-btn pangu-btn-primary"
               aria-label={`Nieuwe kroniek aanmaken in ${world.name}`}
             >
               + Nieuwe kroniek
             </button>
             <button
               type="button"
-              className="pangu-btn pangu-btn-gold w-full landscape:flex-1"
+              className="pangu-btn pangu-btn-gold"
               aria-label="Lore Forge — AI lore genereren"
             >
               ✦ Lore Forge
@@ -169,12 +161,12 @@ export function WorldDetailHeader({ world }: Props) {
         </div>
       </div>
 
-      {/* ── DESKTOP LAYOUT ── */}
+      {/* ── DESKTOP LAYOUT — hidden on mobile via .wdh-desktop ── */}
       <div
-        className="hidden md:flex md:items-stretch"
+        className="wdh-desktop"
         style={{ padding: 16, minHeight: 420 }}
       >
-        {/* Watermark — left side, positioned relative to outer container */}
+        {/* Watermark — left side */}
         <div
           aria-hidden="true"
           style={{
