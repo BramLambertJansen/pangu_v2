@@ -33,14 +33,9 @@ export function WorldDetailHeader({ world }: Props) {
         borderRadius: 'var(--r-xl)',
         border: '1px solid var(--hairline)',
         overflow: 'hidden',
-        minHeight: 420,
-        display: 'flex',
-        alignItems: 'stretch',
-        padding: 16,
-        gap: 0,
       }}
     >
-      {/* Full-bleed background — no scrim */}
+      {/* Full-bleed background */}
       {world.header_image ? (
         <div
           aria-hidden="true"
@@ -60,63 +55,45 @@ export function WorldDetailHeader({ world }: Props) {
         />
       )}
 
-      {/* Watermark initial — left side */}
+      {/* Mobile scrim — bottom-heavy gradient for legibility */}
       <div
         aria-hidden="true"
+        className="md:hidden"
         style={{
-          position: 'absolute',
-          top: '50%', left: '2%',
-          transform: 'translateY(-55%)',
-          fontFamily: 'var(--font-display)',
-          fontSize: 'clamp(140px, 22vw, 220px)',
-          fontWeight: 600,
-          color: 'var(--ink)',
-          opacity: 0.07,
-          lineHeight: 1,
-          userSelect: 'none',
-          pointerEvents: 'none',
+          position: 'absolute', inset: 0, zIndex: 1,
+          background: 'linear-gradient(to top, rgba(10,10,22,0.92) 0%, rgba(10,10,22,0.55) 42%, rgba(10,10,22,0.1) 72%, transparent 100%)',
         }}
-      >
-        {initial}
-      </div>
+      />
 
-      {/* Left spacer — image shows through freely */}
-      <div style={{ flex: '0 0 38%' }} aria-hidden="true" />
-
-      {/* Glass card — right side, full height */}
+      {/* ── MOBILE LAYOUT ── */}
       <div
+        className="md:hidden"
         style={{
-          position: 'relative',
-          flex: 1,
-          background: 'rgba(10, 10, 22, 0.14)',
-          backdropFilter: 'blur(20px)',
-          WebkitBackdropFilter: 'blur(20px)',
-          border: '1px solid rgba(255, 255, 255, 0.06)',
-          borderRadius: 'var(--r-lg)',
-          padding: 'clamp(20px, 3vw, 32px)',
-          display: 'flex',
-          flexDirection: 'column',
-          justifyContent: 'space-between',
+          position: 'relative', zIndex: 2,
+          minHeight: 520,
+          display: 'flex', flexDirection: 'column',
         }}
       >
-        {/* Top: subtitle · hairline · badge */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: 14, marginBottom: 12 }}>
-          {world.subtitle ? (
-            <p style={{
-              fontFamily: "'Cormorant Garamond', Georgia, serif",
-              fontStyle: 'italic',
-              fontSize: 14,
-              color: 'var(--gold)',
-              margin: 0,
-              whiteSpace: 'nowrap',
-              letterSpacing: '0.03em',
-            }}>
-              {world.subtitle}
-            </p>
-          ) : null}
-          <div style={{ flex: 1, height: 1, background: 'var(--hairline-strong)' }} aria-hidden="true" />
+        {/* Watermark — centered in the upper area */}
+        <div
+          aria-hidden="true"
+          style={{
+            position: 'absolute',
+            top: '8%', left: '50%',
+            transform: 'translateX(-50%)',
+            fontFamily: 'var(--font-display)',
+            fontSize: 'clamp(120px, 38vw, 180px)',
+            fontWeight: 600,
+            color: 'var(--ink)', opacity: 0.07,
+            lineHeight: 1, userSelect: 'none', pointerEvents: 'none',
+          }}
+        >
+          {initial}
+        </div>
+
+        {/* Status badge — top right */}
+        <div style={{ display: 'flex', justifyContent: 'flex-end', padding: '16px 16px 0' }}>
           <span style={{
-            flexShrink: 0,
             display: 'inline-flex', alignItems: 'center',
             padding: '4px 12px',
             background: 'var(--gold)',
@@ -130,17 +107,38 @@ export function WorldDetailHeader({ world }: Props) {
           </span>
         </div>
 
-        {/* Middle: title + quote + description */}
-        <div style={{ flex: 1 }}>
+        {/* Spacer — pushes content to bottom */}
+        <div style={{ flex: 1 }} />
+
+        {/* Bottom content panel */}
+        <div
+          style={{
+            background: 'rgba(10, 10, 22, 0.22)',
+            backdropFilter: 'blur(24px)',
+            WebkitBackdropFilter: 'blur(24px)',
+            borderTop: '1px solid rgba(255,255,255,0.08)',
+            padding: '20px 20px 24px',
+          }}
+        >
+          {world.subtitle && (
+            <p style={{
+              fontFamily: "'Cormorant Garamond', Georgia, serif",
+              fontStyle: 'italic',
+              fontSize: 13, letterSpacing: '0.03em',
+              color: 'var(--gold)',
+              margin: '0 0 8px',
+            }}>
+              {world.subtitle}
+            </p>
+          )}
+
           <h1 style={{
             fontFamily: 'var(--font-display)',
-            fontSize: 'clamp(44px, 6.5vw, 88px)',
-            fontWeight: 600,
-            lineHeight: 0.92,
-            letterSpacing: '0.04em',
+            fontSize: 'clamp(36px, 11vw, 52px)',
+            fontWeight: 600, lineHeight: 0.92,
+            letterSpacing: '0.04em', textTransform: 'uppercase',
             color: 'var(--ink)',
-            margin: '0 0 16px',
-            textTransform: 'uppercase',
+            margin: '0 0 14px',
           }}>
             {world.name}
           </h1>
@@ -149,43 +147,157 @@ export function WorldDetailHeader({ world }: Props) {
             <p style={{
               fontFamily: "'Cormorant Garamond', Georgia, serif",
               fontStyle: 'italic',
-              fontSize: 17,
-              lineHeight: 1.55,
+              fontSize: 15, lineHeight: 1.55,
               color: 'var(--ink-soft)',
-              margin: '0 0 10px',
+              margin: '0 0 16px',
             }}>
               "{world.quote}"
             </p>
           )}
 
-          {world.description && (
-            <p style={{
-              fontSize: 13,
-              lineHeight: 1.7,
-              color: 'var(--muted)',
-              margin: 0,
-            }}>
-              {world.description}
-            </p>
-          )}
+          {/* Buttons — stretch to fill row */}
+          <div style={{ display: 'flex', gap: 8 }}>
+            <button
+              type="button"
+              className="pangu-btn pangu-btn-primary"
+              style={{ flex: 1 }}
+              aria-label={`Nieuwe kroniek aanmaken in ${world.name}`}
+            >
+              + Nieuwe kroniek
+            </button>
+            <button
+              type="button"
+              className="pangu-btn pangu-btn-gold"
+              style={{ flex: 1 }}
+              aria-label="Lore Forge — AI lore genereren"
+            >
+              ✦ Lore Forge
+            </button>
+          </div>
+        </div>
+      </div>
+
+      {/* ── DESKTOP LAYOUT ── */}
+      <div
+        className="hidden md:flex md:items-stretch"
+        style={{ padding: 16, minHeight: 420 }}
+      >
+        {/* Watermark — left side, positioned relative to outer container */}
+        <div
+          aria-hidden="true"
+          style={{
+            position: 'absolute',
+            top: '50%', left: '2%',
+            transform: 'translateY(-55%)',
+            fontFamily: 'var(--font-display)',
+            fontSize: 'clamp(140px, 22vw, 220px)',
+            fontWeight: 600,
+            color: 'var(--ink)', opacity: 0.07,
+            lineHeight: 1, userSelect: 'none', pointerEvents: 'none',
+          }}
+        >
+          {initial}
         </div>
 
-        {/* Bottom: buttons right-aligned */}
-        <div style={{ display: 'flex', gap: 10, justifyContent: 'flex-end', flexWrap: 'wrap', marginTop: 24 }}>
-          <button
-            type="button"
-            className="pangu-btn pangu-btn-primary"
-            aria-label={`Nieuwe kroniek aanmaken in ${world.name}`}
-          >
-            + Nieuwe kroniek
-          </button>
-          <button
-            type="button"
-            className="pangu-btn pangu-btn-gold"
-            aria-label="Lore Forge — AI lore genereren"
-          >
-            ✦ Lore Forge
-          </button>
+        {/* Left spacer — image shows through freely */}
+        <div style={{ flex: '0 0 38%' }} aria-hidden="true" />
+
+        {/* Glass card — right side, full height */}
+        <div
+          style={{
+            position: 'relative', flex: 1,
+            background: 'rgba(10, 10, 22, 0.14)',
+            backdropFilter: 'blur(20px)',
+            WebkitBackdropFilter: 'blur(20px)',
+            border: '1px solid rgba(255,255,255,0.06)',
+            borderRadius: 'var(--r-lg)',
+            padding: 'clamp(20px, 3vw, 32px)',
+            display: 'flex', flexDirection: 'column',
+            justifyContent: 'space-between',
+          }}
+        >
+          {/* Top: subtitle · hairline · badge */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: 14, marginBottom: 12 }}>
+            {world.subtitle ? (
+              <p style={{
+                fontFamily: "'Cormorant Garamond', Georgia, serif",
+                fontStyle: 'italic',
+                fontSize: 14, letterSpacing: '0.03em',
+                color: 'var(--gold)',
+                margin: 0, whiteSpace: 'nowrap',
+              }}>
+                {world.subtitle}
+              </p>
+            ) : null}
+            <div style={{ flex: 1, height: 1, background: 'var(--hairline-strong)' }} aria-hidden="true" />
+            <span style={{
+              flexShrink: 0,
+              display: 'inline-flex', alignItems: 'center',
+              padding: '4px 12px',
+              background: 'var(--gold)',
+              borderRadius: 'var(--r-full)',
+              fontFamily: 'var(--font-body)',
+              fontSize: 10, fontWeight: 700,
+              letterSpacing: '0.16em', textTransform: 'uppercase',
+              color: 'var(--void)',
+            }}>
+              {statusLabel[world.status]}
+            </span>
+          </div>
+
+          {/* Middle: title + quote + description */}
+          <div style={{ flex: 1 }}>
+            <h1 style={{
+              fontFamily: 'var(--font-display)',
+              fontSize: 'clamp(44px, 6.5vw, 88px)',
+              fontWeight: 600, lineHeight: 0.92,
+              letterSpacing: '0.04em', textTransform: 'uppercase',
+              color: 'var(--ink)',
+              margin: '0 0 16px',
+            }}>
+              {world.name}
+            </h1>
+
+            {world.quote && (
+              <p style={{
+                fontFamily: "'Cormorant Garamond', Georgia, serif",
+                fontStyle: 'italic',
+                fontSize: 17, lineHeight: 1.55,
+                color: 'var(--ink-soft)',
+                margin: '0 0 10px',
+              }}>
+                "{world.quote}"
+              </p>
+            )}
+
+            {world.description && (
+              <p style={{
+                fontSize: 13, lineHeight: 1.7,
+                color: 'var(--muted)',
+                margin: 0,
+              }}>
+                {world.description}
+              </p>
+            )}
+          </div>
+
+          {/* Bottom: buttons right-aligned */}
+          <div style={{ display: 'flex', gap: 10, justifyContent: 'flex-end', flexWrap: 'wrap', marginTop: 24 }}>
+            <button
+              type="button"
+              className="pangu-btn pangu-btn-primary"
+              aria-label={`Nieuwe kroniek aanmaken in ${world.name}`}
+            >
+              + Nieuwe kroniek
+            </button>
+            <button
+              type="button"
+              className="pangu-btn pangu-btn-gold"
+              aria-label="Lore Forge — AI lore genereren"
+            >
+              ✦ Lore Forge
+            </button>
+          </div>
         </div>
       </div>
     </div>
