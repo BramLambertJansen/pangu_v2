@@ -26,6 +26,21 @@ export function WorldDetailHeader({ world }: Props) {
   const initial = world.name.trim()[0]?.toUpperCase() ?? '?'
   const gradient = world.header_image ? undefined : pickGradient(world.id)
 
+  const sharedBadge = (
+    <span style={{
+      display: 'inline-flex', alignItems: 'center',
+      padding: '4px 12px',
+      background: 'var(--gold)',
+      borderRadius: 'var(--r-full)',
+      fontFamily: 'var(--font-body)',
+      fontSize: 10, fontWeight: 700,
+      letterSpacing: '0.16em', textTransform: 'uppercase',
+      color: 'var(--void)',
+    }}>
+      {statusLabel[world.status]}
+    </span>
+  )
+
   return (
     <div
       style={{
@@ -56,7 +71,7 @@ export function WorldDetailHeader({ world }: Props) {
         />
       )}
 
-      {/* Mobile scrim — cinematic fade, hidden on desktop via .wdh-scrim */}
+      {/* Mobile scrim — bottom-to-top, hidden on desktop */}
       <div
         aria-hidden="true"
         className="wdh-scrim"
@@ -65,7 +80,16 @@ export function WorldDetailHeader({ world }: Props) {
         }}
       />
 
-      {/* ── MOBILE LAYOUT — hidden on desktop via .wdh-mobile ── */}
+      {/* Desktop scrim — left-to-right, hidden on mobile */}
+      <div
+        aria-hidden="true"
+        className="wdh-desktop-scrim"
+        style={{
+          background: 'linear-gradient(to right, transparent 15%, rgba(10,10,22,0.55) 35%, rgba(10,10,22,0.94) 55%, var(--void) 80%)',
+        }}
+      />
+
+      {/* ── MOBILE LAYOUT ── */}
       <div className="wdh-mobile">
         {/* Watermark — centered in upper half */}
         <div
@@ -87,21 +111,9 @@ export function WorldDetailHeader({ world }: Props) {
 
         {/* Status badge — top right */}
         <div style={{ display: 'flex', justifyContent: 'flex-end', padding: '16px 20px 0' }}>
-          <span style={{
-            display: 'inline-flex', alignItems: 'center',
-            padding: '4px 12px',
-            background: 'var(--gold)',
-            borderRadius: 'var(--r-full)',
-            fontFamily: 'var(--font-body)',
-            fontSize: 10, fontWeight: 700,
-            letterSpacing: '0.16em', textTransform: 'uppercase',
-            color: 'var(--void)',
-          }}>
-            {statusLabel[world.status]}
-          </span>
+          {sharedBadge}
         </div>
 
-        {/* Spacer — pushes content to bottom */}
         <div style={{ flex: 1 }} />
 
         {/* Content floats on the scrim */}
@@ -141,7 +153,6 @@ export function WorldDetailHeader({ world }: Props) {
             </p>
           )}
 
-          {/* Buttons — stacked in portrait, row in landscape via .wdh-btns */}
           <div className="wdh-btns">
             <button
               type="button"
@@ -161,12 +172,12 @@ export function WorldDetailHeader({ world }: Props) {
         </div>
       </div>
 
-      {/* ── DESKTOP LAYOUT — hidden on mobile via .wdh-desktop ── */}
+      {/* ── DESKTOP LAYOUT ── */}
       <div
         className="wdh-desktop"
-        style={{ padding: 16, minHeight: 420 }}
+        style={{ padding: '28px 32px', minHeight: 460 }}
       >
-        {/* Watermark — left side */}
+        {/* Watermark — large, left side */}
         <div
           aria-hidden="true"
           style={{
@@ -176,32 +187,27 @@ export function WorldDetailHeader({ world }: Props) {
             fontFamily: 'var(--font-display)',
             fontSize: 'clamp(140px, 22vw, 220px)',
             fontWeight: 600,
-            color: 'var(--ink)', opacity: 0.07,
+            color: 'var(--ink)', opacity: 0.09,
             lineHeight: 1, userSelect: 'none', pointerEvents: 'none',
           }}
         >
           {initial}
         </div>
 
-        {/* Left spacer — image shows through freely */}
+        {/* Left spacer — image shows freely */}
         <div style={{ flex: '0 0 38%' }} aria-hidden="true" />
 
-        {/* Glass card — right side, full height */}
+        {/* Content — floats on the horizontal scrim, no glass card */}
         <div
           style={{
             position: 'relative', flex: 1,
-            background: 'rgba(10, 10, 22, 0.14)',
-            backdropFilter: 'blur(20px)',
-            WebkitBackdropFilter: 'blur(20px)',
-            border: '1px solid rgba(255,255,255,0.06)',
-            borderRadius: 'var(--r-lg)',
-            padding: 'clamp(20px, 3vw, 32px)',
+            padding: 'clamp(20px, 2.5vw, 36px)',
             display: 'flex', flexDirection: 'column',
             justifyContent: 'space-between',
           }}
         >
           {/* Top: subtitle · hairline · badge */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: 14, marginBottom: 12 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 14, marginBottom: 16 }}>
             {world.subtitle ? (
               <p style={{
                 fontFamily: "'Cormorant Garamond', Georgia, serif",
@@ -214,19 +220,7 @@ export function WorldDetailHeader({ world }: Props) {
               </p>
             ) : null}
             <div style={{ flex: 1, height: 1, background: 'var(--hairline-strong)' }} aria-hidden="true" />
-            <span style={{
-              flexShrink: 0,
-              display: 'inline-flex', alignItems: 'center',
-              padding: '4px 12px',
-              background: 'var(--gold)',
-              borderRadius: 'var(--r-full)',
-              fontFamily: 'var(--font-body)',
-              fontSize: 10, fontWeight: 700,
-              letterSpacing: '0.16em', textTransform: 'uppercase',
-              color: 'var(--void)',
-            }}>
-              {statusLabel[world.status]}
-            </span>
+            {sharedBadge}
           </div>
 
           {/* Middle: title + quote + description */}
@@ -265,7 +259,7 @@ export function WorldDetailHeader({ world }: Props) {
             )}
           </div>
 
-          {/* Bottom: buttons right-aligned */}
+          {/* Bottom: buttons */}
           <div style={{ display: 'flex', gap: 10, justifyContent: 'flex-end', flexWrap: 'wrap', marginTop: 24 }}>
             <button
               type="button"
