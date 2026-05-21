@@ -19,15 +19,22 @@ CREATE INDEX IF NOT EXISTS sessions_campaign_id_idx
 
 ALTER TABLE public.sessions ENABLE ROW LEVEL SECURITY;
 
-CREATE POLICY "own_sessions" ON public.sessions
-  USING (user_id = auth.uid())
-  WITH CHECK (
-    user_id = auth.uid()
-    AND EXISTS (
-      SELECT 1 FROM public.campaigns
-      WHERE id = campaign_id AND user_id = auth.uid()
-    )
-  );
+DO $$ BEGIN
+  IF NOT EXISTS (
+    SELECT 1 FROM pg_policies
+    WHERE schemaname = 'public' AND tablename = 'sessions' AND policyname = 'own_sessions'
+  ) THEN
+    CREATE POLICY "own_sessions" ON public.sessions
+      USING (user_id = auth.uid())
+      WITH CHECK (
+        user_id = auth.uid()
+        AND EXISTS (
+          SELECT 1 FROM public.campaigns
+          WHERE id = campaign_id AND user_id = auth.uid()
+        )
+      );
+  END IF;
+END $$;
 
 CREATE OR REPLACE FUNCTION update_sessions_updated_at()
   RETURNS trigger LANGUAGE plpgsql AS $$
@@ -37,6 +44,7 @@ BEGIN
 END;
 $$;
 
+DROP TRIGGER IF EXISTS sessions_updated_at ON public.sessions;
 CREATE TRIGGER sessions_updated_at
   BEFORE UPDATE ON public.sessions
   FOR EACH ROW EXECUTE FUNCTION update_sessions_updated_at();

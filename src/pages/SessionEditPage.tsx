@@ -96,6 +96,7 @@ export default function SessionEditPage() {
       if (error) throw error
     },
     onSuccess: () => {
+      queryClient.removeQueries({ queryKey: queryKeys.campaigns.sessionDetail(id!) })
       if (campaignId) {
         queryClient.invalidateQueries({ queryKey: queryKeys.campaigns.sessions(campaignId) })
         navigate(`/campaigns/${campaignId}/sessions`)
