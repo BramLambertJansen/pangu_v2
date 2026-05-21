@@ -1,10 +1,10 @@
 import type { World, WorldStatus } from '@/types/world.types'
 
 const cardGradients = [
-  'radial-gradient(ellipse 70% 55% at 30% 40%, rgba(155,138,255,0.55) 0%, rgba(80,50,200,0.28) 45%, var(--void) 78%)',
-  'radial-gradient(ellipse 65% 52% at 28% 42%, rgba(220,90,80,0.4) 0%, rgba(155,138,255,0.22) 50%, var(--void) 78%)',
-  'radial-gradient(ellipse 65% 52% at 30% 42%, rgba(62,207,178,0.32) 0%, rgba(60,80,200,0.28) 50%, var(--void) 78%)',
-  'radial-gradient(ellipse 65% 50% at 25% 40%, rgba(245,180,50,0.28) 0%, rgba(155,138,255,0.32) 50%, var(--void) 78%)',
+  'radial-gradient(ellipse 80% 60% at 50% 40%, rgba(155,138,255,0.5) 0%, rgba(80,50,200,0.25) 50%, transparent 80%)',
+  'radial-gradient(ellipse 75% 60% at 50% 40%, rgba(220,90,80,0.38) 0%, rgba(155,138,255,0.2) 55%, transparent 80%)',
+  'radial-gradient(ellipse 75% 60% at 50% 40%, rgba(62,207,178,0.3) 0%, rgba(60,80,200,0.25) 55%, transparent 80%)',
+  'radial-gradient(ellipse 75% 58% at 50% 40%, rgba(245,180,50,0.26) 0%, rgba(155,138,255,0.3) 55%, transparent 80%)',
 ]
 
 function pickGradient(id: string): string {
@@ -46,9 +46,9 @@ export function WorldDetailHeader({ world }: Props) {
         borderRadius: 'var(--r-xl)',
         border: '1px solid var(--hairline)',
         overflow: 'hidden',
-        minHeight: 520,
+        minHeight: 560,
         display: 'flex',
-        alignItems: 'stretch',
+        flexDirection: 'column',
       }}
     >
       {/* Full-bleed background */}
@@ -71,18 +71,18 @@ export function WorldDetailHeader({ world }: Props) {
         />
       )}
 
-      {/* Watermark initial — anchored left */}
+      {/* Watermark initial — centered */}
       <div
         aria-hidden="true"
         style={{
           position: 'absolute',
-          top: '50%', left: '3%',
-          transform: 'translateY(-50%)',
+          top: '50%', left: '50%',
+          transform: 'translate(-50%, -50%)',
           fontFamily: 'var(--font-display)',
-          fontSize: 'clamp(140px, 22vw, 220px)',
+          fontSize: 'clamp(160px, 26vw, 260px)',
           fontWeight: 600,
           color: 'var(--ink)',
-          opacity: 0.06,
+          opacity: 0.05,
           lineHeight: 1,
           userSelect: 'none',
           pointerEvents: 'none',
@@ -91,159 +91,168 @@ export function WorldDetailHeader({ world }: Props) {
         {initial}
       </div>
 
-      {/* Scrim: transparent left → dark right */}
+      {/* Scrim top — dark zone for badge readability */}
       <div
         aria-hidden="true"
         style={{
           position: 'absolute', inset: 0,
-          background: 'linear-gradient(to right, transparent 15%, rgba(10,10,20,0.72) 48%, rgba(10,10,20,0.97) 72%)',
-        }}
-      />
-      {/* Scrim: subtle bottom vignette */}
-      <div
-        aria-hidden="true"
-        style={{
-          position: 'absolute', inset: 0,
-          background: 'linear-gradient(to top, rgba(10,10,20,0.55) 0%, transparent 40%)',
+          background: 'linear-gradient(to bottom, rgba(10,10,20,0.72) 0%, rgba(10,10,20,0.18) 28%, transparent 45%)',
         }}
       />
 
-      {/* Content — right side, full height */}
+      {/* Scrim bottom — dark zone for content readability */}
+      <div
+        aria-hidden="true"
+        style={{
+          position: 'absolute', inset: 0,
+          background: 'linear-gradient(to top, rgba(10,10,20,0.97) 0%, rgba(10,10,20,0.82) 28%, rgba(10,10,20,0.3) 52%, transparent 68%)',
+        }}
+      />
+
+      {/* Content */}
       <div style={{
         position: 'relative',
-        marginLeft: 'auto',
-        width: '62%',
-        padding: 'clamp(32px, 4vw, 52px) clamp(28px, 4vw, 52px)',
+        flex: 1,
         display: 'flex',
         flexDirection: 'column',
-        justifyContent: 'center',
-        gap: 0,
+        padding: 'clamp(24px, 3.5vw, 40px) clamp(28px, 4vw, 52px)',
       }}>
-        {/* Subtitle + status badge */}
-        <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 12, marginBottom: 10 }}>
-          {world.subtitle ? (
+
+        {/* TOP: subtitle + badge, centered + hairline */}
+        <div style={{
+          textAlign: 'center',
+          paddingBottom: 20,
+          marginBottom: 24,
+          borderBottom: '1px solid rgba(255,255,255,0.1)',
+        }}>
+          {world.subtitle && (
             <p style={{
               fontFamily: 'var(--font-body)',
               fontSize: 10, fontWeight: 700,
-              letterSpacing: '0.28em', textTransform: 'uppercase',
+              letterSpacing: '0.3em', textTransform: 'uppercase',
               color: 'var(--gold)',
-              margin: 0,
+              margin: '0 0 10px',
             }}>
               {world.subtitle}
             </p>
-          ) : <span />}
+          )}
           <span style={{
-            flexShrink: 0,
             display: 'inline-flex', alignItems: 'center',
-            padding: '4px 10px',
+            padding: '4px 12px',
             background: 'rgba(245,200,66,0.12)',
             border: '1px solid rgba(245,200,66,0.3)',
             borderRadius: 'var(--r-full)',
             fontFamily: 'var(--font-body)',
             fontSize: 10, fontWeight: 700,
-            letterSpacing: '0.18em', textTransform: 'uppercase',
+            letterSpacing: '0.2em', textTransform: 'uppercase',
             color: 'var(--gold)',
           }}>
             {statusLabel[world.status]}
           </span>
         </div>
 
-        {/* World name */}
-        <h1 style={{
-          fontFamily: 'var(--font-display)',
-          fontSize: 'clamp(40px, 6vw, 82px)',
-          fontWeight: 600,
-          lineHeight: 0.95,
-          letterSpacing: '0.04em',
-          color: 'var(--ink)',
-          margin: '0 0 20px',
-          textTransform: 'uppercase',
-        }}>
-          {world.name}
-        </h1>
-
-        {/* Quote */}
-        {world.quote && (
-          <p style={{
-            fontFamily: "'Cormorant Garamond', Georgia, serif",
-            fontStyle: 'italic',
-            fontSize: 18,
-            lineHeight: 1.55,
-            color: 'var(--gold)',
-            margin: '0 0 16px',
+        {/* MIDDLE: title + quote + description — grows to fill space */}
+        <div style={{ flex: 1 }}>
+          <h1 style={{
+            fontFamily: 'var(--font-display)',
+            fontSize: 'clamp(40px, 6vw, 82px)',
+            fontWeight: 600,
+            lineHeight: 0.95,
+            letterSpacing: '0.04em',
+            color: 'var(--ink)',
+            margin: '0 0 20px',
+            textTransform: 'uppercase',
           }}>
-            "{world.quote}"
-          </p>
-        )}
+            {world.name}
+          </h1>
 
-        {/* Description */}
-        {world.description && (
-          <p style={{
-            fontSize: 14,
-            lineHeight: 1.7,
-            color: 'var(--ink-soft)',
-            margin: '0 0 28px',
-          }}>
-            {world.description}
-          </p>
-        )}
+          {world.quote && (
+            <p style={{
+              fontFamily: "'Cormorant Garamond', Georgia, serif",
+              fontStyle: 'italic',
+              fontSize: 18,
+              lineHeight: 1.55,
+              color: 'var(--gold)',
+              margin: '0 0 14px',
+            }}>
+              "{world.quote}"
+            </p>
+          )}
 
-        {/* Stats */}
-        <div style={{
-          display: 'flex',
-          gap: 'clamp(16px, 3vw, 32px)',
-          flexWrap: 'wrap',
-          marginBottom: 32,
-          paddingBottom: 28,
-          borderBottom: '1px solid rgba(255,255,255,0.08)',
-        }}>
-          {[
-            { label: 'Kronieken', value: 0 },
-            { label: 'Locaties', value: 0 },
-            { label: 'Personages', value: 0 },
-            { label: 'Bijgewerkt', value: formatLastVisited(world.updated_at) },
-          ].map(({ label, value }) => (
-            <div key={label}>
-              <p style={{
-                fontFamily: 'var(--font-body)',
-                fontSize: 9, fontWeight: 700,
-                letterSpacing: '0.24em', textTransform: 'uppercase',
-                color: 'var(--muted)',
-                margin: '0 0 4px',
-              }}>
-                {label}
-              </p>
-              <p style={{
-                fontFamily: 'var(--font-display)',
-                fontSize: typeof value === 'number' ? 28 : 15,
-                fontWeight: 600,
-                color: typeof value === 'string' ? 'var(--gold)' : 'var(--ink)',
-                margin: 0,
-                letterSpacing: typeof value === 'number' ? '0.02em' : '0.06em',
-              }}>
-                {value}
-              </p>
-            </div>
-          ))}
+          {world.description && (
+            <p style={{
+              fontSize: 14,
+              lineHeight: 1.7,
+              color: 'var(--ink-soft)',
+              margin: 0,
+              maxWidth: 620,
+            }}>
+              {world.description}
+            </p>
+          )}
         </div>
 
-        {/* Action buttons */}
-        <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap' }}>
-          <button
-            type="button"
-            className="pangu-btn pangu-btn-primary"
-            aria-label={`Nieuwe kroniek aanmaken in ${world.name}`}
-          >
-            + Nieuwe kroniek
-          </button>
-          <button
-            type="button"
-            className="pangu-btn pangu-btn-gold"
-            aria-label="Lore Forge — AI lore genereren"
-          >
-            ✦ Lore Forge
-          </button>
+        {/* BOTTOM: stats + hairline + buttons */}
+        <div style={{ marginTop: 32 }}>
+          {/* Stats */}
+          <div style={{
+            display: 'flex',
+            gap: 'clamp(16px, 3vw, 36px)',
+            flexWrap: 'wrap',
+            marginBottom: 20,
+          }}>
+            {[
+              { label: 'Kronieken', value: 0 },
+              { label: 'Locaties', value: 0 },
+              { label: 'Personages', value: 0 },
+              { label: 'Bijgewerkt', value: formatLastVisited(world.updated_at) },
+            ].map(({ label, value }) => (
+              <div key={label}>
+                <p style={{
+                  fontFamily: 'var(--font-body)',
+                  fontSize: 9, fontWeight: 700,
+                  letterSpacing: '0.24em', textTransform: 'uppercase',
+                  color: 'var(--muted)',
+                  margin: '0 0 4px',
+                }}>
+                  {label}
+                </p>
+                <p style={{
+                  fontFamily: 'var(--font-display)',
+                  fontSize: typeof value === 'number' ? 26 : 14,
+                  fontWeight: 600,
+                  color: typeof value === 'string' ? 'var(--gold)' : 'var(--ink)',
+                  margin: 0,
+                  letterSpacing: typeof value === 'number' ? '0.02em' : '0.06em',
+                }}>
+                  {value}
+                </p>
+              </div>
+            ))}
+          </div>
+
+          {/* Hairline */}
+          <div style={{ height: 1, background: 'rgba(255,255,255,0.08)', marginBottom: 20 }} aria-hidden="true" />
+
+          {/* Buttons */}
+          <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap' }}>
+            <button
+              type="button"
+              className="pangu-btn pangu-btn-primary"
+              aria-label={`Nieuwe kroniek aanmaken in ${world.name}`}
+            >
+              + Nieuwe kroniek
+            </button>
+            <button
+              type="button"
+              className="pangu-btn pangu-btn-gold"
+              aria-label="Lore Forge — AI lore genereren"
+            >
+              ✦ Lore Forge
+            </button>
+          </div>
         </div>
+
       </div>
     </div>
   )
