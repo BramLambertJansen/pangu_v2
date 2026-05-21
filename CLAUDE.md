@@ -171,6 +171,8 @@ Routestructuur (huidige staat):
 /worlds/:id/edit         → AppLayout
 /campaigns/:id           → AppLayout
 /campaigns/:id/edit      → AppLayout
+/campaigns/:id/sessions  → AppLayout
+/sessions/:id/edit       → AppLayout
 ```
 
 Geplande routes (nog niet geïmplementeerd):
@@ -179,7 +181,6 @@ Geplande routes (nog niet geïmplementeerd):
 /campaigns/:id/locations → locaties
 /campaigns/:id/npcs      → NPCs
 /campaigns/:id/lore      → lore
-/campaigns/:id/sessions  → sessies
 /characters/:id          → spelersperspectief
 ```
 
@@ -305,9 +306,11 @@ npm run type-check   # tsc --noEmit
 - [ ] Lore-item aanmaken / bewerken / verwijderen
 
 ### Sessies
-- [ ] Sessie-overzicht per campaign
-- [ ] Sessie aanmaken / bewerken
-- [ ] Sessieaantekeningen
+- [x] Sessies tabel + RLS (`007_sessions.sql`)
+- [x] Sessie-overzicht per campaign `/campaigns/:id/sessions` — grid met SessionCard, "+ Nieuwe sessie"
+- [x] Sessie aanmaken — direct aanmaken + redirect naar bewerken
+- [x] Sessie bewerken `/sessions/:id/edit` — naam, subtitle, sessienummer, datum, status, beschrijving, DM-notities
+- [x] Sessie verwijderen — met bevestigingsdialoog
 
 ### Karakter (Spelersperspectief)
 - [ ] Karakterblad bekijken
