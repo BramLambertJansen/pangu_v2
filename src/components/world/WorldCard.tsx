@@ -134,6 +134,7 @@ export function WorldCard({ world }: Props) {
           color: 'var(--ink)',
           margin: 0,
           lineHeight: 1.15,
+          overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
         }}>
           {world.name.toUpperCase()}
         </h2>

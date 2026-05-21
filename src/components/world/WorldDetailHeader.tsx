@@ -122,6 +122,7 @@ export function WorldDetailHeader({ world, onCreateCampaign, isCreatingCampaign 
             fontWeight: 600, lineHeight: 0.92,
             letterSpacing: '0.04em', textTransform: 'uppercase',
             color: 'var(--ink)', margin: '0 0 14px',
+            overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
           }}>
             {world.name}
           </h1>
@@ -200,6 +201,7 @@ export function WorldDetailHeader({ world, onCreateCampaign, isCreatingCampaign 
             fontWeight: 600, lineHeight: 0.92,
             letterSpacing: '0.04em', textTransform: 'uppercase',
             color: 'var(--ink)', margin: '0 0 18px',
+            overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
           }}>
             {world.name}
           </h1>
