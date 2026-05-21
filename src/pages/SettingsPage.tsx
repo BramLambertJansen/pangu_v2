@@ -359,19 +359,19 @@ export default function SettingsPage() {
   const [activeTab, setActiveTab] = useState<Tab>('profile')
 
   const tabs: { id: Tab; label: string }[] = [
-    { id: 'profile', label: 'Profile' },
-    { id: 'prefs', label: 'Preferences' },
-    { id: 'about', label: 'About' },
+    { id: 'profile', label: 'Profiel' },
+    { id: 'prefs', label: 'Voorkeuren' },
+    { id: 'about', label: 'Over' },
   ]
 
   return (
     <div style={{ display: 'flex', justifyContent: 'center', width: '100%' }}><div style={{ maxWidth: 820, width: '100%' }}>
       {/* Page header */}
       <header style={{ marginBottom: 40 }}>
-        <p className="pangu-eyebrow">Configuration</p>
-        <h1 className="pangu-display-xl">Settings</h1>
+        <p className="pangu-eyebrow">Configuratie</p>
+        <h1 className="pangu-display-xl">Instellingen</h1>
         <p style={{ marginTop: 8, fontSize: 14, color: 'var(--ink-soft)' }}>
-          Tune the Sanctum to your liking.
+          Pas het Sanctum aan naar jouw wensen.
         </p>
       </header>
 
