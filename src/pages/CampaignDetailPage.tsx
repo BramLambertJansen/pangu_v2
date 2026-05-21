@@ -1,10 +1,14 @@
 import { useParams, useNavigate, Link } from 'react-router-dom'
-import { useQuery } from '@tanstack/react-query'
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
+import { toast } from 'sonner'
 import { supabase } from '@/lib/supabase'
 import { queryKeys } from '@/lib/queryKeys'
+import { useAuthStore } from '@/stores/auth.store'
 import { Spinner } from '@/components/ui/Spinner'
 import { WorldDetailDivider } from '@/components/world/WorldDetailDivider'
+import { SessionCard, ForgeSessionCard } from '@/components/session/SessionCard'
 import type { Campaign, CampaignStatus } from '@/types/campaign.types'
+import type { Session } from '@/types/session.types'
 
 type CampaignWithWorld = Campaign & { worlds: { name: string } | null }
 
@@ -41,6 +45,8 @@ const breadcrumbStyle: React.CSSProperties = {
 export default function CampaignDetailPage() {
   const { id } = useParams<{ id: string }>()
   const navigate = useNavigate()
+  const queryClient = useQueryClient()
+  const { user } = useAuthStore()
 
   const { data: campaign, isLoading } = useQuery<CampaignWithWorld>({
     queryKey: queryKeys.campaigns.detail(id!),
@@ -55,6 +61,45 @@ export default function CampaignDetailPage() {
     },
     enabled: !!id,
     staleTime: 1000 * 60,
+  })
+
+  const { data: sessions, isLoading: isLoadingSessions } = useQuery<Session[]>({
+    queryKey: queryKeys.campaigns.sessions(id!),
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('sessions')
+        .select('*')
+        .eq('campaign_id', id!)
+        .order('session_number', { ascending: true, nullsFirst: false })
+        .order('created_at', { ascending: false })
+      if (error) throw error
+      return data as Session[]
+    },
+    enabled: !!id,
+    staleTime: 1000 * 30,
+  })
+
+  const createSession = useMutation({
+    mutationFn: async () => {
+      if (!user) throw new Error('Niet ingelogd')
+      const nextNumber = sessions && sessions.length > 0
+        ? Math.max(...sessions.map((s) => s.session_number ?? 0)) + 1
+        : 1
+      const { data, error } = await supabase
+        .from('sessions')
+        .insert({ campaign_id: id!, user_id: user.id, name: 'Nieuwe sessie', session_number: nextNumber, status: 'planned' })
+        .select()
+        .single()
+      if (error) throw error
+      return data as Session
+    },
+    onSuccess: (newSession) => {
+      queryClient.invalidateQueries({ queryKey: queryKeys.campaigns.sessions(id!) })
+      navigate(`/sessions/${newSession.id}/edit`, { state: { isNew: true, campaignId: id } })
+    },
+    onError: () => {
+      toast.error('Sessie aanmaken mislukt')
+    },
   })
 
   if (isLoading) {
@@ -262,7 +307,36 @@ export default function CampaignDetailPage() {
         </div>
       </div>
 
-      <WorldDetailDivider label="Sessies in deze kroniek" />
+      <WorldDetailDivider label={`Sessies in deze kroniek${sessions && sessions.length > 0 ? ` (${sessions.length})` : ''}`} />
+
+      {/* Session list */}
+      {isLoadingSessions ? (
+        <div style={{ display: 'flex', justifyContent: 'center', padding: '40px 0' }} aria-live="polite" aria-label="Sessies laden...">
+          <Spinner size="md" />
+        </div>
+      ) : (
+        <ul
+          style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))',
+            gap: 'var(--sp-5)',
+            listStyle: 'none',
+            padding: 0,
+            margin: 0,
+          }}
+          role="list"
+          aria-label="Sessies in deze kroniek"
+        >
+          {sessions?.map((session) => (
+            <li key={session.id}>
+              <SessionCard session={session} />
+            </li>
+          ))}
+          <li>
+            <ForgeSessionCard onClick={() => createSession.mutate()} loading={createSession.isPending} />
+          </li>
+        </ul>
+      )}
     </div>
   )
 }
