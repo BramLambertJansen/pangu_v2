@@ -55,13 +55,13 @@ export function WorldDetailHeader({ world }: Props) {
         />
       )}
 
-      {/* Mobile scrim — bottom-heavy gradient for legibility */}
+      {/* Mobile scrim — cinematic fade, solid at bottom for text legibility */}
       <div
         aria-hidden="true"
         className="md:hidden"
         style={{
           position: 'absolute', inset: 0, zIndex: 1,
-          background: 'linear-gradient(to top, rgba(10,10,22,0.92) 0%, rgba(10,10,22,0.55) 42%, rgba(10,10,22,0.1) 72%, transparent 100%)',
+          background: 'linear-gradient(to top, var(--void) 0%, rgba(10,10,22,0.97) 20%, rgba(10,10,22,0.72) 40%, rgba(10,10,22,0.18) 62%, transparent 82%)',
         }}
       />
 
@@ -74,7 +74,7 @@ export function WorldDetailHeader({ world }: Props) {
           display: 'flex', flexDirection: 'column',
         }}
       >
-        {/* Watermark — centered in the upper area */}
+        {/* Watermark — centered in upper half */}
         <div
           aria-hidden="true"
           style={{
@@ -84,15 +84,16 @@ export function WorldDetailHeader({ world }: Props) {
             fontFamily: 'var(--font-display)',
             fontSize: 'clamp(120px, 38vw, 180px)',
             fontWeight: 600,
-            color: 'var(--ink)', opacity: 0.07,
+            color: 'var(--ink)', opacity: 0.09,
             lineHeight: 1, userSelect: 'none', pointerEvents: 'none',
+            whiteSpace: 'nowrap',
           }}
         >
           {initial}
         </div>
 
         {/* Status badge — top right */}
-        <div style={{ display: 'flex', justifyContent: 'flex-end', padding: '16px 16px 0' }}>
+        <div style={{ display: 'flex', justifyContent: 'flex-end', padding: '16px 20px 0' }}>
           <span style={{
             display: 'inline-flex', alignItems: 'center',
             padding: '4px 12px',
@@ -110,23 +111,15 @@ export function WorldDetailHeader({ world }: Props) {
         {/* Spacer — pushes content to bottom */}
         <div style={{ flex: 1 }} />
 
-        {/* Bottom content panel */}
-        <div
-          style={{
-            background: 'rgba(10, 10, 22, 0.22)',
-            backdropFilter: 'blur(24px)',
-            WebkitBackdropFilter: 'blur(24px)',
-            borderTop: '1px solid rgba(255,255,255,0.08)',
-            padding: '20px 20px 24px',
-          }}
-        >
+        {/* Content floats on the scrim — no hard panel edge */}
+        <div style={{ padding: '0 24px 28px' }}>
           {world.subtitle && (
             <p style={{
               fontFamily: "'Cormorant Garamond', Georgia, serif",
               fontStyle: 'italic',
               fontSize: 13, letterSpacing: '0.03em',
               color: 'var(--gold)',
-              margin: '0 0 8px',
+              margin: '0 0 10px',
             }}>
               {world.subtitle}
             </p>
@@ -134,7 +127,7 @@ export function WorldDetailHeader({ world }: Props) {
 
           <h1 style={{
             fontFamily: 'var(--font-display)',
-            fontSize: 'clamp(36px, 11vw, 52px)',
+            fontSize: 'clamp(40px, 12vw, 56px)',
             fontWeight: 600, lineHeight: 0.92,
             letterSpacing: '0.04em', textTransform: 'uppercase',
             color: 'var(--ink)',
@@ -149,18 +142,18 @@ export function WorldDetailHeader({ world }: Props) {
               fontStyle: 'italic',
               fontSize: 15, lineHeight: 1.55,
               color: 'var(--ink-soft)',
-              margin: '0 0 16px',
+              margin: '0 0 18px',
             }}>
               "{world.quote}"
             </p>
           )}
 
-          {/* Buttons — stretch to fill row */}
-          <div style={{ display: 'flex', gap: 8 }}>
+          {/* Buttons — stacked full-width, no overflow risk */}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
             <button
               type="button"
               className="pangu-btn pangu-btn-primary"
-              style={{ flex: 1 }}
+              style={{ width: '100%' }}
               aria-label={`Nieuwe kroniek aanmaken in ${world.name}`}
             >
               + Nieuwe kroniek
@@ -168,7 +161,7 @@ export function WorldDetailHeader({ world }: Props) {
             <button
               type="button"
               className="pangu-btn pangu-btn-gold"
-              style={{ flex: 1 }}
+              style={{ width: '100%' }}
               aria-label="Lore Forge — AI lore genereren"
             >
               ✦ Lore Forge
