@@ -9,7 +9,6 @@ export interface World {
   description: string | null
   header_image: string | null
   header_image_position: string | null
-  header_image_position: string
   status: WorldStatus
   created_at: string
   updated_at: string
