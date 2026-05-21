@@ -1,5 +1,5 @@
 import { create } from 'zustand'
-import { persist } from 'zustand/middleware'
+import { persist, createJSONStorage } from 'zustand/middleware'
 
 export type PreferencesLanguage = 'nl' | 'en' | 'de' | 'fr'
 
@@ -15,6 +15,15 @@ interface PreferencesState {
   ) => void
 }
 
+function getUserId(): string {
+  try {
+    const auth = JSON.parse(localStorage.getItem('auth') ?? '{}')
+    return (auth?.state?.user?.id as string | undefined) ?? 'guest'
+  } catch {
+    return 'guest'
+  }
+}
+
 export const usePreferencesStore = create<PreferencesState>()(
   persist(
     (set) => ({
@@ -25,6 +34,13 @@ export const usePreferencesStore = create<PreferencesState>()(
       language: 'nl',
       setPreference: (key, value) => set({ [key]: value } as Partial<PreferencesState>),
     }),
-    { name: 'preferences' },
+    {
+      name: 'preferences',
+      storage: createJSONStorage(() => ({
+        getItem: (name) => localStorage.getItem(`${name}:${getUserId()}`),
+        setItem: (name, value) => localStorage.setItem(`${name}:${getUserId()}`, value),
+        removeItem: (name) => localStorage.removeItem(`${name}:${getUserId()}`),
+      })),
+    },
   ),
 )

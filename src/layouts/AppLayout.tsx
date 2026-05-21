@@ -112,7 +112,8 @@ export default function AppLayout() {
   const [mobileOpen, setMobileOpen] = useState(false)
 
   const navItems = [
-    ...(profile?.role === 'admin' ? [adminNavItem] : baseNavItems),
+    ...baseNavItems,
+    ...(profile?.role === 'admin' ? [adminNavItem] : []),
     settingsNavItem,
   ]
 
