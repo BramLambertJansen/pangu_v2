@@ -238,8 +238,8 @@ npm run type-check   # tsc --noEmit
 
 ### Campaign Management (DM)
 - [ ] Campaign overzicht / dashboard
-- [ ] Campaign aanmaken
-- [ ] Campaign bewerken / verwijderen
+- [x] Campaign aanmaken (vanuit wereld detail, "+ Nieuwe kroniek")
+- [x] Campaign bewerken / verwijderen
 
 ### Wereld — Locaties
 - [ ] Locatie-overzicht per campaign

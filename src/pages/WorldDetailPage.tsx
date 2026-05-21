@@ -1,15 +1,21 @@
 import { useParams, useNavigate, Link } from 'react-router-dom'
-import { useQuery } from '@tanstack/react-query'
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
+import { toast } from 'sonner'
 import { supabase } from '@/lib/supabase'
 import { queryKeys } from '@/lib/queryKeys'
+import { useAuthStore } from '@/stores/auth.store'
 import { Spinner } from '@/components/ui/Spinner'
 import { WorldDetailHeader } from '@/components/world/WorldDetailHeader'
 import { WorldDetailDivider } from '@/components/world/WorldDetailDivider'
+import { CampaignCard, ForgeCampaignCard } from '@/components/campaign/CampaignCard'
 import type { World } from '@/types/world.types'
+import type { Campaign } from '@/types/campaign.types'
 
 export default function WorldDetailPage() {
   const { id } = useParams<{ id: string }>()
   const navigate = useNavigate()
+  const queryClient = useQueryClient()
+  const { user } = useAuthStore()
 
   const { data: world, isLoading } = useQuery<World>({
     queryKey: queryKeys.worlds.detail(id!),
@@ -25,6 +31,49 @@ export default function WorldDetailPage() {
     enabled: !!id,
     staleTime: 1000 * 60,
   })
+
+  const { data: campaigns, isLoading: isLoadingCampaigns } = useQuery<Campaign[]>({
+    queryKey: queryKeys.campaigns.byWorld(id!),
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('campaigns')
+        .select('*')
+        .eq('world_id', id!)
+        .order('created_at', { ascending: false })
+      if (error) throw error
+      return data as Campaign[]
+    },
+    enabled: !!id,
+    staleTime: 1000 * 60,
+  })
+
+  const createCampaign = useMutation({
+    mutationFn: async () => {
+      if (!user) throw new Error('Niet ingelogd')
+      const { data, error } = await supabase
+        .from('campaigns')
+        .insert({ world_id: id!, user_id: user.id })
+        .select('id')
+        .single()
+      if (error) throw error
+      return data.id as string
+    },
+    onSuccess: (campaignId) => {
+      queryClient.invalidateQueries({ queryKey: queryKeys.campaigns.byWorld(id!) })
+      navigate(`/campaigns/${campaignId}/edit`, { state: { isNew: true, worldId: id } })
+    },
+    onError: () => {
+      toast.error('Kroniek aanmaken mislukt')
+    },
+  })
+
+  function handleCreateCampaign() {
+    toast.promise(createCampaign.mutateAsync(), {
+      loading: 'Kroniek aanmaken...',
+      success: 'Kroniek aangemaakt',
+      error: 'Aanmaken mislukt',
+    })
+  }
 
   if (isLoading) {
     return (
@@ -91,8 +140,42 @@ export default function WorldDetailPage() {
         </Link>
       </div>
 
-      <WorldDetailHeader world={world} />
+      <WorldDetailHeader
+        world={world}
+        onCreateCampaign={handleCreateCampaign}
+        isCreatingCampaign={createCampaign.isPending}
+      />
+
       <WorldDetailDivider label="Kronieken in deze wereld" />
+
+      {/* Campaign list */}
+      {isLoadingCampaigns ? (
+        <div style={{ display: 'flex', justifyContent: 'center', padding: '40px 0' }} aria-live="polite" aria-label="Kronieken laden...">
+          <Spinner size="md" />
+        </div>
+      ) : (
+        <ul
+          style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))',
+            gap: 'var(--sp-5)',
+            listStyle: 'none',
+            padding: 0,
+            margin: 0,
+          }}
+          role="list"
+          aria-label="Kronieken in deze wereld"
+        >
+          {campaigns?.map((campaign) => (
+            <li key={campaign.id}>
+              <CampaignCard campaign={campaign} />
+            </li>
+          ))}
+          <li>
+            <ForgeCampaignCard onClick={handleCreateCampaign} loading={createCampaign.isPending} />
+          </li>
+        </ul>
+      )}
     </div>
   )
 }

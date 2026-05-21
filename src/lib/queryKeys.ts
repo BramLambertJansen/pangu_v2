@@ -2,6 +2,7 @@ export const queryKeys = {
   campaigns: {
     all: ['campaigns'] as const,
     detail: (id: string) => ['campaigns', id] as const,
+    byWorld: (worldId: string) => ['campaigns', 'world', worldId] as const,
     locations: (id: string) => ['campaigns', id, 'locations'] as const,
     npcs: (id: string) => ['campaigns', id, 'npcs'] as const,
     lore: (id: string) => ['campaigns', id, 'lore'] as const,

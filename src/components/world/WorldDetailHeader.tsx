@@ -23,9 +23,11 @@ const scrimGradient =
 
 interface Props {
   world: World
+  onCreateCampaign?: () => void
+  isCreatingCampaign?: boolean
 }
 
-export function WorldDetailHeader({ world }: Props) {
+export function WorldDetailHeader({ world, onCreateCampaign, isCreatingCampaign }: Props) {
   const initial = world.name.trim()[0]?.toUpperCase() ?? '?'
   const gradient = world.header_image ? undefined : pickGradient(world.id)
 
@@ -134,8 +136,8 @@ export function WorldDetailHeader({ world }: Props) {
             </p>
           )}
           <div className="wdh-btns">
-            <button type="button" className="pangu-btn pangu-btn-primary" aria-label={`Nieuwe kroniek aanmaken in ${world.name}`}>
-              + Nieuwe kroniek
+            <button type="button" className="pangu-btn pangu-btn-primary" aria-label={`Nieuwe kroniek aanmaken in ${world.name}`} onClick={onCreateCampaign} disabled={isCreatingCampaign}>
+              {isCreatingCampaign ? 'Aanmaken...' : '+ Nieuwe kroniek'}
             </button>
             <button type="button" className="pangu-btn pangu-btn-gold" aria-label="Lore Forge — AI lore genereren">
               ✦ Lore Forge
@@ -217,8 +219,8 @@ export function WorldDetailHeader({ world }: Props) {
               )}
             </div>
             <div style={{ flexShrink: 0, display: 'flex', gap: 10 }}>
-              <button type="button" className="pangu-btn pangu-btn-primary" aria-label={`Nieuwe kroniek aanmaken in ${world.name}`}>
-                + Nieuwe kroniek
+              <button type="button" className="pangu-btn pangu-btn-primary" aria-label={`Nieuwe kroniek aanmaken in ${world.name}`} onClick={onCreateCampaign} disabled={isCreatingCampaign}>
+                {isCreatingCampaign ? 'Aanmaken...' : '+ Nieuwe kroniek'}
               </button>
               <button type="button" className="pangu-btn pangu-btn-gold" aria-label="Lore Forge — AI lore genereren">
                 ✦ Lore Forge
