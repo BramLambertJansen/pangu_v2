@@ -18,6 +18,9 @@ const statusLabel: Record<WorldStatus, string> = {
   archived: 'Gearchiveerd',
 }
 
+const scrimGradient =
+  'linear-gradient(to top, var(--void) 0%, rgba(10,10,22,0.97) 20%, rgba(10,10,22,0.72) 40%, rgba(10,10,22,0.18) 62%, transparent 82%)'
+
 interface Props {
   world: World
 }
@@ -26,6 +29,21 @@ export function WorldDetailHeader({ world }: Props) {
   const initial = world.name.trim()[0]?.toUpperCase() ?? '?'
   const gradient = world.header_image ? undefined : pickGradient(world.id)
 
+  const badge = (
+    <span style={{
+      display: 'inline-flex', alignItems: 'center',
+      padding: '4px 12px',
+      background: 'var(--gold)',
+      borderRadius: 'var(--r-full)',
+      fontFamily: 'var(--font-body)',
+      fontSize: 10, fontWeight: 700,
+      letterSpacing: '0.16em', textTransform: 'uppercase',
+      color: 'var(--void)',
+    }}>
+      {statusLabel[world.status]}
+    </span>
+  )
+
   return (
     <div
       style={{
@@ -33,14 +51,9 @@ export function WorldDetailHeader({ world }: Props) {
         borderRadius: 'var(--r-xl)',
         border: '1px solid var(--hairline)',
         overflow: 'hidden',
-        minHeight: 420,
-        display: 'flex',
-        alignItems: 'stretch',
-        padding: 16,
-        gap: 0,
       }}
     >
-      {/* Full-bleed background — no scrim */}
+      {/* Full-bleed background */}
       {world.header_image ? (
         <div
           aria-hidden="true"
@@ -54,139 +67,164 @@ export function WorldDetailHeader({ world }: Props) {
       ) : (
         <div
           aria-hidden="true"
-          style={{
-            position: 'absolute', inset: 0,
-            background: `${gradient}, var(--void)`,
-          }}
+          style={{ position: 'absolute', inset: 0, background: `${gradient}, var(--void)` }}
         />
       )}
 
-      {/* Watermark initial — left side */}
+      {/* Shared scrim — bottom-to-top on both mobile and desktop */}
       <div
         aria-hidden="true"
-        style={{
-          position: 'absolute',
-          top: '50%', left: '2%',
-          transform: 'translateY(-55%)',
-          fontFamily: 'var(--font-display)',
-          fontSize: 'clamp(140px, 22vw, 220px)',
-          fontWeight: 600,
-          color: 'var(--ink)',
-          opacity: 0.07,
-          lineHeight: 1,
-          userSelect: 'none',
-          pointerEvents: 'none',
-        }}
-      >
-        {initial}
-      </div>
+        className="wdh-scrim"
+        style={{ background: scrimGradient }}
+      />
 
-      {/* Left spacer — image shows through freely */}
-      <div style={{ flex: '0 0 38%' }} aria-hidden="true" />
+      {/* ── MOBILE LAYOUT ── */}
+      <div className="wdh-mobile">
+        <div
+          aria-hidden="true"
+          style={{
+            position: 'absolute',
+            top: '8%', left: '50%',
+            transform: 'translateX(-50%)',
+            fontFamily: 'var(--font-display)',
+            fontSize: 'clamp(120px, 38vw, 180px)',
+            fontWeight: 600,
+            color: 'var(--ink)', opacity: 0.09,
+            lineHeight: 1, userSelect: 'none', pointerEvents: 'none',
+            whiteSpace: 'nowrap',
+          }}
+        >
+          {initial}
+        </div>
 
-      {/* Glass card — right side, full height */}
-      <div
-        style={{
-          position: 'relative',
-          flex: 1,
-          background: 'rgba(10, 10, 22, 0.14)',
-          backdropFilter: 'blur(20px)',
-          WebkitBackdropFilter: 'blur(20px)',
-          border: '1px solid rgba(255, 255, 255, 0.06)',
-          borderRadius: 'var(--r-lg)',
-          padding: 'clamp(20px, 3vw, 32px)',
-          display: 'flex',
-          flexDirection: 'column',
-          justifyContent: 'space-between',
-        }}
-      >
-        {/* Top: subtitle · hairline · badge */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: 14, marginBottom: 12 }}>
-          {world.subtitle ? (
+        <div style={{ display: 'flex', justifyContent: 'flex-end', padding: '16px 20px 0' }}>
+          {badge}
+        </div>
+
+        <div style={{ flex: 1 }} />
+
+        <div style={{ padding: '0 24px 28px' }}>
+          {world.subtitle && (
             <p style={{
               fontFamily: "'Cormorant Garamond', Georgia, serif",
               fontStyle: 'italic',
-              fontSize: 14,
-              color: 'var(--gold)',
-              margin: 0,
-              whiteSpace: 'nowrap',
-              letterSpacing: '0.03em',
+              fontSize: 13, letterSpacing: '0.03em',
+              color: 'var(--gold)', margin: '0 0 10px',
             }}>
               {world.subtitle}
             </p>
-          ) : null}
-          <div style={{ flex: 1, height: 1, background: 'var(--hairline-strong)' }} aria-hidden="true" />
-          <span style={{
-            flexShrink: 0,
-            display: 'inline-flex', alignItems: 'center',
-            padding: '4px 12px',
-            background: 'var(--gold)',
-            borderRadius: 'var(--r-full)',
-            fontFamily: 'var(--font-body)',
-            fontSize: 10, fontWeight: 700,
-            letterSpacing: '0.16em', textTransform: 'uppercase',
-            color: 'var(--void)',
-          }}>
-            {statusLabel[world.status]}
-          </span>
-        </div>
-
-        {/* Middle: title + quote + description */}
-        <div style={{ flex: 1 }}>
+          )}
           <h1 style={{
             fontFamily: 'var(--font-display)',
-            fontSize: 'clamp(44px, 6.5vw, 88px)',
-            fontWeight: 600,
-            lineHeight: 0.92,
-            letterSpacing: '0.04em',
-            color: 'var(--ink)',
-            margin: '0 0 16px',
-            textTransform: 'uppercase',
+            fontSize: 'clamp(40px, 12vw, 56px)',
+            fontWeight: 600, lineHeight: 0.92,
+            letterSpacing: '0.04em', textTransform: 'uppercase',
+            color: 'var(--ink)', margin: '0 0 14px',
           }}>
             {world.name}
           </h1>
-
           {world.quote && (
             <p style={{
               fontFamily: "'Cormorant Garamond', Georgia, serif",
               fontStyle: 'italic',
-              fontSize: 17,
-              lineHeight: 1.55,
-              color: 'var(--ink-soft)',
-              margin: '0 0 10px',
+              fontSize: 15, lineHeight: 1.55,
+              color: 'var(--ink-soft)', margin: '0 0 18px',
             }}>
               "{world.quote}"
             </p>
           )}
+          <div className="wdh-btns">
+            <button type="button" className="pangu-btn pangu-btn-primary" aria-label={`Nieuwe kroniek aanmaken in ${world.name}`}>
+              + Nieuwe kroniek
+            </button>
+            <button type="button" className="pangu-btn pangu-btn-gold" aria-label="Lore Forge — AI lore genereren">
+              ✦ Lore Forge
+            </button>
+          </div>
+        </div>
+      </div>
 
-          {world.description && (
-            <p style={{
-              fontSize: 13,
-              lineHeight: 1.7,
-              color: 'var(--muted)',
-              margin: 0,
-            }}>
-              {world.description}
-            </p>
-          )}
+      {/* ── DESKTOP LAYOUT — same bottom-anchor approach, wider proportions ── */}
+      <div className="wdh-desktop">
+        {/* Watermark — centered */}
+        <div
+          aria-hidden="true"
+          style={{
+            position: 'absolute',
+            top: '8%', left: '50%',
+            transform: 'translateX(-50%)',
+            fontFamily: 'var(--font-display)',
+            fontSize: 'clamp(180px, 26vw, 320px)',
+            fontWeight: 600,
+            color: 'var(--ink)', opacity: 0.09,
+            lineHeight: 1, userSelect: 'none', pointerEvents: 'none',
+            whiteSpace: 'nowrap',
+          }}
+        >
+          {initial}
         </div>
 
-        {/* Bottom: buttons right-aligned */}
-        <div style={{ display: 'flex', gap: 10, justifyContent: 'flex-end', flexWrap: 'wrap', marginTop: 24 }}>
-          <button
-            type="button"
-            className="pangu-btn pangu-btn-primary"
-            aria-label={`Nieuwe kroniek aanmaken in ${world.name}`}
-          >
-            + Nieuwe kroniek
-          </button>
-          <button
-            type="button"
-            className="pangu-btn pangu-btn-gold"
-            aria-label="Lore Forge — AI lore genereren"
-          >
-            ✦ Lore Forge
-          </button>
+        {/* Status badge — top right */}
+        <div style={{ display: 'flex', justifyContent: 'flex-end', padding: '20px 28px 0' }}>
+          {badge}
+        </div>
+
+        <div style={{ flex: 1 }} />
+
+        {/* Content at bottom */}
+        <div style={{ padding: '0 clamp(28px, 4vw, 52px) 40px' }}>
+          {world.subtitle && (
+            <p style={{
+              fontFamily: "'Cormorant Garamond', Georgia, serif",
+              fontStyle: 'italic',
+              fontSize: 15, letterSpacing: '0.03em',
+              color: 'var(--gold)', margin: '0 0 12px',
+            }}>
+              {world.subtitle}
+            </p>
+          )}
+
+          <h1 style={{
+            fontFamily: 'var(--font-display)',
+            fontSize: 'clamp(56px, 6.5vw, 96px)',
+            fontWeight: 600, lineHeight: 0.92,
+            letterSpacing: '0.04em', textTransform: 'uppercase',
+            color: 'var(--ink)', margin: '0 0 18px',
+          }}>
+            {world.name}
+          </h1>
+
+          {/* Quote + description left, buttons right */}
+          <div style={{ display: 'flex', alignItems: 'flex-end', gap: 32 }}>
+            <div style={{ flex: 1, minWidth: 0 }}>
+              {world.quote && (
+                <p style={{
+                  fontFamily: "'Cormorant Garamond', Georgia, serif",
+                  fontStyle: 'italic',
+                  fontSize: 18, lineHeight: 1.55,
+                  color: 'var(--ink-soft)', margin: '0 0 10px',
+                }}>
+                  "{world.quote}"
+                </p>
+              )}
+              {world.description && (
+                <p style={{
+                  fontSize: 13, lineHeight: 1.7,
+                  color: 'var(--muted)', margin: 0,
+                }}>
+                  {world.description}
+                </p>
+              )}
+            </div>
+            <div style={{ flexShrink: 0, display: 'flex', gap: 10 }}>
+              <button type="button" className="pangu-btn pangu-btn-primary" aria-label={`Nieuwe kroniek aanmaken in ${world.name}`}>
+                + Nieuwe kroniek
+              </button>
+              <button type="button" className="pangu-btn pangu-btn-gold" aria-label="Lore Forge — AI lore genereren">
+                ✦ Lore Forge
+              </button>
+            </div>
+          </div>
         </div>
       </div>
     </div>
