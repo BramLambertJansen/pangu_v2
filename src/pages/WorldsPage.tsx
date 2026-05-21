@@ -39,7 +39,7 @@ export default function WorldsPage() {
     },
     onSuccess: (id) => {
       queryClient.invalidateQueries({ queryKey: queryKeys.worlds.all })
-      navigate(`/worlds/${id}`, { state: { isNew: true } })
+      navigate(`/worlds/${id}/edit`, { state: { isNew: true } })
     },
     onError: () => {
       toast.error('Wereld aanmaken mislukt')
