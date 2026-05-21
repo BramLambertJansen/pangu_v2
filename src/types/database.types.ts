@@ -13,6 +13,49 @@ export type ProfileRole = 'user' | 'admin'
 export type Database = {
   public: {
     Tables: {
+      campaigns: {
+        Row: {
+          id: string
+          world_id: string
+          user_id: string
+          name: string
+          subtitle: string | null
+          description: string | null
+          status: string
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          world_id: string
+          user_id: string
+          name?: string
+          subtitle?: string | null
+          description?: string | null
+          status?: string
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          world_id?: string
+          user_id?: string
+          name?: string
+          subtitle?: string | null
+          description?: string | null
+          status?: string
+          created_at?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: 'campaigns_world_id_fkey'
+            columns: ['world_id']
+            referencedRelation: 'worlds'
+            referencedColumns: ['id']
+          }
+        ]
+      }
       worlds: {
         Row: {
           id: string
