@@ -15,6 +15,8 @@ const WorldDetailPage = lazy(() => import('@/pages/WorldDetailPage'))
 const WorldEditPage = lazy(() => import('@/pages/WorldEditPage'))
 const CampaignDetailPage = lazy(() => import('@/pages/CampaignDetailPage'))
 const CampaignEditPage = lazy(() => import('@/pages/CampaignEditPage'))
+const SessionsPage = lazy(() => import('@/pages/SessionsPage'))
+const SessionEditPage = lazy(() => import('@/pages/SessionEditPage'))
 
 function PageLoader() {
   return (
@@ -107,6 +109,16 @@ export const router = createBrowserRouter([
         path: '/campaigns/:id/edit',
         loader: requireAuth,
         element: wrap(CampaignEditPage),
+      },
+      {
+        path: '/campaigns/:id/sessions',
+        loader: requireAuth,
+        element: wrap(SessionsPage),
+      },
+      {
+        path: '/sessions/:id/edit',
+        loader: requireAuth,
+        element: wrap(SessionEditPage),
       },
     ],
   },

@@ -6,7 +6,8 @@ export const queryKeys = {
     locations: (id: string) => ['campaigns', id, 'locations'] as const,
     npcs: (id: string) => ['campaigns', id, 'npcs'] as const,
     lore: (id: string) => ['campaigns', id, 'lore'] as const,
-    sessions: (id: string) => ['campaigns', id, 'sessions'] as const,
+    sessions: (campaignId: string) => ['campaigns', campaignId, 'sessions'] as const,
+    sessionDetail: (sessionId: string) => ['sessions', sessionId] as const,
   },
   characters: {
     all: ['characters'] as const,
