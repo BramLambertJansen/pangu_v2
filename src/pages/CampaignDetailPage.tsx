@@ -6,6 +6,8 @@ import { Spinner } from '@/components/ui/Spinner'
 import { WorldDetailDivider } from '@/components/world/WorldDetailDivider'
 import type { Campaign, CampaignStatus } from '@/types/campaign.types'
 
+type CampaignWithWorld = Campaign & { worlds: { name: string } | null }
+
 const statusLabel: Record<CampaignStatus, string> = {
   draft: 'Concept',
   active: 'Actief',
@@ -28,20 +30,28 @@ function pickGradient(id: string): string {
 const scrimGradient =
   'linear-gradient(to top, var(--void) 0%, rgba(10,10,22,0.97) 20%, rgba(10,10,22,0.72) 40%, rgba(10,10,22,0.18) 62%, transparent 82%)'
 
+const breadcrumbStyle: React.CSSProperties = {
+  fontFamily: 'var(--font-body)',
+  fontSize: 11,
+  fontWeight: 700,
+  letterSpacing: '0.18em',
+  textTransform: 'uppercase',
+}
+
 export default function CampaignDetailPage() {
   const { id } = useParams<{ id: string }>()
   const navigate = useNavigate()
 
-  const { data: campaign, isLoading } = useQuery<Campaign>({
+  const { data: campaign, isLoading } = useQuery<CampaignWithWorld>({
     queryKey: queryKeys.campaigns.detail(id!),
     queryFn: async () => {
       const { data, error } = await supabase
         .from('campaigns')
-        .select('*')
+        .select('*, worlds(name)')
         .eq('id', id!)
         .single()
       if (error) throw error
-      return data as Campaign
+      return data as CampaignWithWorld
     },
     enabled: !!id,
     staleTime: 1000 * 60,
@@ -68,31 +78,39 @@ export default function CampaignDetailPage() {
 
   const initial = campaign.name.trim()[0]?.toUpperCase() ?? '?'
   const gradient = campaign.header_image ? undefined : pickGradient(campaign.id)
+  const worldName = campaign.worlds?.name ?? null
 
   return (
     <div>
-      {/* Top bar */}
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 24 }}>
-        <button
-          type="button"
-          onClick={() => navigate(`/worlds/${campaign.world_id}`)}
-          aria-label="Terug naar wereld"
-          style={{
-            display: 'inline-flex', alignItems: 'center', gap: 6,
-            background: 'none', border: 'none', cursor: 'pointer',
-            color: 'var(--muted)', fontSize: 12, fontWeight: 700,
-            letterSpacing: '0.18em', textTransform: 'uppercase',
-            fontFamily: 'var(--font-body)', padding: 0,
-            transition: 'color var(--t-fast)',
-          }}
-          onMouseEnter={(e) => (e.currentTarget.style.color = 'var(--ink-soft)')}
-          onMouseLeave={(e) => (e.currentTarget.style.color = 'var(--muted)')}
-        >
-          <svg aria-hidden="true" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <path d="M19 12H5" /><path d="M12 19l-7-7 7-7" />
-          </svg>
-          Terug naar wereld
-        </button>
+      {/* Breadcrumb */}
+      <nav aria-label="Navigatie" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 24 }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+          <button
+            type="button"
+            onClick={() => navigate(`/worlds/${campaign.world_id}`)}
+            aria-label={`Terug naar ${worldName ?? 'wereld'}`}
+            style={{
+              ...breadcrumbStyle,
+              display: 'inline-flex', alignItems: 'center', gap: 6,
+              background: 'none', border: 'none', cursor: 'pointer',
+              color: 'var(--muted)', padding: 0,
+              transition: 'color var(--t-fast)',
+            }}
+            onMouseEnter={(e) => (e.currentTarget.style.color = 'var(--ink-soft)')}
+            onMouseLeave={(e) => (e.currentTarget.style.color = 'var(--muted)')}
+          >
+            <svg aria-hidden="true" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M19 12H5" /><path d="M12 19l-7-7 7-7" />
+            </svg>
+            {worldName ?? 'Wereld'}
+          </button>
+
+          <span aria-hidden="true" style={{ ...breadcrumbStyle, color: 'var(--hairline)' }}>·</span>
+
+          <span style={{ ...breadcrumbStyle, color: 'var(--ink-soft)' }} aria-current="page">
+            Kroniek
+          </span>
+        </div>
 
         <Link
           to={`/campaigns/${id}/edit`}
@@ -113,7 +131,7 @@ export default function CampaignDetailPage() {
           </svg>
           Bewerken
         </Link>
-      </div>
+      </nav>
 
       {/* Campaign header — full-bleed like WorldDetailHeader */}
       <div
@@ -211,15 +229,36 @@ export default function CampaignDetailPage() {
           }}>
             {campaign.name}
           </h1>
-          {campaign.description && (
-            <p style={{
-              fontSize: 14, lineHeight: 1.7,
-              color: 'var(--ink-soft)', margin: 0,
-              maxWidth: 560,
-            }}>
-              {campaign.description}
-            </p>
-          )}
+
+          {/* Description + action buttons */}
+          <div style={{ display: 'flex', alignItems: 'flex-end', gap: 32, flexWrap: 'wrap' }}>
+            {campaign.description && (
+              <p style={{
+                fontSize: 14, lineHeight: 1.7,
+                color: 'var(--ink-soft)', margin: 0,
+                maxWidth: 560, flex: '1 1 auto',
+              }}>
+                {campaign.description}
+              </p>
+            )}
+            <div style={{ flexShrink: 0, display: 'flex', gap: 10, flexWrap: 'wrap' }}>
+              <button
+                type="button"
+                className="pangu-btn pangu-btn-primary"
+                aria-label="Sessie starten"
+                onClick={() => navigate(`/campaigns/${id}/sessions`)}
+              >
+                ▶ Sessie starten
+              </button>
+              <button
+                type="button"
+                className="pangu-btn pangu-btn-gold"
+                aria-label="Lore Forge — AI lore genereren"
+              >
+                ✦ Lore Forge
+              </button>
+            </div>
+          </div>
         </div>
       </div>
 
