@@ -177,7 +177,11 @@ export default function CampaignEditPage() {
   }
 
   async function abandon() {
-    await supabase.from('campaigns').delete().eq('id', id!)
+    const { error } = await supabase.from('campaigns').delete().eq('id', id!)
+    if (error) {
+      toast.error('Kroniek kon niet worden verwijderd')
+      return
+    }
     const worldId = worldIdFromState
     if (worldId) {
       queryClient.invalidateQueries({ queryKey: queryKeys.campaigns.byWorld(worldId) })

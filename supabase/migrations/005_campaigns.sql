@@ -11,6 +11,9 @@ CREATE TABLE IF NOT EXISTS public.campaigns (
   updated_at  timestamptz DEFAULT now() NOT NULL
 );
 
+CREATE INDEX IF NOT EXISTS campaigns_world_id_created_at_idx
+  ON public.campaigns (world_id, created_at DESC);
+
 ALTER TABLE public.campaigns ENABLE ROW LEVEL SECURITY;
 
 DO $$
@@ -23,6 +26,13 @@ BEGIN
   ) THEN
     CREATE POLICY "own_campaigns" ON public.campaigns
       USING (user_id = auth.uid())
-      WITH CHECK (user_id = auth.uid());
+      WITH CHECK (
+        user_id = auth.uid()
+        AND EXISTS (
+          SELECT 1 FROM public.worlds
+          WHERE id = world_id
+            AND user_id = auth.uid()
+        )
+      );
   END IF;
 END $$;

@@ -154,8 +154,9 @@ export function ForgeCampaignCard({ onClick, loading }: ForgeProps) {
       role="button"
       tabIndex={0}
       aria-label="Nieuwe kroniek aanmaken"
-      onClick={onClick}
+      onClick={() => { if (!loading) onClick() }}
       onKeyDown={(e) => {
+        if (loading) return
         if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onClick() }
       }}
       style={{
