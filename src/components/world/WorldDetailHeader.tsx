@@ -18,19 +18,6 @@ const statusLabel: Record<WorldStatus, string> = {
   archived: 'Gearchiveerd',
 }
 
-function formatLastVisited(iso: string): string {
-  const date = new Date(iso)
-  const today = new Date()
-  if (
-    date.getFullYear() === today.getFullYear() &&
-    date.getMonth() === today.getMonth() &&
-    date.getDate() === today.getDate()
-  ) {
-    return 'Vandaag'
-  }
-  return date.toLocaleDateString('nl-NL', { day: 'numeric', month: 'short', year: 'numeric' })
-}
-
 interface Props {
   world: World
 }
@@ -46,9 +33,11 @@ export function WorldDetailHeader({ world }: Props) {
         borderRadius: 'var(--r-xl)',
         border: '1px solid var(--hairline)',
         overflow: 'hidden',
-        minHeight: 520,
+        minHeight: 420,
         display: 'flex',
-        alignItems: 'stretch',
+        flexDirection: 'column',
+        justifyContent: 'flex-end',
+        padding: 16,
       }}
     >
       {/* Full-bleed background */}
@@ -71,13 +60,13 @@ export function WorldDetailHeader({ world }: Props) {
         />
       )}
 
-      {/* Watermark initial — anchored left */}
+      {/* Watermark initial */}
       <div
         aria-hidden="true"
         style={{
           position: 'absolute',
           top: '50%', left: '3%',
-          transform: 'translateY(-50%)',
+          transform: 'translateY(-55%)',
           fontFamily: 'var(--font-display)',
           fontSize: 'clamp(140px, 22vw, 220px)',
           fontWeight: 600,
@@ -91,58 +80,52 @@ export function WorldDetailHeader({ world }: Props) {
         {initial}
       </div>
 
-      {/* Scrim: transparent left → dark right */}
+      {/* Glass card */}
       <div
-        aria-hidden="true"
         style={{
-          position: 'absolute', inset: 0,
-          background: 'linear-gradient(to right, transparent 15%, rgba(10,10,20,0.72) 48%, rgba(10,10,20,0.97) 72%)',
+          position: 'relative',
+          background: 'rgba(10, 10, 22, 0.58)',
+          backdropFilter: 'blur(18px)',
+          WebkitBackdropFilter: 'blur(18px)',
+          border: '1px solid rgba(255, 255, 255, 0.07)',
+          borderRadius: 'var(--r-lg)',
+          padding: 'clamp(20px, 3vw, 32px) clamp(20px, 3vw, 32px)',
+          display: 'flex',
+          flexDirection: 'column',
+          gap: 0,
         }}
-      />
-      {/* Scrim: subtle bottom vignette */}
-      <div
-        aria-hidden="true"
-        style={{
-          position: 'absolute', inset: 0,
-          background: 'linear-gradient(to top, rgba(10,10,20,0.55) 0%, transparent 40%)',
-        }}
-      />
-
-      {/* Content — right side, full height */}
-      <div style={{
-        position: 'relative',
-        marginLeft: 'auto',
-        width: '62%',
-        padding: 'clamp(32px, 4vw, 52px) clamp(28px, 4vw, 52px)',
-        display: 'flex',
-        flexDirection: 'column',
-        justifyContent: 'center',
-        gap: 0,
-      }}>
-        {/* Subtitle + status badge */}
-        <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 12, marginBottom: 10 }}>
+      >
+        {/* Subtitle row: italic serif left · hairline · badge right */}
+        <div style={{
+          display: 'flex',
+          alignItems: 'center',
+          gap: 14,
+          marginBottom: 10,
+        }}>
           {world.subtitle ? (
             <p style={{
-              fontFamily: 'var(--font-body)',
-              fontSize: 10, fontWeight: 700,
-              letterSpacing: '0.28em', textTransform: 'uppercase',
+              fontFamily: "'Cormorant Garamond', Georgia, serif",
+              fontStyle: 'italic',
+              fontSize: 14,
               color: 'var(--gold)',
               margin: 0,
+              whiteSpace: 'nowrap',
+              letterSpacing: '0.03em',
             }}>
               {world.subtitle}
             </p>
-          ) : <span />}
+          ) : null}
+          <div style={{ flex: 1, height: 1, background: 'var(--hairline-strong)' }} aria-hidden="true" />
           <span style={{
             flexShrink: 0,
             display: 'inline-flex', alignItems: 'center',
-            padding: '4px 10px',
-            background: 'rgba(245,200,66,0.12)',
-            border: '1px solid rgba(245,200,66,0.3)',
+            padding: '4px 12px',
+            background: 'var(--gold)',
             borderRadius: 'var(--r-full)',
             fontFamily: 'var(--font-body)',
             fontSize: 10, fontWeight: 700,
-            letterSpacing: '0.18em', textTransform: 'uppercase',
-            color: 'var(--gold)',
+            letterSpacing: '0.16em', textTransform: 'uppercase',
+            color: 'var(--void)',
           }}>
             {statusLabel[world.status]}
           </span>
@@ -151,12 +134,12 @@ export function WorldDetailHeader({ world }: Props) {
         {/* World name */}
         <h1 style={{
           fontFamily: 'var(--font-display)',
-          fontSize: 'clamp(40px, 6vw, 82px)',
+          fontSize: 'clamp(48px, 7.5vw, 96px)',
           fontWeight: 600,
-          lineHeight: 0.95,
+          lineHeight: 0.92,
           letterSpacing: '0.04em',
           color: 'var(--ink)',
-          margin: '0 0 20px',
+          margin: '0 0 16px',
           textTransform: 'uppercase',
         }}>
           {world.name}
@@ -167,10 +150,10 @@ export function WorldDetailHeader({ world }: Props) {
           <p style={{
             fontFamily: "'Cormorant Garamond', Georgia, serif",
             fontStyle: 'italic',
-            fontSize: 18,
+            fontSize: 17,
             lineHeight: 1.55,
-            color: 'var(--gold)',
-            margin: '0 0 16px',
+            color: 'var(--ink-soft)',
+            margin: '0 0 10px',
           }}>
             "{world.quote}"
           </p>
@@ -181,54 +164,16 @@ export function WorldDetailHeader({ world }: Props) {
           <p style={{
             fontSize: 14,
             lineHeight: 1.7,
-            color: 'var(--ink-soft)',
-            margin: '0 0 28px',
+            color: 'var(--muted)',
+            margin: '0 0 20px',
+            maxWidth: 680,
           }}>
             {world.description}
           </p>
         )}
 
-        {/* Stats */}
-        <div style={{
-          display: 'flex',
-          gap: 'clamp(16px, 3vw, 32px)',
-          flexWrap: 'wrap',
-          marginBottom: 32,
-          paddingBottom: 28,
-          borderBottom: '1px solid rgba(255,255,255,0.08)',
-        }}>
-          {[
-            { label: 'Kronieken', value: 0 },
-            { label: 'Locaties', value: 0 },
-            { label: 'Personages', value: 0 },
-            { label: 'Bijgewerkt', value: formatLastVisited(world.updated_at) },
-          ].map(({ label, value }) => (
-            <div key={label}>
-              <p style={{
-                fontFamily: 'var(--font-body)',
-                fontSize: 9, fontWeight: 700,
-                letterSpacing: '0.24em', textTransform: 'uppercase',
-                color: 'var(--muted)',
-                margin: '0 0 4px',
-              }}>
-                {label}
-              </p>
-              <p style={{
-                fontFamily: 'var(--font-display)',
-                fontSize: typeof value === 'number' ? 28 : 15,
-                fontWeight: 600,
-                color: typeof value === 'string' ? 'var(--gold)' : 'var(--ink)',
-                margin: 0,
-                letterSpacing: typeof value === 'number' ? '0.02em' : '0.06em',
-              }}>
-                {value}
-              </p>
-            </div>
-          ))}
-        </div>
-
-        {/* Action buttons */}
-        <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap' }}>
+        {/* Buttons — right-aligned */}
+        <div style={{ display: 'flex', gap: 10, justifyContent: 'flex-end', flexWrap: 'wrap' }}>
           <button
             type="button"
             className="pangu-btn pangu-btn-primary"
