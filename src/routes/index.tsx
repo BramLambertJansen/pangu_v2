@@ -17,6 +17,8 @@ const CampaignDetailPage = lazy(() => import('@/pages/CampaignDetailPage'))
 const CampaignEditPage = lazy(() => import('@/pages/CampaignEditPage'))
 const LocationsPage = lazy(() => import('@/pages/LocationsPage'))
 const LocationEditPage = lazy(() => import('@/pages/LocationEditPage'))
+const LoresPage = lazy(() => import('@/pages/LoresPage'))
+const LoreEditPage = lazy(() => import('@/pages/LoreEditPage'))
 const SessionsPage = lazy(() => import('@/pages/SessionsPage'))
 const SessionEditPage = lazy(() => import('@/pages/SessionEditPage'))
 
@@ -121,6 +123,16 @@ export const router = createBrowserRouter([
         path: '/locations/:id/edit',
         loader: requireAuth,
         element: wrap(LocationEditPage),
+      },
+      {
+        path: '/campaigns/:id/lore',
+        loader: requireAuth,
+        element: wrap(LoresPage),
+      },
+      {
+        path: '/lore/:id/edit',
+        loader: requireAuth,
+        element: wrap(LoreEditPage),
       },
       {
         path: '/campaigns/:id/sessions',
