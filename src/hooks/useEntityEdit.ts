@@ -18,10 +18,10 @@ export function useEntityEdit<T>({ entity, isNew }: UseEntityEditOptions<T>) {
     }
   }, [entity])
 
-  function set<K extends keyof T>(key: K, value: T[K] | null) {
+  const set = useCallback(<K extends keyof T>(key: K, value: T[K] | null) => {
     setForm((prev) => ({ ...prev, [key]: value }))
     setDirty(true)
-  }
+  }, [])
 
   const resetForm = useCallback(() => {
     if (entity) setForm(entity)

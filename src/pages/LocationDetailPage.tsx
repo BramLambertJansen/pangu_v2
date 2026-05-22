@@ -33,7 +33,7 @@ const cardGradients = [
 ]
 
 function pickGradient(id: string): string {
-  const code = (id.charCodeAt(0) ?? 0) + (id.charCodeAt(id.length - 1) ?? 0)
+  const code = (id.charCodeAt(0) || 0) + (id.charCodeAt(id.length - 1) || 0)
   return cardGradients[code % cardGradients.length]
 }
 
@@ -42,7 +42,7 @@ export default function LocationDetailPage() {
   const navigate = useNavigate()
 
   const { data: location, isLoading } = useQuery<LocationWithCampaign>({
-    queryKey: queryKeys.campaigns.locationDetail(id!),
+    queryKey: queryKeys.campaigns.locationDetailFull(id!),
     queryFn: async () => {
       const { data, error } = await supabase
         .from('locations')

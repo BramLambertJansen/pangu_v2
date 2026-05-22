@@ -42,7 +42,7 @@ export default function WorldEditPage() {
 
   const { data: world, isLoading } = useWorld(id)
 
-  const { containerRef, posString: imagePosString, isDragging, handlers: imagePosHandlers } = useImagePositioning(
+  const { containerRef, posString: imagePosString, isDragging, resetPosition, handlers: imagePosHandlers } = useImagePositioning(
     world?.header_image_position,
     handlePositionChange,
   )
@@ -107,6 +107,7 @@ export default function WorldEditPage() {
     } else {
       setForm(world!)
       setDirty(false)
+      resetPosition(world!.header_image_position)
       navigate(`/worlds/${id}`)
     }
   }

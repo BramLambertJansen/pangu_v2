@@ -33,7 +33,7 @@ const cardGradients = [
 ]
 
 function pickGradient(id: string): string {
-  const code = (id.charCodeAt(0) ?? 0) + (id.charCodeAt(id.length - 1) ?? 0)
+  const code = (id.charCodeAt(0) || 0) + (id.charCodeAt(id.length - 1) || 0)
   return cardGradients[code % cardGradients.length]
 }
 
@@ -42,7 +42,7 @@ export default function NpcDetailPage() {
   const navigate = useNavigate()
 
   const { data: npc, isLoading } = useQuery<NpcWithCampaign>({
-    queryKey: queryKeys.campaigns.npcDetail(id!),
+    queryKey: queryKeys.campaigns.npcDetailFull(id!),
     queryFn: async () => {
       const { data, error } = await supabase
         .from('npcs')
