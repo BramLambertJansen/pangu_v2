@@ -112,23 +112,13 @@ export default function LocationEditPage() {
     setDirty(true)
   }
 
-  async function abandon() {
-    const { error } = await supabase.from('locations').delete().eq('id', id!)
-    if (error) {
-      toast.error('Locatie kon niet worden verwijderd')
-      return
-    }
-    if (campaignId) {
-      queryClient.invalidateQueries({ queryKey: queryKeys.campaigns.locations(campaignId) })
-      navigate(`/campaigns/${campaignId}/locations`)
-    } else {
-      navigate('/dashboard')
-    }
-  }
-
   function handleCancel() {
     if (!committed) {
-      abandon()
+      if (campaignId) {
+        navigate(`/campaigns/${campaignId}/locations`)
+      } else {
+        navigate('/dashboard')
+      }
     } else {
       setForm(locationData!)
       setDirty(false)
@@ -138,7 +128,11 @@ export default function LocationEditPage() {
 
   function handleBack() {
     if (!committed) {
-      abandon()
+      if (campaignId) {
+        navigate(`/campaigns/${campaignId}/locations`)
+      } else {
+        navigate('/dashboard')
+      }
     } else {
       navigate(`/locations/${id}`)
     }

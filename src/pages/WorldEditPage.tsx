@@ -164,19 +164,9 @@ export default function WorldEditPage() {
     setDirty(true)
   }
 
-  async function abandon() {
-    const { error } = await supabase.from('worlds').delete().eq('id', id!)
-    if (error) {
-      toast.error('Wereld kon niet worden verwijderd')
-      return
-    }
-    queryClient.invalidateQueries({ queryKey: queryKeys.worlds.all })
-    navigate('/worlds')
-  }
-
   function handleCancel() {
     if (!committed) {
-      abandon()
+      navigate('/worlds')
     } else {
       setForm(world!)
       setDirty(false)
@@ -186,7 +176,7 @@ export default function WorldEditPage() {
 
   function handleBack() {
     if (!committed) {
-      abandon()
+      navigate('/worlds')
     } else {
       navigate(`/worlds/${id}`)
     }

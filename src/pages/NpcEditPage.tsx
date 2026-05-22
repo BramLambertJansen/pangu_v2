@@ -112,23 +112,13 @@ export default function NpcEditPage() {
     setDirty(true)
   }
 
-  async function abandon() {
-    const { error } = await supabase.from('npcs').delete().eq('id', id!)
-    if (error) {
-      toast.error('NPC kon niet worden verwijderd')
-      return
-    }
-    if (campaignId) {
-      queryClient.invalidateQueries({ queryKey: queryKeys.campaigns.npcs(campaignId) })
-      navigate(`/campaigns/${campaignId}/npcs`)
-    } else {
-      navigate('/dashboard')
-    }
-  }
-
   function handleCancel() {
     if (!committed) {
-      abandon()
+      if (campaignId) {
+        navigate(`/campaigns/${campaignId}/npcs`)
+      } else {
+        navigate('/dashboard')
+      }
     } else {
       setForm(npcData!)
       setDirty(false)
@@ -138,7 +128,11 @@ export default function NpcEditPage() {
 
   function handleBack() {
     if (!committed) {
-      abandon()
+      if (campaignId) {
+        navigate(`/campaigns/${campaignId}/npcs`)
+      } else {
+        navigate('/dashboard')
+      }
     } else {
       navigate(`/campaigns/${campaignId}/npcs`)
     }
