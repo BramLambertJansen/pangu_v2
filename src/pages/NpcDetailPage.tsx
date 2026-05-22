@@ -3,6 +3,7 @@ import { useQuery } from '@tanstack/react-query'
 import { supabase } from '@/lib/supabase'
 import { queryKeys } from '@/lib/queryKeys'
 import { Spinner } from '@/components/ui/Spinner'
+import { Breadcrumb } from '@/components/ui/Breadcrumb'
 import { WorldDetailDivider } from '@/components/world/WorldDetailDivider'
 import type { Npc, NpcStatus } from '@/types/npc.types'
 
@@ -34,27 +35,6 @@ const cardGradients = [
 function pickGradient(id: string): string {
   const code = (id.charCodeAt(0) ?? 0) + (id.charCodeAt(id.length - 1) ?? 0)
   return cardGradients[code % cardGradients.length]
-}
-
-const breadcrumbStyle: React.CSSProperties = {
-  fontFamily: 'var(--font-body)',
-  fontSize: 11,
-  fontWeight: 700,
-  letterSpacing: '0.18em',
-  textTransform: 'uppercase',
-}
-
-const breadcrumbButtonStyle: React.CSSProperties = {
-  ...breadcrumbStyle,
-  display: 'inline-flex',
-  alignItems: 'center',
-  gap: 6,
-  background: 'none',
-  border: 'none',
-  cursor: 'pointer',
-  color: 'var(--muted)',
-  padding: 0,
-  transition: 'color var(--t-fast)',
 }
 
 export default function NpcDetailPage() {
@@ -102,81 +82,37 @@ export default function NpcDetailPage() {
 
   return (
     <div>
-      {/* Breadcrumb */}
-      <nav aria-label="Navigatie" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 24, flexWrap: 'wrap', gap: 12 }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
-          {world && (
-            <>
-              <button
-                type="button"
-                onClick={() => navigate(`/worlds/${world.id}`)}
-                aria-label={`Terug naar ${world.name}`}
-                style={breadcrumbButtonStyle}
-                onMouseEnter={(e) => (e.currentTarget.style.color = 'var(--ink-soft)')}
-                onMouseLeave={(e) => (e.currentTarget.style.color = 'var(--muted)')}
-              >
-                <svg aria-hidden="true" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M19 12H5" /><path d="M12 19l-7-7 7-7" />
-                </svg>
-                {world.name}
-              </button>
-              <span aria-hidden="true" style={{ ...breadcrumbStyle, color: 'var(--hairline)' }}>·</span>
-            </>
-          )}
-
-          {campaign && (
-            <>
-              <button
-                type="button"
-                onClick={() => navigate(`/campaigns/${campaign.id}`)}
-                aria-label={`Terug naar ${campaign.name}`}
-                style={breadcrumbButtonStyle}
-                onMouseEnter={(e) => (e.currentTarget.style.color = 'var(--ink-soft)')}
-                onMouseLeave={(e) => (e.currentTarget.style.color = 'var(--muted)')}
-              >
-                {campaign.name}
-              </button>
-              <span aria-hidden="true" style={{ ...breadcrumbStyle, color: 'var(--hairline)' }}>·</span>
-
-              <button
-                type="button"
-                onClick={() => navigate(`/campaigns/${campaign.id}/npcs`)}
-                aria-label="Terug naar NPCs"
-                style={breadcrumbButtonStyle}
-                onMouseEnter={(e) => (e.currentTarget.style.color = 'var(--ink-soft)')}
-                onMouseLeave={(e) => (e.currentTarget.style.color = 'var(--muted)')}
-              >
-                NPCs
-              </button>
-              <span aria-hidden="true" style={{ ...breadcrumbStyle, color: 'var(--hairline)' }}>·</span>
-            </>
-          )}
-
-          <span style={{ ...breadcrumbStyle, color: 'var(--ink-soft)' }} aria-current="page">
-            NPC
-          </span>
-        </div>
-
-        <Link
-          to={`/npcs/${id}/edit`}
-          aria-label={`${npc.name} bewerken`}
-          style={{
-            display: 'inline-flex', alignItems: 'center', gap: 6,
-            color: 'var(--muted)', fontSize: 12, fontWeight: 700,
-            letterSpacing: '0.18em', textTransform: 'uppercase',
-            fontFamily: 'var(--font-body)',
-            textDecoration: 'none',
-            transition: 'color var(--t-fast)',
-          }}
-          onMouseEnter={(e) => (e.currentTarget.style.color = 'var(--ink-soft)')}
-          onMouseLeave={(e) => (e.currentTarget.style.color = 'var(--muted)')}
-        >
-          <svg aria-hidden="true" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z" />
-          </svg>
-          Bewerken
-        </Link>
-      </nav>
+      <Breadcrumb
+        items={[
+          ...(world ? [{ label: world.name, onClick: () => navigate(`/worlds/${world.id}`) }] : []),
+          ...(campaign ? [
+            { label: campaign.name, onClick: () => navigate(`/campaigns/${campaign.id}`) },
+            { label: 'NPCs', onClick: () => navigate(`/campaigns/${campaign.id}/npcs`) },
+          ] : []),
+          { label: 'NPC' },
+        ]}
+        actions={
+          <Link
+            to={`/npcs/${id}/edit`}
+            aria-label={`${npc.name} bewerken`}
+            style={{
+              display: 'inline-flex', alignItems: 'center', gap: 6,
+              color: 'var(--muted)', fontSize: 12, fontWeight: 700,
+              letterSpacing: '0.18em', textTransform: 'uppercase',
+              fontFamily: 'var(--font-body)',
+              textDecoration: 'none',
+              transition: 'color var(--t-fast)',
+            }}
+            onMouseEnter={(e: React.MouseEvent<HTMLAnchorElement>) => (e.currentTarget.style.color = 'var(--ink-soft)')}
+            onMouseLeave={(e: React.MouseEvent<HTMLAnchorElement>) => (e.currentTarget.style.color = 'var(--muted)')}
+          >
+            <svg aria-hidden="true" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z" />
+            </svg>
+            Bewerken
+          </Link>
+        }
+      />
 
       {/* Header card */}
       <div
