@@ -1,4 +1,4 @@
-import { useState, useEffect, useId } from 'react'
+import { useId } from 'react'
 import { useParams, useNavigate, useLocation } from 'react-router-dom'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { toast } from 'sonner'
@@ -6,6 +6,7 @@ import { supabase } from '@/lib/supabase'
 import { queryKeys } from '@/lib/queryKeys'
 import { Modal } from '@/components/ui/Modal'
 import { Spinner } from '@/components/ui/Spinner'
+import { useEntityEdit } from '@/hooks/useEntityEdit'
 import type { Location, LocationStatus } from '@/types/location.types'
 
 const statusOptions: { value: LocationStatus; label: string }[] = [
@@ -30,11 +31,6 @@ export default function LocationEditPage() {
   const isNew = locationState?.isNew ?? false
   const campaignIdFromState = locationState?.campaignId
 
-  const [committed, setCommitted] = useState(!isNew)
-  const [deleteOpen, setDeleteOpen] = useState(false)
-  const [form, setForm] = useState<Partial<Location>>({})
-  const [dirty, setDirty] = useState(false)
-
   const { data: locationData, isLoading } = useQuery<Location>({
     queryKey: queryKeys.campaigns.locationDetail(id!),
     queryFn: async () => {
@@ -50,12 +46,12 @@ export default function LocationEditPage() {
     staleTime: 1000 * 60,
   })
 
-  useEffect(() => {
-    if (locationData) {
-      setForm(locationData)
-      setDirty(false)
-    }
-  }, [locationData])
+  const {
+    form, set, dirty, setDirty,
+    committed, setCommitted,
+    deleteOpen, setDeleteOpen,
+    resetForm,
+  } = useEntityEdit({ entity: locationData, isNew })
 
   const campaignId = locationData?.campaign_id ?? campaignIdFromState
 
@@ -107,11 +103,6 @@ export default function LocationEditPage() {
     },
   })
 
-  function set<K extends keyof Location>(key: K, value: Location[K]) {
-    setForm((prev) => ({ ...prev, [key]: value }))
-    setDirty(true)
-  }
-
   function handleCancel() {
     if (!committed) {
       if (campaignId) {
@@ -120,8 +111,7 @@ export default function LocationEditPage() {
         navigate('/dashboard')
       }
     } else {
-      setForm(locationData!)
-      setDirty(false)
+      resetForm()
       navigate(`/locations/${id}`)
     }
   }
@@ -231,7 +221,7 @@ export default function LocationEditPage() {
                 id="location-subtitle"
                 className="pangu-input"
                 value={form.subtitle ?? ''}
-                onChange={(e) => set('subtitle', e.target.value || null as unknown as string)}
+                onChange={(e) => set('subtitle', e.target.value || null)}
                 placeholder="Korte omschrijving of tagline"
               />
             </div>
@@ -242,7 +232,7 @@ export default function LocationEditPage() {
                 id={locationTypeId}
                 className="pangu-input"
                 value={form.location_type ?? ''}
-                onChange={(e) => set('location_type', e.target.value || null as unknown as string)}
+                onChange={(e) => set('location_type', e.target.value || null)}
                 placeholder="Bijv. Stad, Kerker, Herberg, Woud..."
               />
             </div>
@@ -267,7 +257,7 @@ export default function LocationEditPage() {
                 id={descriptionId}
                 className="pangu-textarea"
                 value={form.description ?? ''}
-                onChange={(e) => set('description', e.target.value || null as unknown as string)}
+                onChange={(e) => set('description', e.target.value || null)}
                 placeholder="Beschrijf de locatie, haar sfeer en bijzonderheden..."
                 rows={4}
               />
@@ -279,7 +269,7 @@ export default function LocationEditPage() {
                 id={notesId}
                 className="pangu-textarea"
                 value={form.notes ?? ''}
-                onChange={(e) => set('notes', e.target.value || null as unknown as string)}
+                onChange={(e) => set('notes', e.target.value || null)}
                 placeholder="Aantekeningen voor de DM: geheimen, NPCs, verborgen items..."
                 rows={8}
               />

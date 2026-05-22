@@ -1,4 +1,4 @@
-import { useState, useEffect, useId } from 'react'
+import { useId } from 'react'
 import { useParams, useNavigate, useLocation } from 'react-router-dom'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { toast } from 'sonner'
@@ -6,6 +6,7 @@ import { supabase } from '@/lib/supabase'
 import { queryKeys } from '@/lib/queryKeys'
 import { Modal } from '@/components/ui/Modal'
 import { Spinner } from '@/components/ui/Spinner'
+import { useEntityEdit } from '@/hooks/useEntityEdit'
 import type { Lore, LoreStatus } from '@/types/lore.types'
 
 const statusOptions: { value: LoreStatus; label: string }[] = [
@@ -29,11 +30,6 @@ export default function LoreEditPage() {
   const isNew = locationState?.isNew ?? false
   const campaignIdFromState = locationState?.campaignId
 
-  const [committed, setCommitted] = useState(!isNew)
-  const [deleteOpen, setDeleteOpen] = useState(false)
-  const [form, setForm] = useState<Partial<Lore>>({})
-  const [dirty, setDirty] = useState(false)
-
   const { data: loreData, isLoading } = useQuery<Lore>({
     queryKey: queryKeys.campaigns.loreDetail(id!),
     queryFn: async () => {
@@ -49,12 +45,12 @@ export default function LoreEditPage() {
     staleTime: 1000 * 60,
   })
 
-  useEffect(() => {
-    if (loreData) {
-      setForm(loreData)
-      setDirty(false)
-    }
-  }, [loreData])
+  const {
+    form, set, dirty, setDirty,
+    committed, setCommitted,
+    deleteOpen, setDeleteOpen,
+    resetForm,
+  } = useEntityEdit({ entity: loreData, isNew })
 
   const campaignId = loreData?.campaign_id ?? campaignIdFromState
 
@@ -106,11 +102,6 @@ export default function LoreEditPage() {
     },
   })
 
-  function set<K extends keyof Lore>(key: K, value: Lore[K]) {
-    setForm((prev) => ({ ...prev, [key]: value }))
-    setDirty(true)
-  }
-
   function handleCancel() {
     if (!committed) {
       if (campaignId) {
@@ -119,8 +110,7 @@ export default function LoreEditPage() {
         navigate('/dashboard')
       }
     } else {
-      setForm(loreData!)
-      setDirty(false)
+      resetForm()
       navigate(`/campaigns/${campaignId}/lore`)
     }
   }
@@ -230,7 +220,7 @@ export default function LoreEditPage() {
                 id="lore-subtitle"
                 className="pangu-input"
                 value={form.subtitle ?? ''}
-                onChange={(e) => set('subtitle', e.target.value || null as unknown as string)}
+                onChange={(e) => set('subtitle', e.target.value || null)}
                 placeholder="Korte omschrijving of tagline"
               />
             </div>
@@ -241,7 +231,7 @@ export default function LoreEditPage() {
                 id={loreCategoryId}
                 className="pangu-input"
                 value={form.lore_category ?? ''}
-                onChange={(e) => set('lore_category', e.target.value || null as unknown as string)}
+                onChange={(e) => set('lore_category', e.target.value || null)}
                 placeholder="Bijv. Mythe, Legende, Factie, Religie, Magie..."
               />
             </div>
@@ -266,7 +256,7 @@ export default function LoreEditPage() {
                 id={descriptionId}
                 className="pangu-textarea"
                 value={form.description ?? ''}
-                onChange={(e) => set('description', e.target.value || null as unknown as string)}
+                onChange={(e) => set('description', e.target.value || null)}
                 placeholder="Beschrijf dit lore-item, haar oorsprong en betekenis..."
                 rows={4}
               />
@@ -278,7 +268,7 @@ export default function LoreEditPage() {
                 id={notesId}
                 className="pangu-textarea"
                 value={form.notes ?? ''}
-                onChange={(e) => set('notes', e.target.value || null as unknown as string)}
+                onChange={(e) => set('notes', e.target.value || null)}
                 placeholder="Aantekeningen voor de DM: verborgen verbanden, plot hooks, geheimen..."
                 rows={8}
               />

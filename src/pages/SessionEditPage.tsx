@@ -1,4 +1,4 @@
-import { useState, useEffect, useId } from 'react'
+import { useId } from 'react'
 import { useParams, useNavigate, useLocation } from 'react-router-dom'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { toast } from 'sonner'
@@ -6,6 +6,7 @@ import { supabase } from '@/lib/supabase'
 import { queryKeys } from '@/lib/queryKeys'
 import { Modal } from '@/components/ui/Modal'
 import { Spinner } from '@/components/ui/Spinner'
+import { useEntityEdit } from '@/hooks/useEntityEdit'
 import type { Session, SessionStatus } from '@/types/session.types'
 
 const statusOptions: { value: SessionStatus; label: string }[] = [
@@ -31,11 +32,6 @@ export default function SessionEditPage() {
   const isNew = locationState?.isNew ?? false
   const campaignIdFromState = locationState?.campaignId
 
-  const [committed, setCommitted] = useState(!isNew)
-  const [deleteOpen, setDeleteOpen] = useState(false)
-  const [form, setForm] = useState<Partial<Session>>({})
-  const [dirty, setDirty] = useState(false)
-
   const { data: session, isLoading } = useQuery<Session>({
     queryKey: queryKeys.campaigns.sessionDetail(id!),
     queryFn: async () => {
@@ -51,12 +47,12 @@ export default function SessionEditPage() {
     staleTime: 1000 * 60,
   })
 
-  useEffect(() => {
-    if (session) {
-      setForm(session)
-      setDirty(false)
-    }
-  }, [session])
+  const {
+    form, set, dirty, setDirty,
+    committed, setCommitted,
+    deleteOpen, setDeleteOpen,
+    resetForm,
+  } = useEntityEdit({ entity: session, isNew })
 
   const campaignId = session?.campaign_id ?? campaignIdFromState
 
@@ -109,11 +105,6 @@ export default function SessionEditPage() {
     },
   })
 
-  function set<K extends keyof Session>(key: K, value: Session[K]) {
-    setForm((prev) => ({ ...prev, [key]: value }))
-    setDirty(true)
-  }
-
   function handleCancel() {
     if (!committed) {
       if (campaignId) {
@@ -122,8 +113,7 @@ export default function SessionEditPage() {
         navigate('/dashboard')
       }
     } else {
-      setForm(session!)
-      setDirty(false)
+      resetForm()
       navigate(`/campaigns/${campaignId}/sessions`)
     }
   }
@@ -233,7 +223,7 @@ export default function SessionEditPage() {
                 id="session-subtitle"
                 className="pangu-input"
                 value={form.subtitle ?? ''}
-                onChange={(e) => set('subtitle', e.target.value || null as unknown as string)}
+                onChange={(e) => set('subtitle', e.target.value || null)}
                 placeholder="Korte beschrijving of tagline"
               />
             </div>
@@ -246,7 +236,7 @@ export default function SessionEditPage() {
                 type="number"
                 min={1}
                 value={form.session_number ?? ''}
-                onChange={(e) => set('session_number', e.target.value ? parseInt(e.target.value, 10) : null as unknown as number)}
+                onChange={(e) => set('session_number', e.target.value ? parseInt(e.target.value, 10) : null)}
                 placeholder="1"
               />
             </div>
@@ -258,7 +248,7 @@ export default function SessionEditPage() {
                 className="pangu-input"
                 type="date"
                 value={form.session_date ?? ''}
-                onChange={(e) => set('session_date', e.target.value || null as unknown as string)}
+                onChange={(e) => set('session_date', e.target.value || null)}
               />
             </div>
 
@@ -282,7 +272,7 @@ export default function SessionEditPage() {
                 id={descriptionId}
                 className="pangu-textarea"
                 value={form.description ?? ''}
-                onChange={(e) => set('description', e.target.value || null as unknown as string)}
+                onChange={(e) => set('description', e.target.value || null)}
                 placeholder="Beschrijf de sessie, haar sfeer en achtergrond..."
                 rows={4}
               />
@@ -294,7 +284,7 @@ export default function SessionEditPage() {
                 id={notesId}
                 className="pangu-textarea"
                 value={form.notes ?? ''}
-                onChange={(e) => set('notes', e.target.value || null as unknown as string)}
+                onChange={(e) => set('notes', e.target.value || null)}
                 placeholder="Aantekeningen voor de DM: hooks, NPC-namen, verhaalpunten..."
                 rows={8}
               />
