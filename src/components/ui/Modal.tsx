@@ -80,7 +80,7 @@ export function Modal({ open, onClose, title, children, className }: ModalProps)
           <button
             onClick={() => onCloseRef.current()}
             aria-label="Sluiten"
-            className="rounded p-1.5 text-gray-400 hover:text-gray-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500"
+            className="flex h-11 w-11 items-center justify-center rounded text-gray-400 hover:text-gray-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--violet)]"
           >
             <svg aria-hidden="true" className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />

@@ -1,4 +1,5 @@
 import type { World, WorldStatus } from '@/types/world.types'
+import { sanitizeImageUrl } from '@/utils/sanitizeUrl'
 
 const cardGradients = [
   'radial-gradient(ellipse 70% 55% at 30% 40%, rgba(155,138,255,0.55) 0%, rgba(80,50,200,0.28) 45%, var(--void) 78%)',
@@ -56,12 +57,12 @@ export function WorldDetailHeader({ world, onCreateCampaign, isCreatingCampaign 
       }}
     >
       {/* Full-bleed background */}
-      {world.header_image ? (
+      {sanitizeImageUrl(world.header_image) ? (
         <div
           aria-hidden="true"
           style={{
             position: 'absolute', inset: 0,
-            backgroundImage: `url(${world.header_image})`,
+            backgroundImage: `url(${sanitizeImageUrl(world.header_image)})`,
             backgroundSize: 'cover',
             backgroundPosition: world.header_image_position ?? 'center',
           }}

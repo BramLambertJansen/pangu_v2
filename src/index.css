@@ -20,7 +20,7 @@
   --azure: #6ba7ff;
   --ink: #f0ecf7;
   --ink-soft: #c8c2dc;
-  --muted: #8079a0;
+  --muted: #9999b3;
   --subtle: #4a4565;
   --hairline: rgba(155, 138, 255, 0.14);
   --hairline-strong: rgba(155, 138, 255, 0.28);
@@ -627,6 +627,35 @@ body {
     z-index: 2;
     min-height: 520px;
   }
+}
+
+/* ── Card focus (replaces inline onFocus/onBlur handlers) ── */
+
+.pangu-card-focusable:focus-visible {
+  outline: 2px solid var(--violet);
+  outline-offset: 2px;
+}
+
+/* Skip-to-content link ────────────────────────────────────── */
+
+.skip-to-content {
+  position: absolute;
+  top: -100%;
+  left: 8px;
+  z-index: 9999;
+  padding: 8px 16px;
+  background: var(--surface-2);
+  color: var(--ink);
+  border: 1px solid var(--violet);
+  border-radius: var(--r-xl);
+  font-size: 14px;
+  font-weight: 600;
+  text-decoration: none;
+  transition: top 0.1s;
+}
+
+.skip-to-content:focus {
+  top: 8px;
 }
 
 /* ── Motion safety ───────────────────────────────────────── */

@@ -48,6 +48,7 @@ export function LocationCard({ location }: Props) {
       onKeyDown={(e) => {
         if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); handleActivate() }
       }}
+      className="pangu-card-focusable"
       style={{
         position: 'relative',
         borderRadius: 'var(--r-xl)',
@@ -59,7 +60,6 @@ export function LocationCard({ location }: Props) {
         padding: '20px 24px 18px',
         minHeight: 120,
         transition: 'border-color var(--t-base) var(--ease-out), box-shadow var(--t-base) var(--ease-out), transform var(--t-base) var(--ease-out)',
-        outline: 'none',
         background: 'var(--void-2)',
       }}
       onMouseEnter={(e) => {
@@ -74,8 +74,6 @@ export function LocationCard({ location }: Props) {
         el.style.boxShadow = 'none'
         el.style.transform = 'translateY(0)'
       }}
-      onFocus={(e) => { e.currentTarget.style.outline = '2px solid var(--violet)'; e.currentTarget.style.outlineOffset = '2px' }}
-      onBlur={(e) => { e.currentTarget.style.outline = 'none' }}
     >
       {/* Gradient accent */}
       <div
@@ -192,9 +190,9 @@ export function ForgeLocationCard({ onClick, loading }: ForgeProps) {
         minHeight: 120,
         gap: 8,
         transition: 'border-color var(--t-base) var(--ease-out), background var(--t-base) var(--ease-out)',
-        outline: 'none',
         background: 'transparent',
       }}
+      className="pangu-card-focusable"
       onMouseEnter={(e) => {
         e.currentTarget.style.borderColor = 'var(--emerald, #3ecfb2)'
         e.currentTarget.style.background = 'rgba(62,207,178,0.04)'
@@ -203,8 +201,6 @@ export function ForgeLocationCard({ onClick, loading }: ForgeProps) {
         e.currentTarget.style.borderColor = 'var(--hairline-strong)'
         e.currentTarget.style.background = 'transparent'
       }}
-      onFocus={(e) => { e.currentTarget.style.outline = '2px solid var(--violet)'; e.currentTarget.style.outlineOffset = '2px' }}
-      onBlur={(e) => { e.currentTarget.style.outline = 'none' }}
     >
       <svg
         aria-hidden="true"

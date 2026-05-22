@@ -23,7 +23,7 @@ export default defineConfig({
         display: 'standalone',
         start_url: '/',
         scope: '/',
-        orientation: 'portrait',
+        orientation: 'any',
         icons: [
           { src: '/pwa-64x64.png', sizes: '64x64', type: 'image/png' },
           { src: '/pwa-192x192.png', sizes: '192x192', type: 'image/png' },
@@ -37,6 +37,17 @@ export default defineConfig({
   resolve: {
     alias: {
       '@': path.resolve(__dirname, './src'),
+    },
+  },
+  build: {
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          'vendor-react': ['react', 'react-dom', 'react-router-dom'],
+          'vendor-supabase': ['@supabase/supabase-js'],
+          'vendor-data': ['@tanstack/react-query', 'zustand'],
+        },
+      },
     },
   },
 })

@@ -40,7 +40,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         .select('*')
         .order('created_at', { ascending: false })
 
-      if (error) return res.status(500).json({ error: error.message })
+      if (error) { console.error('[admin/users GET]', error.message); return res.status(500).json({ error: 'Ophalen mislukt' }) }
       return res.json(data)
     }
 
@@ -55,6 +55,9 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       if (!email || !password || !role) {
         return res.status(400).json({ error: 'E-mail, wachtwoord en rol zijn verplicht' })
       }
+      if (role !== 'user' && role !== 'admin') {
+        return res.status(400).json({ error: 'Ongeldige rol' })
+      }
 
       const { data, error } = await client.auth.admin.createUser({
         email,
@@ -63,7 +66,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         email_confirm: true,
       })
 
-      if (error) return res.status(400).json({ error: error.message })
+      if (error) { console.error('[admin/users POST] createUser', error.message); return res.status(400).json({ error: 'Account aanmaken mislukt' }) }
 
       // Upsert the profile so role and display_name are always correct,
       // regardless of trigger timing or default values.
@@ -79,7 +82,8 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       if (profileError) {
         // Profile could not be set — roll back the auth user
         await client.auth.admin.deleteUser(data.user.id)
-        return res.status(500).json({ error: 'Account aanmaken mislukt: ' + profileError.message })
+        console.error('[admin/users POST] upsert profile', profileError.message)
+        return res.status(500).json({ error: 'Account aanmaken mislukt' })
       }
 
       return res.status(201).json(data.user)

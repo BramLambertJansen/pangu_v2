@@ -48,6 +48,7 @@ export function NpcCard({ npc }: Props) {
       onKeyDown={(e) => {
         if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); handleActivate() }
       }}
+      className="pangu-card-focusable"
       style={{
         position: 'relative',
         borderRadius: 'var(--r-xl)',
@@ -59,7 +60,6 @@ export function NpcCard({ npc }: Props) {
         padding: '20px 24px 18px',
         minHeight: 120,
         transition: 'border-color var(--t-base) var(--ease-out), box-shadow var(--t-base) var(--ease-out), transform var(--t-base) var(--ease-out)',
-        outline: 'none',
         background: 'var(--void-2)',
       }}
       onMouseEnter={(e) => {
@@ -74,8 +74,6 @@ export function NpcCard({ npc }: Props) {
         el.style.boxShadow = 'none'
         el.style.transform = 'translateY(0)'
       }}
-      onFocus={(e) => { e.currentTarget.style.outline = '2px solid var(--violet)'; e.currentTarget.style.outlineOffset = '2px' }}
-      onBlur={(e) => { e.currentTarget.style.outline = 'none' }}
     >
       {/* Gradient accent */}
       <div
@@ -192,9 +190,9 @@ export function ForgeNpcCard({ onClick, loading }: ForgeProps) {
         minHeight: 120,
         gap: 8,
         transition: 'border-color var(--t-base) var(--ease-out), background var(--t-base) var(--ease-out)',
-        outline: 'none',
         background: 'transparent',
       }}
+      className="pangu-card-focusable"
       onMouseEnter={(e) => {
         e.currentTarget.style.borderColor = 'var(--crimson, #dc5a50)'
         e.currentTarget.style.background = 'rgba(220,90,80,0.04)'
@@ -203,8 +201,6 @@ export function ForgeNpcCard({ onClick, loading }: ForgeProps) {
         e.currentTarget.style.borderColor = 'var(--hairline-strong)'
         e.currentTarget.style.background = 'transparent'
       }}
-      onFocus={(e) => { e.currentTarget.style.outline = '2px solid var(--violet)'; e.currentTarget.style.outlineOffset = '2px' }}
-      onBlur={(e) => { e.currentTarget.style.outline = 'none' }}
     >
       {/* Person icon */}
       <svg

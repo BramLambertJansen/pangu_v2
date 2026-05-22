@@ -13,11 +13,11 @@ const sizeStyles: Record<Size, string> = {
   lg: 'h-8 w-8 border-[3px]',
 }
 
-export function Spinner({ size = 'md', className, ...props }: SpinnerProps) {
+export function Spinner({ size = 'md', className, 'aria-label': ariaLabel = 'Laden...', ...props }: SpinnerProps) {
   return (
     <span
       role="status"
-      aria-label="Laden..."
+      aria-label={ariaLabel}
       className={cn(
         'inline-block animate-spin rounded-full border-current border-t-transparent',
         sizeStyles[size],

@@ -33,7 +33,7 @@ export default function LoginPage() {
     const { data, error } = await supabase.auth.signInWithPassword({ email, password })
 
     if (error) {
-      toast.error('Inloggen mislukt: ' + error.message)
+      toast.error('Inloggen mislukt. Controleer je e-mailadres en wachtwoord.')
       setLoading(false)
       return
     }

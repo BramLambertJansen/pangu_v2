@@ -49,7 +49,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
       if (Object.keys(authUpdates).length > 0) {
         const { error: authError } = await client.auth.admin.updateUserById(id, authUpdates)
-        if (authError) return res.status(400).json({ error: authError.message })
+        if (authError) { console.error('[admin/users PATCH] updateUserById', authError.message); return res.status(400).json({ error: 'Bijwerken mislukt' }) }
       }
 
       // Update profile columns
@@ -59,7 +59,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
       if (Object.keys(profileUpdates).length > 0) {
         const { error } = await client.from('profiles').update(profileUpdates).eq('id', id)
-        if (error) return res.status(400).json({ error: error.message })
+        if (error) { console.error('[admin/users PATCH] update profile', error.message); return res.status(400).json({ error: 'Bijwerken mislukt' }) }
       }
 
       return res.json({ success: true })
@@ -72,7 +72,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       }
 
       const { error } = await client.auth.admin.deleteUser(id)
-      if (error) return res.status(400).json({ error: error.message })
+      if (error) { console.error('[admin/users DELETE]', error.message); return res.status(400).json({ error: 'Verwijderen mislukt' }) }
       return res.json({ success: true })
     }
 

@@ -487,13 +487,7 @@ export default function CampaignDetailPage() {
                 >
                   ▶ Sessie starten
                 </button>
-                <button
-                  type="button"
-                  className="pangu-btn pangu-btn-gold"
-                  aria-label="Lore Forge — AI lore genereren"
-                >
-                  ✦ Lore Forge
-                </button>
+                {/* Lore Forge: hidden until AI integration is implemented */}
               </div>
             </div>
           </div>

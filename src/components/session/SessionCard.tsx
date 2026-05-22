@@ -59,6 +59,7 @@ export function SessionCard({ session }: Props) {
       onKeyDown={(e) => {
         if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); handleActivate() }
       }}
+      className="pangu-card-focusable"
       style={{
         position: 'relative',
         borderRadius: 'var(--r-xl)',
@@ -70,7 +71,6 @@ export function SessionCard({ session }: Props) {
         padding: '20px 24px 18px',
         minHeight: 120,
         transition: 'border-color var(--t-base) var(--ease-out), box-shadow var(--t-base) var(--ease-out), transform var(--t-base) var(--ease-out)',
-        outline: 'none',
         background: 'var(--void-2)',
       }}
       onMouseEnter={(e) => {
@@ -85,8 +85,6 @@ export function SessionCard({ session }: Props) {
         el.style.boxShadow = 'none'
         el.style.transform = 'translateY(0)'
       }}
-      onFocus={(e) => { e.currentTarget.style.outline = '2px solid var(--violet)'; e.currentTarget.style.outlineOffset = '2px' }}
-      onBlur={(e) => { e.currentTarget.style.outline = 'none' }}
     >
       {/* Gradient accent */}
       <div
@@ -221,9 +219,9 @@ export function ForgeSessionCard({ onClick, loading }: ForgeProps) {
         minHeight: 120,
         gap: 8,
         transition: 'border-color var(--t-base) var(--ease-out), background var(--t-base) var(--ease-out)',
-        outline: 'none',
         background: 'transparent',
       }}
+      className="pangu-card-focusable"
       onMouseEnter={(e) => {
         e.currentTarget.style.borderColor = 'var(--violet)'
         e.currentTarget.style.background = 'rgba(155,138,255,0.04)'
@@ -232,8 +230,6 @@ export function ForgeSessionCard({ onClick, loading }: ForgeProps) {
         e.currentTarget.style.borderColor = 'var(--hairline-strong)'
         e.currentTarget.style.background = 'transparent'
       }}
-      onFocus={(e) => { e.currentTarget.style.outline = '2px solid var(--violet)'; e.currentTarget.style.outlineOffset = '2px' }}
-      onBlur={(e) => { e.currentTarget.style.outline = 'none' }}
     >
       <span style={{
         fontFamily: 'var(--font-display)',

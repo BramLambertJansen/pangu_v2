@@ -1,6 +1,7 @@
 import { useNavigate } from 'react-router-dom'
 import type { World } from '@/types/world.types'
 import { CompassRose } from '@/components/world/CompassRose'
+import { sanitizeImageUrl } from '@/utils/sanitizeUrl'
 
 // Deterministic gradient per world based on id
 const cardGradients = [
@@ -33,6 +34,7 @@ export function WorldCard({ world }: Props) {
       onKeyDown={(e) => {
         if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); navigate(`/worlds/${world.id}`) }
       }}
+      className="pangu-card-focusable"
       style={{
         position: 'relative',
         height: 520,
@@ -43,7 +45,6 @@ export function WorldCard({ world }: Props) {
         display: 'flex',
         flexDirection: 'column',
         transition: 'border-color var(--t-base) var(--ease-out), box-shadow var(--t-base) var(--ease-out), transform var(--t-base) var(--ease-out)',
-        outline: 'none',
       }}
       onMouseEnter={(e) => {
         const el = e.currentTarget
@@ -57,14 +58,12 @@ export function WorldCard({ world }: Props) {
         el.style.boxShadow = 'none'
         el.style.transform = 'translateY(0)'
       }}
-      onFocus={(e) => { e.currentTarget.style.outline = '2px solid var(--violet)'; e.currentTarget.style.outlineOffset = '2px' }}
-      onBlur={(e) => { e.currentTarget.style.outline = 'none' }}
     >
       {/* Background */}
-      {world.header_image ? (
+      {sanitizeImageUrl(world.header_image) ? (
         <div aria-hidden="true" style={{
           position: 'absolute', inset: 0,
-          backgroundImage: `url(${world.header_image})`,
+          backgroundImage: `url(${sanitizeImageUrl(world.header_image)})`,
           backgroundSize: 'cover',
           backgroundPosition: world.header_image_position ?? 'center',
         }} />
@@ -201,6 +200,7 @@ export function ForgeWorldCard({ onClick, loading }: ForgeCardProps) {
       aria-label="Creëer een nieuwe wereld"
       onClick={onClick}
       onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onClick() } }}
+      className="pangu-card-focusable"
       style={{
         position: 'relative',
         height: 520,
@@ -215,7 +215,6 @@ export function ForgeWorldCard({ onClick, loading }: ForgeCardProps) {
         gap: 16,
         background: 'transparent',
         transition: 'border-color var(--t-base) var(--ease-out), background var(--t-base) var(--ease-out)',
-        outline: 'none',
       }}
       onMouseEnter={(e) => {
         e.currentTarget.style.borderColor = 'var(--gold)'
@@ -225,8 +224,6 @@ export function ForgeWorldCard({ onClick, loading }: ForgeCardProps) {
         e.currentTarget.style.borderColor = 'var(--hairline-strong)'
         e.currentTarget.style.background = 'transparent'
       }}
-      onFocus={(e) => { e.currentTarget.style.outline = '2px solid var(--violet)'; e.currentTarget.style.outlineOffset = '2px' }}
-      onBlur={(e) => { e.currentTarget.style.outline = 'none' }}
     >
       <CompassRose size={80} opacity={0.65} />
       <div style={{ textAlign: 'center' }}>

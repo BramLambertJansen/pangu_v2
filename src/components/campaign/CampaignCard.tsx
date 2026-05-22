@@ -41,6 +41,7 @@ export function CampaignCard({ campaign }: Props) {
       onKeyDown={(e) => {
         if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); handleActivate() }
       }}
+      className="pangu-card-focusable"
       style={{
         position: 'relative',
         borderRadius: 'var(--r-xl)',
@@ -52,7 +53,6 @@ export function CampaignCard({ campaign }: Props) {
         padding: '24px 24px 20px',
         minHeight: 160,
         transition: 'border-color var(--t-base) var(--ease-out), box-shadow var(--t-base) var(--ease-out), transform var(--t-base) var(--ease-out)',
-        outline: 'none',
         background: 'var(--void-2)',
       }}
       onMouseEnter={(e) => {
@@ -67,8 +67,6 @@ export function CampaignCard({ campaign }: Props) {
         el.style.boxShadow = 'none'
         el.style.transform = 'translateY(0)'
       }}
-      onFocus={(e) => { e.currentTarget.style.outline = '2px solid var(--violet)'; e.currentTarget.style.outlineOffset = '2px' }}
-      onBlur={(e) => { e.currentTarget.style.outline = 'none' }}
     >
       {/* Gradient accent */}
       <div
@@ -173,9 +171,9 @@ export function ForgeCampaignCard({ onClick, loading }: ForgeProps) {
         minHeight: 160,
         gap: 10,
         transition: 'border-color var(--t-base) var(--ease-out), background var(--t-base) var(--ease-out)',
-        outline: 'none',
         background: 'transparent',
       }}
+      className="pangu-card-focusable"
       onMouseEnter={(e) => {
         e.currentTarget.style.borderColor = 'var(--gold)'
         e.currentTarget.style.background = 'rgba(245,180,50,0.04)'
@@ -184,8 +182,6 @@ export function ForgeCampaignCard({ onClick, loading }: ForgeProps) {
         e.currentTarget.style.borderColor = 'var(--hairline-strong)'
         e.currentTarget.style.background = 'transparent'
       }}
-      onFocus={(e) => { e.currentTarget.style.outline = '2px solid var(--violet)'; e.currentTarget.style.outlineOffset = '2px' }}
-      onBlur={(e) => { e.currentTarget.style.outline = 'none' }}
     >
       <span style={{
         fontFamily: 'var(--font-display)',

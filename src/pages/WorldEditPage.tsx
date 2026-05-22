@@ -168,7 +168,7 @@ export default function WorldEditPage() {
     if (!committed) {
       navigate('/worlds')
     } else {
-      setForm(world!)
+      if (world) setForm(world)
       setDirty(false)
       navigate(`/worlds/${id}`)
     }
@@ -343,7 +343,7 @@ export default function WorldEditPage() {
                 id="world-subtitle"
                 className="pangu-input"
                 value={form.subtitle ?? ''}
-                onChange={(e) => set('subtitle', e.target.value || null as unknown as string)}
+                onChange={(e) => set('subtitle', e.target.value || null)}
                 placeholder="Korte beschrijving of tagline"
               />
             </div>
@@ -369,7 +369,7 @@ export default function WorldEditPage() {
                 className="pangu-input"
                 type="url"
                 value={form.header_image ?? ''}
-                onChange={(e) => set('header_image', e.target.value || null as unknown as string)}
+                onChange={(e) => set('header_image', e.target.value || null)}
                 placeholder="https://..."
               />
             </div>
@@ -380,7 +380,7 @@ export default function WorldEditPage() {
                 id={quoteId}
                 className="pangu-textarea"
                 value={form.quote ?? ''}
-                onChange={(e) => set('quote', e.target.value || null as unknown as string)}
+                onChange={(e) => set('quote', e.target.value || null)}
                 placeholder="Een passende quote voor deze wereld..."
                 rows={2}
                 style={{ minHeight: 'auto' }}
@@ -393,7 +393,7 @@ export default function WorldEditPage() {
                 id={descriptionId}
                 className="pangu-textarea"
                 value={form.description ?? ''}
-                onChange={(e) => set('description', e.target.value || null as unknown as string)}
+                onChange={(e) => set('description', e.target.value || null)}
                 placeholder="Beschrijf de wereld, haar sfeer en achtergrond..."
                 rows={5}
               />
