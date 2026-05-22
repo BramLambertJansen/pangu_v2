@@ -441,7 +441,7 @@ npm run type-check   # tsc --noEmit
 ### Wereld — NPCs
 - [x] NPC-overzicht per campaign (`/campaigns/:id/npcs`)
 - [x] NPC aanmaken / bewerken / verwijderen
-- [ ] NPC-detailpagina
+- [x] NPC-detailpagina `/npcs/:id` — breadcrumbs (wereld · kroniek · NPCs), header met rol- en statusbadge, beschrijving, DM-notities
 
 ### Wereld — Lore
 - [x] Lore-overzicht per campaign (`/campaigns/:id/lore`)

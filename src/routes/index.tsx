@@ -21,6 +21,7 @@ const LocationEditPage = lazy(() => import('@/pages/LocationEditPage'))
 const LoresPage = lazy(() => import('@/pages/LoresPage'))
 const LoreEditPage = lazy(() => import('@/pages/LoreEditPage'))
 const NpcsPage = lazy(() => import('@/pages/NpcsPage'))
+const NpcDetailPage = lazy(() => import('@/pages/NpcDetailPage'))
 const NpcEditPage = lazy(() => import('@/pages/NpcEditPage'))
 const SessionsPage = lazy(() => import('@/pages/SessionsPage'))
 const SessionEditPage = lazy(() => import('@/pages/SessionEditPage'))
@@ -146,6 +147,11 @@ export const router = createBrowserRouter([
         path: '/campaigns/:id/npcs',
         loader: requireAuth,
         element: wrap(NpcsPage),
+      },
+      {
+        path: '/npcs/:id',
+        loader: requireAuth,
+        element: wrap(NpcDetailPage),
       },
       {
         path: '/npcs/:id/edit',
