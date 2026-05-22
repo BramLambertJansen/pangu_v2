@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { supabase } from '@/lib/supabase'
 import { queryKeys } from '@/lib/queryKeys'
 import { useAuthStore } from '@/stores/auth.store'
-import { Spinner } from '@/components/ui/Spinner'
+import { EntityCardSkeleton } from '@/components/ui/EntityCardSkeleton'
 import { WorldCard } from '@/components/world/WorldCard'
 import { CampaignCard } from '@/components/campaign/CampaignCard'
 import { SessionCard } from '@/components/session/SessionCard'
@@ -90,24 +90,6 @@ export default function DashboardPage() {
     staleTime: 1000 * 30,
   })
 
-  const isLoading = worldsLoading || campaignsLoading || sessionsLoading
-
-  if (isLoading) {
-    return (
-      <div
-        style={{ display: 'flex', justifyContent: 'center', padding: '80px 0' }}
-        aria-live="polite"
-        aria-label="Dashboard laden..."
-      >
-        <Spinner size="lg" />
-      </div>
-    )
-  }
-
-  const worldCount = worlds?.length ?? 0
-  const campaignCount = activeCampaigns?.length ?? 0
-  const sessionCount = plannedSessions?.length ?? 0
-
   return (
     <div>
       {/* Page header */}
@@ -122,7 +104,11 @@ export default function DashboardPage() {
       {/* Mijn werelden */}
       <WorldDetailDivider label="Mijn werelden" />
 
-      {worldCount === 0 ? (
+      {worldsLoading ? (
+        <ul style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: 'var(--sp-5)', listStyle: 'none', padding: 0, margin: 0 }} aria-label="Werelden laden..." aria-live="polite">
+          <EntityCardSkeleton count={2} variant="hero" />
+        </ul>
+      ) : (worlds?.length ?? 0) === 0 ? (
         <p style={{ fontSize: 14, color: 'var(--muted)', fontStyle: 'italic' }}>
           Nog geen werelden. Begin met het smeden van je eerste wereld.
         </p>
@@ -140,7 +126,11 @@ export default function DashboardPage() {
       {/* Actieve kronieken */}
       <WorldDetailDivider label="Actieve kronieken" />
 
-      {campaignCount === 0 ? (
+      {campaignsLoading ? (
+        <ul style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: 'var(--sp-4)', listStyle: 'none', padding: 0, margin: 0 }} aria-label="Kronieken laden..." aria-live="polite">
+          <EntityCardSkeleton count={2} />
+        </ul>
+      ) : (activeCampaigns?.length ?? 0) === 0 ? (
         <p style={{ fontSize: 14, color: 'var(--muted)', fontStyle: 'italic' }}>
           Geen actieve kronieken. Stel een kroniek in op 'Actief' om hem hier te zien.
         </p>
@@ -155,7 +145,11 @@ export default function DashboardPage() {
       {/* Geplande sessies */}
       <WorldDetailDivider label="Geplande sessies" />
 
-      {sessionCount === 0 ? (
+      {sessionsLoading ? (
+        <ul style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: 'var(--sp-4)', listStyle: 'none', padding: 0, margin: 0 }} aria-label="Sessies laden..." aria-live="polite">
+          <EntityCardSkeleton count={3} />
+        </ul>
+      ) : (plannedSessions?.length ?? 0) === 0 ? (
         <p style={{ fontSize: 14, color: 'var(--muted)', fontStyle: 'italic' }}>
           Geen sessies gepland. Voeg een sessie toe aan een kroniek om hem hier te zien.
         </p>

@@ -1,31 +1,10 @@
 import { useNavigate } from 'react-router-dom'
-import type { Session, SessionStatus } from '@/types/session.types'
-
-const statusLabel: Record<SessionStatus, string> = {
-  planned:   'Gepland',
-  active:    'Actief',
-  completed: 'Voltooid',
-  archived:  'Gearchiveerd',
-}
-
-const statusColor: Record<SessionStatus, string> = {
-  planned:   'var(--gold)',
-  active:    'var(--violet)',
-  completed: 'var(--emerald, #3ecfb2)',
-  archived:  'var(--muted)',
-}
-
-const cardGradients = [
-  'radial-gradient(ellipse 70% 55% at 30% 40%, rgba(155,138,255,0.22) 0%, rgba(80,50,200,0.10) 55%, transparent 80%)',
-  'radial-gradient(ellipse 65% 52% at 28% 42%, rgba(220,90,80,0.18) 0%, rgba(155,138,255,0.10) 55%, transparent 80%)',
-  'radial-gradient(ellipse 65% 52% at 30% 42%, rgba(62,207,178,0.14) 0%, rgba(60,80,200,0.12) 55%, transparent 80%)',
-  'radial-gradient(ellipse 65% 50% at 25% 40%, rgba(245,180,50,0.14) 0%, rgba(155,138,255,0.16) 55%, transparent 80%)',
-]
-
-function pickGradient(id: string): string {
-  const code = (id.charCodeAt(0) ?? 0) + (id.charCodeAt(id.length - 1) ?? 0)
-  return cardGradients[code % cardGradients.length]
-}
+import type { Session } from '@/types/session.types'
+import { EntityCard } from '@/components/ui/EntityCard'
+import { ForgeCard } from '@/components/ui/ForgeCard'
+import { StatusBadge } from '@/components/ui/StatusBadge'
+import { pickGradient, sessionGradients } from '@/utils/pickGradient'
+import { sessionStatusLabel, sessionStatusColor } from '@/lib/statusMaps'
 
 function formatDate(dateStr: string | null): string | null {
   if (!dateStr) return null
@@ -44,49 +23,13 @@ interface Props {
 
 export function SessionCard({ session }: Props) {
   const navigate = useNavigate()
-  const gradient = pickGradient(session.id)
-
-  function handleActivate() {
-    navigate(`/sessions/${session.id}/edit`)
-  }
+  const gradient = pickGradient(session.id, sessionGradients)
 
   return (
-    <article
-      role="button"
-      tabIndex={0}
-      aria-label={`Sessie: ${session.name}`}
-      onClick={handleActivate}
-      onKeyDown={(e) => {
-        if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); handleActivate() }
-      }}
-      style={{
-        position: 'relative',
-        borderRadius: 'var(--r-xl)',
-        border: '1px solid var(--hairline)',
-        overflow: 'hidden',
-        cursor: 'pointer',
-        display: 'flex',
-        flexDirection: 'column',
-        padding: '20px 24px 18px',
-        minHeight: 120,
-        transition: 'border-color var(--t-base) var(--ease-out), box-shadow var(--t-base) var(--ease-out), transform var(--t-base) var(--ease-out)',
-        outline: 'none',
-        background: 'var(--void-2)',
-      }}
-      onMouseEnter={(e) => {
-        const el = e.currentTarget
-        el.style.borderColor = 'var(--hairline-strong)'
-        el.style.boxShadow = '0 6px 24px rgba(0,0,0,0.35), 0 0 0 1px var(--hairline-strong)'
-        el.style.transform = 'translateY(-2px)'
-      }}
-      onMouseLeave={(e) => {
-        const el = e.currentTarget
-        el.style.borderColor = 'var(--hairline)'
-        el.style.boxShadow = 'none'
-        el.style.transform = 'translateY(0)'
-      }}
-      onFocus={(e) => { e.currentTarget.style.outline = '2px solid var(--violet)'; e.currentTarget.style.outlineOffset = '2px' }}
-      onBlur={(e) => { e.currentTarget.style.outline = 'none' }}
+    <EntityCard
+      variant="compact"
+      ariaLabel={`Sessie: ${session.name}`}
+      onClick={() => navigate(`/sessions/${session.id}/edit`)}
     >
       {/* Gradient accent */}
       <div
@@ -121,7 +64,7 @@ export function SessionCard({ session }: Props) {
             <div style={{ minWidth: 0 }}>
               {session.subtitle && (
                 <p style={{
-                  fontFamily: "'Cormorant Garamond', Georgia, serif",
+                  fontFamily: 'var(--font-quote)',
                   fontStyle: 'italic',
                   fontSize: 11, letterSpacing: '0.03em',
                   color: 'var(--gold)', margin: '0 0 2px',
@@ -142,19 +85,11 @@ export function SessionCard({ session }: Props) {
             </div>
           </div>
 
-          <span style={{
-            display: 'inline-flex', alignItems: 'center', flexShrink: 0,
-            padding: '3px 10px',
-            background: statusColor[session.status],
-            borderRadius: 'var(--r-full)',
-            fontFamily: 'var(--font-body)',
-            fontSize: 9, fontWeight: 700,
-            letterSpacing: '0.16em', textTransform: 'uppercase',
-            color: 'var(--void)',
-            marginTop: 2,
-          }}>
-            {statusLabel[session.status]}
-          </span>
+          <StatusBadge
+            label={sessionStatusLabel[session.status]}
+            color={sessionStatusColor[session.status]}
+            className="mt-0.5"
+          />
         </div>
 
         {session.description && (
@@ -187,7 +122,7 @@ export function SessionCard({ session }: Props) {
           </p>
         )}
       </div>
-    </article>
+    </EntityCard>
   )
 }
 
@@ -198,63 +133,23 @@ interface ForgeProps {
 
 export function ForgeSessionCard({ onClick, loading }: ForgeProps) {
   return (
-    <article
-      role="button"
-      tabIndex={0}
-      aria-label="Nieuwe sessie aanmaken"
-      onClick={() => { if (!loading) onClick() }}
-      onKeyDown={(e) => {
-        if (loading) return
-        if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onClick() }
-      }}
-      style={{
-        position: 'relative',
-        borderRadius: 'var(--r-xl)',
-        border: '1px dashed var(--hairline-strong)',
-        overflow: 'hidden',
-        cursor: loading ? 'wait' : 'pointer',
-        display: 'flex',
-        flexDirection: 'column',
-        alignItems: 'center',
-        justifyContent: 'center',
-        padding: '20px 24px',
-        minHeight: 120,
-        gap: 8,
-        transition: 'border-color var(--t-base) var(--ease-out), background var(--t-base) var(--ease-out)',
-        outline: 'none',
-        background: 'transparent',
-      }}
-      onMouseEnter={(e) => {
-        e.currentTarget.style.borderColor = 'var(--violet)'
-        e.currentTarget.style.background = 'rgba(155,138,255,0.04)'
-      }}
-      onMouseLeave={(e) => {
-        e.currentTarget.style.borderColor = 'var(--hairline-strong)'
-        e.currentTarget.style.background = 'transparent'
-      }}
-      onFocus={(e) => { e.currentTarget.style.outline = '2px solid var(--violet)'; e.currentTarget.style.outlineOffset = '2px' }}
-      onBlur={(e) => { e.currentTarget.style.outline = 'none' }}
-    >
-      <span style={{
-        fontFamily: 'var(--font-display)',
-        fontSize: 22, color: 'var(--violet)', opacity: 0.6,
-        lineHeight: 1, userSelect: 'none',
-      }} aria-hidden="true">
-        ▶
-      </span>
-      <div style={{ textAlign: 'center' }}>
-        <p style={{
-          fontFamily: 'var(--font-body)',
-          fontSize: 12, fontWeight: 700,
-          letterSpacing: '0.18em', textTransform: 'uppercase',
-          color: 'var(--violet)', margin: '0 0 4px',
-        }}>
-          {loading ? 'Aanmaken...' : '+ Nieuwe sessie'}
-        </p>
-        <p style={{ fontSize: 12, color: 'var(--muted)', margin: 0 }}>
-          Start een nieuwe spelsessie
-        </p>
-      </div>
-    </article>
+    <ForgeCard
+      variant="compact"
+      accent="violet"
+      onClick={onClick}
+      loading={loading}
+      ariaLabel="Nieuwe sessie aanmaken"
+      title="+ Nieuwe sessie"
+      subtitle="Start een nieuwe spelsessie"
+      icon={
+        <span style={{
+          fontFamily: 'var(--font-display)',
+          fontSize: 22, color: 'var(--violet)', opacity: 0.6,
+          lineHeight: 1, userSelect: 'none',
+        }} aria-hidden="true">
+          ▶
+        </span>
+      }
+    />
   )
 }
