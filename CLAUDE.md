@@ -24,7 +24,7 @@ PANGU is een AI-ondersteund campaign management platform voor tabletop RPGs (PWA
 | Framework | React 19 + Vite 6 |
 | Taal | TypeScript (strict mode) |
 | Styling | TailwindCSS v4 |
-| Client state | Zustand (persisted) |
+| Client state | Zustand v5 (persisted) |
 | Server state | TanStack Query v5 (mutations + cache invalidation) |
 | Routing | react-router-dom v7 |
 | Validatie | Zod |
@@ -39,30 +39,85 @@ PANGU is een AI-ondersteund campaign management platform voor tabletop RPGs (PWA
 
 ```
 src/
-├── assets/              # Statische bestanden (fonts, icons, images)
+├── App.tsx                  # Root: QueryClientProvider, RouterProvider, Toaster
+├── main.tsx                 # Entry point
 ├── components/
-│   ├── ui/              # Herbruikbare basis-componenten (Button, Input, Modal, etc.)
-│   └── [feature]/       # Feature-specifieke componenten
-├── hooks/               # Custom React hooks
-├── layouts/             # Pagina-layouts (AppLayout, AuthLayout)
+│   ├── ui/                  # Herbruikbare basis-componenten
+│   │   ├── Avatar.tsx
+│   │   ├── Badge.tsx
+│   │   ├── Button.tsx
+│   │   ├── Card.tsx
+│   │   ├── Input.tsx
+│   │   ├── Modal.tsx
+│   │   └── Spinner.tsx
+│   ├── admin/               # Admin feature components
+│   │   ├── CreateUserModal.tsx
+│   │   ├── DeleteUserModal.tsx
+│   │   ├── EditUserModal.tsx
+│   │   └── UserTable.tsx
+│   ├── campaign/
+│   │   └── CampaignCard.tsx  # CampaignCard + ForgeCampaignCard
+│   ├── session/
+│   │   └── SessionCard.tsx   # SessionCard + ForgeSessionCard
+│   └── world/
+│       ├── CompassRose.tsx
+│       ├── WorldCard.tsx      # WorldCard + ForgeWorldCard
+│       ├── WorldDetailDivider.tsx
+│       └── WorldDetailHeader.tsx
+├── hooks/                   # Custom React hooks (momenteel leeg)
+├── layouts/
+│   ├── AppLayout.tsx         # Sidebar + starfield achtergrond
+│   └── AuthLayout.tsx
 ├── lib/
-│   ├── supabase.ts      # Supabase client
-│   ├── queryClient.ts   # TanStack Query client
-│   └── queryKeys.ts     # Gecentraliseerde query key constanten
-├── pages/               # Route-componenten (één per route)
-├── routes/              # Route-definities
-├── stores/              # Zustand stores (één per domein)
-├── types/               # Gedeelde TypeScript types/interfaces
-└── utils/               # Pure utility-functies (cn.ts, apiError.ts)
+│   ├── queryClient.ts        # TanStack Query client instantie
+│   ├── queryKeys.ts          # Gecentraliseerde query key constanten
+│   └── supabase.ts           # Supabase client (getypeerd via Database)
+├── pages/
+│   ├── AdminPage.tsx
+│   ├── CampaignDetailPage.tsx
+│   ├── CampaignEditPage.tsx
+│   ├── DashboardPage.tsx
+│   ├── LoginPage.tsx
+│   ├── RegisterPage.tsx      # ⚠️ STUB
+│   ├── SessionEditPage.tsx
+│   ├── SessionsPage.tsx
+│   ├── SettingsPage.tsx
+│   ├── WorldDetailPage.tsx
+│   ├── WorldEditPage.tsx
+│   └── WorldsPage.tsx
+├── routes/
+│   └── index.tsx             # React Router config + auth loaders
+├── stores/
+│   ├── auth.store.ts
+│   ├── campaign.store.ts
+│   ├── preferences.store.ts
+│   └── ui.store.ts
+├── types/
+│   ├── database.types.ts     # Auto-gegenereerd via Supabase CLI
+│   ├── campaign.types.ts
+│   ├── session.types.ts
+│   └── world.types.ts
+└── utils/
+    ├── apiError.ts           # getApiError() voor serverless responses
+    └── cn.ts                 # clsx + tailwind-merge
 
 api/
 └── admin/
-    ├── _auth.ts         # Auth middleware (Vercel serverless)
-    ├── users.ts         # User CRUD
-    └── users/[id].ts    # Dynamisch user endpoint
+    ├── _auth.ts              # verifyAdmin() middleware
+    ├── users.ts              # GET (lijst) + POST (aanmaken)
+    └── users/[id].ts         # PATCH (bewerken) + DELETE
 
 supabase/
-└── migrations/          # SQL-migraties (genummerd, chronologisch)
+└── migrations/               # SQL-migraties (genummerd, chronologisch)
+```
+
+### Path alias
+
+De `@`-alias is geconfigureerd in zowel `vite.config.ts` als `tsconfig.app.json`:
+
+```ts
+import { Button } from '@/components/ui/Button';
+import { supabase } from '@/lib/supabase';
 ```
 
 ---
@@ -77,18 +132,52 @@ Elk basis-component:
 - Is forward-ref-compatibel waar van toepassing
 - Heeft een korte JSDoc-regel boven de functiedefinitie bij niet-evidente props
 
-Verplichte componenten vóór feature-werk:
-- `Button` — varianten: `primary`, `secondary`, `ghost`, `danger`; maten: `sm`, `md`, `lg`
-- `Input` — met label, foutmelding en aria-koppeling
+Beschikbare componenten:
+- `Button` — varianten: `primary`, `secondary`, `ghost`, `danger`; maten: `sm`, `md`, `lg`; `loading` boolean
+- `Input` — met label, foutmelding en aria-koppeling (`htmlFor`/`id`/`aria-describedby`)
 - `Modal` — met focus trap, `role="dialog"`, `aria-modal="true"`
-- `Spinner` — laadstatus-indicator
-- `Badge` — status-labels
+- `Spinner` — laadstatus-indicator; maten: `sm`, `md`, `lg`
+- `Badge` — status-labels (semantisch neutraal)
 - `Card` — content-containers
-- `Avatar` — voor NPCs, spelers
+- `Avatar` — initials-weergave voor users/NPCs
 
 ### Feature-componenten (`src/components/[feature]/`)
 
-Gegroepeerd per domein: `campaign/`, `character/`, `location/`, `npc/`, `session/`, `lore/`.
+Elk feature-domein heeft een map: `campaign/`, `session/`, `world/`, `admin/`.  
+Toekomstige domeinen: `character/`, `location/`, `npc/`, `lore/`.
+
+**Forge-patroon:** elke lijst heeft een `Forge[Entity]Card` naast `[Entity]Card`. De ForgeCard is een placeholder-kaart waarmee een nieuwe entiteit direct aangemaakt wordt (click → mutation → redirect naar edit).
+
+---
+
+## Design System
+
+### CSS-variabelen (globaal)
+
+Gedefinieerd op `:root`, beschikbaar via `var(--naam)`:
+
+| Groep | Variabelen |
+|---|---|
+| Achtergrond | `--void`, `--void-2`, `--surface`, `--surface-2`, `--surface-3` |
+| Accent | `--violet`, `--gold`, `--teal`, `--crimson`, `--azure` |
+| Tekst | `--ink`, `--ink-soft`, `--muted`, `--subtle` |
+| Borders | `--hairline`, `--hairline-strong` |
+| Spacing | `--sp-1` t/m `--sp-4` |
+| Typography | `--font-display`, `--font-body` |
+| Animatie | `--t-fast`, `--t-base`, `--ease-out` |
+| Radius | `--r-full`, `--r-xl` |
+
+### Kleurthema
+
+Dark theme (void/indigo/gold). Nooit hardcoded HEX-waarden gebruiken buiten de variabele-definitie zelf.
+
+### Kaart-gradients
+
+`WorldCard`, `CampaignCard` en `SessionCard` berekenen een deterministische gradient op basis van de eerste 8 tekens van het entity-ID (hash → HSL palette). Geen externe kleurprop nodig.
+
+### Header-afbeelding positie
+
+`WorldEditPage` en `CampaignEditPage` ondersteunen drag-to-reposition van de header-afbeelding (mouse + touch events). De positie wordt opgeslagen als `"X% Y%"` string en teruggelezen als `object-position` op het `<img>`-element.
 
 ---
 
@@ -124,7 +213,14 @@ Regels:
 - Één store per domein: `useAuthStore`, `useCampaignStore`, `useUIStore`, `usePreferencesStore`
 - Persist alleen wat nodig is (geen gevoelige data)
 - Store-bestanden: `src/stores/[domain].store.ts`
-- `usePreferencesStore` isoleert per gebruiker via auth user ID
+- `usePreferencesStore` isoleert per gebruiker: storage key = `'preferences:${userId}'`
+
+| Store | State | Opgeslagen |
+|---|---|---|
+| `auth.store.ts` | `user`, `profile` | ja (`'auth'`) |
+| `campaign.store.ts` | `activeCampaignId` | ja (`'campaign'`) |
+| `ui.store.ts` | `sidebarCollapsed` | nee |
+| `preferences.store.ts` | `sessionReminders`, `soundEffects`, `autosaveNotes`, `loreSuggestions`, `language` | ja (per user) |
 
 ### TanStack Query (server state)
 
@@ -137,20 +233,40 @@ Regels:
 
 ## Supabase
 
-- Client: `src/lib/supabase.ts` — één instantie, geëxporteerd als `supabase`
+- Client: `src/lib/supabase.ts` — één instantie, getypeerd via `createClient<Database>`
 - RLS (Row Level Security) is altijd ingeschakeld op alle tabellen
 - Migraties in `supabase/migrations/`
-- Types genereren via: `npx supabase gen types typescript --local > src/types/database.types.ts`
+- Types regenereren: `npx supabase gen types typescript --local > src/types/database.types.ts`
+
+### Domain types (`src/types/`)
+
+Naast de auto-gegenereerde `database.types.ts` zijn er handmatige domain-types:
+
+```ts
+// world.types.ts
+type WorldStatus = 'draft' | 'active' | 'archived'
+interface World { id, user_id, name, subtitle, quote, description, header_image, header_image_position, status, created_at, updated_at }
+
+// campaign.types.ts
+type CampaignStatus = 'draft' | 'active' | 'archived' | 'completed'
+interface Campaign { id, world_id, user_id, name, subtitle, description, header_image, header_image_position, status, created_at, updated_at }
+
+// session.types.ts
+type SessionStatus = 'planned' | 'active' | 'completed' | 'archived'
+interface Session { id, campaign_id, user_id, name, subtitle, description, notes, status, session_date, session_number, created_at, updated_at }
+```
 
 ### Migraties (chronologisch)
+
 | # | Bestand | Inhoud |
 |---|---|---|
-| 001 | `001_profiles.sql` | Profiles tabel + RLS |
-| 002 | `002_profile_settings.sql` | Profile settings (voorkeuren) |
+| 001 | `001_profiles.sql` | Profiles tabel + RLS + `handle_new_user` trigger (auto-profile bij signup) |
+| 002 | `002_profile_settings.sql` | Profile settings (gereserveerd) |
 | 003 | `003_worlds.sql` | Worlds tabel + RLS |
 | 004 | `004_worlds_header_image_position.sql` | Header image positie voor worlds |
-| 005 | `005_campaigns.sql` | Campaigns tabel + RLS |
-| 006 | `006_campaigns_header_image.sql` | Header image voor campaigns |
+| 005 | `005_campaigns.sql` | Campaigns tabel + RLS + index op `(world_id, created_at DESC)` |
+| 006 | `006_campaigns_header_image.sql` | Header image + positie voor campaigns |
+| 007 | `007_sessions.sql` | Sessions tabel + RLS + index + `update_sessions_updated_at` trigger |
 
 ---
 
@@ -158,31 +274,38 @@ Regels:
 
 Routes zijn gedefinieerd in `src/routes/index.tsx`. Lazy-loading voor alle pagina-routes via React Suspense.
 
-Routestructuur (huidige staat):
-```
-/                        → redirect naar /dashboard of /login
-/login                   → AuthLayout
-/register                → AuthLayout  ⚠️ pagina is nog een stub
-/dashboard               → AppLayout  ⚠️ pagina is nog een stub
-/admin                   → AppLayout (requireAdmin loader)
-/settings                → AppLayout
-/worlds                  → AppLayout
-/worlds/:id              → AppLayout
-/worlds/:id/edit         → AppLayout
-/campaigns/:id           → AppLayout
-/campaigns/:id/edit      → AppLayout
-/campaigns/:id/sessions  → AppLayout
-/sessions/:id/edit       → AppLayout
-```
+### Huidige routes
 
-Geplande routes (nog niet geïmplementeerd):
+| Route | Pagina | Auth | Status |
+|---|---|---|---|
+| `/` | redirect → `/dashboard` | — | ✅ |
+| `/login` | `LoginPage` | nee (AuthLayout) | ✅ |
+| `/register` | `RegisterPage` | nee (AuthLayout) | ⚠️ stub |
+| `/dashboard` | `DashboardPage` | `requireAuth` | ✅ |
+| `/admin` | `AdminPage` | `requireAdmin` | ✅ |
+| `/settings` | `SettingsPage` | `requireAuth` | ✅ |
+| `/worlds` | `WorldsPage` | `requireAuth` | ✅ |
+| `/worlds/:id` | `WorldDetailPage` | `requireAuth` | ✅ |
+| `/worlds/:id/edit` | `WorldEditPage` | `requireAuth` | ✅ |
+| `/campaigns/:id` | `CampaignDetailPage` | `requireAuth` | ✅ |
+| `/campaigns/:id/edit` | `CampaignEditPage` | `requireAuth` | ✅ |
+| `/campaigns/:id/sessions` | `SessionsPage` | `requireAuth` | ✅ |
+| `/sessions/:id/edit` | `SessionEditPage` | `requireAuth` | ✅ |
+
+### Geplande routes (nog niet geïmplementeerd)
+
 ```
-/campaigns               → overzicht
-/campaigns/:id/locations → locaties
-/campaigns/:id/npcs      → NPCs
-/campaigns/:id/lore      → lore
+/campaigns               → overzicht alle campaigns
+/campaigns/:id/locations → locaties per campaign
+/campaigns/:id/npcs      → NPCs per campaign
+/campaigns/:id/lore      → lore per campaign
 /characters/:id          → spelersperspectief
 ```
+
+### Auth loaders
+
+- `requireAuth` — redirect naar `/login` als geen sessie actief
+- `requireAdmin` — redirect naar `/dashboard` als rol ≠ `'admin'`
 
 ---
 
@@ -209,6 +332,7 @@ Elke feature is pas **klaar** als alle punten gehaald zijn:
 4. **Foutafhandeling alleen aan systeemgrenzen** — gebruikersinput, externe APIs. Vertrouw interne code en framework-garanties.
 5. **TypeScript strict** — geen `any`, geen `@ts-ignore` zonder uitleg.
 6. **Elke nieuwe feature documenteren** in de Feature Status hieronder.
+7. **Hooks directory** — extraheer herbruikbare query/state logica naar `src/hooks/` zodra dezelfde logica op ≥2 plekken voorkomt (bv. `useImagePositioning`, `useWorld`).
 
 ---
 
@@ -230,66 +354,80 @@ npm run type-check   # tsc --noEmit
 
 ### Infrastructuur
 - [x] Vite + React 19 + TypeScript setup
-- [x] TailwindCSS v4 configuratie
+- [x] TailwindCSS v4 configuratie + CSS design tokens
 - [x] Supabase client + types
 - [x] TanStack Query client + gecentraliseerde query keys
-- [x] Zustand stores scaffold (auth, campaign, ui, preferences)
+- [x] Zustand stores (auth, campaign, ui, preferences)
 - [x] react-router-dom v7 routing (lazy-loaded, auth guards)
 - [x] Sonner toasts (`<Toaster />` in `App.tsx`)
 - [x] PWA-configuratie (vite-plugin-pwa, manifest, icons)
 - [x] Vercel serverless API (`api/admin/`)
+- [x] `@`-path alias (Vite + TypeScript)
 
 ### UI Basis-componenten (`src/components/ui/`)
-- [x] `Button`
-- [x] `Input`
-- [x] `Modal` (focus trap)
-- [x] `Spinner`
+- [x] `Button` (variants: primary/secondary/ghost/danger, sizes: sm/md/lg, loading state)
+- [x] `Input` (label, foutmelding, aria-koppeling)
+- [x] `Modal` (focus trap, role="dialog", aria-modal)
+- [x] `Spinner` (sizes: sm/md/lg)
 - [x] `Badge`
 - [x] `Card`
-- [x] `Avatar`
+- [x] `Avatar` (initials-weergave)
 
 ### Authenticatie
 - [x] Login pagina (email + wachtwoord, validatie, redirect op rol)
-- [ ] Registratie pagina ⚠️ stub — formulier nog te bouwen
+- [ ] Registratie pagina ⚠️ stub — formulier nog te bouwen (email, wachtwoord, display_name + Supabase signup)
 - [x] Supabase Auth integratie (`signInWithPassword`, `signOut`)
 - [x] Protected routes (loaders: `requireAuth`, `requireAdmin`)
 - [x] Auth store (Zustand) — `user`, `profile`, `setUser`, `setProfile`, `signOut`
+- [x] Auto-profile aanmaken bij signup (`handle_new_user` trigger in `001_profiles.sql`)
 
 ### Admin
 - [x] Profiles tabel + RLS (`001_profiles.sql`)
 - [x] Profile settings tabel (`002_profile_settings.sql`)
 - [x] Vercel serverless API (`api/admin/users.ts`, `api/admin/users/[id].ts`)
 - [x] Admin pagina `/admin` — accountbeheer (lijst, aanmaken, bewerken, verwijderen)
+- [x] Zelf-verwijdering-preventie in DELETE endpoint
 - [x] Rol-gebaseerde navigatie (Accountbeheer zichtbaar voor admins)
 - [x] Uitloggen via sidebar
 
 ### Instellingen
 - [x] Instellingen pagina `/settings` (3 tabs: Profiel, Voorkeuren, Info)
-- [x] Profiel-tab — naam/avatar formulier
-- [x] Voorkeuren-tab — sessieherinneringen, geluidseffecten, autosave, lore-suggesties, taal
+- [x] Profiel-tab — naam, lidwoordkeuze, bio, avatar; email read-only
+- [x] Voorkeuren-tab — sessieherinneringen, geluidseffecten, autosave, lore-suggesties, taal (nl/en/de/fr)
+- [x] Info-tab — PANGU branding, versie, status, licentie
 - [x] Preferences store (Zustand, per-gebruiker geïsoleerd via user ID)
+
+### Dashboard
+- [x] Dashboard pagina `/dashboard` — recent: 4 werelden, 4 actieve campaigns, 6 geplande sessies
+- [x] Begroeting met gebruikersnaam
+- [x] Responsief grid-layout
 
 ### Werelden (DM)
 - [x] Worlds tabel + RLS (`003_worlds.sql`)
 - [x] Header image positie (`004_worlds_header_image_position.sql`)
-- [x] Werelden overzicht `/worlds` — grid met WorldCard, lege staat, responsief
+- [x] Werelden overzicht `/worlds` — grid met WorldCard + ForgeWorldCard, lege staat, responsief
 - [x] Wereld aanmaken — direct aanmaken + redirect naar bewerken
-- [x] Wereld bewerken `/worlds/:id/edit` — naam, subtitle, quote, beschrijving, header image + positie, status
+- [x] Wereld bewerken `/worlds/:id/edit` — naam, subtitle, quote, beschrijving, header image + drag-to-reposition, status
 - [x] Wereld verwijderen — met bevestigingsdialoog
-- [x] Wereld detail `/worlds/:id` — WorldDetailHeader, WorldDetailDivider, CompassRose
+- [x] Wereld detail `/worlds/:id` — WorldDetailHeader, WorldDetailDivider, CompassRose, campaigns lijst
 - [x] Navigatie-item "Werelden" in sidebar
 
 ### Campaigns (DM)
 - [x] Campaigns tabel + RLS (`005_campaigns.sql`)
 - [x] Campaign header image (`006_campaigns_header_image.sql`)
-- [x] Campaign aanmaken (vanuit wereld detail, "+ Nieuwe kroniek")
-- [x] Campaign bewerken `/campaigns/:id/edit` — volledig formulier, image positioning, status
+- [x] Campaign aanmaken (vanuit wereld detail, "+ Nieuwe kroniek") → direct redirect naar bewerken
+- [x] Campaign bewerken `/campaigns/:id/edit` — volledig formulier, drag-to-reposition, status
 - [x] Campaign verwijderen — met bevestigingsdialoog
-- [x] Campaign detail `/campaigns/:id` — breadcrumbs, header, status badge, actieknoppen
-- [ ] Campaign overzicht `/campaigns` — lijst/dashboard
+- [x] Campaign detail `/campaigns/:id` — breadcrumbs, header, status badge, sessies lijst, actieknoppen
+- [ ] Campaign overzicht `/campaigns` — lijst/dashboard van alle campaigns
 
-### Dashboard
-- [ ] Dashboard pagina `/dashboard` ⚠️ stub — inhoud nog te bepalen en bouwen
+### Sessies
+- [x] Sessies tabel + RLS (`007_sessions.sql`)
+- [x] `update_sessions_updated_at` trigger
+- [x] Sessie-overzicht per campaign `/campaigns/:id/sessions` — grid met SessionCard + ForgeSessionCard
+- [x] Sessie aanmaken — direct aanmaken + redirect naar bewerken
+- [x] Sessie bewerken `/sessions/:id/edit` — naam, subtitle, sessienummer, datum, status (planned/active/completed/archived), beschrijving, DM-notities
+- [x] Sessie verwijderen — met bevestigingsdialoog
 
 ### Wereld — Locaties
 - [ ] Locatie-overzicht per campaign
@@ -305,19 +443,12 @@ npm run type-check   # tsc --noEmit
 - [ ] Lore-overzicht per campaign
 - [ ] Lore-item aanmaken / bewerken / verwijderen
 
-### Sessies
-- [x] Sessies tabel + RLS (`007_sessions.sql`)
-- [x] Sessie-overzicht per campaign `/campaigns/:id/sessions` — grid met SessionCard, "+ Nieuwe sessie"
-- [x] Sessie aanmaken — direct aanmaken + redirect naar bewerken
-- [x] Sessie bewerken `/sessions/:id/edit` — naam, subtitle, sessienummer, datum, status, beschrijving, DM-notities
-- [x] Sessie verwijderen — met bevestigingsdialoog
-
 ### Karakter (Spelersperspectief)
 - [ ] Karakterblad bekijken
 - [ ] Inventaris beheren
 - [ ] Karakterstats bijwerken
 
-### AI-integratie
+### AI-integratie (Lore Forge)
 - [ ] AI-agent configuratie
 - [ ] Content genereren voor locaties
 - [ ] Content genereren voor NPCs
