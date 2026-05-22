@@ -9,10 +9,12 @@ import { WorldDetailDivider } from '@/components/world/WorldDetailDivider'
 import { SessionCard, ForgeSessionCard } from '@/components/session/SessionCard'
 import { LocationCard, ForgeLocationCard } from '@/components/location/LocationCard'
 import { LoreCard, ForgeLoreCard } from '@/components/lore/LoreCard'
+import { NpcCard, ForgeNpcCard } from '@/components/npc/NpcCard'
 import type { Campaign, CampaignStatus } from '@/types/campaign.types'
 import type { Session } from '@/types/session.types'
 import type { Location } from '@/types/location.types'
 import type { Lore } from '@/types/lore.types'
+import type { Npc } from '@/types/npc.types'
 
 type CampaignWithWorld = Campaign & { worlds: { name: string } | null }
 
@@ -173,6 +175,41 @@ export default function CampaignDetailPage() {
     },
     onError: () => {
       toast.error('Lore aanmaken mislukt')
+    },
+  })
+
+  const { data: npcs, isLoading: isLoadingNpcs } = useQuery<Npc[]>({
+    queryKey: queryKeys.campaigns.npcs(id!),
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('npcs')
+        .select('*')
+        .eq('campaign_id', id!)
+        .order('created_at', { ascending: false })
+      if (error) throw error
+      return data as Npc[]
+    },
+    enabled: !!id,
+    staleTime: 1000 * 30,
+  })
+
+  const createNpc = useMutation({
+    mutationFn: async () => {
+      if (!user) throw new Error('Niet ingelogd')
+      const { data, error } = await supabase
+        .from('npcs')
+        .insert({ campaign_id: id!, user_id: user.id, name: 'Nieuwe NPC', status: 'draft' })
+        .select()
+        .single()
+      if (error) throw error
+      return data as Npc
+    },
+    onSuccess: (newNpc) => {
+      queryClient.invalidateQueries({ queryKey: queryKeys.campaigns.npcs(id!) })
+      navigate(`/npcs/${newNpc.id}/edit`, { state: { isNew: true, campaignId: id } })
+    },
+    onError: () => {
+      toast.error('NPC aanmaken mislukt')
     },
   })
 
@@ -576,6 +613,50 @@ export default function CampaignDetailPage() {
                 onClick={() => navigate(`/campaigns/${id}/lore`)}
               >
                 Alle lore bekijken →
+              </button>
+            </div>
+          )}
+        </>
+      )}
+
+      <WorldDetailDivider label={`NPCs in deze kroniek${npcs && npcs.length > 0 ? ` (${npcs.length})` : ''}`} />
+
+      {/* NPC list */}
+      {isLoadingNpcs ? (
+        <div style={{ display: 'flex', justifyContent: 'center', padding: '40px 0' }} aria-live="polite" aria-label="NPCs laden...">
+          <Spinner size="md" />
+        </div>
+      ) : (
+        <>
+          <ul
+            style={{
+              display: 'grid',
+              gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))',
+              gap: 'var(--sp-5)',
+              listStyle: 'none',
+              padding: 0,
+              margin: 0,
+            }}
+            role="list"
+            aria-label="NPCs in deze kroniek"
+          >
+            {npcs?.map((npc) => (
+              <li key={npc.id}>
+                <NpcCard npc={npc} />
+              </li>
+            ))}
+            <li>
+              <ForgeNpcCard onClick={() => createNpc.mutate()} loading={createNpc.isPending} />
+            </li>
+          </ul>
+          {npcs && npcs.length > 0 && (
+            <div style={{ marginTop: 16, display: 'flex', justifyContent: 'flex-end' }}>
+              <button
+                type="button"
+                className="pangu-btn pangu-btn-ghost pangu-btn-sm"
+                onClick={() => navigate(`/campaigns/${id}/npcs`)}
+              >
+                Alle NPCs bekijken →
               </button>
             </div>
           )}
