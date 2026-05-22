@@ -430,8 +430,8 @@ npm run type-check   # tsc --noEmit
 - [x] Sessie verwijderen — met bevestigingsdialoog
 
 ### Wereld — Locaties
-- [ ] Locatie-overzicht per campaign
-- [ ] Locatie aanmaken / bewerken / verwijderen
+- [x] Locatie-overzicht per campaign (`/campaigns/:id/locations`)
+- [x] Locatie aanmaken / bewerken / verwijderen
 - [ ] Locatie-detailpagina
 
 ### Wereld — NPCs
