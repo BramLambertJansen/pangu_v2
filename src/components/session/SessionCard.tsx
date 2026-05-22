@@ -1,31 +1,7 @@
 import { useNavigate } from 'react-router-dom'
-import type { Session, SessionStatus } from '@/types/session.types'
-
-const statusLabel: Record<SessionStatus, string> = {
-  planned:   'Gepland',
-  active:    'Actief',
-  completed: 'Voltooid',
-  archived:  'Gearchiveerd',
-}
-
-const statusColor: Record<SessionStatus, string> = {
-  planned:   'var(--gold)',
-  active:    'var(--violet)',
-  completed: 'var(--emerald, #3ecfb2)',
-  archived:  'var(--muted)',
-}
-
-const cardGradients = [
-  'radial-gradient(ellipse 70% 55% at 30% 40%, rgba(155,138,255,0.22) 0%, rgba(80,50,200,0.10) 55%, transparent 80%)',
-  'radial-gradient(ellipse 65% 52% at 28% 42%, rgba(220,90,80,0.18) 0%, rgba(155,138,255,0.10) 55%, transparent 80%)',
-  'radial-gradient(ellipse 65% 52% at 30% 42%, rgba(62,207,178,0.14) 0%, rgba(60,80,200,0.12) 55%, transparent 80%)',
-  'radial-gradient(ellipse 65% 50% at 25% 40%, rgba(245,180,50,0.14) 0%, rgba(155,138,255,0.16) 55%, transparent 80%)',
-]
-
-function pickGradient(id: string): string {
-  const code = (id.charCodeAt(0) ?? 0) + (id.charCodeAt(id.length - 1) ?? 0)
-  return cardGradients[code % cardGradients.length]
-}
+import type { Session } from '@/types/session.types'
+import { pickGradient, sessionGradients } from '@/utils/pickGradient'
+import { sessionStatusLabel, sessionStatusColor } from '@/lib/statusMaps'
 
 function formatDate(dateStr: string | null): string | null {
   if (!dateStr) return null
@@ -44,7 +20,7 @@ interface Props {
 
 export function SessionCard({ session }: Props) {
   const navigate = useNavigate()
-  const gradient = pickGradient(session.id)
+  const gradient = pickGradient(session.id, sessionGradients)
 
   function handleActivate() {
     navigate(`/sessions/${session.id}/edit`)
@@ -145,7 +121,7 @@ export function SessionCard({ session }: Props) {
           <span style={{
             display: 'inline-flex', alignItems: 'center', flexShrink: 0,
             padding: '3px 10px',
-            background: statusColor[session.status],
+            background: sessionStatusColor[session.status],
             borderRadius: 'var(--r-full)',
             fontFamily: 'var(--font-body)',
             fontSize: 9, fontWeight: 700,
@@ -153,7 +129,7 @@ export function SessionCard({ session }: Props) {
             color: 'var(--void)',
             marginTop: 2,
           }}>
-            {statusLabel[session.status]}
+            {sessionStatusLabel[session.status]}
           </span>
         </div>
 

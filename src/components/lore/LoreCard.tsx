@@ -1,29 +1,7 @@
 import { useNavigate } from 'react-router-dom'
-import type { Lore, LoreStatus } from '@/types/lore.types'
-
-const statusLabel: Record<LoreStatus, string> = {
-  draft:    'Concept',
-  active:   'Actief',
-  archived: 'Gearchiveerd',
-}
-
-const statusColor: Record<LoreStatus, string> = {
-  draft:    'var(--gold)',
-  active:   'var(--violet)',
-  archived: 'var(--muted)',
-}
-
-const cardGradients = [
-  'radial-gradient(ellipse 70% 55% at 30% 40%, rgba(155,138,255,0.18) 0%, rgba(80,50,200,0.10) 55%, transparent 80%)',
-  'radial-gradient(ellipse 65% 52% at 28% 42%, rgba(245,180,50,0.16) 0%, rgba(155,138,255,0.10) 55%, transparent 80%)',
-  'radial-gradient(ellipse 65% 52% at 30% 42%, rgba(62,207,178,0.16) 0%, rgba(155,138,255,0.12) 55%, transparent 80%)',
-  'radial-gradient(ellipse 65% 50% at 25% 40%, rgba(220,90,80,0.14) 0%, rgba(155,138,255,0.14) 55%, transparent 80%)',
-]
-
-function pickGradient(id: string): string {
-  const code = (id.charCodeAt(0) ?? 0) + (id.charCodeAt(id.length - 1) ?? 0)
-  return cardGradients[code % cardGradients.length]
-}
+import type { Lore } from '@/types/lore.types'
+import { pickGradient, loreGradients } from '@/utils/pickGradient'
+import { loreStatusLabel, loreStatusColor } from '@/lib/statusMaps'
 
 interface Props {
   lore: Lore
@@ -31,7 +9,7 @@ interface Props {
 
 export function LoreCard({ lore }: Props) {
   const navigate = useNavigate()
-  const gradient = pickGradient(lore.id)
+  const gradient = pickGradient(lore.id, loreGradients)
 
   function handleActivate() {
     navigate(`/lore/${lore.id}`)
@@ -114,7 +92,7 @@ export function LoreCard({ lore }: Props) {
           <span style={{
             display: 'inline-flex', alignItems: 'center', flexShrink: 0,
             padding: '3px 10px',
-            background: statusColor[lore.status],
+            background: loreStatusColor[lore.status],
             borderRadius: 'var(--r-full)',
             fontFamily: 'var(--font-body)',
             fontSize: 9, fontWeight: 700,
@@ -122,7 +100,7 @@ export function LoreCard({ lore }: Props) {
             color: 'var(--void)',
             marginTop: 2,
           }}>
-            {statusLabel[lore.status]}
+            {loreStatusLabel[lore.status]}
           </span>
         </div>
 

@@ -1,24 +1,7 @@
 import { useNavigate } from 'react-router-dom'
-import type { Campaign, CampaignStatus } from '@/types/campaign.types'
-
-const cardGradients = [
-  'radial-gradient(ellipse 70% 55% at 50% 32%, rgba(155,138,255,0.4) 0%, rgba(80,50,200,0.18) 55%, transparent 80%)',
-  'radial-gradient(ellipse 65% 52% at 50% 35%, rgba(220,90,80,0.3) 0%, rgba(155,138,255,0.15) 55%, transparent 80%)',
-  'radial-gradient(ellipse 65% 52% at 50% 35%, rgba(62,207,178,0.22) 0%, rgba(60,80,200,0.18) 55%, transparent 80%)',
-  'radial-gradient(ellipse 65% 50% at 45% 35%, rgba(245,180,50,0.2) 0%, rgba(155,138,255,0.22) 55%, transparent 80%)',
-]
-
-function pickGradient(id: string): string {
-  const code = (id.charCodeAt(0) ?? 0) + (id.charCodeAt(id.length - 1) ?? 0)
-  return cardGradients[code % cardGradients.length]
-}
-
-const statusLabel: Record<CampaignStatus, string> = {
-  draft: 'Concept',
-  active: 'Actief',
-  archived: 'Gearchiveerd',
-  completed: 'Voltooid',
-}
+import type { Campaign } from '@/types/campaign.types'
+import { pickGradient, accentGradients } from '@/utils/pickGradient'
+import { campaignStatusLabel, campaignStatusColor } from '@/lib/statusMaps'
 
 interface Props {
   campaign: Campaign
@@ -26,7 +9,7 @@ interface Props {
 
 export function CampaignCard({ campaign }: Props) {
   const navigate = useNavigate()
-  const gradient = pickGradient(campaign.id)
+  const gradient = pickGradient(campaign.id, accentGradients)
 
   function handleActivate() {
     navigate(`/campaigns/${campaign.id}`)
@@ -108,7 +91,7 @@ export function CampaignCard({ campaign }: Props) {
           <span style={{
             display: 'inline-flex', alignItems: 'center', flexShrink: 0,
             padding: '3px 10px',
-            background: 'var(--gold)',
+            background: campaignStatusColor[campaign.status],
             borderRadius: 'var(--r-full)',
             fontFamily: 'var(--font-body)',
             fontSize: 9, fontWeight: 700,
@@ -116,7 +99,7 @@ export function CampaignCard({ campaign }: Props) {
             color: 'var(--void)',
             marginTop: 2,
           }}>
-            {statusLabel[campaign.status]}
+            {campaignStatusLabel[campaign.status]}
           </span>
         </div>
 

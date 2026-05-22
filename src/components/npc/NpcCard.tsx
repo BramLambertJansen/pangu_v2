@@ -1,31 +1,7 @@
 import { useNavigate } from 'react-router-dom'
-import type { Npc, NpcStatus } from '@/types/npc.types'
-
-const statusLabel: Record<NpcStatus, string> = {
-  draft:    'Concept',
-  active:   'Actief',
-  retired:  'Teruggetrokken',
-  archived: 'Gearchiveerd',
-}
-
-const statusColor: Record<NpcStatus, string> = {
-  draft:    'var(--gold)',
-  active:   'var(--violet)',
-  retired:  'var(--muted)',
-  archived: 'var(--muted)',
-}
-
-const cardGradients = [
-  'radial-gradient(ellipse 70% 55% at 30% 40%, rgba(220,90,80,0.18) 0%, rgba(180,50,80,0.10) 55%, transparent 80%)',
-  'radial-gradient(ellipse 65% 52% at 28% 42%, rgba(220,90,80,0.14) 0%, rgba(155,138,255,0.12) 55%, transparent 80%)',
-  'radial-gradient(ellipse 65% 52% at 30% 42%, rgba(245,150,50,0.16) 0%, rgba(220,90,80,0.12) 55%, transparent 80%)',
-  'radial-gradient(ellipse 65% 50% at 25% 40%, rgba(155,138,255,0.14) 0%, rgba(220,90,80,0.14) 55%, transparent 80%)',
-]
-
-function pickGradient(id: string): string {
-  const code = (id.charCodeAt(0) ?? 0) + (id.charCodeAt(id.length - 1) ?? 0)
-  return cardGradients[code % cardGradients.length]
-}
+import type { Npc } from '@/types/npc.types'
+import { pickGradient, npcGradients } from '@/utils/pickGradient'
+import { npcStatusLabel, npcStatusColor } from '@/lib/statusMaps'
 
 interface Props {
   npc: Npc
@@ -33,7 +9,7 @@ interface Props {
 
 export function NpcCard({ npc }: Props) {
   const navigate = useNavigate()
-  const gradient = pickGradient(npc.id)
+  const gradient = pickGradient(npc.id, npcGradients)
 
   function handleActivate() {
     navigate(`/npcs/${npc.id}`)
@@ -116,7 +92,7 @@ export function NpcCard({ npc }: Props) {
           <span style={{
             display: 'inline-flex', alignItems: 'center', flexShrink: 0,
             padding: '3px 10px',
-            background: statusColor[npc.status],
+            background: npcStatusColor[npc.status],
             borderRadius: 'var(--r-full)',
             fontFamily: 'var(--font-body)',
             fontSize: 9, fontWeight: 700,
@@ -124,7 +100,7 @@ export function NpcCard({ npc }: Props) {
             color: 'var(--void)',
             marginTop: 2,
           }}>
-            {statusLabel[npc.status]}
+            {npcStatusLabel[npc.status]}
           </span>
         </div>
 

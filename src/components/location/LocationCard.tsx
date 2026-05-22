@@ -1,31 +1,7 @@
 import { useNavigate } from 'react-router-dom'
-import type { Location, LocationStatus } from '@/types/location.types'
-
-const statusLabel: Record<LocationStatus, string> = {
-  draft:      'Concept',
-  active:     'Actief',
-  discovered: 'Ontdekt',
-  archived:   'Gearchiveerd',
-}
-
-const statusColor: Record<LocationStatus, string> = {
-  draft:      'var(--gold)',
-  active:     'var(--violet)',
-  discovered: 'var(--emerald, #3ecfb2)',
-  archived:   'var(--muted)',
-}
-
-const cardGradients = [
-  'radial-gradient(ellipse 70% 55% at 30% 40%, rgba(62,207,178,0.18) 0%, rgba(60,120,80,0.10) 55%, transparent 80%)',
-  'radial-gradient(ellipse 65% 52% at 28% 42%, rgba(245,180,50,0.16) 0%, rgba(62,207,178,0.10) 55%, transparent 80%)',
-  'radial-gradient(ellipse 65% 52% at 30% 42%, rgba(155,138,255,0.16) 0%, rgba(62,207,178,0.12) 55%, transparent 80%)',
-  'radial-gradient(ellipse 65% 50% at 25% 40%, rgba(220,90,80,0.14) 0%, rgba(62,207,178,0.14) 55%, transparent 80%)',
-]
-
-function pickGradient(id: string): string {
-  const code = (id.charCodeAt(0) ?? 0) + (id.charCodeAt(id.length - 1) ?? 0)
-  return cardGradients[code % cardGradients.length]
-}
+import type { Location } from '@/types/location.types'
+import { pickGradient, locationGradients } from '@/utils/pickGradient'
+import { locationStatusLabel, locationStatusColor } from '@/lib/statusMaps'
 
 interface Props {
   location: Location
@@ -33,7 +9,7 @@ interface Props {
 
 export function LocationCard({ location }: Props) {
   const navigate = useNavigate()
-  const gradient = pickGradient(location.id)
+  const gradient = pickGradient(location.id, locationGradients)
 
   function handleActivate() {
     navigate(`/locations/${location.id}`)
@@ -116,7 +92,7 @@ export function LocationCard({ location }: Props) {
           <span style={{
             display: 'inline-flex', alignItems: 'center', flexShrink: 0,
             padding: '3px 10px',
-            background: statusColor[location.status],
+            background: locationStatusColor[location.status],
             borderRadius: 'var(--r-full)',
             fontFamily: 'var(--font-body)',
             fontSize: 9, fontWeight: 700,
@@ -124,7 +100,7 @@ export function LocationCard({ location }: Props) {
             color: 'var(--void)',
             marginTop: 2,
           }}>
-            {statusLabel[location.status]}
+            {locationStatusLabel[location.status]}
           </span>
         </div>
 

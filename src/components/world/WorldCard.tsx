@@ -1,19 +1,7 @@
 import { useNavigate } from 'react-router-dom'
 import type { World } from '@/types/world.types'
 import { CompassRose } from '@/components/world/CompassRose'
-
-// Deterministic gradient per world based on id
-const cardGradients = [
-  'radial-gradient(ellipse 70% 55% at 50% 32%, rgba(155,138,255,0.55) 0%, rgba(80,50,200,0.28) 45%, var(--void) 78%)',
-  'radial-gradient(ellipse 65% 52% at 50% 35%, rgba(220,90,80,0.4) 0%, rgba(155,138,255,0.22) 50%, var(--void) 78%)',
-  'radial-gradient(ellipse 65% 52% at 50% 35%, rgba(62,207,178,0.32) 0%, rgba(60,80,200,0.28) 50%, var(--void) 78%)',
-  'radial-gradient(ellipse 65% 50% at 45% 35%, rgba(245,180,50,0.28) 0%, rgba(155,138,255,0.32) 50%, var(--void) 78%)',
-]
-
-function pickGradient(id: string): string {
-  const code = (id.charCodeAt(0) ?? 0) + (id.charCodeAt(id.length - 1) ?? 0)
-  return cardGradients[code % cardGradients.length]
-}
+import { pickGradient, coverGradients } from '@/utils/pickGradient'
 
 interface Props {
   world: World
@@ -22,7 +10,7 @@ interface Props {
 export function WorldCard({ world }: Props) {
   const navigate = useNavigate()
   const initial = world.name.trim()[0]?.toUpperCase() ?? '?'
-  const gradient = world.header_image ? undefined : pickGradient(world.id)
+  const gradient = world.header_image ? undefined : pickGradient(world.id, coverGradients)
 
   return (
     <article
