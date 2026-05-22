@@ -1,3 +1,4 @@
+import { memo } from 'react'
 import { useNavigate } from 'react-router-dom'
 import type { Campaign } from '@/types/campaign.types'
 import { EntityCard } from '@/components/ui/EntityCard'
@@ -10,7 +11,7 @@ interface Props {
   campaign: Campaign
 }
 
-export function CampaignCard({ campaign }: Props) {
+export const CampaignCard = memo(function CampaignCard({ campaign }: Props) {
   const navigate = useNavigate()
   const gradient = pickGradient(campaign.id, accentGradients)
 
@@ -83,14 +84,14 @@ export function CampaignCard({ campaign }: Props) {
       </div>
     </EntityCard>
   )
-}
+})
 
 interface ForgeProps {
   onClick: () => void
   loading?: boolean
 }
 
-export function ForgeCampaignCard({ onClick, loading }: ForgeProps) {
+export const ForgeCampaignCard = memo(function ForgeCampaignCard({ onClick, loading }: ForgeProps) {
   return (
     <ForgeCard
       variant="compact"
@@ -111,4 +112,4 @@ export function ForgeCampaignCard({ onClick, loading }: ForgeProps) {
       }
     />
   )
-}
+})

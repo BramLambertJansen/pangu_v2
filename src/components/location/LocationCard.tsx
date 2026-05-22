@@ -1,3 +1,4 @@
+import { memo } from 'react'
 import { useNavigate } from 'react-router-dom'
 import type { Location } from '@/types/location.types'
 import { EntityCard } from '@/components/ui/EntityCard'
@@ -10,7 +11,7 @@ interface Props {
   location: Location
 }
 
-export function LocationCard({ location }: Props) {
+export const LocationCard = memo(function LocationCard({ location }: Props) {
   const navigate = useNavigate()
   const gradient = pickGradient(location.id, locationGradients)
 
@@ -95,14 +96,14 @@ export function LocationCard({ location }: Props) {
       </div>
     </EntityCard>
   )
-}
+})
 
 interface ForgeProps {
   onClick: () => void
   loading?: boolean
 }
 
-export function ForgeLocationCard({ onClick, loading }: ForgeProps) {
+export const ForgeLocationCard = memo(function ForgeLocationCard({ onClick, loading }: ForgeProps) {
   return (
     <ForgeCard
       variant="compact"
@@ -130,4 +131,4 @@ export function ForgeLocationCard({ onClick, loading }: ForgeProps) {
       }
     />
   )
-}
+})

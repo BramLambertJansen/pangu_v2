@@ -1,3 +1,4 @@
+import { memo } from 'react'
 import { useNavigate } from 'react-router-dom'
 import type { World } from '@/types/world.types'
 import { CompassRose } from '@/components/world/CompassRose'
@@ -9,7 +10,7 @@ interface Props {
   world: World
 }
 
-export function WorldCard({ world }: Props) {
+export const WorldCard = memo(function WorldCard({ world }: Props) {
   const navigate = useNavigate()
   const initial = world.name.trim()[0]?.toUpperCase() ?? '?'
   const gradient = world.header_image ? undefined : pickGradient(world.id, coverGradients)
@@ -22,12 +23,20 @@ export function WorldCard({ world }: Props) {
     >
       {/* Background */}
       {world.header_image ? (
-        <div aria-hidden="true" style={{
-          position: 'absolute', inset: 0,
-          backgroundImage: `url(${world.header_image})`,
-          backgroundSize: 'cover',
-          backgroundPosition: world.header_image_position ?? 'center',
-        }} />
+        <img
+          src={world.header_image}
+          alt=""
+          aria-hidden="true"
+          loading="lazy"
+          decoding="async"
+          style={{
+            position: 'absolute', inset: 0,
+            width: '100%', height: '100%',
+            objectFit: 'cover',
+            objectPosition: world.header_image_position ?? 'center',
+            display: 'block',
+          }}
+        />
       ) : (
         <div aria-hidden="true" style={{
           position: 'absolute', inset: 0,
@@ -139,14 +148,14 @@ export function WorldCard({ world }: Props) {
       </div>
     </EntityCard>
   )
-}
+})
 
 interface ForgeCardProps {
   onClick: () => void
   loading?: boolean
 }
 
-export function ForgeWorldCard({ onClick, loading }: ForgeCardProps) {
+export const ForgeWorldCard = memo(function ForgeWorldCard({ onClick, loading }: ForgeCardProps) {
   return (
     <ForgeCard
       variant="hero"
@@ -159,4 +168,4 @@ export function ForgeWorldCard({ onClick, loading }: ForgeCardProps) {
       icon={<CompassRose size={80} opacity={0.65} />}
     />
   )
-}
+})

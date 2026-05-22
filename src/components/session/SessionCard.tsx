@@ -1,3 +1,4 @@
+import { memo } from 'react'
 import { useNavigate } from 'react-router-dom'
 import type { Session } from '@/types/session.types'
 import { EntityCard } from '@/components/ui/EntityCard'
@@ -21,7 +22,7 @@ interface Props {
   session: Session
 }
 
-export function SessionCard({ session }: Props) {
+export const SessionCard = memo(function SessionCard({ session }: Props) {
   const navigate = useNavigate()
   const gradient = pickGradient(session.id, sessionGradients)
 
@@ -124,14 +125,14 @@ export function SessionCard({ session }: Props) {
       </div>
     </EntityCard>
   )
-}
+})
 
 interface ForgeProps {
   onClick: () => void
   loading?: boolean
 }
 
-export function ForgeSessionCard({ onClick, loading }: ForgeProps) {
+export const ForgeSessionCard = memo(function ForgeSessionCard({ onClick, loading }: ForgeProps) {
   return (
     <ForgeCard
       variant="compact"
@@ -152,4 +153,4 @@ export function ForgeSessionCard({ onClick, loading }: ForgeProps) {
       }
     />
   )
-}
+})

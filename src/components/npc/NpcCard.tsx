@@ -1,3 +1,4 @@
+import { memo } from 'react'
 import { useNavigate } from 'react-router-dom'
 import type { Npc } from '@/types/npc.types'
 import { EntityCard } from '@/components/ui/EntityCard'
@@ -10,7 +11,7 @@ interface Props {
   npc: Npc
 }
 
-export function NpcCard({ npc }: Props) {
+export const NpcCard = memo(function NpcCard({ npc }: Props) {
   const navigate = useNavigate()
   const gradient = pickGradient(npc.id, npcGradients)
 
@@ -95,14 +96,14 @@ export function NpcCard({ npc }: Props) {
       </div>
     </EntityCard>
   )
-}
+})
 
 interface ForgeProps {
   onClick: () => void
   loading?: boolean
 }
 
-export function ForgeNpcCard({ onClick, loading }: ForgeProps) {
+export const ForgeNpcCard = memo(function ForgeNpcCard({ onClick, loading }: ForgeProps) {
   return (
     <ForgeCard
       variant="compact"
@@ -130,4 +131,4 @@ export function ForgeNpcCard({ onClick, loading }: ForgeProps) {
       }
     />
   )
-}
+})
