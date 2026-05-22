@@ -114,23 +114,13 @@ export default function SessionEditPage() {
     setDirty(true)
   }
 
-  async function abandon() {
-    const { error } = await supabase.from('sessions').delete().eq('id', id!)
-    if (error) {
-      toast.error('Sessie kon niet worden verwijderd')
-      return
-    }
-    if (campaignId) {
-      queryClient.invalidateQueries({ queryKey: queryKeys.campaigns.sessions(campaignId) })
-      navigate(`/campaigns/${campaignId}/sessions`)
-    } else {
-      navigate('/dashboard')
-    }
-  }
-
   function handleCancel() {
     if (!committed) {
-      abandon()
+      if (campaignId) {
+        navigate(`/campaigns/${campaignId}/sessions`)
+      } else {
+        navigate('/dashboard')
+      }
     } else {
       setForm(session!)
       setDirty(false)
@@ -140,7 +130,11 @@ export default function SessionEditPage() {
 
   function handleBack() {
     if (!committed) {
-      abandon()
+      if (campaignId) {
+        navigate(`/campaigns/${campaignId}/sessions`)
+      } else {
+        navigate('/dashboard')
+      }
     } else {
       navigate(`/campaigns/${campaignId}/sessions`)
     }

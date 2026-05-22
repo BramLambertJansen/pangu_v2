@@ -1,9 +1,10 @@
 import { lazy, Suspense } from 'react'
-import { createBrowserRouter, redirect } from 'react-router-dom'
+import { createBrowserRouter, redirect, isRouteErrorResponse, useRouteError } from 'react-router-dom'
 import AppLayout from '@/layouts/AppLayout'
 import AuthLayout from '@/layouts/AuthLayout'
 import { Spinner } from '@/components/ui/Spinner'
 import { supabase } from '@/lib/supabase'
+import { useAuthStore } from '@/stores/auth.store'
 
 const LoginPage = lazy(() => import('@/pages/LoginPage'))
 const RegisterPage = lazy(() => import('@/pages/RegisterPage'))
@@ -53,14 +54,61 @@ async function requireAdmin() {
   const { data: { session } } = await supabase.auth.getSession()
   if (!session) return redirect('/login')
 
-  const { data: profile } = await supabase
+  // Use persisted profile from store to avoid an extra round-trip on every navigation
+  const { profile } = useAuthStore.getState()
+  if (profile !== null) {
+    return profile.role === 'admin' ? null : redirect('/dashboard')
+  }
+
+  const { data } = await supabase
     .from('profiles')
     .select('role')
     .eq('id', session.user.id)
     .single()
 
-  if (profile?.role !== 'admin') return redirect('/dashboard')
+  if (data?.role !== 'admin') return redirect('/dashboard')
   return null
+}
+
+function RouteErrorPage() {
+  const error = useRouteError()
+  const is404 = isRouteErrorResponse(error) && error.status === 404
+
+  return (
+    <div
+      role="alert"
+      style={{
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        justifyContent: 'center',
+        minHeight: '100dvh',
+        textAlign: 'center',
+        padding: '2rem',
+        background: 'var(--void)',
+        color: 'var(--ink)',
+      }}
+    >
+      <p style={{ fontFamily: 'var(--font-mono)', fontSize: 72, fontWeight: 700, color: 'var(--violet)', margin: 0, lineHeight: 1 }}>
+        {is404 ? '404' : '500'}
+      </p>
+      <h1 style={{ fontFamily: 'var(--font-display)', fontSize: 28, marginTop: 16 }}>
+        {is404 ? 'Pagina niet gevonden' : 'Er is iets misgegaan'}
+      </h1>
+      <p style={{ fontSize: 14, color: 'var(--ink-soft)', marginTop: 8, maxWidth: 380 }}>
+        {is404
+          ? 'Deze pagina bestaat niet of is verplaatst.'
+          : 'Een onverwachte fout heeft de pagina onderbroken.'}
+      </p>
+      <a
+        href="/dashboard"
+        className="pangu-btn pangu-btn-primary"
+        style={{ marginTop: 28, textDecoration: 'none' }}
+      >
+        Terug naar dashboard
+      </a>
+    </div>
+  )
 }
 
 export const router = createBrowserRouter([
@@ -68,9 +116,11 @@ export const router = createBrowserRouter([
     path: '/',
     loader: () => redirect('/dashboard'),
     element: null,
+    errorElement: <RouteErrorPage />,
   },
   {
     element: <AuthLayout />,
+    errorElement: <RouteErrorPage />,
     children: [
       { path: '/login', element: wrap(LoginPage) },
       { path: '/register', element: wrap(RegisterPage) },
@@ -78,6 +128,7 @@ export const router = createBrowserRouter([
   },
   {
     element: <AppLayout />,
+    errorElement: <RouteErrorPage />,
     children: [
       {
         path: '/dashboard',
@@ -174,6 +225,7 @@ export const router = createBrowserRouter([
         loader: requireAuth,
         element: wrap(SessionEditPage),
       },
+      { path: '*', element: <RouteErrorPage /> },
     ],
   },
 ])

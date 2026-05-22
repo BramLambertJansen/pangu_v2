@@ -111,23 +111,13 @@ export default function LoreEditPage() {
     setDirty(true)
   }
 
-  async function abandon() {
-    const { error } = await supabase.from('lore').delete().eq('id', id!)
-    if (error) {
-      toast.error('Lore-item kon niet worden verwijderd')
-      return
-    }
-    if (campaignId) {
-      queryClient.invalidateQueries({ queryKey: queryKeys.campaigns.lore(campaignId) })
-      navigate(`/campaigns/${campaignId}/lore`)
-    } else {
-      navigate('/dashboard')
-    }
-  }
-
   function handleCancel() {
     if (!committed) {
-      abandon()
+      if (campaignId) {
+        navigate(`/campaigns/${campaignId}/lore`)
+      } else {
+        navigate('/dashboard')
+      }
     } else {
       setForm(loreData!)
       setDirty(false)
@@ -137,7 +127,11 @@ export default function LoreEditPage() {
 
   function handleBack() {
     if (!committed) {
-      abandon()
+      if (campaignId) {
+        navigate(`/campaigns/${campaignId}/lore`)
+      } else {
+        navigate('/dashboard')
+      }
     } else {
       navigate(`/campaigns/${campaignId}/lore`)
     }

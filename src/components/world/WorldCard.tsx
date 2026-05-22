@@ -239,10 +239,10 @@ export function ForgeWorldCard({ onClick, loading }: ForgeCardProps) {
           color: 'var(--gold)',
           margin: '0 0 6px',
         }}>
-          {loading ? 'Aanmaken...' : 'Forge a World'}
+          {loading ? 'Aanmaken...' : 'Nieuwe wereld'}
         </p>
         <p style={{ fontSize: 13, color: 'var(--muted)', margin: 0 }}>
-          A blank kosmos awaits.
+          Een leeg kosmos wacht.
         </p>
       </div>
     </article>

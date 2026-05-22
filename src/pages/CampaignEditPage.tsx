@@ -176,24 +176,13 @@ export default function CampaignEditPage() {
     setDirty(true)
   }
 
-  async function abandon() {
-    const { error } = await supabase.from('campaigns').delete().eq('id', id!)
-    if (error) {
-      toast.error('Kroniek kon niet worden verwijderd')
-      return
-    }
-    const worldId = worldIdFromState
-    if (worldId) {
-      queryClient.invalidateQueries({ queryKey: queryKeys.campaigns.byWorld(worldId) })
-      navigate(`/worlds/${worldId}`)
-    } else {
-      navigate('/dashboard')
-    }
-  }
-
   function handleCancel() {
     if (!committed) {
-      abandon()
+      if (worldIdFromState) {
+        navigate(`/worlds/${worldIdFromState}`)
+      } else {
+        navigate('/dashboard')
+      }
     } else {
       setForm(campaign!)
       setImagePos(parsePosition(campaign!.header_image_position))
@@ -204,7 +193,11 @@ export default function CampaignEditPage() {
 
   function handleBack() {
     if (!committed) {
-      abandon()
+      if (worldIdFromState) {
+        navigate(`/worlds/${worldIdFromState}`)
+      } else {
+        navigate('/dashboard')
+      }
     } else {
       navigate(`/campaigns/${id}`)
     }

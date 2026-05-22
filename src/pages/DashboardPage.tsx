@@ -112,7 +112,7 @@ export default function DashboardPage() {
     <div>
       {/* Page header */}
       <header style={{ marginBottom: 48 }}>
-        <p className="pangu-eyebrow">Your adventure awaits</p>
+        <p className="pangu-eyebrow">Het avontuur wacht</p>
         <h1 className="pangu-display-xl">Welkom, {displayName}</h1>
         <p style={{ marginTop: 8, fontSize: 14, color: 'var(--ink-soft)', maxWidth: 480, lineHeight: 1.65 }}>
           Hier vind je een overzicht van je werelden, actieve kronieken en geplande sessies.
