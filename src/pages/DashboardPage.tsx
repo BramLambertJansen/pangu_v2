@@ -42,7 +42,8 @@ function LinkRow({ href, label }: { href: string; label: string }) {
 }
 
 export default function DashboardPage() {
-  const { user, profile } = useAuthStore()
+  const user = useAuthStore(s => s.user)
+  const profile = useAuthStore(s => s.profile)
   const displayName = profile?.display_name ?? user?.email ?? 'Avonturier'
 
   const { data: worlds, isLoading: worldsLoading } = useQuery<World[]>({

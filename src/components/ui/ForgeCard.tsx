@@ -1,4 +1,4 @@
-import type { ReactNode, KeyboardEvent } from 'react'
+import { memo, type ReactNode, type KeyboardEvent } from 'react'
 import { cn } from '@/utils/cn'
 
 export interface ForgeCardProps {
@@ -13,7 +13,7 @@ export interface ForgeCardProps {
   className?: string
 }
 
-export function ForgeCard({
+export const ForgeCard = memo(function ForgeCard({
   onClick,
   loading,
   icon,
@@ -65,4 +65,4 @@ export function ForgeCard({
       </div>
     </article>
   )
-}
+})

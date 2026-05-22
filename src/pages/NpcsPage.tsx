@@ -19,7 +19,7 @@ export default function NpcsPage() {
   const { id: campaignId } = useParams<{ id: string }>()
   const navigate = useNavigate()
   const queryClient = useQueryClient()
-  const { user } = useAuthStore()
+  const user = useAuthStore(s => s.user)
   const [creatingNpc, setCreatingNpc] = useState(false)
 
   const { data: campaign, isLoading: campaignLoading } = useCampaign(campaignId)

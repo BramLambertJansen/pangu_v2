@@ -11,7 +11,7 @@ import type { World } from '@/types/world.types'
 export default function WorldsPage() {
   const navigate = useNavigate()
   const queryClient = useQueryClient()
-  const { user } = useAuthStore()
+  const user = useAuthStore(s => s.user)
 
   const { data: worlds, isLoading } = useQuery<World[]>({
     queryKey: queryKeys.worlds.all,

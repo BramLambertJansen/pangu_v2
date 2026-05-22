@@ -1,3 +1,4 @@
+import { memo } from 'react'
 import { useNavigate } from 'react-router-dom'
 import type { Lore } from '@/types/lore.types'
 import { EntityCard } from '@/components/ui/EntityCard'
@@ -10,7 +11,7 @@ interface Props {
   lore: Lore
 }
 
-export function LoreCard({ lore }: Props) {
+export const LoreCard = memo(function LoreCard({ lore }: Props) {
   const navigate = useNavigate()
   const gradient = pickGradient(lore.id, loreGradients)
 
@@ -95,14 +96,14 @@ export function LoreCard({ lore }: Props) {
       </div>
     </EntityCard>
   )
-}
+})
 
 interface ForgeProps {
   onClick: () => void
   loading?: boolean
 }
 
-export function ForgeLoreCard({ onClick, loading }: ForgeProps) {
+export const ForgeLoreCard = memo(function ForgeLoreCard({ onClick, loading }: ForgeProps) {
   return (
     <ForgeCard
       variant="compact"
@@ -130,4 +131,4 @@ export function ForgeLoreCard({ onClick, loading }: ForgeProps) {
       }
     />
   )
-}
+})

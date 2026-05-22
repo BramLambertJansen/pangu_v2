@@ -57,7 +57,8 @@ function SettingToggle({
 // ── Profile tab ───────────────────────────────────────────
 
 function ProfielTab() {
-  const { profile, setProfile } = useAuthStore()
+  const profile = useAuthStore(s => s.profile)
+  const setProfile = useAuthStore(s => s.setProfile)
 
   const [form, setForm] = useState<ProfileForm>({
     display_name: profile?.display_name ?? '',
@@ -231,14 +232,12 @@ function ProfielTab() {
 // ── Preferences tab ───────────────────────────────────────
 
 function VoorkeurenTab() {
-  const {
-    sessionReminders,
-    soundEffects,
-    autosaveNotes,
-    loreSuggestions,
-    language,
-    setPreference,
-  } = usePreferencesStore()
+  const sessionReminders = usePreferencesStore(s => s.sessionReminders)
+  const soundEffects = usePreferencesStore(s => s.soundEffects)
+  const autosaveNotes = usePreferencesStore(s => s.autosaveNotes)
+  const loreSuggestions = usePreferencesStore(s => s.loreSuggestions)
+  const language = usePreferencesStore(s => s.language)
+  const setPreference = usePreferencesStore(s => s.setPreference)
 
   const langId = useId()
 

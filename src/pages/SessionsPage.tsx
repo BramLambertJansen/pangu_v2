@@ -18,7 +18,7 @@ export default function SessionsPage() {
   const { id: campaignId } = useParams<{ id: string }>()
   const navigate = useNavigate()
   const queryClient = useQueryClient()
-  const { user } = useAuthStore()
+  const user = useAuthStore(s => s.user)
   const [creatingSession, setCreatingSession] = useState(false)
 
   const { data: campaign, isLoading: campaignLoading } = useQuery<Campaign>({

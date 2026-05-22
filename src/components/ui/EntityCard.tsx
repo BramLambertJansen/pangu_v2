@@ -1,4 +1,4 @@
-import type { ReactNode, KeyboardEvent } from 'react'
+import { memo, type ReactNode, type KeyboardEvent } from 'react'
 import { cn } from '@/utils/cn'
 
 export interface EntityCardProps {
@@ -9,7 +9,7 @@ export interface EntityCardProps {
   className?: string
 }
 
-export function EntityCard({ children, onClick, ariaLabel, variant = 'compact', className }: EntityCardProps) {
+export const EntityCard = memo(function EntityCard({ children, onClick, ariaLabel, variant = 'compact', className }: EntityCardProps) {
   function handleKeyDown(e: KeyboardEvent<HTMLElement>) {
     if (e.key === 'Enter' || e.key === ' ') {
       e.preventDefault()
@@ -30,4 +30,4 @@ export function EntityCard({ children, onClick, ariaLabel, variant = 'compact', 
       {children}
     </article>
   )
-}
+})

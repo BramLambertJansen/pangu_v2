@@ -37,7 +37,7 @@ export default function CampaignDetailPage() {
   const { id } = useParams<{ id: string }>()
   const navigate = useNavigate()
   const queryClient = useQueryClient()
-  const { user } = useAuthStore()
+  const user = useAuthStore(s => s.user)
 
   const { data: campaign, isLoading } = useCampaignWithWorld(id)
   const { data: sessions, isLoading: isLoadingSessions } = useCampaignSessions(id)
