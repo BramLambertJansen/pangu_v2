@@ -1,24 +1,18 @@
 import { useEffect } from 'react'
 import { useBlocker } from 'react-router-dom'
 
-export function useUnsavedChangesPrompt(dirty: boolean, message = 'Je hebt niet-opgeslagen wijzigingen. Weet je zeker dat je de pagina wilt verlaten?') {
+export interface UnsavedChangesPrompt {
+  blocked: boolean
+  proceed: () => void
+  reset: () => void
+}
+
+export function useUnsavedChangesPrompt(dirty: boolean): UnsavedChangesPrompt {
   const blocker = useBlocker(
     ({ currentLocation, nextLocation }) =>
       dirty && currentLocation.pathname !== nextLocation.pathname,
   )
 
-  // Show native confirm when blocker triggers
-  useEffect(() => {
-    if (blocker.state === 'blocked') {
-      if (window.confirm(message)) {
-        blocker.proceed()
-      } else {
-        blocker.reset()
-      }
-    }
-  }, [blocker, message])
-
-  // Also guard against browser/tab close
   useEffect(() => {
     if (!dirty) return
     const handler = (e: BeforeUnloadEvent) => {
@@ -27,4 +21,10 @@ export function useUnsavedChangesPrompt(dirty: boolean, message = 'Je hebt niet-
     window.addEventListener('beforeunload', handler)
     return () => window.removeEventListener('beforeunload', handler)
   }, [dirty])
+
+  return {
+    blocked: blocker.state === 'blocked',
+    proceed: () => blocker.state === 'blocked' && blocker.proceed(),
+    reset: () => blocker.state === 'blocked' && blocker.reset(),
+  }
 }

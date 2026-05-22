@@ -5,19 +5,14 @@ import { toast } from 'sonner'
 import { supabase } from '@/lib/supabase'
 import { queryKeys } from '@/lib/queryKeys'
 import { Spinner } from '@/components/ui/Spinner'
+import { EntityCardSkeleton } from '@/components/ui/EntityCardSkeleton'
+import { EmptyState } from '@/components/ui/EmptyState'
+import { Breadcrumbs } from '@/components/ui/Breadcrumbs'
 import { SessionCard, ForgeSessionCard } from '@/components/session/SessionCard'
 import { WorldDetailDivider } from '@/components/world/WorldDetailDivider'
 import type { Campaign } from '@/types/campaign.types'
 import type { Session } from '@/types/session.types'
 import { useAuthStore } from '@/stores/auth.store'
-
-const breadcrumbStyle: React.CSSProperties = {
-  fontFamily: 'var(--font-body)',
-  fontSize: 11,
-  fontWeight: 700,
-  letterSpacing: '0.18em',
-  textTransform: 'uppercase',
-}
 
 export default function SessionsPage() {
   const { id: campaignId } = useParams<{ id: string }>()
@@ -94,11 +89,9 @@ export default function SessionsPage() {
     createSession.mutate()
   }
 
-  const isLoading = campaignLoading || sessionsLoading
-
-  if (isLoading) {
+  if (campaignLoading) {
     return (
-      <div style={{ display: 'flex', justifyContent: 'center', padding: '80px 0' }} aria-live="polite" aria-label="Sessies laden...">
+      <div style={{ display: 'flex', justifyContent: 'center', padding: '80px 0' }} aria-live="polite" aria-label="Kroniek laden...">
         <Spinner size="lg" />
       </div>
     )
@@ -118,54 +111,13 @@ export default function SessionsPage() {
   return (
     <div>
       {/* Breadcrumb */}
-      <nav aria-label="Navigatie" style={{ display: 'flex', alignItems: 'center', marginBottom: 24 }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-          <button
-            type="button"
-            onClick={() => navigate(`/worlds/${campaign.world_id}`)}
-            aria-label="Terug naar wereld"
-            style={{
-              ...breadcrumbStyle,
-              display: 'inline-flex', alignItems: 'center', gap: 6,
-              background: 'none', border: 'none', cursor: 'pointer',
-              color: 'var(--muted)', padding: 0,
-              transition: 'color var(--t-fast)',
-            }}
-            onMouseEnter={(e) => (e.currentTarget.style.color = 'var(--ink-soft)')}
-            onMouseLeave={(e) => (e.currentTarget.style.color = 'var(--muted)')}
-          >
-            <svg aria-hidden="true" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M19 12H5" /><path d="M12 19l-7-7 7-7" />
-            </svg>
-            Wereld
-          </button>
-
-          <span aria-hidden="true" style={{ ...breadcrumbStyle, color: 'var(--hairline)' }}>·</span>
-
-          <button
-            type="button"
-            onClick={() => navigate(`/campaigns/${campaignId}`)}
-            aria-label={`Terug naar ${campaign.name}`}
-            style={{
-              ...breadcrumbStyle,
-              display: 'inline-flex', alignItems: 'center', gap: 6,
-              background: 'none', border: 'none', cursor: 'pointer',
-              color: 'var(--muted)', padding: 0,
-              transition: 'color var(--t-fast)',
-            }}
-            onMouseEnter={(e) => (e.currentTarget.style.color = 'var(--ink-soft)')}
-            onMouseLeave={(e) => (e.currentTarget.style.color = 'var(--muted)')}
-          >
-            {campaign.name}
-          </button>
-
-          <span aria-hidden="true" style={{ ...breadcrumbStyle, color: 'var(--hairline)' }}>·</span>
-
-          <span style={{ ...breadcrumbStyle, color: 'var(--ink-soft)' }} aria-current="page">
-            Sessies
-          </span>
-        </div>
-      </nav>
+      <div style={{ marginBottom: 24 }}>
+        <Breadcrumbs items={[
+          { label: 'Wereld', to: `/worlds/${campaign.world_id}` },
+          { label: campaign.name, to: `/campaigns/${campaignId}` },
+          { label: 'Sessies' },
+        ]} />
+      </div>
 
       {/* Page header */}
       <header style={{ marginBottom: 32 }}>
@@ -180,21 +132,26 @@ export default function SessionsPage() {
 
       {/* Session grid */}
       <div style={{ marginTop: 24 }}>
-        {(!sessions || sessions.length === 0) && (
-          <p style={{
-            fontSize: 14, color: 'var(--muted)',
-            fontStyle: 'italic', marginBottom: 24,
-          }}>
-            Nog geen sessies. Begin met je eerste avontuur.
-          </p>
+        {sessionsLoading ? (
+          <ul style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: 'var(--sp-4)', listStyle: 'none', padding: 0, margin: 0 }} aria-label="Sessies laden..." aria-live="polite">
+            <EntityCardSkeleton count={3} />
+          </ul>
+        ) : (
+          <>
+            {(!sessions || sessions.length === 0) && (
+              <EmptyState
+                title="Nog geen sessies"
+                description="Begin met je eerste avontuur. Elke grote queeste start met één stap."
+              />
+            )}
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+              {sessions?.map((session) => (
+                <SessionCard key={session.id} session={session} />
+              ))}
+              <ForgeSessionCard onClick={handleCreateSession} loading={creatingSession} />
+            </div>
+          </>
         )}
-
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {sessions?.map((session) => (
-            <SessionCard key={session.id} session={session} />
-          ))}
-          <ForgeSessionCard onClick={handleCreateSession} loading={creatingSession} />
-        </div>
       </div>
     </div>
   )

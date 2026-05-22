@@ -4,10 +4,11 @@ import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { toast } from 'sonner'
 import { supabase } from '@/lib/supabase'
 import { queryKeys } from '@/lib/queryKeys'
-import { Modal } from '@/components/ui/Modal'
 import { Spinner } from '@/components/ui/Spinner'
+import { ConfirmDialog } from '@/components/ui/ConfirmDialog'
 import { useWorld } from '@/hooks/queries/useWorld'
 import { useImagePositioning } from '@/hooks/useImagePositioning'
+import { useUnsavedChangesPrompt } from '@/hooks/useUnsavedChangesPrompt'
 import type { World, WorldStatus } from '@/types/world.types'
 
 const statusOptions: { value: WorldStatus; label: string }[] = [
@@ -31,6 +32,8 @@ export default function WorldEditPage() {
   const [deleteOpen, setDeleteOpen] = useState(false)
   const [form, setForm] = useState<Partial<World>>({})
   const [dirty, setDirty] = useState(false)
+
+  const unsaved = useUnsavedChangesPrompt(dirty)
 
   const handlePositionChange = useCallback((posString: string) => {
     setForm((prev) => ({ ...prev, header_image_position: posString }))
@@ -359,24 +362,28 @@ export default function WorldEditPage() {
 
       </div>
 
-      {/* Delete modal */}
-      <Modal
+      <ConfirmDialog
         open={deleteOpen}
         onClose={() => setDeleteOpen(false)}
+        onConfirm={handleDelete}
         title="Wereld verwijderen"
+        confirmLabel="Verwijder wereld"
+        loading={deleteWorld.isPending}
       >
-        <p style={{ fontSize: 14, color: 'var(--ink-soft)', marginBottom: 24 }}>
-          Weet je zeker dat je <strong style={{ color: 'var(--ink)' }}>{world.name}</strong> wilt verwijderen? Dit kan niet ongedaan worden gemaakt.
-        </p>
-        <div className="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
-          <button type="button" className="pangu-btn pangu-btn-ghost" onClick={() => setDeleteOpen(false)}>
-            Annuleren
-          </button>
-          <button type="button" className="pangu-btn pangu-btn-crimson" onClick={handleDelete} disabled={deleteWorld.isPending}>
-            {deleteWorld.isPending ? 'Verwijderen...' : 'Verwijder wereld'}
-          </button>
-        </div>
-      </Modal>
+        Weet je zeker dat je <strong style={{ color: 'var(--ink)' }}>{world.name}</strong> wilt verwijderen? Dit kan niet ongedaan worden gemaakt.
+      </ConfirmDialog>
+
+      <ConfirmDialog
+        open={unsaved.blocked}
+        onClose={unsaved.reset}
+        onConfirm={unsaved.proceed}
+        title="Niet-opgeslagen wijzigingen"
+        confirmLabel="Verlaten"
+        cancelLabel="Blijven"
+        confirmVariant="crimson"
+      >
+        Je hebt niet-opgeslagen wijzigingen. Weet je zeker dat je de pagina wilt verlaten?
+      </ConfirmDialog>
     </div>
   )
 }

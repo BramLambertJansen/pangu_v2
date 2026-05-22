@@ -654,6 +654,26 @@ body {
   }
 }
 
+/* ── Skeleton ────────────────────────────────────────────── */
+
+@keyframes skeleton-shimmer {
+  0%   { opacity: 0.5; }
+  50%  { opacity: 0.9; }
+  100% { opacity: 0.5; }
+}
+
+.skeleton-pulse {
+  background: var(--surface-2);
+  animation: skeleton-shimmer 1.6s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .skeleton-pulse {
+    animation: none;
+    opacity: 0.6;
+  }
+}
+
 /* ── Entity cards ───────────────────────────────────────── */
 
 .entity-card {

@@ -4,10 +4,11 @@ import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { toast } from 'sonner'
 import { supabase } from '@/lib/supabase'
 import { queryKeys } from '@/lib/queryKeys'
-import { Modal } from '@/components/ui/Modal'
 import { Spinner } from '@/components/ui/Spinner'
+import { ConfirmDialog } from '@/components/ui/ConfirmDialog'
 import { useCampaign } from '@/hooks/queries/useCampaign'
 import { useImagePositioning } from '@/hooks/useImagePositioning'
+import { useUnsavedChangesPrompt } from '@/hooks/useUnsavedChangesPrompt'
 import type { Campaign, CampaignStatus } from '@/types/campaign.types'
 
 const statusOptions: { value: CampaignStatus; label: string }[] = [
@@ -34,6 +35,8 @@ export default function CampaignEditPage() {
   const [deleteOpen, setDeleteOpen] = useState(false)
   const [form, setForm] = useState<Partial<Campaign>>({})
   const [dirty, setDirty] = useState(false)
+
+  const unsaved = useUnsavedChangesPrompt(dirty)
 
   const handlePositionChange = useCallback((posString: string) => {
     setForm((prev) => ({ ...prev, header_image_position: posString }))
@@ -366,24 +369,28 @@ export default function CampaignEditPage() {
 
       </div>
 
-      {/* Delete modal */}
-      <Modal
+      <ConfirmDialog
         open={deleteOpen}
         onClose={() => setDeleteOpen(false)}
+        onConfirm={handleDelete}
         title="Kroniek verwijderen"
+        confirmLabel="Verwijder kroniek"
+        loading={deleteCampaign.isPending}
       >
-        <p style={{ fontSize: 14, color: 'var(--ink-soft)', marginBottom: 24 }}>
-          Weet je zeker dat je <strong style={{ color: 'var(--ink)' }}>{campaign.name}</strong> wilt verwijderen? Dit kan niet ongedaan worden gemaakt.
-        </p>
-        <div className="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
-          <button type="button" className="pangu-btn pangu-btn-ghost" onClick={() => setDeleteOpen(false)}>
-            Annuleren
-          </button>
-          <button type="button" className="pangu-btn pangu-btn-crimson" onClick={handleDelete} disabled={deleteCampaign.isPending}>
-            {deleteCampaign.isPending ? 'Verwijderen...' : 'Verwijder kroniek'}
-          </button>
-        </div>
-      </Modal>
+        Weet je zeker dat je <strong style={{ color: 'var(--ink)' }}>{campaign.name}</strong> wilt verwijderen? Dit kan niet ongedaan worden gemaakt.
+      </ConfirmDialog>
+
+      <ConfirmDialog
+        open={unsaved.blocked}
+        onClose={unsaved.reset}
+        onConfirm={unsaved.proceed}
+        title="Niet-opgeslagen wijzigingen"
+        confirmLabel="Verlaten"
+        cancelLabel="Blijven"
+        confirmVariant="crimson"
+      >
+        Je hebt niet-opgeslagen wijzigingen. Weet je zeker dat je de pagina wilt verlaten?
+      </ConfirmDialog>
     </div>
   )
 }
