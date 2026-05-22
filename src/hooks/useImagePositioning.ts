@@ -6,7 +6,7 @@ interface Position {
 }
 
 interface ImagePositioningResult {
-  containerRef: React.RefObject<HTMLDivElement>
+  containerRef: React.RefObject<HTMLDivElement | null>
   posString: string
   isDragging: boolean
   handlers: {
