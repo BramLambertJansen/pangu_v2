@@ -628,3 +628,21 @@ body {
     min-height: 520px;
   }
 }
+
+/* ── Motion safety ───────────────────────────────────────── */
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+
+  .pangu-btn-primary:hover,
+  .pangu-btn-gold:hover {
+    transform: none !important;
+  }
+}
