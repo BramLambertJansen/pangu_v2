@@ -2,6 +2,7 @@ import { Outlet, NavLink, useNavigate } from 'react-router-dom'
 import { useUIStore } from '@/stores/ui.store'
 import { useAuthStore } from '@/stores/auth.store'
 import { supabase } from '@/lib/supabase'
+import { queryClient } from '@/lib/queryClient'
 import { toast } from 'sonner'
 import { useMemo, useState } from 'react'
 
@@ -120,6 +121,7 @@ export default function AppLayout() {
   async function handleSignOut() {
     await supabase.auth.signOut()
     signOut()
+    queryClient.clear()
     toast.success('Uitgelogd')
     navigate('/login', { replace: true })
   }
@@ -164,6 +166,7 @@ export default function AppLayout() {
 
       {/* ── Sidebar ── */}
       <nav
+        id="sidebar-nav"
         aria-label="Hoofdnavigatie"
         className={`sidebar-nav relative flex flex-col h-full shrink-0${mobileOpen ? ' is-open' : ''}`}
         style={{
