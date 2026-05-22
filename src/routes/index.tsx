@@ -44,13 +44,13 @@ function wrap(Page: React.ComponentType) {
   )
 }
 
-async function requireAuth() {
+export async function requireAuth() {
   const { data: { session } } = await supabase.auth.getSession()
   if (!session) return redirect('/login')
   return null
 }
 
-async function requireAdmin() {
+export async function requireAdmin() {
   const { data: { session } } = await supabase.auth.getSession()
   if (!session) return redirect('/login')
 

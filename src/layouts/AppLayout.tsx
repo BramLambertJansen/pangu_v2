@@ -133,6 +133,7 @@ export default function AppLayout() {
 
   return (
     <div className="flex h-screen overflow-hidden" style={{ background: 'var(--void)', color: 'var(--ink)' }}>
+      <a href="#main-content" className="skip-to-content">Naar inhoud springen</a>
 
       {/* ── Mobile backdrop ── */}
       <div
@@ -225,6 +226,7 @@ export default function AppLayout() {
                 <NavLink
                   to={item.to}
                   title={sidebarCollapsed ? item.label : undefined}
+                  aria-label={sidebarCollapsed ? item.label : undefined}
                   onClick={() => setMobileOpen(false)}
                   className={({ isActive }) =>
                     sidebarCollapsed
@@ -291,6 +293,7 @@ export default function AppLayout() {
 
       {/* ── Main content ── */}
       <main
+        id="main-content"
         className="main-content flex-1 overflow-auto"
         style={{ position: 'relative', zIndex: 10 }}
       >

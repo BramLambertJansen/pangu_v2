@@ -1,4 +1,4 @@
-import { useState, useEffect, useId } from 'react'
+import { useId } from 'react'
 import { useParams, useNavigate, useLocation } from 'react-router-dom'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { toast } from 'sonner'
@@ -6,6 +6,7 @@ import { supabase } from '@/lib/supabase'
 import { queryKeys } from '@/lib/queryKeys'
 import { Modal } from '@/components/ui/Modal'
 import { Spinner } from '@/components/ui/Spinner'
+import { useEntityEdit } from '@/hooks/useEntityEdit'
 import type { Npc, NpcStatus } from '@/types/npc.types'
 
 const statusOptions: { value: NpcStatus; label: string }[] = [
@@ -30,11 +31,6 @@ export default function NpcEditPage() {
   const isNew = locationState?.isNew ?? false
   const campaignIdFromState = locationState?.campaignId
 
-  const [committed, setCommitted] = useState(!isNew)
-  const [deleteOpen, setDeleteOpen] = useState(false)
-  const [form, setForm] = useState<Partial<Npc>>({})
-  const [dirty, setDirty] = useState(false)
-
   const { data: npcData, isLoading } = useQuery<Npc>({
     queryKey: queryKeys.campaigns.npcDetail(id!),
     queryFn: async () => {
@@ -50,12 +46,12 @@ export default function NpcEditPage() {
     staleTime: 1000 * 60,
   })
 
-  useEffect(() => {
-    if (npcData) {
-      setForm(npcData)
-      setDirty(false)
-    }
-  }, [npcData])
+  const {
+    form, set, dirty, setDirty,
+    committed, setCommitted,
+    deleteOpen, setDeleteOpen,
+    resetForm,
+  } = useEntityEdit({ entity: npcData, isNew })
 
   const campaignId = npcData?.campaign_id ?? campaignIdFromState
 
@@ -107,11 +103,6 @@ export default function NpcEditPage() {
     },
   })
 
-  function set<K extends keyof Npc>(key: K, value: Npc[K]) {
-    setForm((prev) => ({ ...prev, [key]: value }))
-    setDirty(true)
-  }
-
   function handleCancel() {
     if (!committed) {
       if (campaignId) {
@@ -120,8 +111,7 @@ export default function NpcEditPage() {
         navigate('/dashboard')
       }
     } else {
-      setForm(npcData!)
-      setDirty(false)
+      resetForm()
       navigate(`/campaigns/${campaignId}/npcs`)
     }
   }
@@ -231,7 +221,7 @@ export default function NpcEditPage() {
                 id="npc-subtitle"
                 className="pangu-input"
                 value={form.subtitle ?? ''}
-                onChange={(e) => set('subtitle', e.target.value || null as unknown as string)}
+                onChange={(e) => set('subtitle', e.target.value || null)}
                 placeholder="Bijnaam, titel of tagline"
               />
             </div>
@@ -242,7 +232,7 @@ export default function NpcEditPage() {
                 id={npcRoleId}
                 className="pangu-input"
                 value={form.npc_role ?? ''}
-                onChange={(e) => set('npc_role', e.target.value || null as unknown as string)}
+                onChange={(e) => set('npc_role', e.target.value || null)}
                 placeholder="Bijv. Schurk, Bondgenoot, Koopman, Gids..."
               />
             </div>
@@ -267,7 +257,7 @@ export default function NpcEditPage() {
                 id={descriptionId}
                 className="pangu-textarea"
                 value={form.description ?? ''}
-                onChange={(e) => set('description', e.target.value || null as unknown as string)}
+                onChange={(e) => set('description', e.target.value || null)}
                 placeholder="Beschrijf het personage, uiterlijk, persoonlijkheid en achtergrond..."
                 rows={4}
               />
@@ -279,7 +269,7 @@ export default function NpcEditPage() {
                 id={notesId}
                 className="pangu-textarea"
                 value={form.notes ?? ''}
-                onChange={(e) => set('notes', e.target.value || null as unknown as string)}
+                onChange={(e) => set('notes', e.target.value || null)}
                 placeholder="Aantekeningen voor de DM: geheimen, motieven, verborgen agenda's..."
                 rows={8}
               />

@@ -34,12 +34,10 @@ export default function LoginPage() {
     const { data, error } = await supabase.auth.signInWithPassword({ email, password })
 
     if (error) {
-      toast.error('Inloggen mislukt: ' + error.message)
+      toast.error('Inloggen mislukt. Controleer je e-mailadres en wachtwoord.')
       setLoading(false)
       return
     }
-
-    setUser(data.user)
 
     const { data: profile } = await supabase
       .from('profiles')
@@ -48,6 +46,8 @@ export default function LoginPage() {
       .single()
 
     if (profile) setProfile(profile as Profile)
+
+    setUser(data.user)
 
     navigate(profile?.role === 'admin' ? '/admin' : '/dashboard', { replace: true })
   }
