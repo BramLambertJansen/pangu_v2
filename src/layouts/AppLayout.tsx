@@ -224,6 +224,7 @@ export default function AppLayout() {
                 <NavLink
                   to={item.to}
                   title={sidebarCollapsed ? item.label : undefined}
+                  aria-label={sidebarCollapsed ? item.label : undefined}
                   onClick={() => setMobileOpen(false)}
                   className={({ isActive }) =>
                     sidebarCollapsed

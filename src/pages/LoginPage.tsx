@@ -38,8 +38,6 @@ export default function LoginPage() {
       return
     }
 
-    setUser(data.user)
-
     const { data: profile } = await supabase
       .from('profiles')
       .select('*')
@@ -47,6 +45,8 @@ export default function LoginPage() {
       .single()
 
     if (profile) setProfile(profile as Profile)
+
+    setUser(data.user)
 
     navigate(profile?.role === 'admin' ? '/admin' : '/dashboard', { replace: true })
   }

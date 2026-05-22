@@ -90,24 +90,6 @@ export default function DashboardPage() {
     staleTime: 1000 * 30,
   })
 
-  const isLoading = worldsLoading || campaignsLoading || sessionsLoading
-
-  if (isLoading) {
-    return (
-      <div
-        style={{ display: 'flex', justifyContent: 'center', padding: '80px 0' }}
-        aria-live="polite"
-        aria-label="Dashboard laden..."
-      >
-        <Spinner size="lg" />
-      </div>
-    )
-  }
-
-  const worldCount = worlds?.length ?? 0
-  const campaignCount = activeCampaigns?.length ?? 0
-  const sessionCount = plannedSessions?.length ?? 0
-
   return (
     <div>
       {/* Page header */}
@@ -122,7 +104,11 @@ export default function DashboardPage() {
       {/* Mijn werelden */}
       <WorldDetailDivider label="Mijn werelden" />
 
-      {worldCount === 0 ? (
+      {worldsLoading ? (
+        <div style={{ display: 'flex', justifyContent: 'center', padding: '24px 0' }} aria-live="polite" aria-label="Werelden laden...">
+          <Spinner size="sm" />
+        </div>
+      ) : (worlds?.length ?? 0) === 0 ? (
         <p style={{ fontSize: 14, color: 'var(--muted)', fontStyle: 'italic' }}>
           Nog geen werelden. Begin met het smeden van je eerste wereld.
         </p>
@@ -140,7 +126,11 @@ export default function DashboardPage() {
       {/* Actieve kronieken */}
       <WorldDetailDivider label="Actieve kronieken" />
 
-      {campaignCount === 0 ? (
+      {campaignsLoading ? (
+        <div style={{ display: 'flex', justifyContent: 'center', padding: '24px 0' }} aria-live="polite" aria-label="Kronieken laden...">
+          <Spinner size="sm" />
+        </div>
+      ) : (activeCampaigns?.length ?? 0) === 0 ? (
         <p style={{ fontSize: 14, color: 'var(--muted)', fontStyle: 'italic' }}>
           Geen actieve kronieken. Stel een kroniek in op 'Actief' om hem hier te zien.
         </p>
@@ -155,7 +145,11 @@ export default function DashboardPage() {
       {/* Geplande sessies */}
       <WorldDetailDivider label="Geplande sessies" />
 
-      {sessionCount === 0 ? (
+      {sessionsLoading ? (
+        <div style={{ display: 'flex', justifyContent: 'center', padding: '24px 0' }} aria-live="polite" aria-label="Sessies laden...">
+          <Spinner size="sm" />
+        </div>
+      ) : (plannedSessions?.length ?? 0) === 0 ? (
         <p style={{ fontSize: 14, color: 'var(--muted)', fontStyle: 'italic' }}>
           Geen sessies gepland. Voeg een sessie toe aan een kroniek om hem hier te zien.
         </p>

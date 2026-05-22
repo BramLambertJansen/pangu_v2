@@ -150,7 +150,7 @@ export default function WorldDetailPage() {
 
       {/* Campaign list */}
       {isLoadingCampaigns ? (
-        <div style={{ display: 'flex', justifyContent: 'center', padding: '40px 0' }} aria-live="polite" aria-label="Kronieken laden...">
+        <div style={{ display: 'flex', justifyContent: 'center', padding: '40px 0' }} aria-live="polite" aria-label="Kronieken laden..." aria-busy="true">
           <Spinner size="md" />
         </div>
       ) : (

@@ -1,4 +1,5 @@
 import { useParams, useNavigate, Link } from 'react-router-dom'
+import { Breadcrumb } from '@/components/ui/Breadcrumb'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { toast } from 'sonner'
 import { supabase } from '@/lib/supabase'
@@ -39,14 +40,6 @@ function pickGradient(id: string): string {
 
 const scrimGradient =
   'linear-gradient(to top, var(--void) 0%, rgba(10,10,22,0.97) 20%, rgba(10,10,22,0.72) 40%, rgba(10,10,22,0.18) 62%, transparent 82%)'
-
-const breadcrumbStyle: React.CSSProperties = {
-  fontFamily: 'var(--font-body)',
-  fontSize: 11,
-  fontWeight: 700,
-  letterSpacing: '0.18em',
-  textTransform: 'uppercase',
-}
 
 export default function CampaignDetailPage() {
   const { id } = useParams<{ id: string }>()
@@ -238,56 +231,10 @@ export default function CampaignDetailPage() {
 
   return (
     <div>
-      {/* Breadcrumb */}
-      <nav aria-label="Navigatie" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 24 }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-          <button
-            type="button"
-            onClick={() => navigate(`/worlds/${campaign.world_id}`)}
-            aria-label={`Terug naar ${worldName ?? 'wereld'}`}
-            style={{
-              ...breadcrumbStyle,
-              display: 'inline-flex', alignItems: 'center', gap: 6,
-              background: 'none', border: 'none', cursor: 'pointer',
-              color: 'var(--muted)', padding: 0,
-              transition: 'color var(--t-fast)',
-            }}
-            onMouseEnter={(e) => (e.currentTarget.style.color = 'var(--ink-soft)')}
-            onMouseLeave={(e) => (e.currentTarget.style.color = 'var(--muted)')}
-          >
-            <svg aria-hidden="true" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M19 12H5" /><path d="M12 19l-7-7 7-7" />
-            </svg>
-            {worldName ?? 'Wereld'}
-          </button>
-
-          <span aria-hidden="true" style={{ ...breadcrumbStyle, color: 'var(--hairline)' }}>·</span>
-
-          <span style={{ ...breadcrumbStyle, color: 'var(--ink-soft)' }} aria-current="page">
-            Kroniek
-          </span>
-        </div>
-
-        <Link
-          to={`/campaigns/${id}/edit`}
-          aria-label={`${campaign.name} bewerken`}
-          style={{
-            display: 'inline-flex', alignItems: 'center', gap: 6,
-            color: 'var(--muted)', fontSize: 12, fontWeight: 700,
-            letterSpacing: '0.18em', textTransform: 'uppercase',
-            fontFamily: 'var(--font-body)',
-            textDecoration: 'none',
-            transition: 'color var(--t-fast)',
-          }}
-          onMouseEnter={(e) => (e.currentTarget.style.color = 'var(--ink-soft)')}
-          onMouseLeave={(e) => (e.currentTarget.style.color = 'var(--muted)')}
-        >
-          <svg aria-hidden="true" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z" />
-          </svg>
-          Bewerken
-        </Link>
-      </nav>
+      <Breadcrumb items={[
+        { label: 'Wereld', onClick: () => navigate(`/worlds/${campaign.world_id}`) },
+        { label: campaign.name },
+      ]} />
 
       {/* Campaign header — full-bleed, same responsive layout as WorldDetailHeader */}
       <div
@@ -498,7 +445,7 @@ export default function CampaignDetailPage() {
 
       {/* Session list */}
       {isLoadingSessions ? (
-        <div style={{ display: 'flex', justifyContent: 'center', padding: '40px 0' }} aria-live="polite" aria-label="Sessies laden...">
+        <div style={{ display: 'flex', justifyContent: 'center', padding: '40px 0' }} aria-live="polite" aria-label="Sessies laden..." aria-busy="true">
           <Spinner size="md" />
         </div>
       ) : (
@@ -529,7 +476,7 @@ export default function CampaignDetailPage() {
 
       {/* Location list */}
       {isLoadingLocations ? (
-        <div style={{ display: 'flex', justifyContent: 'center', padding: '40px 0' }} aria-live="polite" aria-label="Locaties laden...">
+        <div style={{ display: 'flex', justifyContent: 'center', padding: '40px 0' }} aria-live="polite" aria-label="Locaties laden..." aria-busy="true">
           <Spinner size="md" />
         </div>
       ) : (
@@ -573,7 +520,7 @@ export default function CampaignDetailPage() {
 
       {/* Lore list */}
       {isLoadingLore ? (
-        <div style={{ display: 'flex', justifyContent: 'center', padding: '40px 0' }} aria-live="polite" aria-label="Lore laden...">
+        <div style={{ display: 'flex', justifyContent: 'center', padding: '40px 0' }} aria-live="polite" aria-label="Lore laden..." aria-busy="true">
           <Spinner size="md" />
         </div>
       ) : (
@@ -617,7 +564,7 @@ export default function CampaignDetailPage() {
 
       {/* NPC list */}
       {isLoadingNpcs ? (
-        <div style={{ display: 'flex', justifyContent: 'center', padding: '40px 0' }} aria-live="polite" aria-label="NPCs laden...">
+        <div style={{ display: 'flex', justifyContent: 'center', padding: '40px 0' }} aria-live="polite" aria-label="NPCs laden..." aria-busy="true">
           <Spinner size="md" />
         </div>
       ) : (

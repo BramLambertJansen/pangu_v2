@@ -18,6 +18,12 @@ const sizeStyles: Record<Size, string> = {
   lg: 'h-14 w-14 text-base',
 }
 
+const sizePx: Record<Size, number> = {
+  sm: 32,
+  md: 40,
+  lg: 56,
+}
+
 export function Avatar({ src, alt, size = 'md', fallback, className, ...props }: AvatarProps) {
   return (
     <div
@@ -29,7 +35,7 @@ export function Avatar({ src, alt, size = 'md', fallback, className, ...props }:
       {...props}
     >
       {src ? (
-        <img src={src} alt={alt ?? ''} className="h-full w-full object-cover" />
+        <img src={src} alt={alt ?? ''} className="h-full w-full object-cover" width={sizePx[size]} height={sizePx[size]} />
       ) : (
         <span aria-label={alt}>{fallback ?? '?'}</span>
       )}

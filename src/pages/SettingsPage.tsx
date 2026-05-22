@@ -28,11 +28,12 @@ function SettingToggle({
   onChange: (v: boolean) => void
 }) {
   const id = useId()
+  const labelId = `${id}-label`
   return (
     <div className="flex items-center justify-between gap-6 py-4" style={{ borderBottom: '1px solid var(--hairline)' }}>
       <div className="flex flex-col gap-0.5 min-w-0">
         <label
-          htmlFor={id}
+          id={labelId}
           className="text-sm font-medium cursor-pointer"
           style={{ color: 'var(--ink-soft)' }}
         >
@@ -42,7 +43,7 @@ function SettingToggle({
       </div>
       <button
         role="switch"
-        id={id}
+        aria-labelledby={labelId}
         aria-checked={checked}
         onClick={() => onChange(!checked)}
         className="pangu-toggle"

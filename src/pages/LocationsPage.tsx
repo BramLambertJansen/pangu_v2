@@ -5,19 +5,12 @@ import { toast } from 'sonner'
 import { supabase } from '@/lib/supabase'
 import { queryKeys } from '@/lib/queryKeys'
 import { Spinner } from '@/components/ui/Spinner'
+import { Breadcrumb } from '@/components/ui/Breadcrumb'
 import { LocationCard, ForgeLocationCard } from '@/components/location/LocationCard'
 import { WorldDetailDivider } from '@/components/world/WorldDetailDivider'
 import type { Campaign } from '@/types/campaign.types'
 import type { Location } from '@/types/location.types'
 import { useAuthStore } from '@/stores/auth.store'
-
-const breadcrumbStyle: React.CSSProperties = {
-  fontFamily: 'var(--font-body)',
-  fontSize: 11,
-  fontWeight: 700,
-  letterSpacing: '0.18em',
-  textTransform: 'uppercase',
-}
 
 export default function LocationsPage() {
   const { id: campaignId } = useParams<{ id: string }>()
@@ -112,55 +105,11 @@ export default function LocationsPage() {
 
   return (
     <div>
-      {/* Breadcrumb */}
-      <nav aria-label="Navigatie" style={{ display: 'flex', alignItems: 'center', marginBottom: 24 }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-          <button
-            type="button"
-            onClick={() => navigate(`/worlds/${campaign.world_id}`)}
-            aria-label="Terug naar wereld"
-            style={{
-              ...breadcrumbStyle,
-              display: 'inline-flex', alignItems: 'center', gap: 6,
-              background: 'none', border: 'none', cursor: 'pointer',
-              color: 'var(--muted)', padding: 0,
-              transition: 'color var(--t-fast)',
-            }}
-            onMouseEnter={(e) => (e.currentTarget.style.color = 'var(--ink-soft)')}
-            onMouseLeave={(e) => (e.currentTarget.style.color = 'var(--muted)')}
-          >
-            <svg aria-hidden="true" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M19 12H5" /><path d="M12 19l-7-7 7-7" />
-            </svg>
-            Wereld
-          </button>
-
-          <span aria-hidden="true" style={{ ...breadcrumbStyle, color: 'var(--hairline)' }}>·</span>
-
-          <button
-            type="button"
-            onClick={() => navigate(`/campaigns/${campaignId}`)}
-            aria-label={`Terug naar ${campaign.name}`}
-            style={{
-              ...breadcrumbStyle,
-              display: 'inline-flex', alignItems: 'center', gap: 6,
-              background: 'none', border: 'none', cursor: 'pointer',
-              color: 'var(--muted)', padding: 0,
-              transition: 'color var(--t-fast)',
-            }}
-            onMouseEnter={(e) => (e.currentTarget.style.color = 'var(--ink-soft)')}
-            onMouseLeave={(e) => (e.currentTarget.style.color = 'var(--muted)')}
-          >
-            {campaign.name}
-          </button>
-
-          <span aria-hidden="true" style={{ ...breadcrumbStyle, color: 'var(--hairline)' }}>·</span>
-
-          <span style={{ ...breadcrumbStyle, color: 'var(--ink-soft)' }} aria-current="page">
-            Locaties
-          </span>
-        </div>
-      </nav>
+      <Breadcrumb items={[
+        { label: 'Wereld', onClick: () => navigate(`/worlds/${campaign.world_id}`) },
+        { label: campaign.name, onClick: () => navigate(`/campaigns/${campaignId}`) },
+        { label: 'Locaties' },
+      ]} />
 
       {/* Page header */}
       <header style={{ marginBottom: 32 }}>

@@ -629,6 +629,62 @@ body {
   }
 }
 
+/* ── Breadcrumb ──────────────────────────────────────────── */
+
+.pangu-breadcrumb {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 24px;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.pangu-breadcrumb-items {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.pangu-breadcrumb-btn {
+  font-family: var(--font-body);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--muted);
+  padding: 0;
+  transition: color var(--t-fast);
+}
+
+.pangu-breadcrumb-btn:hover {
+  color: var(--ink-soft);
+}
+
+.pangu-breadcrumb-sep {
+  font-family: var(--font-body);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  color: var(--hairline);
+}
+
+.pangu-breadcrumb-current {
+  font-family: var(--font-body);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+}
+
 /* ── Card focus (replaces inline onFocus/onBlur handlers) ── */
 
 .pangu-card-focusable:focus-visible {

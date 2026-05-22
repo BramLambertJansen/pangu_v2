@@ -5,19 +5,12 @@ import { toast } from 'sonner'
 import { supabase } from '@/lib/supabase'
 import { queryKeys } from '@/lib/queryKeys'
 import { Spinner } from '@/components/ui/Spinner'
+import { Breadcrumb } from '@/components/ui/Breadcrumb'
 import { LoreCard, ForgeLoreCard } from '@/components/lore/LoreCard'
 import { WorldDetailDivider } from '@/components/world/WorldDetailDivider'
 import type { Campaign } from '@/types/campaign.types'
 import type { Lore } from '@/types/lore.types'
 import { useAuthStore } from '@/stores/auth.store'
-
-const breadcrumbStyle: React.CSSProperties = {
-  fontFamily: 'var(--font-body)',
-  fontSize: 11,
-  fontWeight: 700,
-  letterSpacing: '0.18em',
-  textTransform: 'uppercase',
-}
 
 export default function LoresPage() {
   const { id: campaignId } = useParams<{ id: string }>()
