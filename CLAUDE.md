@@ -291,6 +291,8 @@ Routes zijn gedefinieerd in `src/routes/index.tsx`. Lazy-loading voor alle pagin
 | `/campaigns/:id/edit` | `CampaignEditPage` | `requireAuth` | ✅ |
 | `/campaigns/:id/sessions` | `SessionsPage` | `requireAuth` | ✅ |
 | `/sessions/:id/edit` | `SessionEditPage` | `requireAuth` | ✅ |
+| `/campaigns/:id/lore` | `LoresPage` | `requireAuth` | ✅ |
+| `/lore/:id/edit` | `LoreEditPage` | `requireAuth` | ✅ |
 
 ### Geplande routes (nog niet geïmplementeerd)
 
@@ -298,7 +300,6 @@ Routes zijn gedefinieerd in `src/routes/index.tsx`. Lazy-loading voor alle pagin
 /campaigns               → overzicht alle campaigns
 /campaigns/:id/locations → locaties per campaign
 /campaigns/:id/npcs      → NPCs per campaign
-/campaigns/:id/lore      → lore per campaign
 /characters/:id          → spelersperspectief
 ```
 
@@ -440,8 +441,8 @@ npm run type-check   # tsc --noEmit
 - [ ] NPC-detailpagina
 
 ### Wereld — Lore
-- [ ] Lore-overzicht per campaign
-- [ ] Lore-item aanmaken / bewerken / verwijderen
+- [x] Lore-overzicht per campaign (`/campaigns/:id/lore`)
+- [x] Lore-item aanmaken / bewerken / verwijderen
 
 ### Karakter (Spelersperspectief)
 - [ ] Karakterblad bekijken

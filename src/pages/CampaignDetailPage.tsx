@@ -8,9 +8,11 @@ import { Spinner } from '@/components/ui/Spinner'
 import { WorldDetailDivider } from '@/components/world/WorldDetailDivider'
 import { SessionCard, ForgeSessionCard } from '@/components/session/SessionCard'
 import { LocationCard, ForgeLocationCard } from '@/components/location/LocationCard'
+import { LoreCard, ForgeLoreCard } from '@/components/lore/LoreCard'
 import type { Campaign, CampaignStatus } from '@/types/campaign.types'
 import type { Session } from '@/types/session.types'
 import type { Location } from '@/types/location.types'
+import type { Lore } from '@/types/lore.types'
 
 type CampaignWithWorld = Campaign & { worlds: { name: string } | null }
 
@@ -136,6 +138,41 @@ export default function CampaignDetailPage() {
     },
     onError: () => {
       toast.error('Locatie aanmaken mislukt')
+    },
+  })
+
+  const { data: loreItems, isLoading: isLoadingLore } = useQuery<Lore[]>({
+    queryKey: queryKeys.campaigns.lore(id!),
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('lore')
+        .select('*')
+        .eq('campaign_id', id!)
+        .order('created_at', { ascending: false })
+      if (error) throw error
+      return data as Lore[]
+    },
+    enabled: !!id,
+    staleTime: 1000 * 30,
+  })
+
+  const createLore = useMutation({
+    mutationFn: async () => {
+      if (!user) throw new Error('Niet ingelogd')
+      const { data, error } = await supabase
+        .from('lore')
+        .insert({ campaign_id: id!, user_id: user.id, name: 'Nieuwe lore', status: 'draft' })
+        .select()
+        .single()
+      if (error) throw error
+      return data as Lore
+    },
+    onSuccess: (newLore) => {
+      queryClient.invalidateQueries({ queryKey: queryKeys.campaigns.lore(id!) })
+      navigate(`/lore/${newLore.id}/edit`, { state: { isNew: true, campaignId: id } })
+    },
+    onError: () => {
+      toast.error('Lore aanmaken mislukt')
     },
   })
 
@@ -495,6 +532,50 @@ export default function CampaignDetailPage() {
                 onClick={() => navigate(`/campaigns/${id}/locations`)}
               >
                 Alle locaties bekijken →
+              </button>
+            </div>
+          )}
+        </>
+      )}
+
+      <WorldDetailDivider label={`Lore in deze kroniek${loreItems && loreItems.length > 0 ? ` (${loreItems.length})` : ''}`} />
+
+      {/* Lore list */}
+      {isLoadingLore ? (
+        <div style={{ display: 'flex', justifyContent: 'center', padding: '40px 0' }} aria-live="polite" aria-label="Lore laden...">
+          <Spinner size="md" />
+        </div>
+      ) : (
+        <>
+          <ul
+            style={{
+              display: 'grid',
+              gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))',
+              gap: 'var(--sp-5)',
+              listStyle: 'none',
+              padding: 0,
+              margin: 0,
+            }}
+            role="list"
+            aria-label="Lore in deze kroniek"
+          >
+            {loreItems?.map((lore) => (
+              <li key={lore.id}>
+                <LoreCard lore={lore} />
+              </li>
+            ))}
+            <li>
+              <ForgeLoreCard onClick={() => createLore.mutate()} loading={createLore.isPending} />
+            </li>
+          </ul>
+          {loreItems && loreItems.length > 0 && (
+            <div style={{ marginTop: 16, display: 'flex', justifyContent: 'flex-end' }}>
+              <button
+                type="button"
+                className="pangu-btn pangu-btn-ghost pangu-btn-sm"
+                onClick={() => navigate(`/campaigns/${id}/lore`)}
+              >
+                Alle lore bekijken →
               </button>
             </div>
           )}
