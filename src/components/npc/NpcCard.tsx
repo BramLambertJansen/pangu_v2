@@ -36,7 +36,7 @@ export function NpcCard({ npc }: Props) {
   const gradient = pickGradient(npc.id)
 
   function handleActivate() {
-    navigate(`/npcs/${npc.id}/edit`)
+    navigate(`/npcs/${npc.id}`)
   }
 
   return (
