@@ -1,53 +1,29 @@
 import { useState } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
+import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { toast } from 'sonner'
 import { supabase } from '@/lib/supabase'
 import { queryKeys } from '@/lib/queryKeys'
 import { Spinner } from '@/components/ui/Spinner'
-import { Breadcrumb } from '@/components/ui/Breadcrumb'
+import { EntityCardSkeleton } from '@/components/ui/EntityCardSkeleton'
+import { EmptyState } from '@/components/ui/EmptyState'
+import { Breadcrumbs } from '@/components/ui/Breadcrumbs'
 import { LocationCard, ForgeLocationCard } from '@/components/location/LocationCard'
 import { WorldDetailDivider } from '@/components/world/WorldDetailDivider'
-import type { Campaign } from '@/types/campaign.types'
 import type { Location } from '@/types/location.types'
 import { useAuthStore } from '@/stores/auth.store'
+import { useCampaign } from '@/hooks/queries/useCampaign'
+import { useCampaignLocations } from '@/hooks/queries/useCampaignLocations'
 
 export default function LocationsPage() {
   const { id: campaignId } = useParams<{ id: string }>()
   const navigate = useNavigate()
   const queryClient = useQueryClient()
-  const { user } = useAuthStore()
+  const user = useAuthStore(s => s.user)
   const [creatingLocation, setCreatingLocation] = useState(false)
 
-  const { data: campaign, isLoading: campaignLoading } = useQuery<Campaign>({
-    queryKey: queryKeys.campaigns.detail(campaignId!),
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from('campaigns')
-        .select('*')
-        .eq('id', campaignId!)
-        .single()
-      if (error) throw error
-      return data as Campaign
-    },
-    enabled: !!campaignId,
-    staleTime: 1000 * 60,
-  })
-
-  const { data: locations, isLoading: locationsLoading } = useQuery<Location[]>({
-    queryKey: queryKeys.campaigns.locations(campaignId!),
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from('locations')
-        .select('*')
-        .eq('campaign_id', campaignId!)
-        .order('created_at', { ascending: false })
-      if (error) throw error
-      return data as Location[]
-    },
-    enabled: !!campaignId,
-    staleTime: 1000 * 30,
-  })
+  const { data: campaign, isLoading: campaignLoading } = useCampaign(campaignId)
+  const { data: locations, isLoading: locationsLoading } = useCampaignLocations(campaignId)
 
   const createLocation = useMutation({
     mutationFn: async () => {
@@ -82,11 +58,9 @@ export default function LocationsPage() {
     createLocation.mutate()
   }
 
-  const isLoading = campaignLoading || locationsLoading
-
-  if (isLoading) {
+  if (campaignLoading) {
     return (
-      <div style={{ display: 'flex', justifyContent: 'center', padding: '80px 0' }} aria-live="polite" aria-label="Locaties laden...">
+      <div style={{ display: 'flex', justifyContent: 'center', padding: '80px 0' }} aria-live="polite" aria-label="Kroniek laden...">
         <Spinner size="lg" />
       </div>
     )
@@ -105,11 +79,14 @@ export default function LocationsPage() {
 
   return (
     <div>
-      <Breadcrumb items={[
-        { label: 'Wereld', onClick: () => navigate(`/worlds/${campaign.world_id}`) },
-        { label: campaign.name, onClick: () => navigate(`/campaigns/${campaignId}`) },
-        { label: 'Locaties' },
-      ]} />
+      {/* Breadcrumb */}
+      <div style={{ marginBottom: 24 }}>
+        <Breadcrumbs items={[
+          { label: 'Wereld', to: `/worlds/${campaign.world_id}` },
+          { label: campaign.name, to: `/campaigns/${campaignId}` },
+          { label: 'Locaties' },
+        ]} />
+      </div>
 
       {/* Page header */}
       <header style={{ marginBottom: 32 }}>
@@ -124,21 +101,26 @@ export default function LocationsPage() {
 
       {/* Location grid */}
       <div style={{ marginTop: 24 }}>
-        {(!locations || locations.length === 0) && (
-          <p style={{
-            fontSize: 14, color: 'var(--muted)',
-            fontStyle: 'italic', marginBottom: 24,
-          }}>
-            Nog geen locaties. Breng de eerste plek in kaart.
-          </p>
+        {locationsLoading ? (
+          <ul style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: 'var(--sp-4)', listStyle: 'none', padding: 0, margin: 0 }} aria-label="Locaties laden..." aria-live="polite">
+            <EntityCardSkeleton count={3} />
+          </ul>
+        ) : (
+          <>
+            {(!locations || locations.length === 0) && (
+              <EmptyState
+                title="Nog geen locaties"
+                description="Breng de eerste plek in kaart. Elk verhaal speelt zich ergens af."
+              />
+            )}
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+              {locations?.map((location) => (
+                <LocationCard key={location.id} location={location} />
+              ))}
+              <ForgeLocationCard onClick={handleCreateLocation} loading={creatingLocation} />
+            </div>
+          </>
         )}
-
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {locations?.map((location) => (
-            <LocationCard key={location.id} location={location} />
-          ))}
-          <ForgeLocationCard onClick={handleCreateLocation} loading={creatingLocation} />
-        </div>
       </div>
     </div>
   )

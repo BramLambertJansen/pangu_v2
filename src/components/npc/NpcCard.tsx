@@ -1,79 +1,25 @@
+import { memo } from 'react'
 import { useNavigate } from 'react-router-dom'
-import type { Npc, NpcStatus } from '@/types/npc.types'
-
-const statusLabel: Record<NpcStatus, string> = {
-  draft:    'Concept',
-  active:   'Actief',
-  retired:  'Teruggetrokken',
-  archived: 'Gearchiveerd',
-}
-
-const statusColor: Record<NpcStatus, string> = {
-  draft:    'var(--gold)',
-  active:   'var(--violet)',
-  retired:  'var(--muted)',
-  archived: 'var(--muted)',
-}
-
-const cardGradients = [
-  'radial-gradient(ellipse 70% 55% at 30% 40%, rgba(220,90,80,0.18) 0%, rgba(180,50,80,0.10) 55%, transparent 80%)',
-  'radial-gradient(ellipse 65% 52% at 28% 42%, rgba(220,90,80,0.14) 0%, rgba(155,138,255,0.12) 55%, transparent 80%)',
-  'radial-gradient(ellipse 65% 52% at 30% 42%, rgba(245,150,50,0.16) 0%, rgba(220,90,80,0.12) 55%, transparent 80%)',
-  'radial-gradient(ellipse 65% 50% at 25% 40%, rgba(155,138,255,0.14) 0%, rgba(220,90,80,0.14) 55%, transparent 80%)',
-]
-
-function pickGradient(id: string): string {
-  const code = (id.charCodeAt(0) ?? 0) + (id.charCodeAt(id.length - 1) ?? 0)
-  return cardGradients[code % cardGradients.length]
-}
+import type { Npc } from '@/types/npc.types'
+import { EntityCard } from '@/components/ui/EntityCard'
+import { ForgeCard } from '@/components/ui/ForgeCard'
+import { StatusBadge } from '@/components/ui/StatusBadge'
+import { pickGradient, npcGradients } from '@/utils/pickGradient'
+import { npcStatusLabel, npcStatusColor } from '@/lib/statusMaps'
 
 interface Props {
   npc: Npc
 }
 
-export function NpcCard({ npc }: Props) {
+export const NpcCard = memo(function NpcCard({ npc }: Props) {
   const navigate = useNavigate()
-  const gradient = pickGradient(npc.id)
-
-  function handleActivate() {
-    navigate(`/npcs/${npc.id}`)
-  }
+  const gradient = pickGradient(npc.id, npcGradients)
 
   return (
-    <article
-      role="button"
-      tabIndex={0}
-      aria-label={`NPC: ${npc.name}`}
-      onClick={handleActivate}
-      onKeyDown={(e) => {
-        if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); handleActivate() }
-      }}
-      className="pangu-card-focusable"
-      style={{
-        position: 'relative',
-        borderRadius: 'var(--r-xl)',
-        border: '1px solid var(--hairline)',
-        overflow: 'hidden',
-        cursor: 'pointer',
-        display: 'flex',
-        flexDirection: 'column',
-        padding: '20px 24px 18px',
-        minHeight: 120,
-        transition: 'border-color var(--t-base) var(--ease-out), box-shadow var(--t-base) var(--ease-out), transform var(--t-base) var(--ease-out)',
-        background: 'var(--void-2)',
-      }}
-      onMouseEnter={(e) => {
-        const el = e.currentTarget
-        el.style.borderColor = 'var(--hairline-strong)'
-        el.style.boxShadow = '0 6px 24px rgba(0,0,0,0.35), 0 0 0 1px var(--hairline-strong)'
-        el.style.transform = 'translateY(-2px)'
-      }}
-      onMouseLeave={(e) => {
-        const el = e.currentTarget
-        el.style.borderColor = 'var(--hairline)'
-        el.style.boxShadow = 'none'
-        el.style.transform = 'translateY(0)'
-      }}
+    <EntityCard
+      variant="compact"
+      ariaLabel={`NPC: ${npc.name}`}
+      onClick={() => navigate(`/npcs/${npc.id}`)}
     >
       {/* Gradient accent */}
       <div
@@ -91,7 +37,7 @@ export function NpcCard({ npc }: Props) {
           <div style={{ minWidth: 0 }}>
             {npc.subtitle && (
               <p style={{
-                fontFamily: "'Cormorant Garamond', Georgia, serif",
+                fontFamily: 'var(--font-quote)',
                 fontStyle: 'italic',
                 fontSize: 11, letterSpacing: '0.03em',
                 color: 'var(--gold)', margin: '0 0 2px',
@@ -111,26 +57,18 @@ export function NpcCard({ npc }: Props) {
             </h2>
           </div>
 
-          <span style={{
-            display: 'inline-flex', alignItems: 'center', flexShrink: 0,
-            padding: '3px 10px',
-            background: statusColor[npc.status],
-            borderRadius: 'var(--r-full)',
-            fontFamily: 'var(--font-body)',
-            fontSize: 9, fontWeight: 700,
-            letterSpacing: '0.16em', textTransform: 'uppercase',
-            color: 'var(--void)',
-            marginTop: 2,
-          }}>
-            {statusLabel[npc.status]}
-          </span>
+          <StatusBadge
+            label={npcStatusLabel[npc.status]}
+            color={npcStatusColor[npc.status]}
+            className="mt-0.5"
+          />
         </div>
 
         {npc.npc_role && (
           <p style={{
             fontSize: 11, fontWeight: 700,
             letterSpacing: '0.14em', textTransform: 'uppercase',
-            color: 'var(--crimson, #dc5a50)', margin: 0,
+            color: 'var(--crimson)', margin: 0,
             fontFamily: 'var(--font-body)',
           }}>
             {npc.npc_role}
@@ -156,81 +94,41 @@ export function NpcCard({ npc }: Props) {
           </p>
         )}
       </div>
-    </article>
+    </EntityCard>
   )
-}
+})
 
 interface ForgeProps {
   onClick: () => void
   loading?: boolean
 }
 
-export function ForgeNpcCard({ onClick, loading }: ForgeProps) {
+export const ForgeNpcCard = memo(function ForgeNpcCard({ onClick, loading }: ForgeProps) {
   return (
-    <article
-      role="button"
-      tabIndex={0}
-      aria-label="Nieuwe NPC aanmaken"
-      onClick={() => { if (!loading) onClick() }}
-      onKeyDown={(e) => {
-        if (loading) return
-        if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onClick() }
-      }}
-      style={{
-        position: 'relative',
-        borderRadius: 'var(--r-xl)',
-        border: '1px dashed var(--hairline-strong)',
-        overflow: 'hidden',
-        cursor: loading ? 'wait' : 'pointer',
-        display: 'flex',
-        flexDirection: 'column',
-        alignItems: 'center',
-        justifyContent: 'center',
-        padding: '20px 24px',
-        minHeight: 120,
-        gap: 8,
-        transition: 'border-color var(--t-base) var(--ease-out), background var(--t-base) var(--ease-out)',
-        background: 'transparent',
-      }}
-      className="pangu-card-focusable"
-      onMouseEnter={(e) => {
-        e.currentTarget.style.borderColor = 'var(--crimson, #dc5a50)'
-        e.currentTarget.style.background = 'rgba(220,90,80,0.04)'
-      }}
-      onMouseLeave={(e) => {
-        e.currentTarget.style.borderColor = 'var(--hairline-strong)'
-        e.currentTarget.style.background = 'transparent'
-      }}
-    >
-      {/* Person icon */}
-      <svg
-        aria-hidden="true"
-        width="20"
-        height="20"
-        viewBox="0 0 24 24"
-        fill="none"
-        stroke="var(--crimson, #dc5a50)"
-        strokeWidth="1.5"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        style={{ opacity: 0.7 }}
-      >
-        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
-        <circle cx="12" cy="7" r="4" />
-      </svg>
-      <div style={{ textAlign: 'center' }}>
-        <p style={{
-          fontFamily: 'var(--font-body)',
-          fontSize: 12, fontWeight: 700,
-          letterSpacing: '0.18em', textTransform: 'uppercase',
-          color: 'var(--crimson, #dc5a50)', margin: '0 0 4px',
-        }}>
-          {loading ? 'Aanmaken...' : '+ NPC toevoegen'}
-        </p>
-        <p style={{ fontSize: 12, color: 'var(--muted)', margin: 0 }}>
-          Voeg een nieuw personage toe
-        </p>
-      </div>
-    </article>
+    <ForgeCard
+      variant="compact"
+      accent="crimson"
+      onClick={onClick}
+      loading={loading}
+      ariaLabel="Nieuwe NPC aanmaken"
+      title="+ NPC toevoegen"
+      subtitle="Voeg een nieuw personage toe"
+      icon={
+        <svg
+          aria-hidden="true"
+          width="20" height="20"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="var(--crimson)"
+          strokeWidth="1.5"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          style={{ opacity: 0.7 }}
+        >
+          <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+          <circle cx="12" cy="7" r="4" />
+        </svg>
+      }
+    />
   )
-}
+})

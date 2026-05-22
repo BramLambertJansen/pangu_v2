@@ -9,7 +9,8 @@ import type { Profile } from '@/types/database.types'
 
 export default function LoginPage() {
   const navigate = useNavigate()
-  const { setUser, setProfile } = useAuthStore()
+  const setUser = useAuthStore(s => s.setUser)
+  const setProfile = useAuthStore(s => s.setProfile)
 
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')

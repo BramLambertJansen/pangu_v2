@@ -4,14 +4,14 @@ import { toast } from 'sonner'
 import { supabase } from '@/lib/supabase'
 import { queryKeys } from '@/lib/queryKeys'
 import { useAuthStore } from '@/stores/auth.store'
-import { Spinner } from '@/components/ui/Spinner'
+import { EntityCardSkeleton } from '@/components/ui/EntityCardSkeleton'
 import { WorldCard, ForgeWorldCard } from '@/components/world/WorldCard'
 import type { World } from '@/types/world.types'
 
 export default function WorldsPage() {
   const navigate = useNavigate()
   const queryClient = useQueryClient()
-  const { user } = useAuthStore()
+  const user = useAuthStore(s => s.user)
 
   const { data: worlds, isLoading } = useQuery<World[]>({
     queryKey: queryKeys.worlds.all,
@@ -58,9 +58,9 @@ export default function WorldsPage() {
     <div>
       {/* Page header */}
       <header style={{ marginBottom: 48 }}>
-        <p className="pangu-eyebrow">The Cradle of Every Story</p>
+        <p className="pangu-eyebrow">De wieg van elk verhaal</p>
         <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', flexWrap: 'wrap', gap: 24 }}>
-          <h1 className="pangu-display-xl">Worlds</h1>
+          <h1 className="pangu-display-xl">Werelden</h1>
           <button
             type="button"
             className="pangu-btn pangu-btn-primary"
@@ -69,19 +69,23 @@ export default function WorldsPage() {
             aria-label="Creëer een nieuwe wereld"
             style={{ marginBottom: 8, flexShrink: 0 }}
           >
-            {createWorld.isPending ? 'Aanmaken...' : '+ Forge a World'}
+            {createWorld.isPending ? 'Aanmaken...' : '+ Nieuwe wereld'}
           </button>
         </div>
         <p style={{ marginTop: 16, fontSize: 15, color: 'var(--ink-soft)', maxWidth: 560, lineHeight: 1.65 }}>
-          A world is where everything lives — the cities, the lonely roads, the people, and the beasts. Choose one to enter.
+          Een wereld is waar alles leeft — de steden, de verlaten wegen, de mensen en de monsters. Kies er één om te betreden.
         </p>
       </header>
 
-      {/* Loading */}
+      {/* Grid */}
       {isLoading ? (
-        <div style={{ display: 'flex', justifyContent: 'center', padding: '80px 0' }} aria-live="polite" aria-label="Werelden laden...">
-          <Spinner size="lg" />
-        </div>
+        <ul
+          style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: 'var(--sp-5)', listStyle: 'none', padding: 0, margin: 0 }}
+          aria-label="Werelden laden..."
+          aria-live="polite"
+        >
+          <EntityCardSkeleton count={3} variant="hero" />
+        </ul>
       ) : (
         <>
           {/* Section divider */}
@@ -101,7 +105,7 @@ export default function WorldsPage() {
                   fontFamily: 'var(--font-body)', fontSize: 10, fontWeight: 700,
                   letterSpacing: '0.28em', textTransform: 'uppercase', color: 'var(--gold)',
                 }}>
-                  Known Worlds
+                  Bekende werelden
                 </span>
                 <span style={{ color: 'var(--gold)', fontSize: 9 }}>✦</span>
               </div>

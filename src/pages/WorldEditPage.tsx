@@ -1,13 +1,14 @@
-import { useId } from 'react'
+import { useState, useEffect, useId, useCallback } from 'react'
 import { useParams, useNavigate, useLocation } from 'react-router-dom'
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
+import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { toast } from 'sonner'
 import { supabase } from '@/lib/supabase'
 import { queryKeys } from '@/lib/queryKeys'
-import { Modal } from '@/components/ui/Modal'
 import { Spinner } from '@/components/ui/Spinner'
-import { useEntityEdit } from '@/hooks/useEntityEdit'
+import { ConfirmDialog } from '@/components/ui/ConfirmDialog'
+import { useWorld } from '@/hooks/queries/useWorld'
 import { useImagePositioning } from '@/hooks/useImagePositioning'
+import { useUnsavedChangesPrompt } from '@/hooks/useUnsavedChangesPrompt'
 import type { World, WorldStatus } from '@/types/world.types'
 
 const statusOptions: { value: WorldStatus; label: string }[] = [
@@ -27,33 +28,31 @@ export default function WorldEditPage() {
   const headerImageId = useId()
 
   const isNew = (location.state as { isNew?: boolean } | null)?.isNew ?? false
+  const [committed, setCommitted] = useState(!isNew)
+  const [deleteOpen, setDeleteOpen] = useState(false)
+  const [form, setForm] = useState<Partial<World>>({})
+  const [dirty, setDirty] = useState(false)
 
-  const { data: world, isLoading } = useQuery<World>({
-    queryKey: queryKeys.worlds.detail(id!),
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from('worlds')
-        .select('*')
-        .eq('id', id!)
-        .single()
-      if (error) throw error
-      return data as World
-    },
-    enabled: !!id,
-    staleTime: 1000 * 60,
-  })
+  const unsaved = useUnsavedChangesPrompt(dirty)
 
-  const {
-    form, set, dirty, setDirty,
-    committed, setCommitted,
-    deleteOpen, setDeleteOpen,
-    resetForm,
-  } = useEntityEdit({ entity: world, isNew })
+  const handlePositionChange = useCallback((posString: string) => {
+    setForm((prev) => ({ ...prev, header_image_position: posString }))
+    setDirty(true)
+  }, [])
 
-  const { imagePos, isDragging, containerRef, handleImageMouseDown, handleImageTouchStart, handleImageKeyDown } = useImagePositioning({
-    initialPosition: world?.header_image_position,
-    onChange: (pos) => set('header_image_position', pos),
-  })
+  const { data: world, isLoading } = useWorld(id)
+
+  const { containerRef, posString: imagePosString, isDragging, handlers: imagePosHandlers } = useImagePositioning(
+    world?.header_image_position,
+    handlePositionChange,
+  )
+
+  useEffect(() => {
+    if (world) {
+      setForm(world)
+      setDirty(false)
+    }
+  }, [world])
 
   const saveWorld = useMutation({
     mutationFn: async () => {
@@ -97,11 +96,17 @@ export default function WorldEditPage() {
     },
   })
 
+  function set<K extends keyof World>(key: K, value: World[K]) {
+    setForm((prev) => ({ ...prev, [key]: value }))
+    setDirty(true)
+  }
+
   function handleCancel() {
     if (!committed) {
       navigate('/worlds')
     } else {
-      resetForm()
+      setForm(world!)
+      setDirty(false)
       navigate(`/worlds/${id}`)
     }
   }
@@ -199,11 +204,11 @@ export default function WorldEditPage() {
             <div
               ref={containerRef}
               role="img"
-              aria-label={`Afbeeldingsuitsnede: positie ${Math.round(imagePos.x)}% horizontaal, ${Math.round(imagePos.y)}% verticaal. Gebruik pijltjestoetsen om bij te stellen.`}
+              aria-label={`Afbeeldingsuitsnede: positie ${imagePosString}. Gebruik pijltjestoetsen om bij te stellen.`}
               tabIndex={0}
-              onMouseDown={handleImageMouseDown}
-              onTouchStart={handleImageTouchStart}
-              onKeyDown={handleImageKeyDown}
+              onMouseDown={imagePosHandlers.onMouseDown}
+              onTouchStart={imagePosHandlers.onTouchStart}
+              onKeyDown={imagePosHandlers.onKeyDown}
               style={{
                 position: 'relative',
                 cursor: isDragging ? 'grabbing' : 'grab',
@@ -226,7 +231,7 @@ export default function WorldEditPage() {
                   width: '100%',
                   height: '100%',
                   objectFit: 'cover',
-                  objectPosition: `${imagePos.x}% ${imagePos.y}%`,
+                  objectPosition: imagePosString,
                   pointerEvents: 'none',
                   display: 'block',
                 }}
@@ -255,7 +260,7 @@ export default function WorldEditPage() {
                 id="world-subtitle"
                 className="pangu-input"
                 value={form.subtitle ?? ''}
-                onChange={(e) => set('subtitle', e.target.value || null)}
+                onChange={(e) => set('subtitle', e.target.value || null as unknown as string)}
                 placeholder="Korte beschrijving of tagline"
               />
             </div>
@@ -281,7 +286,7 @@ export default function WorldEditPage() {
                 className="pangu-input"
                 type="url"
                 value={form.header_image ?? ''}
-                onChange={(e) => set('header_image', e.target.value || null)}
+                onChange={(e) => set('header_image', e.target.value || null as unknown as string)}
                 placeholder="https://..."
               />
             </div>
@@ -292,7 +297,7 @@ export default function WorldEditPage() {
                 id={quoteId}
                 className="pangu-textarea"
                 value={form.quote ?? ''}
-                onChange={(e) => set('quote', e.target.value || null)}
+                onChange={(e) => set('quote', e.target.value || null as unknown as string)}
                 placeholder="Een passende quote voor deze wereld..."
                 rows={2}
                 style={{ minHeight: 'auto' }}
@@ -305,7 +310,7 @@ export default function WorldEditPage() {
                 id={descriptionId}
                 className="pangu-textarea"
                 value={form.description ?? ''}
-                onChange={(e) => set('description', e.target.value || null)}
+                onChange={(e) => set('description', e.target.value || null as unknown as string)}
                 placeholder="Beschrijf de wereld, haar sfeer en achtergrond..."
                 rows={5}
               />
@@ -357,24 +362,28 @@ export default function WorldEditPage() {
 
       </div>
 
-      {/* Delete modal */}
-      <Modal
+      <ConfirmDialog
         open={deleteOpen}
         onClose={() => setDeleteOpen(false)}
+        onConfirm={handleDelete}
         title="Wereld verwijderen"
+        confirmLabel="Verwijder wereld"
+        loading={deleteWorld.isPending}
       >
-        <p style={{ fontSize: 14, color: 'var(--ink-soft)', marginBottom: 24 }}>
-          Weet je zeker dat je <strong style={{ color: 'var(--ink)' }}>{world.name}</strong> wilt verwijderen? Dit kan niet ongedaan worden gemaakt.
-        </p>
-        <div className="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
-          <button type="button" className="pangu-btn pangu-btn-ghost" onClick={() => setDeleteOpen(false)}>
-            Annuleren
-          </button>
-          <button type="button" className="pangu-btn pangu-btn-crimson" onClick={handleDelete} disabled={deleteWorld.isPending}>
-            {deleteWorld.isPending ? 'Verwijderen...' : 'Verwijder wereld'}
-          </button>
-        </div>
-      </Modal>
+        Weet je zeker dat je <strong style={{ color: 'var(--ink)' }}>{world.name}</strong> wilt verwijderen? Dit kan niet ongedaan worden gemaakt.
+      </ConfirmDialog>
+
+      <ConfirmDialog
+        open={unsaved.blocked}
+        onClose={unsaved.reset}
+        onConfirm={unsaved.proceed}
+        title="Niet-opgeslagen wijzigingen"
+        confirmLabel="Verlaten"
+        cancelLabel="Blijven"
+        confirmVariant="crimson"
+      >
+        Je hebt niet-opgeslagen wijzigingen. Weet je zeker dat je de pagina wilt verlaten?
+      </ConfirmDialog>
     </div>
   )
 }

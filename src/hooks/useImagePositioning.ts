@@ -1,33 +1,49 @@
-import { useState, useEffect, useRef } from 'react'
+import { useState, useRef, useEffect, useCallback } from 'react'
 
-interface Position { x: number; y: number }
-
-interface UseImagePositioningOptions {
-  /** Serialised "X% Y%" string from the entity (re-sync when entity loads) */
-  initialPosition: string | null | undefined
-  /** Called with the new serialised string whenever the position changes */
-  onChange: (serialized: string) => void
+interface Position {
+  x: number
+  y: number
 }
 
-function parse(pos: string | null | undefined): Position {
+interface ImagePositioningResult {
+  containerRef: React.RefObject<HTMLDivElement | null>
+  posString: string
+  isDragging: boolean
+  handlers: {
+    onMouseDown: (e: React.MouseEvent) => void
+    onTouchStart: (e: React.TouchEvent) => void
+    onKeyDown: (e: React.KeyboardEvent) => void
+  }
+}
+
+function parsePosition(pos: string | null | undefined): Position {
   if (!pos || pos === 'center') return { x: 50, y: 50 }
   const m = pos.match(/^([\d.]+)%\s+([\d.]+)%$/)
   return m ? { x: parseFloat(m[1]), y: parseFloat(m[2]) } : { x: 50, y: 50 }
 }
 
-function serialize(pos: Position): string {
+function serializePosition(pos: Position): string {
   return `${pos.x.toFixed(1)}% ${pos.y.toFixed(1)}%`
 }
 
-export function useImagePositioning({ initialPosition, onChange }: UseImagePositioningOptions) {
-  const [imagePos, setImagePos] = useState<Position>(() => parse(initialPosition))
+export function useImagePositioning(
+  initial: string | null | undefined,
+  onChange: (posString: string) => void,
+): ImagePositioningResult {
+  const [imagePos, setImagePos] = useState<Position>(() => parsePosition(initial))
   const [isDragging, setIsDragging] = useState(false)
   const dragStartRef = useRef<{ mouseX: number; mouseY: number; posX: number; posY: number } | null>(null)
   const containerRef = useRef<HTMLDivElement>(null)
 
+  // Sync when initial changes (e.g. after data loads)
   useEffect(() => {
-    setImagePos(parse(initialPosition))
-  }, [initialPosition])
+    setImagePos(parsePosition(initial))
+  }, [initial])
+
+  const updatePos = useCallback((newPos: Position) => {
+    setImagePos(newPos)
+    onChange(serializePosition(newPos))
+  }, [onChange])
 
   useEffect(() => {
     if (!isDragging) return
@@ -39,11 +55,11 @@ export function useImagePositioning({ initialPosition, onChange }: UseImagePosit
       const rect = containerRef.current.getBoundingClientRect()
       const dx = clientX - dragStartRef.current.mouseX
       const dy = clientY - dragStartRef.current.mouseY
-      const newX = Math.max(0, Math.min(100, dragStartRef.current.posX - (dx / rect.width) * 100))
-      const newY = Math.max(0, Math.min(100, dragStartRef.current.posY - (dy / rect.height) * 100))
-      const newPos = { x: newX, y: newY }
-      setImagePos(newPos)
-      onChange(serialize(newPos))
+      const newPos: Position = {
+        x: Math.max(0, Math.min(100, dragStartRef.current.posX - (dx / rect.width) * 100)),
+        y: Math.max(0, Math.min(100, dragStartRef.current.posY - (dy / rect.height) * 100)),
+      }
+      updatePos(newPos)
     }
 
     function onUp() {
@@ -63,41 +79,45 @@ export function useImagePositioning({ initialPosition, onChange }: UseImagePosit
       document.removeEventListener('touchend', onUp)
       document.removeEventListener('touchcancel', onUp)
     }
-  }, [isDragging, onChange])
+  }, [isDragging, updatePos])
 
-  function handleImageMouseDown(e: React.MouseEvent) {
+  const onMouseDown = useCallback((e: React.MouseEvent) => {
     e.preventDefault()
     dragStartRef.current = { mouseX: e.clientX, mouseY: e.clientY, posX: imagePos.x, posY: imagePos.y }
     setIsDragging(true)
-  }
+  }, [imagePos])
 
-  function handleImageTouchStart(e: React.TouchEvent) {
+  const onTouchStart = useCallback((e: React.TouchEvent) => {
     const t = e.touches[0]
     dragStartRef.current = { mouseX: t.clientX, mouseY: t.clientY, posX: imagePos.x, posY: imagePos.y }
     setIsDragging(true)
-  }
+  }, [imagePos])
 
-  function handleImageKeyDown(e: React.KeyboardEvent) {
-    const step = e.shiftKey ? 10 : 1
-    let { x, y } = imagePos
-    if (e.key === 'ArrowLeft')  x = Math.max(0, x - step)
-    if (e.key === 'ArrowRight') x = Math.min(100, x + step)
-    if (e.key === 'ArrowUp')    y = Math.max(0, y - step)
-    if (e.key === 'ArrowDown')  y = Math.min(100, y + step)
-    if (['ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown'].includes(e.key)) {
-      e.preventDefault()
-      const newPos = { x, y }
-      setImagePos(newPos)
-      onChange(serialize(newPos))
+  const onKeyDown = useCallback((e: React.KeyboardEvent) => {
+    const step = 5
+    const dirs: Record<string, { dx: number; dy: number }> = {
+      ArrowLeft:  { dx: -step, dy: 0 },
+      ArrowRight: { dx:  step, dy: 0 },
+      ArrowUp:    { dx: 0, dy: -step },
+      ArrowDown:  { dx: 0, dy:  step },
     }
-  }
+    const delta = dirs[e.key]
+    if (!delta) return
+    e.preventDefault()
+    setImagePos((prev) => {
+      const newPos: Position = {
+        x: Math.max(0, Math.min(100, prev.x + delta.dx)),
+        y: Math.max(0, Math.min(100, prev.y + delta.dy)),
+      }
+      onChange(serializePosition(newPos))
+      return newPos
+    })
+  }, [onChange])
 
   return {
-    imagePos,
-    isDragging,
     containerRef,
-    handleImageMouseDown,
-    handleImageTouchStart,
-    handleImageKeyDown,
+    posString: serializePosition(imagePos),
+    isDragging,
+    handlers: { onMouseDown, onTouchStart, onKeyDown },
   }
 }

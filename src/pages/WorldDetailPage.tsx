@@ -15,7 +15,7 @@ export default function WorldDetailPage() {
   const { id } = useParams<{ id: string }>()
   const navigate = useNavigate()
   const queryClient = useQueryClient()
-  const { user } = useAuthStore()
+  const user = useAuthStore(s => s.user)
 
   const { data: world, isLoading } = useQuery<World>({
     queryKey: queryKeys.worlds.detail(id!),

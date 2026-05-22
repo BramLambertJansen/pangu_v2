@@ -5,7 +5,9 @@ import { toast } from 'sonner'
 import { supabase } from '@/lib/supabase'
 import { queryKeys } from '@/lib/queryKeys'
 import { Spinner } from '@/components/ui/Spinner'
-import { Breadcrumb } from '@/components/ui/Breadcrumb'
+import { EntityCardSkeleton } from '@/components/ui/EntityCardSkeleton'
+import { EmptyState } from '@/components/ui/EmptyState'
+import { Breadcrumbs } from '@/components/ui/Breadcrumbs'
 import { SessionCard, ForgeSessionCard } from '@/components/session/SessionCard'
 import { WorldDetailDivider } from '@/components/world/WorldDetailDivider'
 import type { Campaign } from '@/types/campaign.types'
@@ -16,7 +18,7 @@ export default function SessionsPage() {
   const { id: campaignId } = useParams<{ id: string }>()
   const navigate = useNavigate()
   const queryClient = useQueryClient()
-  const { user } = useAuthStore()
+  const user = useAuthStore(s => s.user)
   const [creatingSession, setCreatingSession] = useState(false)
 
   const { data: campaign, isLoading: campaignLoading } = useQuery<Campaign>({
@@ -87,11 +89,9 @@ export default function SessionsPage() {
     createSession.mutate()
   }
 
-  const isLoading = campaignLoading || sessionsLoading
-
-  if (isLoading) {
+  if (campaignLoading) {
     return (
-      <div style={{ display: 'flex', justifyContent: 'center', padding: '80px 0' }} aria-live="polite" aria-label="Sessies laden...">
+      <div style={{ display: 'flex', justifyContent: 'center', padding: '80px 0' }} aria-live="polite" aria-label="Kroniek laden...">
         <Spinner size="lg" />
       </div>
     )
@@ -110,11 +110,14 @@ export default function SessionsPage() {
 
   return (
     <div>
-      <Breadcrumb items={[
-        { label: 'Wereld', onClick: () => navigate(`/worlds/${campaign.world_id}`) },
-        { label: campaign.name, onClick: () => navigate(`/campaigns/${campaignId}`) },
-        { label: 'Sessies' },
-      ]} />
+      {/* Breadcrumb */}
+      <div style={{ marginBottom: 24 }}>
+        <Breadcrumbs items={[
+          { label: 'Wereld', to: `/worlds/${campaign.world_id}` },
+          { label: campaign.name, to: `/campaigns/${campaignId}` },
+          { label: 'Sessies' },
+        ]} />
+      </div>
 
       {/* Page header */}
       <header style={{ marginBottom: 32 }}>
@@ -129,21 +132,26 @@ export default function SessionsPage() {
 
       {/* Session grid */}
       <div style={{ marginTop: 24 }}>
-        {(!sessions || sessions.length === 0) && (
-          <p style={{
-            fontSize: 14, color: 'var(--muted)',
-            fontStyle: 'italic', marginBottom: 24,
-          }}>
-            Nog geen sessies. Begin met je eerste avontuur.
-          </p>
+        {sessionsLoading ? (
+          <ul style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: 'var(--sp-4)', listStyle: 'none', padding: 0, margin: 0 }} aria-label="Sessies laden..." aria-live="polite">
+            <EntityCardSkeleton count={3} />
+          </ul>
+        ) : (
+          <>
+            {(!sessions || sessions.length === 0) && (
+              <EmptyState
+                title="Nog geen sessies"
+                description="Begin met je eerste avontuur. Elke grote queeste start met één stap."
+              />
+            )}
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+              {sessions?.map((session) => (
+                <SessionCard key={session.id} session={session} />
+              ))}
+              <ForgeSessionCard onClick={handleCreateSession} loading={creatingSession} />
+            </div>
+          </>
         )}
-
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {sessions?.map((session) => (
-            <SessionCard key={session.id} session={session} />
-          ))}
-          <ForgeSessionCard onClick={handleCreateSession} loading={creatingSession} />
-        </div>
       </div>
     </div>
   )

@@ -1,13 +1,14 @@
-import { useId } from 'react'
+import { useState, useEffect, useId, useCallback } from 'react'
 import { useParams, useNavigate, useLocation } from 'react-router-dom'
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
+import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { toast } from 'sonner'
 import { supabase } from '@/lib/supabase'
 import { queryKeys } from '@/lib/queryKeys'
-import { Modal } from '@/components/ui/Modal'
 import { Spinner } from '@/components/ui/Spinner'
-import { useEntityEdit } from '@/hooks/useEntityEdit'
+import { ConfirmDialog } from '@/components/ui/ConfirmDialog'
+import { useCampaign } from '@/hooks/queries/useCampaign'
 import { useImagePositioning } from '@/hooks/useImagePositioning'
+import { useUnsavedChangesPrompt } from '@/hooks/useUnsavedChangesPrompt'
 import type { Campaign, CampaignStatus } from '@/types/campaign.types'
 
 const statusOptions: { value: CampaignStatus; label: string }[] = [
@@ -30,32 +31,31 @@ export default function CampaignEditPage() {
   const isNew = locationState?.isNew ?? false
   const worldIdFromState = locationState?.worldId
 
-  const { data: campaign, isLoading } = useQuery<Campaign>({
-    queryKey: queryKeys.campaigns.detail(id!),
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from('campaigns')
-        .select('*')
-        .eq('id', id!)
-        .single()
-      if (error) throw error
-      return data as Campaign
-    },
-    enabled: !!id,
-    staleTime: 1000 * 60,
-  })
+  const [committed, setCommitted] = useState(!isNew)
+  const [deleteOpen, setDeleteOpen] = useState(false)
+  const [form, setForm] = useState<Partial<Campaign>>({})
+  const [dirty, setDirty] = useState(false)
 
-  const {
-    form, set, dirty, setDirty,
-    committed, setCommitted,
-    deleteOpen, setDeleteOpen,
-    resetForm,
-  } = useEntityEdit({ entity: campaign, isNew })
+  const unsaved = useUnsavedChangesPrompt(dirty)
 
-  const { imagePos, isDragging, containerRef, handleImageMouseDown, handleImageTouchStart, handleImageKeyDown } = useImagePositioning({
-    initialPosition: campaign?.header_image_position,
-    onChange: (pos) => set('header_image_position', pos),
-  })
+  const handlePositionChange = useCallback((posString: string) => {
+    setForm((prev) => ({ ...prev, header_image_position: posString }))
+    setDirty(true)
+  }, [])
+
+  const { data: campaign, isLoading } = useCampaign(id)
+
+  const { containerRef, posString: imagePosString, isDragging, handlers: imagePosHandlers } = useImagePositioning(
+    campaign?.header_image_position,
+    handlePositionChange,
+  )
+
+  useEffect(() => {
+    if (campaign) {
+      setForm(campaign)
+      setDirty(false)
+    }
+  }, [campaign])
 
   const saveCampaign = useMutation({
     mutationFn: async () => {
@@ -108,6 +108,11 @@ export default function CampaignEditPage() {
     },
   })
 
+  function set<K extends keyof Campaign>(key: K, value: Campaign[K]) {
+    setForm((prev) => ({ ...prev, [key]: value }))
+    setDirty(true)
+  }
+
   function handleCancel() {
     if (!committed) {
       if (worldIdFromState) {
@@ -116,7 +121,8 @@ export default function CampaignEditPage() {
         navigate('/dashboard')
       }
     } else {
-      resetForm()
+      setForm(campaign!)
+      setDirty(false)
       navigate(`/campaigns/${id}`)
     }
   }
@@ -218,11 +224,11 @@ export default function CampaignEditPage() {
             <div
               ref={containerRef}
               role="img"
-              aria-label={`Afbeeldingsuitsnede: positie ${Math.round(imagePos.x)}% horizontaal, ${Math.round(imagePos.y)}% verticaal. Gebruik pijltjestoetsen om bij te stellen.`}
+              aria-label={`Afbeeldingsuitsnede: positie ${imagePosString}. Gebruik pijltjestoetsen om bij te stellen.`}
               tabIndex={0}
-              onMouseDown={handleImageMouseDown}
-              onTouchStart={handleImageTouchStart}
-              onKeyDown={handleImageKeyDown}
+              onMouseDown={imagePosHandlers.onMouseDown}
+              onTouchStart={imagePosHandlers.onTouchStart}
+              onKeyDown={imagePosHandlers.onKeyDown}
               style={{
                 position: 'relative',
                 cursor: isDragging ? 'grabbing' : 'grab',
@@ -245,7 +251,7 @@ export default function CampaignEditPage() {
                   width: '100%',
                   height: '100%',
                   objectFit: 'cover',
-                  objectPosition: `${imagePos.x}% ${imagePos.y}%`,
+                  objectPosition: imagePosString,
                   pointerEvents: 'none',
                   display: 'block',
                 }}
@@ -274,7 +280,7 @@ export default function CampaignEditPage() {
                 id="campaign-subtitle"
                 className="pangu-input"
                 value={form.subtitle ?? ''}
-                onChange={(e) => set('subtitle', e.target.value || null)}
+                onChange={(e) => set('subtitle', e.target.value || null as unknown as string)}
                 placeholder="Korte beschrijving of tagline"
               />
             </div>
@@ -300,7 +306,7 @@ export default function CampaignEditPage() {
                 className="pangu-input"
                 type="url"
                 value={form.header_image ?? ''}
-                onChange={(e) => set('header_image', e.target.value || null)}
+                onChange={(e) => set('header_image', e.target.value || null as unknown as string)}
                 placeholder="https://..."
               />
             </div>
@@ -311,7 +317,7 @@ export default function CampaignEditPage() {
                 id={descriptionId}
                 className="pangu-textarea"
                 value={form.description ?? ''}
-                onChange={(e) => set('description', e.target.value || null)}
+                onChange={(e) => set('description', e.target.value || null as unknown as string)}
                 placeholder="Beschrijf de kroniek, haar sfeer en achtergrond..."
                 rows={5}
               />
@@ -363,24 +369,28 @@ export default function CampaignEditPage() {
 
       </div>
 
-      {/* Delete modal */}
-      <Modal
+      <ConfirmDialog
         open={deleteOpen}
         onClose={() => setDeleteOpen(false)}
+        onConfirm={handleDelete}
         title="Kroniek verwijderen"
+        confirmLabel="Verwijder kroniek"
+        loading={deleteCampaign.isPending}
       >
-        <p style={{ fontSize: 14, color: 'var(--ink-soft)', marginBottom: 24 }}>
-          Weet je zeker dat je <strong style={{ color: 'var(--ink)' }}>{campaign.name}</strong> wilt verwijderen? Dit kan niet ongedaan worden gemaakt.
-        </p>
-        <div className="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
-          <button type="button" className="pangu-btn pangu-btn-ghost" onClick={() => setDeleteOpen(false)}>
-            Annuleren
-          </button>
-          <button type="button" className="pangu-btn pangu-btn-crimson" onClick={handleDelete} disabled={deleteCampaign.isPending}>
-            {deleteCampaign.isPending ? 'Verwijderen...' : 'Verwijder kroniek'}
-          </button>
-        </div>
-      </Modal>
+        Weet je zeker dat je <strong style={{ color: 'var(--ink)' }}>{campaign.name}</strong> wilt verwijderen? Dit kan niet ongedaan worden gemaakt.
+      </ConfirmDialog>
+
+      <ConfirmDialog
+        open={unsaved.blocked}
+        onClose={unsaved.reset}
+        onConfirm={unsaved.proceed}
+        title="Niet-opgeslagen wijzigingen"
+        confirmLabel="Verlaten"
+        cancelLabel="Blijven"
+        confirmVariant="crimson"
+      >
+        Je hebt niet-opgeslagen wijzigingen. Weet je zeker dat je de pagina wilt verlaten?
+      </ConfirmDialog>
     </div>
   )
 }

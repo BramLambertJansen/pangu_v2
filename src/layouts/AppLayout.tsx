@@ -107,8 +107,10 @@ const settingsNavItem = {
 }
 
 export default function AppLayout() {
-  const { sidebarCollapsed, toggleSidebar } = useUIStore()
-  const { profile, signOut } = useAuthStore()
+  const sidebarCollapsed = useUIStore(s => s.sidebarCollapsed)
+  const toggleSidebar = useUIStore(s => s.toggleSidebar)
+  const profile = useAuthStore(s => s.profile)
+  const signOut = useAuthStore(s => s.signOut)
   const navigate = useNavigate()
   const [mobileOpen, setMobileOpen] = useState(false)
 

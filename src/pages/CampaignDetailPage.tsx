@@ -1,6 +1,6 @@
 import { useParams, useNavigate, Link } from 'react-router-dom'
 import { Breadcrumb } from '@/components/ui/Breadcrumb'
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
+import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { toast } from 'sonner'
 import { supabase } from '@/lib/supabase'
 import { queryKeys } from '@/lib/queryKeys'
@@ -11,32 +11,17 @@ import { SessionCard, ForgeSessionCard } from '@/components/session/SessionCard'
 import { LocationCard, ForgeLocationCard } from '@/components/location/LocationCard'
 import { LoreCard, ForgeLoreCard } from '@/components/lore/LoreCard'
 import { NpcCard, ForgeNpcCard } from '@/components/npc/NpcCard'
-import type { Campaign, CampaignStatus } from '@/types/campaign.types'
+import { useCampaignWithWorld } from '@/hooks/queries/useCampaign'
+import { useCampaignSessions } from '@/hooks/queries/useCampaignSessions'
+import { useCampaignLocations } from '@/hooks/queries/useCampaignLocations'
+import { useCampaignNpcs } from '@/hooks/queries/useCampaignNpcs'
+import { useCampaignLore } from '@/hooks/queries/useCampaignLore'
+import { pickGradient, coverGradients } from '@/utils/pickGradient'
+import { campaignStatusLabel } from '@/lib/statusMaps'
 import type { Session } from '@/types/session.types'
 import type { Location } from '@/types/location.types'
 import type { Lore } from '@/types/lore.types'
 import type { Npc } from '@/types/npc.types'
-
-type CampaignWithWorld = Campaign & { worlds: { name: string } | null }
-
-const statusLabel: Record<CampaignStatus, string> = {
-  draft: 'Concept',
-  active: 'Actief',
-  archived: 'Gearchiveerd',
-  completed: 'Voltooid',
-}
-
-const cardGradients = [
-  'radial-gradient(ellipse 70% 55% at 30% 40%, rgba(155,138,255,0.55) 0%, rgba(80,50,200,0.28) 45%, var(--void) 78%)',
-  'radial-gradient(ellipse 65% 52% at 28% 42%, rgba(220,90,80,0.4) 0%, rgba(155,138,255,0.22) 50%, var(--void) 78%)',
-  'radial-gradient(ellipse 65% 52% at 30% 42%, rgba(62,207,178,0.32) 0%, rgba(60,80,200,0.28) 50%, var(--void) 78%)',
-  'radial-gradient(ellipse 65% 50% at 25% 40%, rgba(245,180,50,0.28) 0%, rgba(155,138,255,0.32) 50%, var(--void) 78%)',
-]
-
-function pickGradient(id: string): string {
-  const code = (id.charCodeAt(0) ?? 0) + (id.charCodeAt(id.length - 1) ?? 0)
-  return cardGradients[code % cardGradients.length]
-}
 
 const scrimGradient =
   'linear-gradient(to top, var(--void) 0%, rgba(10,10,22,0.97) 20%, rgba(10,10,22,0.72) 40%, rgba(10,10,22,0.18) 62%, transparent 82%)'
@@ -45,38 +30,10 @@ export default function CampaignDetailPage() {
   const { id } = useParams<{ id: string }>()
   const navigate = useNavigate()
   const queryClient = useQueryClient()
-  const { user } = useAuthStore()
+  const user = useAuthStore(s => s.user)
 
-  const { data: campaign, isLoading } = useQuery<CampaignWithWorld>({
-    queryKey: queryKeys.campaigns.detail(id!),
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from('campaigns')
-        .select('*, worlds(name)')
-        .eq('id', id!)
-        .single()
-      if (error) throw error
-      return data as CampaignWithWorld
-    },
-    enabled: !!id,
-    staleTime: 1000 * 60,
-  })
-
-  const { data: sessions, isLoading: isLoadingSessions } = useQuery<Session[]>({
-    queryKey: queryKeys.campaigns.sessions(id!),
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from('sessions')
-        .select('*')
-        .eq('campaign_id', id!)
-        .order('session_number', { ascending: true, nullsFirst: false })
-        .order('created_at', { ascending: false })
-      if (error) throw error
-      return data as Session[]
-    },
-    enabled: !!id,
-    staleTime: 1000 * 30,
-  })
+  const { data: campaign, isLoading } = useCampaignWithWorld(id)
+  const { data: sessions, isLoading: isLoadingSessions } = useCampaignSessions(id)
 
   const createSession = useMutation({
     mutationFn: async () => {
@@ -101,20 +58,7 @@ export default function CampaignDetailPage() {
     },
   })
 
-  const { data: locations, isLoading: isLoadingLocations } = useQuery<Location[]>({
-    queryKey: queryKeys.campaigns.locations(id!),
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from('locations')
-        .select('*')
-        .eq('campaign_id', id!)
-        .order('created_at', { ascending: false })
-      if (error) throw error
-      return data as Location[]
-    },
-    enabled: !!id,
-    staleTime: 1000 * 30,
-  })
+  const { data: locations, isLoading: isLoadingLocations } = useCampaignLocations(id)
 
   const createLocation = useMutation({
     mutationFn: async () => {
@@ -136,20 +80,7 @@ export default function CampaignDetailPage() {
     },
   })
 
-  const { data: loreItems, isLoading: isLoadingLore } = useQuery<Lore[]>({
-    queryKey: queryKeys.campaigns.lore(id!),
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from('lore')
-        .select('*')
-        .eq('campaign_id', id!)
-        .order('created_at', { ascending: false })
-      if (error) throw error
-      return data as Lore[]
-    },
-    enabled: !!id,
-    staleTime: 1000 * 30,
-  })
+  const { data: loreItems, isLoading: isLoadingLore } = useCampaignLore(id)
 
   const createLore = useMutation({
     mutationFn: async () => {
@@ -171,20 +102,7 @@ export default function CampaignDetailPage() {
     },
   })
 
-  const { data: npcs, isLoading: isLoadingNpcs } = useQuery<Npc[]>({
-    queryKey: queryKeys.campaigns.npcs(id!),
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from('npcs')
-        .select('*')
-        .eq('campaign_id', id!)
-        .order('created_at', { ascending: false })
-      if (error) throw error
-      return data as Npc[]
-    },
-    enabled: !!id,
-    staleTime: 1000 * 30,
-  })
+  const { data: npcs, isLoading: isLoadingNpcs } = useCampaignNpcs(id)
 
   const createNpc = useMutation({
     mutationFn: async () => {
@@ -226,7 +144,7 @@ export default function CampaignDetailPage() {
   }
 
   const initial = campaign.name.trim()[0]?.toUpperCase() ?? '?'
-  const gradient = campaign.header_image ? undefined : pickGradient(campaign.id)
+  const gradient = campaign.header_image ? undefined : pickGradient(campaign.id, coverGradients)
   const worldName = campaign.worlds?.name ?? null
 
   return (
@@ -298,7 +216,7 @@ export default function CampaignDetailPage() {
               letterSpacing: '0.16em', textTransform: 'uppercase',
               color: 'var(--void)',
             }}>
-              {statusLabel[campaign.status]}
+              {campaignStatusLabel[campaign.status]}
             </span>
           </div>
 
@@ -385,7 +303,7 @@ export default function CampaignDetailPage() {
               letterSpacing: '0.16em', textTransform: 'uppercase',
               color: 'var(--void)',
             }}>
-              {statusLabel[campaign.status]}
+              {campaignStatusLabel[campaign.status]}
             </span>
           </div>
 

@@ -18,7 +18,9 @@ async function syncProfile(userId: string) {
  * Renders nothing — pure side-effect.
  */
 export function AuthInitializer() {
-  const { setUser, setProfile, signOut } = useAuthStore()
+  const setUser = useAuthStore(s => s.setUser)
+  const setProfile = useAuthStore(s => s.setProfile)
+  const signOut = useAuthStore(s => s.signOut)
 
   useEffect(() => {
     // Hydrate on mount from existing session
