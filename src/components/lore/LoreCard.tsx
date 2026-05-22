@@ -34,7 +34,7 @@ export function LoreCard({ lore }: Props) {
   const gradient = pickGradient(lore.id)
 
   function handleActivate() {
-    navigate(`/lore/${lore.id}/edit`)
+    navigate(`/lore/${lore.id}`)
   }
 
   return (

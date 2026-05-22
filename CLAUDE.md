@@ -295,6 +295,7 @@ Routes zijn gedefinieerd in `src/routes/index.tsx`. Lazy-loading voor alle pagin
 | `/locations/:id` | `LocationDetailPage` | `requireAuth` | ✅ |
 | `/locations/:id/edit` | `LocationEditPage` | `requireAuth` | ✅ |
 | `/campaigns/:id/lore` | `LoresPage` | `requireAuth` | ✅ |
+| `/lore/:id` | `LoreDetailPage` | `requireAuth` | ✅ |
 | `/lore/:id/edit` | `LoreEditPage` | `requireAuth` | ✅ |
 | `/campaigns/:id/npcs` | `NpcsPage` | `requireAuth` | ✅ |
 | `/npcs/:id/edit` | `NpcEditPage` | `requireAuth` | ✅ |
@@ -446,6 +447,7 @@ npm run type-check   # tsc --noEmit
 ### Wereld — Lore
 - [x] Lore-overzicht per campaign (`/campaigns/:id/lore`)
 - [x] Lore-item aanmaken / bewerken / verwijderen
+- [x] Lore-detailpagina `/lore/:id` — breadcrumbs (wereld · kroniek · lore), header met categorie- en statusbadge, beschrijving, DM-notities
 
 ### Karakter (Spelersperspectief)
 - [ ] Karakterblad bekijken
