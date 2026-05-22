@@ -5,6 +5,7 @@ import { CompassRose } from '@/components/world/CompassRose'
 import { EntityCard } from '@/components/ui/EntityCard'
 import { ForgeCard } from '@/components/ui/ForgeCard'
 import { pickGradient, coverGradients } from '@/utils/pickGradient'
+import { sanitizeImageUrl } from '@/utils/sanitizeUrl'
 
 interface Props {
   world: World
@@ -22,9 +23,9 @@ export const WorldCard = memo(function WorldCard({ world }: Props) {
       onClick={() => navigate(`/worlds/${world.id}`)}
     >
       {/* Background */}
-      {world.header_image ? (
+      {sanitizeImageUrl(world.header_image) ? (
         <img
-          src={world.header_image}
+          src={sanitizeImageUrl(world.header_image)}
           alt=""
           aria-hidden="true"
           loading="lazy"

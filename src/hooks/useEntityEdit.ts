@@ -24,8 +24,13 @@ export function useEntityEdit<T>({ entity, isNew }: UseEntityEditOptions<T>) {
   }, [])
 
   const resetForm = useCallback(() => {
-    if (entity) setForm(entity)
-    setDirty(false)
+    // Only reset when we actually have data to restore; if entity is undefined
+    // (e.g. query is still loading after a network blip), leave form and dirty
+    // untouched so the user can still save or retry.
+    if (entity) {
+      setForm(entity)
+      setDirty(false)
+    }
   }, [entity])
 
   return {
