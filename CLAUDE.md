@@ -293,13 +293,13 @@ Routes zijn gedefinieerd in `src/routes/index.tsx`. Lazy-loading voor alle pagin
 | `/sessions/:id/edit` | `SessionEditPage` | `requireAuth` | ✅ |
 | `/campaigns/:id/lore` | `LoresPage` | `requireAuth` | ✅ |
 | `/lore/:id/edit` | `LoreEditPage` | `requireAuth` | ✅ |
+| `/campaigns/:id/npcs` | `NpcsPage` | `requireAuth` | ✅ |
+| `/npcs/:id/edit` | `NpcEditPage` | `requireAuth` | ✅ |
 
 ### Geplande routes (nog niet geïmplementeerd)
 
 ```
 /campaigns               → overzicht alle campaigns
-/campaigns/:id/locations → locaties per campaign
-/campaigns/:id/npcs      → NPCs per campaign
 /characters/:id          → spelersperspectief
 ```
 
@@ -436,8 +436,8 @@ npm run type-check   # tsc --noEmit
 - [ ] Locatie-detailpagina
 
 ### Wereld — NPCs
-- [ ] NPC-overzicht per campaign
-- [ ] NPC aanmaken / bewerken / verwijderen
+- [x] NPC-overzicht per campaign (`/campaigns/:id/npcs`)
+- [x] NPC aanmaken / bewerken / verwijderen
 - [ ] NPC-detailpagina
 
 ### Wereld — Lore
