@@ -22,5 +22,5 @@
     }
   },
   "include": ["src"],
-  "exclude": ["src/test/setup.ts"]
+  "exclude": ["src/test"]
 }

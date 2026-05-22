@@ -1,4 +1,4 @@
-import { useParams, useNavigate, Link } from 'react-router-dom'
+import { useParams, useNavigate } from 'react-router-dom'
 import { Breadcrumb } from '@/components/ui/Breadcrumb'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { toast } from 'sonner'
@@ -145,7 +145,6 @@ export default function CampaignDetailPage() {
 
   const initial = campaign.name.trim()[0]?.toUpperCase() ?? '?'
   const gradient = campaign.header_image ? undefined : pickGradient(campaign.id, coverGradients)
-  const worldName = campaign.worlds?.name ?? null
 
   return (
     <div>
