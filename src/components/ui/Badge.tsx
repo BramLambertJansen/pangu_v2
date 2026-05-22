@@ -8,11 +8,11 @@ export interface BadgeProps extends ComponentPropsWithoutRef<'span'> {
 }
 
 const variantStyles: Record<Variant, string> = {
-  default: 'bg-gray-700 text-gray-200',
-  success: 'bg-green-900 text-green-300',
-  warning: 'bg-yellow-900 text-yellow-300',
-  danger:  'bg-red-900 text-red-300',
-  info:    'bg-indigo-900 text-indigo-300',
+  default: 'bg-surface-2 text-ink-soft',
+  success: 'bg-teal/15 text-teal',
+  warning: 'bg-gold/15 text-gold',
+  danger:  'bg-crimson/15 text-crimson',
+  info:    'bg-violet/15 text-violet',
 }
 
 export function Badge({ variant = 'default', className, children, ...props }: BadgeProps) {

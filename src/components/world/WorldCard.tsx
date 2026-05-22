@@ -1,6 +1,8 @@
 import { useNavigate } from 'react-router-dom'
 import type { World } from '@/types/world.types'
 import { CompassRose } from '@/components/world/CompassRose'
+import { EntityCard } from '@/components/ui/EntityCard'
+import { ForgeCard } from '@/components/ui/ForgeCard'
 import { pickGradient, coverGradients } from '@/utils/pickGradient'
 
 interface Props {
@@ -13,40 +15,10 @@ export function WorldCard({ world }: Props) {
   const gradient = world.header_image ? undefined : pickGradient(world.id, coverGradients)
 
   return (
-    <article
-      role="button"
-      tabIndex={0}
-      aria-label={`Wereld: ${world.name}`}
+    <EntityCard
+      variant="hero"
+      ariaLabel={`Wereld: ${world.name}`}
       onClick={() => navigate(`/worlds/${world.id}`)}
-      onKeyDown={(e) => {
-        if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); navigate(`/worlds/${world.id}`) }
-      }}
-      style={{
-        position: 'relative',
-        height: 520,
-        borderRadius: 'var(--r-xl)',
-        border: '1px solid var(--hairline)',
-        overflow: 'hidden',
-        cursor: 'pointer',
-        display: 'flex',
-        flexDirection: 'column',
-        transition: 'border-color var(--t-base) var(--ease-out), box-shadow var(--t-base) var(--ease-out), transform var(--t-base) var(--ease-out)',
-        outline: 'none',
-      }}
-      onMouseEnter={(e) => {
-        const el = e.currentTarget
-        el.style.borderColor = 'var(--hairline-strong)'
-        el.style.boxShadow = '0 12px 48px rgba(0,0,0,0.5), 0 0 0 1px var(--hairline-strong)'
-        el.style.transform = 'translateY(-3px)'
-      }}
-      onMouseLeave={(e) => {
-        const el = e.currentTarget
-        el.style.borderColor = 'var(--hairline)'
-        el.style.boxShadow = 'none'
-        el.style.transform = 'translateY(0)'
-      }}
-      onFocus={(e) => { e.currentTarget.style.outline = '2px solid var(--violet)'; e.currentTarget.style.outlineOffset = '2px' }}
-      onBlur={(e) => { e.currentTarget.style.outline = 'none' }}
     >
       {/* Background */}
       {world.header_image ? (
@@ -98,7 +70,6 @@ export function WorldCard({ world }: Props) {
         alignItems: 'center',
         gap: 10,
       }}>
-        {/* Era / subtitle */}
         {world.subtitle && (
           <div style={{
             display: 'flex', alignItems: 'center', gap: 8,
@@ -113,7 +84,6 @@ export function WorldCard({ world }: Props) {
           </div>
         )}
 
-        {/* World name */}
         <h2 style={{
           fontFamily: 'var(--font-display)',
           fontSize: 'clamp(22px, 3.5vw, 30px)',
@@ -127,10 +97,9 @@ export function WorldCard({ world }: Props) {
           {world.name.toUpperCase()}
         </h2>
 
-        {/* Quote */}
         {world.quote && (
           <p style={{
-            fontFamily: "'Cormorant Garamond', Georgia, serif",
+            fontFamily: 'var(--font-quote)',
             fontStyle: 'italic',
             fontSize: 14,
             lineHeight: 1.5,
@@ -141,7 +110,6 @@ export function WorldCard({ world }: Props) {
           </p>
         )}
 
-        {/* Description */}
         {world.description && (
           <p style={{
             fontSize: 13,
@@ -157,10 +125,9 @@ export function WorldCard({ world }: Props) {
           </p>
         )}
 
-        {/* Empty state hint */}
         {!world.quote && !world.description && (
           <p style={{
-            fontFamily: "'Cormorant Garamond', Georgia, serif",
+            fontFamily: 'var(--font-quote)',
             fontStyle: 'italic',
             fontSize: 13,
             color: 'var(--subtle)',
@@ -170,11 +137,9 @@ export function WorldCard({ world }: Props) {
           </p>
         )}
       </div>
-    </article>
+    </EntityCard>
   )
 }
-
-// ── Forge a World placeholder card ──────────────────────────
 
 interface ForgeCardProps {
   onClick: () => void
@@ -183,56 +148,15 @@ interface ForgeCardProps {
 
 export function ForgeWorldCard({ onClick, loading }: ForgeCardProps) {
   return (
-    <article
-      role="button"
-      tabIndex={0}
-      aria-label="Creëer een nieuwe wereld"
+    <ForgeCard
+      variant="hero"
+      accent="gold"
       onClick={onClick}
-      onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onClick() } }}
-      style={{
-        position: 'relative',
-        height: 520,
-        borderRadius: 'var(--r-xl)',
-        border: '1px dashed var(--hairline-strong)',
-        overflow: 'hidden',
-        cursor: loading ? 'wait' : 'pointer',
-        display: 'flex',
-        flexDirection: 'column',
-        alignItems: 'center',
-        justifyContent: 'center',
-        gap: 16,
-        background: 'transparent',
-        transition: 'border-color var(--t-base) var(--ease-out), background var(--t-base) var(--ease-out)',
-        outline: 'none',
-      }}
-      onMouseEnter={(e) => {
-        e.currentTarget.style.borderColor = 'var(--gold)'
-        e.currentTarget.style.background = 'rgba(245,200,66,0.03)'
-      }}
-      onMouseLeave={(e) => {
-        e.currentTarget.style.borderColor = 'var(--hairline-strong)'
-        e.currentTarget.style.background = 'transparent'
-      }}
-      onFocus={(e) => { e.currentTarget.style.outline = '2px solid var(--violet)'; e.currentTarget.style.outlineOffset = '2px' }}
-      onBlur={(e) => { e.currentTarget.style.outline = 'none' }}
-    >
-      <CompassRose size={80} opacity={0.65} />
-      <div style={{ textAlign: 'center' }}>
-        <p style={{
-          fontFamily: 'var(--font-display)',
-          fontSize: 15,
-          fontWeight: 600,
-          letterSpacing: '0.18em',
-          textTransform: 'uppercase',
-          color: 'var(--gold)',
-          margin: '0 0 6px',
-        }}>
-          {loading ? 'Aanmaken...' : 'Nieuwe wereld'}
-        </p>
-        <p style={{ fontSize: 13, color: 'var(--muted)', margin: 0 }}>
-          Een leeg kosmos wacht.
-        </p>
-      </div>
-    </article>
+      loading={loading}
+      ariaLabel="Creëer een nieuwe wereld"
+      title="Nieuwe wereld"
+      subtitle="Een leeg kosmos wacht."
+      icon={<CompassRose size={80} opacity={0.65} />}
+    />
   )
 }

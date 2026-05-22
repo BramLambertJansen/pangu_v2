@@ -1,5 +1,8 @@
 import { useNavigate } from 'react-router-dom'
 import type { Campaign } from '@/types/campaign.types'
+import { EntityCard } from '@/components/ui/EntityCard'
+import { ForgeCard } from '@/components/ui/ForgeCard'
+import { StatusBadge } from '@/components/ui/StatusBadge'
 import { pickGradient, accentGradients } from '@/utils/pickGradient'
 import { campaignStatusLabel, campaignStatusColor } from '@/lib/statusMaps'
 
@@ -11,47 +14,11 @@ export function CampaignCard({ campaign }: Props) {
   const navigate = useNavigate()
   const gradient = pickGradient(campaign.id, accentGradients)
 
-  function handleActivate() {
-    navigate(`/campaigns/${campaign.id}`)
-  }
-
   return (
-    <article
-      role="button"
-      tabIndex={0}
-      aria-label={`Kroniek: ${campaign.name}`}
-      onClick={handleActivate}
-      onKeyDown={(e) => {
-        if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); handleActivate() }
-      }}
-      style={{
-        position: 'relative',
-        borderRadius: 'var(--r-xl)',
-        border: '1px solid var(--hairline)',
-        overflow: 'hidden',
-        cursor: 'pointer',
-        display: 'flex',
-        flexDirection: 'column',
-        padding: '24px 24px 20px',
-        minHeight: 160,
-        transition: 'border-color var(--t-base) var(--ease-out), box-shadow var(--t-base) var(--ease-out), transform var(--t-base) var(--ease-out)',
-        outline: 'none',
-        background: 'var(--void-2)',
-      }}
-      onMouseEnter={(e) => {
-        const el = e.currentTarget
-        el.style.borderColor = 'var(--hairline-strong)'
-        el.style.boxShadow = '0 8px 32px rgba(0,0,0,0.4), 0 0 0 1px var(--hairline-strong)'
-        el.style.transform = 'translateY(-2px)'
-      }}
-      onMouseLeave={(e) => {
-        const el = e.currentTarget
-        el.style.borderColor = 'var(--hairline)'
-        el.style.boxShadow = 'none'
-        el.style.transform = 'translateY(0)'
-      }}
-      onFocus={(e) => { e.currentTarget.style.outline = '2px solid var(--violet)'; e.currentTarget.style.outlineOffset = '2px' }}
-      onBlur={(e) => { e.currentTarget.style.outline = 'none' }}
+    <EntityCard
+      variant="compact"
+      ariaLabel={`Kroniek: ${campaign.name}`}
+      onClick={() => navigate(`/campaigns/${campaign.id}`)}
     >
       {/* Gradient accent */}
       <div
@@ -69,7 +36,7 @@ export function CampaignCard({ campaign }: Props) {
           <div style={{ minWidth: 0 }}>
             {campaign.subtitle && (
               <p style={{
-                fontFamily: "'Cormorant Garamond', Georgia, serif",
+                fontFamily: 'var(--font-quote)',
                 fontStyle: 'italic',
                 fontSize: 12, letterSpacing: '0.03em',
                 color: 'var(--gold)', margin: '0 0 4px',
@@ -88,19 +55,11 @@ export function CampaignCard({ campaign }: Props) {
               {campaign.name}
             </h2>
           </div>
-          <span style={{
-            display: 'inline-flex', alignItems: 'center', flexShrink: 0,
-            padding: '3px 10px',
-            background: campaignStatusColor[campaign.status],
-            borderRadius: 'var(--r-full)',
-            fontFamily: 'var(--font-body)',
-            fontSize: 9, fontWeight: 700,
-            letterSpacing: '0.16em', textTransform: 'uppercase',
-            color: 'var(--void)',
-            marginTop: 2,
-          }}>
-            {campaignStatusLabel[campaign.status]}
-          </span>
+          <StatusBadge
+            label={campaignStatusLabel[campaign.status]}
+            color={campaignStatusColor[campaign.status]}
+            className="mt-0.5"
+          />
         </div>
 
         {campaign.description && (
@@ -122,7 +81,7 @@ export function CampaignCard({ campaign }: Props) {
           </p>
         )}
       </div>
-    </article>
+    </EntityCard>
   )
 }
 
@@ -133,63 +92,23 @@ interface ForgeProps {
 
 export function ForgeCampaignCard({ onClick, loading }: ForgeProps) {
   return (
-    <article
-      role="button"
-      tabIndex={0}
-      aria-label="Nieuwe kroniek aanmaken"
-      onClick={() => { if (!loading) onClick() }}
-      onKeyDown={(e) => {
-        if (loading) return
-        if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onClick() }
-      }}
-      style={{
-        position: 'relative',
-        borderRadius: 'var(--r-xl)',
-        border: '1px dashed var(--hairline-strong)',
-        overflow: 'hidden',
-        cursor: loading ? 'wait' : 'pointer',
-        display: 'flex',
-        flexDirection: 'column',
-        alignItems: 'center',
-        justifyContent: 'center',
-        padding: '24px',
-        minHeight: 160,
-        gap: 10,
-        transition: 'border-color var(--t-base) var(--ease-out), background var(--t-base) var(--ease-out)',
-        outline: 'none',
-        background: 'transparent',
-      }}
-      onMouseEnter={(e) => {
-        e.currentTarget.style.borderColor = 'var(--gold)'
-        e.currentTarget.style.background = 'rgba(245,180,50,0.04)'
-      }}
-      onMouseLeave={(e) => {
-        e.currentTarget.style.borderColor = 'var(--hairline-strong)'
-        e.currentTarget.style.background = 'transparent'
-      }}
-      onFocus={(e) => { e.currentTarget.style.outline = '2px solid var(--violet)'; e.currentTarget.style.outlineOffset = '2px' }}
-      onBlur={(e) => { e.currentTarget.style.outline = 'none' }}
-    >
-      <span style={{
-        fontFamily: 'var(--font-display)',
-        fontSize: 28, color: 'var(--gold)', opacity: 0.6,
-        lineHeight: 1, userSelect: 'none',
-      }} aria-hidden="true">
-        ✦
-      </span>
-      <div style={{ textAlign: 'center' }}>
-        <p style={{
-          fontFamily: 'var(--font-body)',
-          fontSize: 12, fontWeight: 700,
-          letterSpacing: '0.18em', textTransform: 'uppercase',
-          color: 'var(--gold)', margin: '0 0 4px',
-        }}>
-          {loading ? 'Aanmaken...' : '+ Nieuwe kroniek'}
-        </p>
-        <p style={{ fontSize: 12, color: 'var(--muted)', margin: 0 }}>
-          Voeg een kroniek toe aan deze wereld
-        </p>
-      </div>
-    </article>
+    <ForgeCard
+      variant="compact"
+      accent="gold"
+      onClick={onClick}
+      loading={loading}
+      ariaLabel="Nieuwe kroniek aanmaken"
+      title="+ Nieuwe kroniek"
+      subtitle="Voeg een kroniek toe aan deze wereld"
+      icon={
+        <span style={{
+          fontFamily: 'var(--font-display)',
+          fontSize: 28, color: 'var(--gold)', opacity: 0.6,
+          lineHeight: 1, userSelect: 'none',
+        }} aria-hidden="true">
+          ✦
+        </span>
+      }
+    />
   )
 }

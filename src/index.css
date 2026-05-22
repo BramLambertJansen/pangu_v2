@@ -1,5 +1,29 @@
 @import "tailwindcss";
 
+/* ── Semantic Tailwind v4 color aliases ─────────────────── */
+@theme inline {
+  --color-void:           var(--void);
+  --color-void-2:         var(--void-2);
+  --color-surface:        var(--surface);
+  --color-surface-2:      var(--surface-2);
+  --color-surface-3:      var(--surface-3);
+  --color-surface-hover:  var(--surface-hover);
+  --color-violet:         var(--violet);
+  --color-violet-soft:    var(--violet-soft);
+  --color-violet-deep:    var(--violet-deep);
+  --color-gold:           var(--gold);
+  --color-gold-soft:      var(--gold-soft);
+  --color-teal:           var(--teal);
+  --color-crimson:        var(--crimson);
+  --color-azure:          var(--azure);
+  --color-ink:            var(--ink);
+  --color-ink-soft:       var(--ink-soft);
+  --color-muted:          var(--muted);
+  --color-subtle:         var(--subtle);
+  --color-hairline:       var(--hairline);
+  --color-hairline-strong: var(--hairline-strong);
+}
+
 :root {
   --void: #0a0a14;
   --void-2: #0f0e1c;
@@ -46,6 +70,7 @@
   --font-display: 'Cinzel', Georgia, serif;
   --font-body: 'Manrope', system-ui, sans-serif;
   --font-mono: 'JetBrains Mono', ui-monospace, monospace;
+  --font-quote: 'Cormorant Garamond', Georgia, serif;
   --ease-out: cubic-bezier(0.2, 0.7, 0.2, 1);
   --t-fast: 180ms;
   --t-base: 220ms;
@@ -629,6 +654,120 @@ body {
   }
 }
 
+/* ── Entity cards ───────────────────────────────────────── */
+
+.entity-card {
+  position: relative;
+  border-radius: var(--r-xl);
+  border: 1px solid var(--hairline);
+  overflow: hidden;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  outline: none;
+  transition:
+    border-color var(--t-base) var(--ease-out),
+    box-shadow   var(--t-base) var(--ease-out),
+    transform    var(--t-base) var(--ease-out);
+}
+
+.entity-card:hover {
+  border-color: var(--hairline-strong);
+  box-shadow: 0 8px 32px rgba(0,0,0,0.4), 0 0 0 1px var(--hairline-strong);
+  transform: translateY(-2px);
+}
+
+.entity-card:focus-visible {
+  outline: 2px solid var(--violet);
+  outline-offset: 2px;
+}
+
+.entity-card[data-variant="hero"] {
+  height: 520px;
+  background: var(--void);
+}
+
+.entity-card[data-variant="hero"]:hover {
+  box-shadow: 0 12px 48px rgba(0,0,0,0.5), 0 0 0 1px var(--hairline-strong);
+  transform: translateY(-3px);
+}
+
+.entity-card[data-variant="compact"] {
+  min-height: 120px;
+  padding: 20px 24px 18px;
+  background: var(--void-2);
+}
+
+/* ── Forge cards ─────────────────────────────────────────── */
+
+.forge-card {
+  position: relative;
+  border-radius: var(--r-xl);
+  border: 1px dashed var(--hairline-strong);
+  overflow: hidden;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  outline: none;
+  background: transparent;
+  gap: 10px;
+  transition:
+    border-color var(--t-base) var(--ease-out),
+    background   var(--t-base) var(--ease-out);
+}
+
+.forge-card:focus-visible {
+  outline: 2px solid var(--violet);
+  outline-offset: 2px;
+}
+
+.forge-card[data-variant="hero"] {
+  height: 520px;
+}
+
+.forge-card[data-variant="compact"] {
+  min-height: 120px;
+  padding: 20px 24px;
+}
+
+.forge-card[data-accent="violet"]:hover {
+  border-color: var(--violet);
+  background: rgba(155,138,255,0.04);
+}
+
+.forge-card[data-accent="gold"]:hover {
+  border-color: var(--gold);
+  background: rgba(245,200,66,0.03);
+}
+
+.forge-card[data-accent="teal"]:hover {
+  border-color: var(--teal);
+  background: rgba(62,207,178,0.04);
+}
+
+.forge-card[data-accent="crimson"]:hover {
+  border-color: var(--crimson);
+  background: rgba(220,90,80,0.04);
+}
+
+/* ── Status badge ────────────────────────────────────────── */
+
+.status-badge {
+  display: inline-flex;
+  align-items: center;
+  flex-shrink: 0;
+  padding: 3px 10px;
+  border-radius: var(--r-full);
+  font-family: var(--font-body);
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--void);
+}
+
 /* ── Motion safety ───────────────────────────────────────── */
 
 @media (prefers-reduced-motion: reduce) {
@@ -642,7 +781,9 @@ body {
   }
 
   .pangu-btn-primary:hover,
-  .pangu-btn-gold:hover {
+  .pangu-btn-gold:hover,
+  .entity-card:hover,
+  .entity-card[data-variant="hero"]:hover {
     transform: none !important;
   }
 }

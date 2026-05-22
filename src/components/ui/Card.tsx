@@ -6,7 +6,7 @@ export type CardProps = ComponentPropsWithoutRef<'div'>
 export function Card({ className, children, ...props }: CardProps) {
   return (
     <div
-      className={cn('rounded-lg border border-gray-800 bg-gray-900 p-4', className)}
+      className={cn('rounded-lg border border-hairline bg-surface p-4', className)}
       {...props}
     >
       {children}
@@ -28,7 +28,7 @@ export type CardTitleProps = ComponentPropsWithoutRef<'h3'>
 
 export function CardTitle({ className, children, ...props }: CardTitleProps) {
   return (
-    <h3 className={cn('text-lg font-semibold text-gray-100', className)} {...props}>
+    <h3 className={cn('text-lg font-semibold text-ink', className)} {...props}>
       {children}
     </h3>
   )
@@ -38,7 +38,7 @@ export type CardContentProps = ComponentPropsWithoutRef<'div'>
 
 export function CardContent({ className, children, ...props }: CardContentProps) {
   return (
-    <div className={cn('text-sm text-gray-300', className)} {...props}>
+    <div className={cn('text-sm text-ink-soft', className)} {...props}>
       {children}
     </div>
   )
