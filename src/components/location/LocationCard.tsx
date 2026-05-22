@@ -36,7 +36,7 @@ export function LocationCard({ location }: Props) {
   const gradient = pickGradient(location.id)
 
   function handleActivate() {
-    navigate(`/locations/${location.id}/edit`)
+    navigate(`/locations/${location.id}`)
   }
 
   return (

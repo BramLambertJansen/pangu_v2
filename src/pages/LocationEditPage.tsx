@@ -132,7 +132,7 @@ export default function LocationEditPage() {
     } else {
       setForm(locationData!)
       setDirty(false)
-      navigate(`/campaigns/${campaignId}/locations`)
+      navigate(`/locations/${id}`)
     }
   }
 
@@ -140,7 +140,7 @@ export default function LocationEditPage() {
     if (!committed) {
       abandon()
     } else {
-      navigate(`/campaigns/${campaignId}/locations`)
+      navigate(`/locations/${id}`)
     }
   }
 
@@ -188,7 +188,7 @@ export default function LocationEditPage() {
         <button
           type="button"
           onClick={handleBack}
-          aria-label="Terug naar locaties"
+          aria-label="Terug naar locatie"
           style={{
             display: 'inline-flex', alignItems: 'center', gap: 6,
             background: 'none', border: 'none', cursor: 'pointer',
@@ -204,7 +204,7 @@ export default function LocationEditPage() {
           <svg aria-hidden="true" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
             <path d="M19 12H5" /><path d="M12 19l-7-7 7-7" />
           </svg>
-          Terug naar locaties
+          Terug naar locatie
         </button>
 
         {/* Page header */}

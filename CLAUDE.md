@@ -291,6 +291,9 @@ Routes zijn gedefinieerd in `src/routes/index.tsx`. Lazy-loading voor alle pagin
 | `/campaigns/:id/edit` | `CampaignEditPage` | `requireAuth` | ✅ |
 | `/campaigns/:id/sessions` | `SessionsPage` | `requireAuth` | ✅ |
 | `/sessions/:id/edit` | `SessionEditPage` | `requireAuth` | ✅ |
+| `/campaigns/:id/locations` | `LocationsPage` | `requireAuth` | ✅ |
+| `/locations/:id` | `LocationDetailPage` | `requireAuth` | ✅ |
+| `/locations/:id/edit` | `LocationEditPage` | `requireAuth` | ✅ |
 | `/campaigns/:id/lore` | `LoresPage` | `requireAuth` | ✅ |
 | `/lore/:id/edit` | `LoreEditPage` | `requireAuth` | ✅ |
 | `/campaigns/:id/npcs` | `NpcsPage` | `requireAuth` | ✅ |
@@ -433,7 +436,7 @@ npm run type-check   # tsc --noEmit
 ### Wereld — Locaties
 - [x] Locatie-overzicht per campaign (`/campaigns/:id/locations`)
 - [x] Locatie aanmaken / bewerken / verwijderen
-- [ ] Locatie-detailpagina
+- [x] Locatie-detailpagina `/locations/:id` — breadcrumbs (wereld · kroniek · locaties), header met type- en status-badge, beschrijving, DM-notities
 
 ### Wereld — NPCs
 - [x] NPC-overzicht per campaign (`/campaigns/:id/npcs`)
