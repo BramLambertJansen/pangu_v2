@@ -546,6 +546,7 @@ export type Database = {
           display_name: string | null
           pronouns: string | null
           bio: string | null
+          avatar_url: string | null
           role: ProfileRole
           created_at: string
         }
@@ -555,6 +556,7 @@ export type Database = {
           display_name?: string | null
           pronouns?: string | null
           bio?: string | null
+          avatar_url?: string | null
           role?: ProfileRole
           created_at?: string
         }
@@ -564,6 +566,7 @@ export type Database = {
           display_name?: string | null
           pronouns?: string | null
           bio?: string | null
+          avatar_url?: string | null
           role?: ProfileRole
           created_at?: string
         }
@@ -591,6 +594,7 @@ export interface Profile {
   display_name: string | null
   pronouns: string | null
   bio: string | null
+  avatar_url: string | null
   role: ProfileRole
   created_at: string
 }

@@ -1,5 +1,6 @@
-import { useState, useId } from 'react'
+import { useState, useId, useRef } from 'react'
 import { CompassRose } from '@/components/world/CompassRose'
+import { Spinner } from '@/components/ui/Spinner'
 import { useMutation } from '@tanstack/react-query'
 import { toast } from 'sonner'
 import { supabase } from '@/lib/supabase'
@@ -57,6 +58,8 @@ function SettingToggle({
 
 // ── Profile tab ───────────────────────────────────────────
 
+const MAX_AVATAR_BYTES = 5 * 1024 * 1024 // 5 MB
+
 function ProfielTab() {
   const profile = useAuthStore(s => s.profile)
   const setProfile = useAuthStore(s => s.setProfile)
@@ -67,6 +70,8 @@ function ProfielTab() {
     bio: profile?.bio ?? '',
   })
   const [errors, setErrors] = useState<Partial<Record<keyof ProfileForm, string>>>({})
+  const [avatarUploading, setAvatarUploading] = useState(false)
+  const fileInputRef = useRef<HTMLInputElement>(null)
 
   const hasChanges =
     form.display_name !== (profile?.display_name ?? '') ||
@@ -81,6 +86,40 @@ function ProfielTab() {
     .toUpperCase()
 
   const bioId = useId()
+
+  async function handleAvatarUpload(file: File) {
+    if (!profile) return
+    if (!file.type.startsWith('image/')) {
+      toast.error('Alleen afbeeldingen zijn toegestaan')
+      return
+    }
+    if (file.size > MAX_AVATAR_BYTES) {
+      toast.error('Afbeelding mag maximaal 5 MB zijn')
+      return
+    }
+    setAvatarUploading(true)
+    try {
+      const ext = file.name.split('.').pop() ?? 'jpg'
+      const path = `${profile.id}/${Date.now()}.${ext}`
+      const { error: uploadError } = await supabase.storage
+        .from('avatars')
+        .upload(path, file, { upsert: true })
+      if (uploadError) throw uploadError
+      const { data: urlData } = supabase.storage.from('avatars').getPublicUrl(path)
+      const avatarUrl = urlData.publicUrl
+      const { error: updateError } = await supabase
+        .from('profiles')
+        .update({ avatar_url: avatarUrl })
+        .eq('id', profile.id)
+      if (updateError) throw updateError
+      setProfile({ ...profile, avatar_url: avatarUrl })
+      toast.success('Foto bijgewerkt')
+    } catch {
+      toast.error('Uploaden mislukt')
+    } finally {
+      setAvatarUploading(false)
+    }
+  }
 
   const mutation = useMutation({
     mutationFn: async () => {
@@ -124,9 +163,45 @@ function ProfielTab() {
 
   return (
     <div className="pangu-surface" style={{ padding: 28 }}>
+      {/* Hidden file input for avatar upload */}
+      <input
+        ref={fileInputRef}
+        type="file"
+        accept="image/*"
+        className="sr-only"
+        aria-hidden="true"
+        tabIndex={-1}
+        onChange={(e) => {
+          const file = e.target.files?.[0]
+          if (file) handleAvatarUpload(file)
+          e.target.value = ''
+        }}
+      />
+
       {/* Avatar row */}
       <div className="flex items-center gap-5" style={{ marginBottom: 32 }}>
-        <div className="settings-avatar" aria-hidden="true">{initials}</div>
+        <div style={{ position: 'relative', flexShrink: 0 }}>
+          {profile?.avatar_url ? (
+            <img
+              src={profile.avatar_url}
+              alt={profile.display_name ?? 'Avatar'}
+              className="settings-avatar"
+              style={{ objectFit: 'cover' }}
+            />
+          ) : (
+            <div className="settings-avatar" aria-hidden="true">{initials}</div>
+          )}
+          {avatarUploading && (
+            <div
+              className="absolute inset-0 flex items-center justify-center rounded-full"
+              style={{ background: 'rgba(0,0,0,0.45)' }}
+              aria-live="polite"
+              aria-label="Foto wordt geüpload"
+            >
+              <Spinner size="sm" />
+            </div>
+          )}
+        </div>
         <div>
           <h3 className="pangu-display" style={{ fontSize: 20 }}>
             {profile?.display_name ?? '—'}
@@ -134,8 +209,13 @@ function ProfielTab() {
           <p className="mt-1" style={{ fontSize: 13, color: 'var(--muted)' }}>
             Lid sinds ster-jaar {new Date(profile?.created_at ?? '').getFullYear()}
           </p>
-          <button className="pangu-btn pangu-btn-violet-soft pangu-btn-sm mt-3" type="button">
-            Foto wijzigen
+          <button
+            className="pangu-btn pangu-btn-violet-soft pangu-btn-sm mt-3"
+            type="button"
+            disabled={avatarUploading}
+            onClick={() => fileInputRef.current?.click()}
+          >
+            {avatarUploading ? 'Uploaden...' : 'Foto wijzigen'}
           </button>
         </div>
       </div>
