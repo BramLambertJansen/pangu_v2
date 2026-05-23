@@ -33,6 +33,9 @@ const CharacterEditPage = lazy(() => import('@/pages/CharacterEditPage'))
 const BestiariesPage = lazy(() => import('@/pages/BestiariesPage'))
 const BestiaryDetailPage = lazy(() => import('@/pages/BestiaryDetailPage'))
 const BestiaryEditPage = lazy(() => import('@/pages/BestiaryEditPage'))
+const QuestsPage = lazy(() => import('@/pages/QuestsPage'))
+const QuestDetailPage = lazy(() => import('@/pages/QuestDetailPage'))
+const QuestEditPage = lazy(() => import('@/pages/QuestEditPage'))
 
 function PageLoader() {
   return (
@@ -260,6 +263,21 @@ export const router = createBrowserRouter([
         path: '/bestiary/:id/edit',
         loader: requireAuth,
         element: wrap(BestiaryEditPage),
+      },
+      {
+        path: '/campaigns/:id/quests',
+        loader: requireAuth,
+        element: wrap(QuestsPage),
+      },
+      {
+        path: '/quests/:id',
+        loader: requireAuth,
+        element: wrap(QuestDetailPage),
+      },
+      {
+        path: '/quests/:id/edit',
+        loader: requireAuth,
+        element: wrap(QuestEditPage),
       },
       { path: '*', element: <RouteErrorPage /> },
     ],

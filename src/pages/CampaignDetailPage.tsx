@@ -11,11 +11,13 @@ import { SessionCard, ForgeSessionCard } from '@/components/session/SessionCard'
 import { LocationCard, ForgeLocationCard } from '@/components/location/LocationCard'
 import { LoreCard, ForgeLoreCard } from '@/components/lore/LoreCard'
 import { NpcCard, ForgeNpcCard } from '@/components/npc/NpcCard'
+import { QuestCard, ForgeQuestCard } from '@/components/quest/QuestCard'
 import { useCampaignWithWorld } from '@/hooks/queries/useCampaign'
 import { useCampaignSessions } from '@/hooks/queries/useCampaignSessions'
 import { useCampaignLocations } from '@/hooks/queries/useCampaignLocations'
 import { useCampaignNpcs } from '@/hooks/queries/useCampaignNpcs'
 import { useCampaignLore } from '@/hooks/queries/useCampaignLore'
+import { useCampaignQuests } from '@/hooks/queries/useCampaignQuests'
 import { pickGradient, coverGradients } from '@/utils/pickGradient'
 import { sanitizeImageUrl } from '@/utils/sanitizeUrl'
 import { campaignStatusLabel } from '@/lib/statusMaps'
@@ -23,6 +25,7 @@ import type { Session } from '@/types/session.types'
 import type { Location } from '@/types/location.types'
 import type { Lore } from '@/types/lore.types'
 import type { Npc } from '@/types/npc.types'
+import type { Quest } from '@/types/quest.types'
 
 const scrimGradient =
   'linear-gradient(to top, var(--void) 0%, rgba(10,10,22,0.97) 20%, rgba(10,10,22,0.72) 40%, rgba(10,10,22,0.18) 62%, transparent 82%)'
@@ -104,6 +107,7 @@ export default function CampaignDetailPage() {
   })
 
   const { data: npcs, isLoading: isLoadingNpcs } = useCampaignNpcs(id)
+  const { data: quests, isLoading: isLoadingQuests } = useCampaignQuests(id)
 
   const createNpc = useMutation({
     mutationFn: async () => {
@@ -122,6 +126,26 @@ export default function CampaignDetailPage() {
     },
     onError: () => {
       toast.error('NPC aanmaken mislukt')
+    },
+  })
+
+  const createQuest = useMutation({
+    mutationFn: async () => {
+      if (!user) throw new Error('Niet ingelogd')
+      const { data, error } = await supabase
+        .from('quests')
+        .insert({ campaign_id: id!, user_id: user.id, name: 'Nieuwe quest', status: 'draft' })
+        .select()
+        .single()
+      if (error) throw error
+      return data as Quest
+    },
+    onSuccess: (newQuest) => {
+      queryClient.invalidateQueries({ queryKey: queryKeys.campaigns.quests(id!) })
+      navigate(`/quests/${newQuest.id}/edit`, { state: { isNew: true, campaignId: id } })
+    },
+    onError: () => {
+      toast.error('Quest aanmaken mislukt')
     },
   })
 
@@ -516,6 +540,50 @@ export default function CampaignDetailPage() {
                 onClick={() => navigate(`/campaigns/${id}/npcs`)}
               >
                 Alle NPCs bekijken →
+              </button>
+            </div>
+          )}
+        </>
+      )}
+
+      <WorldDetailDivider label={`Quests in deze kroniek${quests && quests.length > 0 ? ` (${quests.length})` : ''}`} />
+
+      {/* Quest list */}
+      {isLoadingQuests ? (
+        <div style={{ display: 'flex', justifyContent: 'center', padding: '40px 0' }} aria-live="polite" aria-label="Quests laden..." aria-busy="true">
+          <Spinner size="md" />
+        </div>
+      ) : (
+        <>
+          <ul
+            style={{
+              display: 'grid',
+              gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))',
+              gap: 'var(--sp-5)',
+              listStyle: 'none',
+              padding: 0,
+              margin: 0,
+            }}
+            role="list"
+            aria-label="Quests in deze kroniek"
+          >
+            {quests?.map((quest) => (
+              <li key={quest.id}>
+                <QuestCard quest={quest} />
+              </li>
+            ))}
+            <li>
+              <ForgeQuestCard onClick={() => createQuest.mutate()} loading={createQuest.isPending} />
+            </li>
+          </ul>
+          {quests && quests.length > 0 && (
+            <div style={{ marginTop: 16, display: 'flex', justifyContent: 'flex-end' }}>
+              <button
+                type="button"
+                className="pangu-btn pangu-btn-ghost pangu-btn-sm"
+                onClick={() => navigate(`/campaigns/${id}/quests`)}
+              >
+                Alle quests bekijken →
               </button>
             </div>
           )}
