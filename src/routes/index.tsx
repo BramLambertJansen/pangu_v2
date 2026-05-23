@@ -36,6 +36,9 @@ const BestiaryEditPage = lazy(() => import('@/pages/BestiaryEditPage'))
 const QuestsPage = lazy(() => import('@/pages/QuestsPage'))
 const QuestDetailPage = lazy(() => import('@/pages/QuestDetailPage'))
 const QuestEditPage = lazy(() => import('@/pages/QuestEditPage'))
+const EncountersPage = lazy(() => import('@/pages/EncountersPage'))
+const EncounterDetailPage = lazy(() => import('@/pages/EncounterDetailPage'))
+const EncounterEditPage = lazy(() => import('@/pages/EncounterEditPage'))
 
 function PageLoader() {
   return (
@@ -278,6 +281,21 @@ export const router = createBrowserRouter([
         path: '/quests/:id/edit',
         loader: requireAuth,
         element: wrap(QuestEditPage),
+      },
+      {
+        path: '/campaigns/:id/encounters',
+        loader: requireAuth,
+        element: wrap(EncountersPage),
+      },
+      {
+        path: '/encounters/:id',
+        loader: requireAuth,
+        element: wrap(EncounterDetailPage),
+      },
+      {
+        path: '/encounters/:id/edit',
+        loader: requireAuth,
+        element: wrap(EncounterEditPage),
       },
       { path: '*', element: <RouteErrorPage /> },
     ],

@@ -539,6 +539,107 @@ export type Database = {
           }
         ]
       }
+      encounters: {
+        Row: {
+          id: string
+          campaign_id: string
+          user_id: string
+          session_id: string | null
+          name: string
+          subtitle: string | null
+          description: string | null
+          notes: string | null
+          status: string
+          environment: string | null
+          difficulty: string | null
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          campaign_id: string
+          user_id: string
+          session_id?: string | null
+          name?: string
+          subtitle?: string | null
+          description?: string | null
+          notes?: string | null
+          status?: string
+          environment?: string | null
+          difficulty?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          campaign_id?: string
+          user_id?: string
+          session_id?: string | null
+          name?: string
+          subtitle?: string | null
+          description?: string | null
+          notes?: string | null
+          status?: string
+          environment?: string | null
+          difficulty?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: 'encounters_campaign_id_fkey'
+            columns: ['campaign_id']
+            referencedRelation: 'campaigns'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'encounters_session_id_fkey'
+            columns: ['session_id']
+            referencedRelation: 'sessions'
+            referencedColumns: ['id']
+          }
+        ]
+      }
+      encounter_monsters: {
+        Row: {
+          id: string
+          encounter_id: string
+          bestiary_id: string
+          user_id: string
+          count: number
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          encounter_id: string
+          bestiary_id: string
+          user_id: string
+          count?: number
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          encounter_id?: string
+          bestiary_id?: string
+          user_id?: string
+          count?: number
+          created_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: 'encounter_monsters_encounter_id_fkey'
+            columns: ['encounter_id']
+            referencedRelation: 'encounters'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'encounter_monsters_bestiary_id_fkey'
+            columns: ['bestiary_id']
+            referencedRelation: 'bestiaries'
+            referencedColumns: ['id']
+          }
+        ]
+      }
       profiles: {
         Row: {
           id: string
