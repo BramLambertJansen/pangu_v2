@@ -49,6 +49,7 @@ export const npcGradients = [
 ]
 
 export function pickGradient(id: string, gradients: string[] = accentGradients): string {
-  const code = (id.charCodeAt(0) ?? 0) + (id.charCodeAt(id.length - 1) ?? 0)
+  // charCodeAt returns NaN for empty strings; NaN ?? 0 is still NaN, so use || 0 instead
+  const code = (id.charCodeAt(0) || 0) + (id.charCodeAt(id.length - 1) || 0)
   return gradients[code % gradients.length]
 }

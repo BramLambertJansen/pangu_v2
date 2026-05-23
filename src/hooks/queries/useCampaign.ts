@@ -24,7 +24,7 @@ export function useCampaign(id: string | undefined) {
 
 export function useCampaignWithWorld(id: string | undefined) {
   return useQuery<CampaignWithWorld>({
-    queryKey: queryKeys.campaigns.detail(id!),
+    queryKey: queryKeys.campaigns.detailWithWorld(id!),
     queryFn: async () => {
       const { data, error } = await supabase
         .from('campaigns')

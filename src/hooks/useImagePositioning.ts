@@ -9,6 +9,7 @@ interface ImagePositioningResult {
   containerRef: React.RefObject<HTMLDivElement | null>
   posString: string
   isDragging: boolean
+  resetPosition: (pos: string | null | undefined) => void
   handlers: {
     onMouseDown: (e: React.MouseEvent) => void
     onTouchStart: (e: React.TouchEvent) => void
@@ -114,10 +115,15 @@ export function useImagePositioning(
     })
   }, [onChange])
 
+  const resetPosition = useCallback((pos: string | null | undefined) => {
+    setImagePos(parsePosition(pos))
+  }, [])
+
   return {
     containerRef,
     posString: serializePosition(imagePos),
     isDragging,
+    resetPosition,
     handlers: { onMouseDown, onTouchStart, onKeyDown },
   }
 }

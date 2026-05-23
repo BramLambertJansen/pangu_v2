@@ -45,7 +45,7 @@ export default function CampaignEditPage() {
 
   const { data: campaign, isLoading } = useCampaign(id)
 
-  const { containerRef, posString: imagePosString, isDragging, handlers: imagePosHandlers } = useImagePositioning(
+  const { containerRef, posString: imagePosString, isDragging, resetPosition, handlers: imagePosHandlers } = useImagePositioning(
     campaign?.header_image_position,
     handlePositionChange,
   )
@@ -123,6 +123,7 @@ export default function CampaignEditPage() {
     } else {
       setForm(campaign!)
       setDirty(false)
+      resetPosition(campaign!.header_image_position)
       navigate(`/campaigns/${id}`)
     }
   }

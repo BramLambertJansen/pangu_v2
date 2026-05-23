@@ -18,14 +18,19 @@ export function useEntityEdit<T>({ entity, isNew }: UseEntityEditOptions<T>) {
     }
   }, [entity])
 
-  function set<K extends keyof T>(key: K, value: T[K] | null) {
+  const set = useCallback(<K extends keyof T>(key: K, value: T[K] | null) => {
     setForm((prev) => ({ ...prev, [key]: value }))
     setDirty(true)
-  }
+  }, [])
 
   const resetForm = useCallback(() => {
-    if (entity) setForm(entity)
-    setDirty(false)
+    // Only reset when we actually have data to restore; if entity is undefined
+    // (e.g. query is still loading after a network blip), leave form and dirty
+    // untouched so the user can still save or retry.
+    if (entity) {
+      setForm(entity)
+      setDirty(false)
+    }
   }, [entity])
 
   return {

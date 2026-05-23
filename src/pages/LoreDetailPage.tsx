@@ -31,7 +31,7 @@ const cardGradients = [
 ]
 
 function pickGradient(id: string): string {
-  const code = (id.charCodeAt(0) ?? 0) + (id.charCodeAt(id.length - 1) ?? 0)
+  const code = (id.charCodeAt(0) || 0) + (id.charCodeAt(id.length - 1) || 0)
   return cardGradients[code % cardGradients.length]
 }
 
@@ -40,7 +40,7 @@ export default function LoreDetailPage() {
   const navigate = useNavigate()
 
   const { data: lore, isLoading } = useQuery<LoreWithCampaign>({
-    queryKey: queryKeys.campaigns.loreDetail(id!),
+    queryKey: queryKeys.campaigns.loreDetailFull(id!),
     queryFn: async () => {
       const { data, error } = await supabase
         .from('lore')

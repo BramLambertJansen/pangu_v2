@@ -17,6 +17,7 @@ import { useCampaignLocations } from '@/hooks/queries/useCampaignLocations'
 import { useCampaignNpcs } from '@/hooks/queries/useCampaignNpcs'
 import { useCampaignLore } from '@/hooks/queries/useCampaignLore'
 import { pickGradient, coverGradients } from '@/utils/pickGradient'
+import { sanitizeImageUrl } from '@/utils/sanitizeUrl'
 import { campaignStatusLabel } from '@/lib/statusMaps'
 import type { Session } from '@/types/session.types'
 import type { Location } from '@/types/location.types'
@@ -149,7 +150,7 @@ export default function CampaignDetailPage() {
   return (
     <div>
       <Breadcrumb items={[
-        { label: 'Wereld', onClick: () => navigate(`/worlds/${campaign.world_id}`) },
+        { label: campaign.worlds?.name ?? 'Wereld', onClick: () => navigate(`/worlds/${campaign.world_id}`) },
         { label: campaign.name },
       ]} />
 
@@ -168,7 +169,7 @@ export default function CampaignDetailPage() {
             aria-hidden="true"
             style={{
               position: 'absolute', inset: 0,
-              backgroundImage: `url(${campaign.header_image})`,
+              backgroundImage: sanitizeImageUrl(campaign.header_image) ? `url(${sanitizeImageUrl(campaign.header_image)})` : undefined,
               backgroundSize: 'cover',
               backgroundPosition: campaign.header_image_position ?? 'center',
             }}
