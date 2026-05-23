@@ -115,6 +115,7 @@ export default function BestiaryEditPage() {
         queryClient.invalidateQueries({ queryKey: queryKeys.worlds.bestiaries(worldId) })
       }
       queryClient.invalidateQueries({ queryKey: queryKeys.worlds.bestiaryDetail(id!) })
+      queryClient.invalidateQueries({ queryKey: queryKeys.worlds.bestiaryDetailFull(id!) })
       setCommitted(true)
       setDirty(false)
     },
@@ -130,6 +131,7 @@ export default function BestiaryEditPage() {
     },
     onSuccess: () => {
       queryClient.removeQueries({ queryKey: queryKeys.worlds.bestiaryDetail(id!) })
+      queryClient.removeQueries({ queryKey: queryKeys.worlds.bestiaryDetailFull(id!) })
       if (worldId) {
         queryClient.invalidateQueries({ queryKey: queryKeys.worlds.bestiaries(worldId) })
         navigate(`/worlds/${worldId}/bestiary`)
