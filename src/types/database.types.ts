@@ -13,6 +13,88 @@ export type ProfileRole = 'user' | 'admin'
 export type Database = {
   public: {
     Tables: {
+      bestiaries: {
+        Row: {
+          id: string
+          world_id: string
+          user_id: string
+          name: string
+          subtitle: string | null
+          creature_type: string | null
+          threat_level: string | null
+          habitat: string | null
+          description: string | null
+          notes: string | null
+          status: string
+          hp: number
+          ac: number
+          speed: number
+          stat_str: number
+          stat_dex: number
+          stat_con: number
+          stat_int: number
+          stat_wis: number
+          stat_cha: number
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          world_id: string
+          user_id: string
+          name?: string
+          subtitle?: string | null
+          creature_type?: string | null
+          threat_level?: string | null
+          habitat?: string | null
+          description?: string | null
+          notes?: string | null
+          status?: string
+          hp?: number
+          ac?: number
+          speed?: number
+          stat_str?: number
+          stat_dex?: number
+          stat_con?: number
+          stat_int?: number
+          stat_wis?: number
+          stat_cha?: number
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          world_id?: string
+          user_id?: string
+          name?: string
+          subtitle?: string | null
+          creature_type?: string | null
+          threat_level?: string | null
+          habitat?: string | null
+          description?: string | null
+          notes?: string | null
+          status?: string
+          hp?: number
+          ac?: number
+          speed?: number
+          stat_str?: number
+          stat_dex?: number
+          stat_con?: number
+          stat_int?: number
+          stat_wis?: number
+          stat_cha?: number
+          created_at?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: 'bestiaries_world_id_fkey'
+            columns: ['world_id']
+            referencedRelation: 'worlds'
+            referencedColumns: ['id']
+          }
+        ]
+      }
       campaigns: {
         Row: {
           id: string

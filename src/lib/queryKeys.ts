@@ -28,6 +28,10 @@ export const queryKeys = {
   worlds: {
     all: ['worlds'] as const,
     detail: (id: string) => ['worlds', id] as const,
+    bestiaries: (worldId: string) => ['worlds', worldId, 'bestiaries'] as const,
+    bestiaryDetail: (id: string) => ['bestiaries', id] as const,
+    // Separate key for the variant that joins worlds (used by BestiaryDetailPage)
+    bestiaryDetailFull: (id: string) => ['bestiaries', id, 'full'] as const,
   },
   sessions: {
     planned: ['sessions', 'planned'] as const,
