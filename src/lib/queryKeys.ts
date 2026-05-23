@@ -31,6 +31,12 @@ export const queryKeys = {
   characters: {
     all: ['characters'] as const,
     detail: (id: string) => ['characters', id] as const,
+    byCampaign: (campaignId: string) => ['characters', 'campaign', campaignId] as const,
+    items: (characterId: string) => ['characters', characterId, 'items'] as const,
+  },
+  items: {
+    byCampaign: (campaignId: string) => ['items', 'campaign', campaignId] as const,
+    detail: (id: string) => ['items', id] as const,
   },
   worlds: {
     all: ['worlds'] as const,

@@ -39,6 +39,8 @@ const QuestEditPage = lazy(() => import('@/pages/QuestEditPage'))
 const EncountersPage = lazy(() => import('@/pages/EncountersPage'))
 const EncounterDetailPage = lazy(() => import('@/pages/EncounterDetailPage'))
 const EncounterEditPage = lazy(() => import('@/pages/EncounterEditPage'))
+const CampaignItemsPage = lazy(() => import('@/pages/CampaignItemsPage'))
+const ItemEditPage = lazy(() => import('@/pages/ItemEditPage'))
 
 function PageLoader() {
   return (
@@ -296,6 +298,16 @@ export const router = createBrowserRouter([
         path: '/encounters/:id/edit',
         loader: requireAuth,
         element: wrap(EncounterEditPage),
+      },
+      {
+        path: '/campaigns/:id/items',
+        loader: requireAuth,
+        element: wrap(CampaignItemsPage),
+      },
+      {
+        path: '/items/:id/edit',
+        loader: requireAuth,
+        element: wrap(ItemEditPage),
       },
       { path: '*', element: <RouteErrorPage /> },
     ],

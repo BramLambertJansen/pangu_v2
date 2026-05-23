@@ -5,10 +5,11 @@ import { toast } from 'sonner'
 import { supabase } from '@/lib/supabase'
 import { queryKeys } from '@/lib/queryKeys'
 import { Spinner } from '@/components/ui/Spinner'
-import { characterStatusLabel, characterStatusColor } from '@/lib/statusMaps'
+import { characterStatusLabel, characterStatusColor, itemRarityLabel, itemRarityColor, itemTypeLabel } from '@/lib/statusMaps'
+import { useCharacterItems } from '@/hooks/queries/useCharacterItems'
 import type { Character } from '@/types/character.types'
 
-type Tab = 'stats' | 'lore'
+type Tab = 'stats' | 'lore' | 'inventaris'
 
 const abilityScores: { key: keyof Character; abbr: string; label: string }[] = [
   { key: 'stat_str', abbr: 'STR', label: 'Sterkte' },
@@ -36,6 +37,27 @@ export default function CharacterDetailPage() {
   const navigate = useNavigate()
   const queryClient = useQueryClient()
   const [activeTab, setActiveTab] = useState<Tab>('stats')
+
+  const { data: items, isLoading: isLoadingItems } = useCharacterItems(id)
+
+  const returnItemToDm = useMutation({
+    mutationFn: async (itemId: string) => {
+      const { error } = await supabase
+        .from('items')
+        .update({ character_id: null, updated_at: new Date().toISOString() })
+        .eq('id', itemId)
+      if (error) throw error
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: queryKeys.characters.items(id!) })
+      // Also invalidate the campaign items cache so DM pool updates
+      queryClient.invalidateQueries({ queryKey: ['items'] })
+      toast.success('Item teruggegeven aan de DM')
+    },
+    onError: () => {
+      toast.error('Teruggeven mislukt')
+    },
+  })
 
   const { data: character, isLoading } = useQuery<Character>({
     queryKey: queryKeys.characters.detail(id!),
@@ -254,20 +276,26 @@ export default function CharacterDetailPage() {
           borderBottom: '1px solid var(--hairline)',
         }}
       >
-        {(['stats', 'lore'] as Tab[]).map((tab) => (
+        {(
+          [
+            { key: 'stats', label: 'Stats' },
+            { key: 'lore', label: 'Lore' },
+            { key: 'inventaris', label: `Inventaris${items && items.length > 0 ? ` (${items.length})` : ''}` },
+          ] as { key: Tab; label: string }[]
+        ).map(({ key, label }) => (
           <button
-            key={tab}
+            key={key}
             type="button"
             role="tab"
-            aria-selected={activeTab === tab}
-            aria-controls={`tabpanel-${tab}`}
-            id={`tab-${tab}`}
-            onClick={() => setActiveTab(tab)}
+            aria-selected={activeTab === key}
+            aria-controls={`tabpanel-${key}`}
+            id={`tab-${key}`}
+            onClick={() => setActiveTab(key)}
             style={{
               background: 'none',
               border: 'none',
-              borderBottom: activeTab === tab ? '2px solid var(--azure)' : '2px solid transparent',
-              color: activeTab === tab ? 'var(--ink)' : 'var(--muted)',
+              borderBottom: activeTab === key ? '2px solid var(--azure)' : '2px solid transparent',
+              color: activeTab === key ? 'var(--ink)' : 'var(--muted)',
               cursor: 'pointer',
               fontSize: 13,
               fontWeight: 700,
@@ -279,7 +307,7 @@ export default function CharacterDetailPage() {
               transition: 'color var(--t-fast)',
             }}
           >
-            {tab === 'stats' ? 'Stats' : 'Lore'}
+            {label}
           </button>
         ))}
       </div>
@@ -465,6 +493,93 @@ export default function CharacterDetailPage() {
                 </div>
               ))}
             </div>
+          </div>
+        )}
+      </div>
+
+      {/* Inventaris tab */}
+      <div
+        id="tabpanel-inventaris"
+        role="tabpanel"
+        aria-labelledby="tab-inventaris"
+        hidden={activeTab !== 'inventaris'}
+      >
+        {isLoadingItems ? (
+          <div style={{ display: 'flex', justifyContent: 'center', padding: '40px 0' }} aria-live="polite" aria-busy="true">
+            <Spinner size="md" />
+          </div>
+        ) : items && items.length > 0 ? (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+            {items.map((item) => (
+              <div
+                key={item.id}
+                className="pangu-surface"
+                style={{ padding: '16px 20px', display: 'flex', alignItems: 'flex-start', gap: 16, flexWrap: 'wrap' }}
+              >
+                {/* Left: item info */}
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap', marginBottom: 4 }}>
+                    <h3 style={{
+                      fontFamily: 'var(--font-display)',
+                      fontSize: 16, fontWeight: 600,
+                      letterSpacing: '0.04em', textTransform: 'uppercase',
+                      color: 'var(--ink)', margin: 0,
+                    }}>
+                      {item.is_magical && <span style={{ color: 'var(--gold)', marginRight: 6 }} aria-hidden="true">✦</span>}
+                      {item.name}
+                      {item.quantity > 1 && (
+                        <span style={{ fontSize: 13, color: 'var(--ink-soft)', fontWeight: 400, marginLeft: 6 }}>×{item.quantity}</span>
+                      )}
+                    </h3>
+                    <span style={{
+                      display: 'inline-flex', alignItems: 'center',
+                      padding: '2px 8px',
+                      borderRadius: 'var(--r-full)',
+                      fontSize: 10, fontWeight: 700,
+                      letterSpacing: '0.12em', textTransform: 'uppercase',
+                      color: itemRarityColor[item.rarity],
+                      border: `1px solid ${itemRarityColor[item.rarity]}55`,
+                      background: `${itemRarityColor[item.rarity]}11`,
+                    }}>
+                      {itemRarityLabel[item.rarity]}
+                    </span>
+                    <span style={{
+                      fontSize: 10, fontWeight: 700,
+                      letterSpacing: '0.12em', textTransform: 'uppercase',
+                      color: 'var(--muted)',
+                    }}>
+                      {itemTypeLabel[item.item_type]}
+                    </span>
+                  </div>
+                  {item.description && (
+                    <p style={{ fontSize: 13, color: 'var(--ink-soft)', margin: 0, lineHeight: 1.65 }}>
+                      {item.description}
+                    </p>
+                  )}
+                </div>
+
+                {/* Right: action */}
+                <button
+                  type="button"
+                  className="pangu-btn pangu-btn-ghost pangu-btn-sm"
+                  onClick={() => returnItemToDm.mutate(item.id)}
+                  disabled={returnItemToDm.isPending}
+                  aria-label={`${item.name} teruggeven aan DM`}
+                  style={{ flexShrink: 0 }}
+                >
+                  Teruggeven aan DM
+                </button>
+              </div>
+            ))}
+          </div>
+        ) : (
+          <div className="pangu-surface" style={{ padding: 28, textAlign: 'center' }}>
+            <p style={{ fontSize: 14, color: 'var(--muted)', fontStyle: 'italic', margin: 0 }}>
+              Geen items in je inventaris.
+            </p>
+            <p style={{ fontSize: 12, color: 'var(--subtle)', margin: '8px 0 0' }}>
+              De DM kan items toewijzen vanuit de kroniek-schatkist.
+            </p>
           </div>
         )}
       </div>

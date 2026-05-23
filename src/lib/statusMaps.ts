@@ -8,6 +8,7 @@ import type { CharacterStatus } from '@/types/character.types'
 import type { BestiaryStatus } from '@/types/bestiary.types'
 import type { QuestStatus } from '@/types/quest.types'
 import type { EncounterStatus } from '@/types/encounter.types'
+import type { ItemRarity, ItemType } from '@/types/item.types'
 
 export const worldStatusLabel: Record<WorldStatus, string> = {
   draft:    'Concept',
@@ -145,4 +146,35 @@ export const encounterStatusColor: Record<EncounterStatus, string> = {
   active:    'var(--violet)',
   completed: 'var(--teal)',
   archived:  'var(--muted)',
+}
+
+export const itemRarityLabel: Record<ItemRarity, string> = {
+  common:     'Gewoon',
+  uncommon:   'Ongewoon',
+  rare:       'Zeldzaam',
+  very_rare:  'Zeer zeldzaam',
+  legendary:  'Legendarisch',
+  artifact:   'Artefact',
+}
+
+export const itemRarityColor: Record<ItemRarity, string> = {
+  common:     'var(--muted)',
+  uncommon:   'var(--teal)',
+  rare:       'var(--azure)',
+  very_rare:  'var(--violet)',
+  legendary:  'var(--gold)',
+  artifact:   'var(--crimson)',
+}
+
+export const itemTypeLabel: Record<ItemType, string> = {
+  weapon:   'Wapen',
+  armor:    'Pantser',
+  potion:   'Drankje',
+  ring:     'Ring',
+  rod:      'Staf',
+  scroll:   'Perkament',
+  staff:    'Stok',
+  wand:     'Toverstok',
+  wondrous: 'Wonderlijk',
+  misc:     'Overig',
 }
