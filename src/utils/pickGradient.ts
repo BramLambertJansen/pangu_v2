@@ -48,6 +48,14 @@ export const npcGradients = [
   'radial-gradient(ellipse 65% 50% at 25% 40%, rgba(155,138,255,0.14) 0%, rgba(220,90,80,0.14) 55%, transparent 80%)',
 ]
 
+// Character: azure-tinted
+export const characterGradients = [
+  'radial-gradient(ellipse 70% 55% at 30% 40%, rgba(56,152,255,0.18) 0%, rgba(30,80,200,0.10) 55%, transparent 80%)',
+  'radial-gradient(ellipse 65% 52% at 28% 42%, rgba(56,152,255,0.14) 0%, rgba(155,138,255,0.12) 55%, transparent 80%)',
+  'radial-gradient(ellipse 65% 52% at 30% 42%, rgba(62,207,178,0.14) 0%, rgba(56,152,255,0.12) 55%, transparent 80%)',
+  'radial-gradient(ellipse 65% 50% at 25% 40%, rgba(245,180,50,0.14) 0%, rgba(56,152,255,0.14) 55%, transparent 80%)',
+]
+
 export function pickGradient(id: string, gradients: string[] = accentGradients): string {
   // charCodeAt returns NaN for empty strings; NaN ?? 0 is still NaN, so use || 0 instead
   const code = (id.charCodeAt(0) || 0) + (id.charCodeAt(id.length - 1) || 0)

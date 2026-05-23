@@ -4,6 +4,7 @@ import type { SessionStatus } from '@/types/session.types'
 import type { LocationStatus } from '@/types/location.types'
 import type { LoreStatus } from '@/types/lore.types'
 import type { NpcStatus } from '@/types/npc.types'
+import type { CharacterStatus } from '@/types/character.types'
 
 export const worldStatusLabel: Record<WorldStatus, string> = {
   draft:    'Concept',
@@ -81,6 +82,20 @@ export const npcStatusLabel: Record<NpcStatus, string> = {
 export const npcStatusColor: Record<NpcStatus, string> = {
   draft:    'var(--gold)',
   active:   'var(--violet)',
+  retired:  'var(--muted)',
+  archived: 'var(--muted)',
+}
+
+export const characterStatusLabel: Record<CharacterStatus, string> = {
+  active:   'Actief',
+  inactive: 'Inactief',
+  retired:  'Teruggetrokken',
+  archived: 'Gearchiveerd',
+}
+
+export const characterStatusColor: Record<CharacterStatus, string> = {
+  active:   'var(--azure)',
+  inactive: 'var(--gold)',
   retired:  'var(--muted)',
   archived: 'var(--muted)',
 }

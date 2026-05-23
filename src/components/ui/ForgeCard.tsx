@@ -7,7 +7,7 @@ export interface ForgeCardProps {
   icon?: ReactNode
   title: string
   subtitle?: string
-  accent?: 'violet' | 'gold' | 'teal' | 'crimson'
+  accent?: 'violet' | 'gold' | 'teal' | 'crimson' | 'azure'
   variant?: 'hero' | 'compact'
   ariaLabel?: string
   className?: string

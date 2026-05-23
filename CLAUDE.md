@@ -299,12 +299,14 @@ Routes zijn gedefinieerd in `src/routes/index.tsx`. Lazy-loading voor alle pagin
 | `/lore/:id/edit` | `LoreEditPage` | `requireAuth` | ✅ |
 | `/campaigns/:id/npcs` | `NpcsPage` | `requireAuth` | ✅ |
 | `/npcs/:id/edit` | `NpcEditPage` | `requireAuth` | ✅ |
+| `/characters` | `CharactersPage` | `requireAuth` | ✅ |
+| `/characters/:id` | `CharacterDetailPage` | `requireAuth` | ✅ |
+| `/characters/:id/edit` | `CharacterEditPage` | `requireAuth` | ✅ |
 
 ### Geplande routes (nog niet geïmplementeerd)
 
 ```
 /campaigns               → overzicht alle campaigns
-/characters/:id          → spelersperspectief
 ```
 
 ### Auth loaders
@@ -450,9 +452,15 @@ npm run type-check   # tsc --noEmit
 - [x] Lore-detailpagina `/lore/:id` — breadcrumbs (wereld · kroniek · lore), header met categorie- en statusbadge, beschrijving, DM-notities
 
 ### Karakter (Spelersperspectief)
-- [ ] Karakterblad bekijken
-- [ ] Inventaris beheren
-- [ ] Karakterstats bijwerken
+- [x] Characters tabel + RLS (`014_characters.sql`) — global per user, full D&D stat block
+- [x] Karakters overzicht `/characters` — grid met CharacterCard + ForgeCharacterCard, zoekfilter
+- [x] Karakter aanmaken — direct aanmaken + redirect naar bewerken
+- [x] Karakter bewerken `/characters/:id/edit` — naam, klasse, subklasse, ras, level, XP, HP, AC, snelheid, initiatief, vaardigheidsbonus, 6 eigenschappen, schatkist, achtergrond, privénotities
+- [x] Karakter-detailpagina `/characters/:id` — Stats/Lore tabs, inline HP ±1, XP-balk, eigenschappen-grid met modifiers, schatkist
+- [x] Karakter verwijderen — met bevestigingsdialoog
+- [x] Navigatie-item "Karakters" in sidebar
+- [ ] Inventaris beheren (v2 — vereist JSONB-tabel)
+- [ ] Vaardigheden & spreuken (v2 — vereist JSONB-tabel)
 
 ### AI-integratie (Lore Forge)
 - [ ] AI-agent configuratie

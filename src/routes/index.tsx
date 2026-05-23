@@ -27,6 +27,9 @@ const NpcDetailPage = lazy(() => import('@/pages/NpcDetailPage'))
 const NpcEditPage = lazy(() => import('@/pages/NpcEditPage'))
 const SessionsPage = lazy(() => import('@/pages/SessionsPage'))
 const SessionEditPage = lazy(() => import('@/pages/SessionEditPage'))
+const CharactersPage = lazy(() => import('@/pages/CharactersPage'))
+const CharacterDetailPage = lazy(() => import('@/pages/CharacterDetailPage'))
+const CharacterEditPage = lazy(() => import('@/pages/CharacterEditPage'))
 
 function PageLoader() {
   return (
@@ -224,6 +227,21 @@ export const router = createBrowserRouter([
         path: '/sessions/:id/edit',
         loader: requireAuth,
         element: wrap(SessionEditPage),
+      },
+      {
+        path: '/characters',
+        loader: requireAuth,
+        element: wrap(CharactersPage),
+      },
+      {
+        path: '/characters/:id',
+        loader: requireAuth,
+        element: wrap(CharacterDetailPage),
+      },
+      {
+        path: '/characters/:id/edit',
+        loader: requireAuth,
+        element: wrap(CharacterEditPage),
       },
       { path: '*', element: <RouteErrorPage /> },
     ],

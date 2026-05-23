@@ -849,6 +849,10 @@ body {
   border-color: var(--crimson);
   background: rgba(220,90,80,0.04);
 }
+.forge-card[data-accent="azure"]:hover {
+  border-color: var(--azure);
+  background: rgba(107,167,255,0.04);
+}
 
 /* ── Status badge ────────────────────────────────────────── */
 
