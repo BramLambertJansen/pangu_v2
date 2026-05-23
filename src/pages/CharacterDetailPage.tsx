@@ -5,7 +5,6 @@ import { toast } from 'sonner'
 import { supabase } from '@/lib/supabase'
 import { queryKeys } from '@/lib/queryKeys'
 import { Spinner } from '@/components/ui/Spinner'
-import { pickGradient, characterGradients } from '@/utils/pickGradient'
 import { characterStatusLabel, characterStatusColor } from '@/lib/statusMaps'
 import type { Character } from '@/types/character.types'
 
