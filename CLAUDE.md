@@ -267,6 +267,7 @@ interface Session { id, campaign_id, user_id, name, subtitle, description, notes
 | 005 | `005_campaigns.sql` | Campaigns tabel + RLS + index op `(world_id, created_at DESC)` |
 | 006 | `006_campaigns_header_image.sql` | Header image + positie voor campaigns |
 | 007 | `007_sessions.sql` | Sessions tabel + RLS + index + `update_sessions_updated_at` trigger |
+| 015 | `015_bestiaries.sql` | Bestiaries tabel + RLS + index op `(world_id, created_at DESC)` + `update_bestiaries_updated_at` trigger |
 
 ---
 
@@ -299,6 +300,9 @@ Routes zijn gedefinieerd in `src/routes/index.tsx`. Lazy-loading voor alle pagin
 | `/lore/:id/edit` | `LoreEditPage` | `requireAuth` | ✅ |
 | `/campaigns/:id/npcs` | `NpcsPage` | `requireAuth` | ✅ |
 | `/npcs/:id/edit` | `NpcEditPage` | `requireAuth` | ✅ |
+| `/worlds/:id/bestiary` | `BestiariesPage` | `requireAuth` | ✅ |
+| `/bestiary/:id` | `BestiaryDetailPage` | `requireAuth` | ✅ |
+| `/bestiary/:id/edit` | `BestiaryEditPage` | `requireAuth` | ✅ |
 | `/characters` | `CharactersPage` | `requireAuth` | ✅ |
 | `/characters/:id` | `CharacterDetailPage` | `requireAuth` | ✅ |
 | `/characters/:id/edit` | `CharacterEditPage` | `requireAuth` | ✅ |
@@ -416,7 +420,7 @@ npm run type-check   # tsc --noEmit
 - [x] Wereld aanmaken — direct aanmaken + redirect naar bewerken
 - [x] Wereld bewerken `/worlds/:id/edit` — naam, subtitle, quote, beschrijving, header image + drag-to-reposition, status
 - [x] Wereld verwijderen — met bevestigingsdialoog
-- [x] Wereld detail `/worlds/:id` — WorldDetailHeader, WorldDetailDivider, CompassRose, campaigns lijst
+- [x] Wereld detail `/worlds/:id` — WorldDetailHeader, WorldDetailDivider, CompassRose, campaigns lijst, bestiarium-link
 - [x] Navigatie-item "Werelden" in sidebar
 
 ### Campaigns (DM)
@@ -450,6 +454,15 @@ npm run type-check   # tsc --noEmit
 - [x] Lore-overzicht per campaign (`/campaigns/:id/lore`)
 - [x] Lore-item aanmaken / bewerken / verwijderen
 - [x] Lore-detailpagina `/lore/:id` — breadcrumbs (wereld · kroniek · lore), header met categorie- en statusbadge, beschrijving, DM-notities
+
+### Wereld — Bestiarium
+- [x] Bestiaries tabel + RLS (`015_bestiaries.sql`) — world-scoped, full D&D stat block (HP, AC, speed, 6 eigenschappen)
+- [x] Bestiarium-overzicht per wereld (`/worlds/:id/bestiary`) — grid met BestiaryCard + ForgeBestiaryCard, lege staat
+- [x] Wezen aanmaken — direct aanmaken + redirect naar bewerken
+- [x] Wezen bewerken `/bestiary/:id/edit` — naam, subtitel, type, dreigingsniveau, leefgebied, status, HP/AC/snelheid, 6 eigenschappen, beschrijving, DM-notities
+- [x] Wezen-detailpagina `/bestiary/:id` — breadcrumbs (wereld · bestiarium), header met type- en dreigingsbadges, stat block met modifiers, beschrijving, DM-notities
+- [x] Wezen verwijderen — met bevestigingsdialoog
+- [x] Bestiarium-link in wereld-detailpagina
 
 ### Karakter (Spelersperspectief)
 - [x] Characters tabel + RLS (`014_characters.sql`) — global per user, full D&D stat block

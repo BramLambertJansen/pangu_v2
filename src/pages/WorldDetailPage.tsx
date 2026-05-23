@@ -176,6 +176,65 @@ export default function WorldDetailPage() {
           </li>
         </ul>
       )}
+
+      <WorldDetailDivider label="Bestiarium" />
+
+      {/* Bestiary entry point */}
+      <Link
+        to={`/worlds/${id}/bestiary`}
+        style={{ textDecoration: 'none' }}
+        aria-label="Bestiarium van deze wereld openen"
+      >
+        <div
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            padding: '20px 24px',
+            borderRadius: 'var(--r-xl)',
+            border: '1px solid var(--hairline)',
+            background: 'var(--surface)',
+            cursor: 'pointer',
+            transition: 'border-color var(--t-fast), background var(--t-fast)',
+          }}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.borderColor = 'rgba(62,207,178,0.35)'
+            e.currentTarget.style.background = 'rgba(62,207,178,0.04)'
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.borderColor = 'var(--hairline)'
+            e.currentTarget.style.background = 'var(--surface)'
+          }}
+        >
+          <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
+            <div style={{
+              width: 40, height: 40,
+              borderRadius: 'var(--r-full)',
+              background: 'rgba(62,207,178,0.10)',
+              border: '1px solid rgba(62,207,178,0.25)',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              flexShrink: 0,
+            }}>
+              <svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--teal)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2z" />
+                <path d="M8 12s1.5 2 4 2 4-2 4-2" />
+                <path d="M9 9h.01M15 9h.01" />
+              </svg>
+            </div>
+            <div>
+              <p style={{ fontSize: 14, fontWeight: 700, color: 'var(--ink)', margin: 0 }}>
+                Bestiarium
+              </p>
+              <p style={{ fontSize: 13, color: 'var(--muted)', margin: '2px 0 0' }}>
+                Catalogiseer de wezens en monsters van {world.name}
+              </p>
+            </div>
+          </div>
+          <svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--muted)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M9 18l6-6-6-6" />
+          </svg>
+        </div>
+      </Link>
     </div>
   )
 }
