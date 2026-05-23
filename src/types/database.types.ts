@@ -389,6 +389,7 @@ export type Database = {
         Row: {
           id: string
           user_id: string
+          campaign_id: string | null
           name: string
           subtitle: string | null
           character_class: string | null
@@ -421,6 +422,7 @@ export type Database = {
         Insert: {
           id?: string
           user_id: string
+          campaign_id?: string | null
           name?: string
           subtitle?: string | null
           character_class?: string | null
@@ -453,6 +455,7 @@ export type Database = {
         Update: {
           id?: string
           user_id?: string
+          campaign_id?: string | null
           name?: string
           subtitle?: string | null
           character_class?: string | null
@@ -482,7 +485,14 @@ export type Database = {
           created_at?: string
           updated_at?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: 'characters_campaign_id_fkey'
+            columns: ['campaign_id']
+            referencedRelation: 'campaigns'
+            referencedColumns: ['id']
+          }
+        ]
       }
       quests: {
         Row: {
@@ -636,6 +646,67 @@ export type Database = {
             foreignKeyName: 'encounter_monsters_bestiary_id_fkey'
             columns: ['bestiary_id']
             referencedRelation: 'bestiaries'
+            referencedColumns: ['id']
+          }
+        ]
+      }
+      items: {
+        Row: {
+          id: string
+          campaign_id: string
+          character_id: string | null
+          name: string
+          description: string | null
+          item_type: string
+          rarity: string
+          is_magical: boolean
+          quantity: number
+          weight: number | null
+          properties: Json
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          campaign_id: string
+          character_id?: string | null
+          name?: string
+          description?: string | null
+          item_type?: string
+          rarity?: string
+          is_magical?: boolean
+          quantity?: number
+          weight?: number | null
+          properties?: Json
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          campaign_id?: string
+          character_id?: string | null
+          name?: string
+          description?: string | null
+          item_type?: string
+          rarity?: string
+          is_magical?: boolean
+          quantity?: number
+          weight?: number | null
+          properties?: Json
+          created_at?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: 'items_campaign_id_fkey'
+            columns: ['campaign_id']
+            referencedRelation: 'campaigns'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'items_character_id_fkey'
+            columns: ['character_id']
+            referencedRelation: 'characters'
             referencedColumns: ['id']
           }
         ]
