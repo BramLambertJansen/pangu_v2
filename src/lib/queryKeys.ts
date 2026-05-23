@@ -20,6 +20,9 @@ export const queryKeys = {
     loreDetailFull: (loreId: string) => ['lore', loreId, 'full'] as const,
     sessions: (campaignId: string) => ['campaigns', campaignId, 'sessions'] as const,
     sessionDetail: (sessionId: string) => ['sessions', sessionId] as const,
+    quests: (id: string) => ['campaigns', id, 'quests'] as const,
+    questDetail: (questId: string) => ['quests', questId] as const,
+    questDetailFull: (questId: string) => ['quests', questId, 'full'] as const,
   },
   characters: {
     all: ['characters'] as const,

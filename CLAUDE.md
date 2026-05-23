@@ -303,6 +303,9 @@ Routes zijn gedefinieerd in `src/routes/index.tsx`. Lazy-loading voor alle pagin
 | `/worlds/:id/bestiary` | `BestiariesPage` | `requireAuth` | ✅ |
 | `/bestiary/:id` | `BestiaryDetailPage` | `requireAuth` | ✅ |
 | `/bestiary/:id/edit` | `BestiaryEditPage` | `requireAuth` | ✅ |
+| `/campaigns/:id/quests` | `QuestsPage` | `requireAuth` | ✅ |
+| `/quests/:id` | `QuestDetailPage` | `requireAuth` | ✅ |
+| `/quests/:id/edit` | `QuestEditPage` | `requireAuth` | ✅ |
 | `/characters` | `CharactersPage` | `requireAuth` | ✅ |
 | `/characters/:id` | `CharacterDetailPage` | `requireAuth` | ✅ |
 | `/characters/:id/edit` | `CharacterEditPage` | `requireAuth` | ✅ |
@@ -474,6 +477,15 @@ npm run type-check   # tsc --noEmit
 - [x] Navigatie-item "Karakters" in sidebar
 - [ ] Inventaris beheren (v2 — vereist JSONB-tabel)
 - [ ] Vaardigheden & spreuken (v2 — vereist JSONB-tabel)
+
+### Wereld — Quests
+- [x] Quests tabel + RLS (`017_quests.sql`) — campaign-scoped, status (draft/active/completed/failed/archived), type, difficulty, reward
+- [x] Quest-overzicht per campaign (`/campaigns/:id/quests`) — grid met QuestCard + ForgeQuestCard, lege staat
+- [x] Quest aanmaken — direct aanmaken + redirect naar bewerken
+- [x] Quest bewerken `/quests/:id/edit` — naam, subtitel, type, moeilijkheidsgraad, status, beloning, beschrijving, DM-notities
+- [x] Quest-detailpagina `/quests/:id` — breadcrumbs (wereld · kroniek · quests), header met type- en statusbadge, beschrijving, beloning, DM-notities
+- [x] Quest verwijderen — met bevestigingsdialoog
+- [x] Quest-preview in kroniek-detailpagina (inline grid + "Alle quests bekijken →")
 
 ### AI-integratie (Lore Forge)
 - [ ] AI-agent configuratie

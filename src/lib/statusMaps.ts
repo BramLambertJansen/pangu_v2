@@ -6,6 +6,7 @@ import type { LoreStatus } from '@/types/lore.types'
 import type { NpcStatus } from '@/types/npc.types'
 import type { CharacterStatus } from '@/types/character.types'
 import type { BestiaryStatus } from '@/types/bestiary.types'
+import type { QuestStatus } from '@/types/quest.types'
 
 export const worldStatusLabel: Record<WorldStatus, string> = {
   draft:    'Concept',
@@ -111,4 +112,20 @@ export const bestiaryStatusColor: Record<BestiaryStatus, string> = {
   draft:    'var(--gold)',
   active:   'var(--teal)',
   archived: 'var(--muted)',
+}
+
+export const questStatusLabel: Record<QuestStatus, string> = {
+  draft:     'Concept',
+  active:    'Actief',
+  completed: 'Voltooid',
+  failed:    'Mislukt',
+  archived:  'Gearchiveerd',
+}
+
+export const questStatusColor: Record<QuestStatus, string> = {
+  draft:     'var(--gold)',
+  active:    'var(--violet)',
+  completed: 'var(--teal)',
+  failed:    'var(--crimson)',
+  archived:  'var(--muted)',
 }
