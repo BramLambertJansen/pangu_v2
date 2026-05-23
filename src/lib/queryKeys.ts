@@ -23,6 +23,10 @@ export const queryKeys = {
     quests: (id: string) => ['campaigns', id, 'quests'] as const,
     questDetail: (questId: string) => ['quests', questId] as const,
     questDetailFull: (questId: string) => ['quests', questId, 'full'] as const,
+    encounters: (id: string) => ['campaigns', id, 'encounters'] as const,
+    encounterDetail: (encounterId: string) => ['encounters', encounterId] as const,
+    encounterDetailFull: (encounterId: string) => ['encounters', encounterId, 'full'] as const,
+    encounterMonsters: (encounterId: string) => ['encounters', encounterId, 'monsters'] as const,
   },
   characters: {
     all: ['characters'] as const,

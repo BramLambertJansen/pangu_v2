@@ -268,6 +268,7 @@ interface Session { id, campaign_id, user_id, name, subtitle, description, notes
 | 006 | `006_campaigns_header_image.sql` | Header image + positie voor campaigns |
 | 007 | `007_sessions.sql` | Sessions tabel + RLS + index + `update_sessions_updated_at` trigger |
 | 015 | `015_bestiaries.sql` | Bestiaries tabel + RLS + index op `(world_id, created_at DESC)` + `update_bestiaries_updated_at` trigger |
+| 018 | `018_encounters.sql` | Encounters tabel + RLS + index + `update_encounters_updated_at` trigger; encounter_monsters junction tabel + RLS + index |
 
 ---
 
@@ -306,6 +307,9 @@ Routes zijn gedefinieerd in `src/routes/index.tsx`. Lazy-loading voor alle pagin
 | `/campaigns/:id/quests` | `QuestsPage` | `requireAuth` | ✅ |
 | `/quests/:id` | `QuestDetailPage` | `requireAuth` | ✅ |
 | `/quests/:id/edit` | `QuestEditPage` | `requireAuth` | ✅ |
+| `/campaigns/:id/encounters` | `EncountersPage` | `requireAuth` | ✅ |
+| `/encounters/:id` | `EncounterDetailPage` | `requireAuth` | ✅ |
+| `/encounters/:id/edit` | `EncounterEditPage` | `requireAuth` | ✅ |
 | `/characters` | `CharactersPage` | `requireAuth` | ✅ |
 | `/characters/:id` | `CharacterDetailPage` | `requireAuth` | ✅ |
 | `/characters/:id/edit` | `CharacterEditPage` | `requireAuth` | ✅ |
@@ -486,6 +490,17 @@ npm run type-check   # tsc --noEmit
 - [x] Quest-detailpagina `/quests/:id` — breadcrumbs (wereld · kroniek · quests), header met type- en statusbadge, beschrijving, beloning, DM-notities
 - [x] Quest verwijderen — met bevestigingsdialoog
 - [x] Quest-preview in kroniek-detailpagina (inline grid + "Alle quests bekijken →")
+
+### Gevechten — Encounter Builder
+- [x] Encounters tabel + RLS + `session_id` FK (optionele koppeling aan sessie) (`018_encounters.sql`)
+- [x] `encounter_monsters` junction tabel + RLS (bestiary creatures met aantallen)
+- [x] Gevechten-overzicht per kroniek (`/campaigns/:id/encounters`) — grid met EncounterCard + ForgeEncounterCard
+- [x] Gevecht aanmaken — direct aanmaken + redirect naar bewerken
+- [x] Gevecht bewerken `/encounters/:id/edit` — naam, subtitel, omgeving, moeilijkheidsgraad, status, sessie-koppeling, beschrijving, DM-notities
+- [x] Monster builder in edit pagina — inline picker met zoekveld, alle wezens uit wereld-bestiarium, aantalcontrols (+ / −), verwijderknop; save via full-replace strategie
+- [x] Gevecht-detailpagina `/encounters/:id` — breadcrumbs, header met moeilijkheid- en omgevingsbadges, monsters-tabel met stats, beschrijving, DM-notities
+- [x] Gevecht verwijderen — met bevestigingsdialoog (cascade verwijdert ook encounter_monsters)
+- [x] Gevechten-preview in kroniek-detailpagina (inline grid max 3 + "Alle gevechten bekijken →")
 
 ### AI-integratie (Lore Forge)
 - [ ] AI-agent configuratie

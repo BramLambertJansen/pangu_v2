@@ -12,12 +12,14 @@ import { LocationCard, ForgeLocationCard } from '@/components/location/LocationC
 import { LoreCard, ForgeLoreCard } from '@/components/lore/LoreCard'
 import { NpcCard, ForgeNpcCard } from '@/components/npc/NpcCard'
 import { QuestCard, ForgeQuestCard } from '@/components/quest/QuestCard'
+import { EncounterCard, ForgeEncounterCard } from '@/components/encounter/EncounterCard'
 import { useCampaignWithWorld } from '@/hooks/queries/useCampaign'
 import { useCampaignSessions } from '@/hooks/queries/useCampaignSessions'
 import { useCampaignLocations } from '@/hooks/queries/useCampaignLocations'
 import { useCampaignNpcs } from '@/hooks/queries/useCampaignNpcs'
 import { useCampaignLore } from '@/hooks/queries/useCampaignLore'
 import { useCampaignQuests } from '@/hooks/queries/useCampaignQuests'
+import { useCampaignEncounters } from '@/hooks/queries/useCampaignEncounters'
 import { pickGradient, coverGradients } from '@/utils/pickGradient'
 import { sanitizeImageUrl } from '@/utils/sanitizeUrl'
 import { campaignStatusLabel } from '@/lib/statusMaps'
@@ -26,6 +28,7 @@ import type { Location } from '@/types/location.types'
 import type { Lore } from '@/types/lore.types'
 import type { Npc } from '@/types/npc.types'
 import type { Quest } from '@/types/quest.types'
+import type { Encounter } from '@/types/encounter.types'
 
 const scrimGradient =
   'linear-gradient(to top, var(--void) 0%, rgba(10,10,22,0.97) 20%, rgba(10,10,22,0.72) 40%, rgba(10,10,22,0.18) 62%, transparent 82%)'
@@ -108,6 +111,7 @@ export default function CampaignDetailPage() {
 
   const { data: npcs, isLoading: isLoadingNpcs } = useCampaignNpcs(id)
   const { data: quests, isLoading: isLoadingQuests } = useCampaignQuests(id)
+  const { data: encounters, isLoading: isLoadingEncounters } = useCampaignEncounters(id)
 
   const createNpc = useMutation({
     mutationFn: async () => {
@@ -146,6 +150,26 @@ export default function CampaignDetailPage() {
     },
     onError: () => {
       toast.error('Quest aanmaken mislukt')
+    },
+  })
+
+  const createEncounter = useMutation({
+    mutationFn: async () => {
+      if (!user) throw new Error('Niet ingelogd')
+      const { data, error } = await supabase
+        .from('encounters')
+        .insert({ campaign_id: id!, user_id: user.id, name: 'Nieuw gevecht', status: 'draft' })
+        .select()
+        .single()
+      if (error) throw error
+      return data as Encounter
+    },
+    onSuccess: (newEncounter) => {
+      queryClient.invalidateQueries({ queryKey: queryKeys.campaigns.encounters(id!) })
+      navigate(`/encounters/${newEncounter.id}/edit`, { state: { isNew: true, campaignId: id } })
+    },
+    onError: () => {
+      toast.error('Gevecht aanmaken mislukt')
     },
   })
 
@@ -584,6 +608,50 @@ export default function CampaignDetailPage() {
                 onClick={() => navigate(`/campaigns/${id}/quests`)}
               >
                 Alle quests bekijken →
+              </button>
+            </div>
+          )}
+        </>
+      )}
+
+      <WorldDetailDivider label={`Gevechten in deze kroniek${encounters && encounters.length > 0 ? ` (${encounters.length})` : ''}`} />
+
+      {/* Encounter list */}
+      {isLoadingEncounters ? (
+        <div style={{ display: 'flex', justifyContent: 'center', padding: '40px 0' }} aria-live="polite" aria-label="Gevechten laden..." aria-busy="true">
+          <Spinner size="md" />
+        </div>
+      ) : (
+        <>
+          <ul
+            style={{
+              display: 'grid',
+              gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))',
+              gap: 'var(--sp-5)',
+              listStyle: 'none',
+              padding: 0,
+              margin: 0,
+            }}
+            role="list"
+            aria-label="Gevechten in deze kroniek"
+          >
+            {encounters?.slice(0, 3).map((encounter) => (
+              <li key={encounter.id}>
+                <EncounterCard encounter={encounter} />
+              </li>
+            ))}
+            <li>
+              <ForgeEncounterCard onClick={() => createEncounter.mutate()} loading={createEncounter.isPending} />
+            </li>
+          </ul>
+          {encounters && encounters.length > 0 && (
+            <div style={{ marginTop: 16, display: 'flex', justifyContent: 'flex-end' }}>
+              <button
+                type="button"
+                className="pangu-btn pangu-btn-ghost pangu-btn-sm"
+                onClick={() => navigate(`/campaigns/${id}/encounters`)}
+              >
+                Alle gevechten bekijken →
               </button>
             </div>
           )}

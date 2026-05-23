@@ -7,6 +7,7 @@ import type { NpcStatus } from '@/types/npc.types'
 import type { CharacterStatus } from '@/types/character.types'
 import type { BestiaryStatus } from '@/types/bestiary.types'
 import type { QuestStatus } from '@/types/quest.types'
+import type { EncounterStatus } from '@/types/encounter.types'
 
 export const worldStatusLabel: Record<WorldStatus, string> = {
   draft:    'Concept',
@@ -127,5 +128,21 @@ export const questStatusColor: Record<QuestStatus, string> = {
   active:    'var(--violet)',
   completed: 'var(--teal)',
   failed:    'var(--crimson)',
+  archived:  'var(--muted)',
+}
+
+export const encounterStatusLabel: Record<EncounterStatus, string> = {
+  draft:     'Concept',
+  ready:     'Klaar',
+  active:    'Actief',
+  completed: 'Voltooid',
+  archived:  'Gearchiveerd',
+}
+
+export const encounterStatusColor: Record<EncounterStatus, string> = {
+  draft:     'var(--gold)',
+  ready:     'var(--azure)',
+  active:    'var(--violet)',
+  completed: 'var(--teal)',
   archived:  'var(--muted)',
 }
