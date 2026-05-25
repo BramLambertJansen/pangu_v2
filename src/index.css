@@ -555,19 +555,45 @@ body {
   display: flex;
   align-items: center;
   gap: 9px;
+  text-decoration: none;
+  outline: none;
+}
+
+.mobile-topbar-brand:focus-visible {
+  outline: 2px solid var(--violet);
+  outline-offset: 3px;
+  border-radius: var(--r-sm);
 }
 
 .mobile-topbar-wordmark {
   font-family: var(--font-display);
-  font-size: 14px;
+  font-size: 13px;
   font-weight: 600;
   letter-spacing: 0.22em;
   color: var(--ink);
 }
 
-.mobile-topbar-avatar {
+.mobile-topbar-avatar-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  border-radius: var(--r-full);
   flex-shrink: 0;
-  pointer-events: none;
+  transition: opacity var(--t-fast);
+}
+
+.mobile-topbar-avatar-btn:hover {
+  opacity: 0.8;
+}
+
+.mobile-topbar-avatar-btn:focus-visible {
+  outline: 2px solid var(--violet);
+  outline-offset: 2px;
 }
 
 /* ── Mobile responsive ────────────────────────────────────── */
@@ -644,7 +670,7 @@ body {
     align-items: center;
     justify-content: space-between;
     padding: 0 var(--sp-3);
-    height: 56px;
+    height: 48px;
     position: fixed;
     top: 0;
     left: 0;
@@ -659,6 +685,11 @@ body {
     -webkit-backdrop-filter: blur(16px) saturate(1.6);
     border-bottom: 1px solid var(--hairline);
     box-shadow: 0 1px 0 rgba(155, 138, 255, 0.06);
+    transition: transform var(--t-base) var(--ease-out);
+  }
+
+  .mobile-topbar--hidden {
+    transform: translateY(-100%);
   }
 
   .sidebar-close-btn {
@@ -670,8 +701,8 @@ body {
   }
 
   .main-content {
-    /* 56px clears the fixed topbar; sides 16px; bottom respects iOS home indicator */
-    padding: calc(56px + var(--sp-4)) var(--sp-4) max(var(--sp-16), env(safe-area-inset-bottom, var(--sp-16))) !important;
+    /* 48px clears the fixed topbar; sides 16px; bottom respects iOS home indicator */
+    padding: calc(48px + var(--sp-4)) var(--sp-4) max(var(--sp-16), env(safe-area-inset-bottom, var(--sp-16))) !important;
   }
 
   .settings-form-grid {

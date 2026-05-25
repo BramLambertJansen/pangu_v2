@@ -1,10 +1,10 @@
-import { Outlet, NavLink, useNavigate } from 'react-router-dom'
+import { Outlet, NavLink, Link, useNavigate } from 'react-router-dom'
 import { useUIStore } from '@/stores/ui.store'
 import { useAuthStore } from '@/stores/auth.store'
 import { supabase } from '@/lib/supabase'
 import { queryClient } from '@/lib/queryClient'
 import { toast } from 'sonner'
-import { useMemo, useState } from 'react'
+import { useMemo, useState, useEffect, useRef } from 'react'
 import { Avatar } from '@/components/ui/Avatar'
 
 interface Star {
@@ -137,6 +137,26 @@ export default function AppLayout() {
     toast.success('Uitgelogd')
     navigate('/login', { replace: true })
   }
+
+  const topbarRef = useRef<HTMLElement>(null)
+  const mainRef = useRef<HTMLElement>(null)
+  const lastScrollY = useRef(0)
+
+  useEffect(() => {
+    const main = mainRef.current
+    if (!main) return
+
+    const onScroll = () => {
+      const y = main.scrollTop
+      // Hide when scrolling down past 80px; reveal on any upward scroll
+      const hide = y > lastScrollY.current && y > 80
+      topbarRef.current?.classList.toggle('mobile-topbar--hidden', hide)
+      lastScrollY.current = y
+    }
+
+    main.addEventListener('scroll', onScroll, { passive: true })
+    return () => main.removeEventListener('scroll', onScroll)
+  }, [])
 
   const iconOnly = `nav-item nav-item--icon-only`
   const sidebarWidth = sidebarCollapsed ? '56px' : '240px'
@@ -303,12 +323,13 @@ export default function AppLayout() {
 
       {/* ── Main content ── */}
       <main
+        ref={mainRef}
         id="main-content"
         className="main-content flex-1 overflow-auto"
         style={{ position: 'relative', zIndex: 10 }}
       >
         {/* ── Mobile top bar (fixed, hidden on desktop) ── */}
-        <header className="mobile-topbar" aria-label="Mobiele navigatiebalk">
+        <header ref={topbarRef} className="mobile-topbar" aria-label="Mobiele navigatiebalk">
           <button
             onClick={() => setMobileOpen(true)}
             className="mobile-topbar-btn"
@@ -323,7 +344,7 @@ export default function AppLayout() {
             </svg>
           </button>
 
-          <div className="mobile-topbar-brand" aria-hidden="true">
+          <Link to="/dashboard" className="mobile-topbar-brand" aria-label="Naar dashboard">
             <svg width="20" height="20" viewBox="0 0 28 28" fill="none" aria-hidden="true">
               <circle cx="14" cy="14" r="12" stroke="#f5c842" strokeWidth="1" strokeOpacity="0.6" />
               <circle cx="14" cy="14" r="8" stroke="#9b8aff" strokeWidth="1.5" />
@@ -331,16 +352,20 @@ export default function AppLayout() {
               <circle cx="14" cy="5" r="1.5" fill="#f5c842" />
               <circle cx="22" cy="18" r="1" fill="#9b8aff" opacity="0.7" />
             </svg>
-            <span className="mobile-topbar-wordmark">PANGU</span>
-          </div>
+            <span className="mobile-topbar-wordmark" aria-hidden="true">PANGU</span>
+          </Link>
 
-          <Avatar
-            fallback={(profile?.display_name ?? '?').slice(0, 2).toUpperCase()}
-            alt={profile?.display_name ?? 'Gebruiker'}
-            size="sm"
-            className="mobile-topbar-avatar"
-            aria-hidden="true"
-          />
+          <button
+            onClick={() => navigate('/settings')}
+            className="mobile-topbar-avatar-btn"
+            aria-label="Naar instellingen"
+          >
+            <Avatar
+              fallback={(profile?.display_name ?? '?').slice(0, 2).toUpperCase()}
+              alt={profile?.display_name ?? 'Gebruiker'}
+              size="sm"
+            />
+          </button>
         </header>
         <Outlet />
       </main>
