@@ -416,6 +416,7 @@ export type Database = {
           description: string | null
           notes: string | null
           status: string
+          proficient_skills: string[]
           created_at: string
           updated_at: string
         }
@@ -449,6 +450,7 @@ export type Database = {
           description?: string | null
           notes?: string | null
           status?: string
+          proficient_skills?: string[]
           created_at?: string
           updated_at?: string
         }
@@ -482,6 +484,7 @@ export type Database = {
           description?: string | null
           notes?: string | null
           status?: string
+          proficient_skills?: string[]
           created_at?: string
           updated_at?: string
         }
