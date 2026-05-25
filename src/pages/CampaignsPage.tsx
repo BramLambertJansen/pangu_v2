@@ -10,6 +10,7 @@ import { EmptyState } from '@/components/ui/EmptyState'
 import { CampaignCard, ForgeCampaignCard } from '@/components/campaign/CampaignCard'
 import { WorldDetailDivider } from '@/components/world/WorldDetailDivider'
 import type { Campaign } from '@/types/campaign.types'
+import type { World } from '@/types/world.types'
 
 interface CampaignWithWorld extends Campaign {
   worlds: { id: string; name: string }
@@ -21,17 +22,18 @@ interface WorldGroup {
   campaigns: CampaignWithWorld[]
 }
 
-function groupByWorld(campaigns: CampaignWithWorld[]): WorldGroup[] {
-  const map = new Map<string, WorldGroup>()
-  for (const campaign of campaigns) {
-    const worldId = campaign.world_id
-    const worldName = campaign.worlds?.name ?? 'Onbekende wereld'
-    if (!map.has(worldId)) {
-      map.set(worldId, { worldId, worldName, campaigns: [] })
-    }
-    map.get(worldId)!.campaigns.push(campaign)
+function buildWorldGroups(worlds: World[], campaigns: CampaignWithWorld[]): WorldGroup[] {
+  const campaignsByWorld = new Map<string, CampaignWithWorld[]>()
+  for (const c of campaigns) {
+    const arr = campaignsByWorld.get(c.world_id) ?? []
+    arr.push(c)
+    campaignsByWorld.set(c.world_id, arr)
   }
-  return Array.from(map.values())
+  return worlds.map(w => ({
+    worldId: w.id,
+    worldName: w.name ?? 'Naamloze wereld',
+    campaigns: campaignsByWorld.get(w.id) ?? [],
+  }))
 }
 
 export default function CampaignsPage() {
@@ -40,7 +42,20 @@ export default function CampaignsPage() {
   const user = useAuthStore(s => s.user)
   const [creatingForWorldId, setCreatingForWorldId] = useState<string | null>(null)
 
-  const { data: campaigns, isLoading } = useQuery<CampaignWithWorld[]>({
+  const { data: worlds, isLoading: worldsLoading } = useQuery<World[]>({
+    queryKey: queryKeys.worlds.all,
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('worlds')
+        .select('*')
+        .order('created_at', { ascending: false })
+      if (error) throw error
+      return data as World[]
+    },
+    staleTime: 1000 * 60,
+  })
+
+  const { data: campaigns, isLoading: campaignsLoading } = useQuery<CampaignWithWorld[]>({
     queryKey: queryKeys.campaigns.all,
     queryFn: async () => {
       const { data, error } = await supabase
@@ -52,6 +67,8 @@ export default function CampaignsPage() {
     },
     staleTime: 1000 * 60,
   })
+
+  const isLoading = worldsLoading || campaignsLoading
 
   const createCampaign = useMutation({
     mutationFn: async (worldId: string) => {
@@ -84,8 +101,9 @@ export default function CampaignsPage() {
     })
   }
 
-  const worldGroups = campaigns ? groupByWorld(campaigns) : []
+  const worldGroups = worlds && campaigns ? buildWorldGroups(worlds, campaigns) : []
   const totalCount = campaigns?.length ?? 0
+  const hasNoWorlds = !isLoading && (!worlds || worlds.length === 0)
 
   return (
     <div>
@@ -111,16 +129,16 @@ export default function CampaignsPage() {
       {/* Content */}
       {isLoading ? (
         <ul
-          style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: 'var(--sp-5)', listStyle: 'none', padding: 0, margin: 0 }}
+          style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: 'var(--sp-5)', listStyle: 'none', padding: 0, margin: 0 }}
           aria-label="Kronieken laden..."
           aria-live="polite"
         >
           <EntityCardSkeleton count={4} />
         </ul>
-      ) : worldGroups.length === 0 ? (
+      ) : hasNoWorlds ? (
         <EmptyState
-          title="Nog geen kronieken"
-          description="Begin met een wereld en voeg daar een kroniek aan toe om je avonturen bij te houden."
+          title="Nog geen werelden"
+          description="Een kroniek leeft binnen een wereld. Maak eerst een wereld aan om avonturen te beginnen."
           action={
             <button
               type="button"
@@ -134,7 +152,7 @@ export default function CampaignsPage() {
       ) : (
         <>
           {totalCount > 0 && (
-            <div style={{ display: 'flex', alignItems: 'center', gap: 0, marginBottom: 8 }} aria-hidden="true">
+            <div style={{ display: 'flex', alignItems: 'center', gap: 0, marginBottom: 32 }} aria-hidden="true">
               <div style={{ flex: 1, height: 1, background: 'linear-gradient(to right, transparent, var(--hairline-strong))' }} />
               <div style={{
                 display: 'inline-flex', alignItems: 'center', gap: 10,
@@ -158,12 +176,22 @@ export default function CampaignsPage() {
           )}
 
           {worldGroups.map(({ worldId, worldName, campaigns: worldCampaigns }) => (
-            <section key={worldId} aria-labelledby={`world-${worldId}`}>
+            <section key={worldId} aria-label={worldName}>
               <WorldDetailDivider label={worldName} />
+              <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: -28, marginBottom: 16 }}>
+                <button
+                  type="button"
+                  className="pangu-btn pangu-btn-ghost"
+                  style={{ fontSize: 12, padding: '4px 12px' }}
+                  onClick={() => navigate(`/worlds/${worldId}`)}
+                >
+                  Naar wereld →
+                </button>
+              </div>
               <ul
                 style={{
                   display: 'grid',
-                  gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))',
+                  gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))',
                   gap: 'var(--sp-4)',
                   listStyle: 'none',
                   padding: 0,
