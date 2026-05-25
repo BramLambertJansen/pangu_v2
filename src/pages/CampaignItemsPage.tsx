@@ -97,13 +97,9 @@ export default function CampaignItemsPage() {
         <div
           role="tablist"
           aria-label="Items filteren"
-          style={{
-            display: 'flex',
-            gap: 2,
-            marginBottom: 24,
-            borderBottom: '1px solid var(--hairline)',
-            overflowX: 'auto',
-          }}
+          data-accent="gold"
+          className="pangu-tab-bar--line"
+          style={{ marginBottom: 24 }}
         >
           {(
             [
@@ -121,22 +117,7 @@ export default function CampaignItemsPage() {
               role="tab"
               aria-selected={activeTab === key}
               onClick={() => setActiveTab(key)}
-              style={{
-                background: 'none',
-                border: 'none',
-                borderBottom: activeTab === key ? '2px solid var(--gold)' : '2px solid transparent',
-                color: activeTab === key ? 'var(--ink)' : 'var(--muted)',
-                cursor: 'pointer',
-                fontSize: 13,
-                fontWeight: 700,
-                letterSpacing: '0.1em',
-                textTransform: 'uppercase',
-                fontFamily: 'var(--font-body)',
-                padding: '10px 14px',
-                marginBottom: -1,
-                whiteSpace: 'nowrap',
-                transition: 'color var(--t-fast)',
-              }}
+              className="pangu-tab--line"
             >
               {label}
             </button>

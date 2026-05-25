@@ -671,7 +671,7 @@ export default function SettingsPage() {
       </header>
 
       {/* Tab bar */}
-      <nav aria-label="Instellingen tabbladen" style={{ maxWidth: 400, marginBottom: 32 }}>
+      <nav aria-label="Instellingen tabbladen" style={{ marginBottom: 32 }}>
         <div role="tablist" className="pangu-tab-bar">
           {tabs.map((tab) => (
             <button

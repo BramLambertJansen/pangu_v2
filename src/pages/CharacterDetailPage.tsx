@@ -296,12 +296,8 @@ export default function CharacterDetailPage() {
       <div
         role="tablist"
         aria-label="Karakter tabs"
-        style={{
-          display: 'flex',
-          gap: 2,
-          marginBottom: 20,
-          borderBottom: '1px solid var(--hairline)',
-        }}
+        className="pangu-tab-bar--line"
+        style={{ marginBottom: 20 }}
       >
         {(
           [
@@ -319,21 +315,7 @@ export default function CharacterDetailPage() {
             aria-controls={`tabpanel-${key}`}
             id={`tab-${key}`}
             onClick={() => setActiveTab(key)}
-            style={{
-              background: 'none',
-              border: 'none',
-              borderBottom: activeTab === key ? '2px solid var(--azure)' : '2px solid transparent',
-              color: activeTab === key ? 'var(--ink)' : 'var(--muted)',
-              cursor: 'pointer',
-              fontSize: 13,
-              fontWeight: 700,
-              letterSpacing: '0.1em',
-              textTransform: 'uppercase',
-              fontFamily: 'var(--font-body)',
-              padding: '10px 16px',
-              marginBottom: -1,
-              transition: 'color var(--t-fast)',
-            }}
+            className="pangu-tab--line"
           >
             {label}
           </button>
