@@ -30,7 +30,7 @@ export const SessionCard = memo(function SessionCard({ session }: Props) {
     <EntityCard
       variant="compact"
       ariaLabel={`Sessie: ${session.name}`}
-      onClick={() => navigate(`/sessions/${session.id}/edit`)}
+      onClick={() => navigate(`/sessions/${session.id}`)}
     >
       {/* Gradient accent */}
       <div

@@ -79,6 +79,7 @@ src/
 │   ├── DashboardPage.tsx
 │   ├── LoginPage.tsx
 │   ├── RegisterPage.tsx      # ⚠️ STUB
+│   ├── SessionDetailPage.tsx
 │   ├── SessionEditPage.tsx
 │   ├── SessionsPage.tsx
 │   ├── SettingsPage.tsx
@@ -292,6 +293,7 @@ Routes zijn gedefinieerd in `src/routes/index.tsx`. Lazy-loading voor alle pagin
 | `/campaigns/:id` | `CampaignDetailPage` | `requireAuth` | ✅ |
 | `/campaigns/:id/edit` | `CampaignEditPage` | `requireAuth` | ✅ |
 | `/campaigns/:id/sessions` | `SessionsPage` | `requireAuth` | ✅ |
+| `/sessions/:id` | `SessionDetailPage` | `requireAuth` | ✅ |
 | `/sessions/:id/edit` | `SessionEditPage` | `requireAuth` | ✅ |
 | `/campaigns/:id/locations` | `LocationsPage` | `requireAuth` | ✅ |
 | `/locations/:id` | `LocationDetailPage` | `requireAuth` | ✅ |
@@ -442,6 +444,7 @@ npm run type-check   # tsc --noEmit
 - [x] Sessie-overzicht per campaign `/campaigns/:id/sessions` — grid met SessionCard + ForgeSessionCard
 - [x] Sessie aanmaken — direct aanmaken + redirect naar bewerken
 - [x] Sessie bewerken `/sessions/:id/edit` — naam, subtitle, sessienummer, datum, status (planned/active/completed/archived), beschrijving, DM-notities
+- [x] Sessie-detailpagina `/sessions/:id` — breadcrumbs (wereld · kroniek · sessies), header met sessienummer-, datum- en statusbadge, beschrijving, DM-notities
 - [x] Sessie verwijderen — met bevestigingsdialoog
 
 ### Wereld — Locaties
