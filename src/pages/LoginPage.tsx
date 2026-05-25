@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import { toast } from 'sonner'
 import { supabase } from '@/lib/supabase'
 import { useAuthStore } from '@/stores/auth.store'
@@ -85,6 +85,17 @@ export default function LoginPage() {
           Inloggen
         </Button>
       </form>
+
+      <p className="mt-6 text-center text-sm" style={{ color: 'var(--ink-soft)' }}>
+        Nog geen account?{' '}
+        <Link
+          to="/register"
+          className="font-medium underline-offset-4 hover:underline"
+          style={{ color: 'var(--violet)' }}
+        >
+          Account aanmaken
+        </Link>
+      </p>
     </section>
   )
 }
