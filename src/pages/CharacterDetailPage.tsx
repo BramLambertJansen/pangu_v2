@@ -9,7 +9,34 @@ import { characterStatusLabel, characterStatusColor, itemRarityLabel, itemRarity
 import { useCharacterItems } from '@/hooks/queries/useCharacterItems'
 import type { Character } from '@/types/character.types'
 
-type Tab = 'stats' | 'lore' | 'inventaris'
+type Tab = 'stats' | 'lore' | 'inventaris' | 'vaardigheden'
+
+interface Skill {
+  name: string
+  ability: 'stat_str' | 'stat_dex' | 'stat_con' | 'stat_int' | 'stat_wis' | 'stat_cha'
+  abbr: 'STR' | 'DEX' | 'CON' | 'INT' | 'WIS' | 'CHA'
+}
+
+const SKILLS: Skill[] = [
+  { name: 'Atletiek',          ability: 'stat_str', abbr: 'STR' },
+  { name: 'Acrobatiek',        ability: 'stat_dex', abbr: 'DEX' },
+  { name: 'Vingervlugheid',    ability: 'stat_dex', abbr: 'DEX' },
+  { name: 'Sluipen',           ability: 'stat_dex', abbr: 'DEX' },
+  { name: 'Magie',             ability: 'stat_int', abbr: 'INT' },
+  { name: 'Geschiedenis',      ability: 'stat_int', abbr: 'INT' },
+  { name: 'Onderzoek',         ability: 'stat_int', abbr: 'INT' },
+  { name: 'Natuur',            ability: 'stat_int', abbr: 'INT' },
+  { name: 'Religie',           ability: 'stat_int', abbr: 'INT' },
+  { name: 'Dierenverzorging',  ability: 'stat_wis', abbr: 'WIS' },
+  { name: 'Inzicht',           ability: 'stat_wis', abbr: 'WIS' },
+  { name: 'Geneeskunde',       ability: 'stat_wis', abbr: 'WIS' },
+  { name: 'Waarneming',        ability: 'stat_wis', abbr: 'WIS' },
+  { name: 'Overleven',         ability: 'stat_wis', abbr: 'WIS' },
+  { name: 'Bedrog',            ability: 'stat_cha', abbr: 'CHA' },
+  { name: 'Intimidatie',       ability: 'stat_cha', abbr: 'CHA' },
+  { name: 'Optreden',          ability: 'stat_cha', abbr: 'CHA' },
+  { name: 'Overtuigen',        ability: 'stat_cha', abbr: 'CHA' },
+]
 
 const abilityScores: { key: keyof Character; abbr: string; label: string }[] = [
   { key: 'stat_str', abbr: 'STR', label: 'Sterkte' },
@@ -279,6 +306,7 @@ export default function CharacterDetailPage() {
         {(
           [
             { key: 'stats', label: 'Stats' },
+            { key: 'vaardigheden', label: 'Vaardigheden' },
             { key: 'lore', label: 'Lore' },
             { key: 'inventaris', label: `Inventaris${items && items.length > 0 ? ` (${items.length})` : ''}` },
           ] as { key: Tab; label: string }[]
@@ -495,6 +523,76 @@ export default function CharacterDetailPage() {
             </div>
           </div>
         )}
+      </div>
+
+      {/* Vaardigheden tab */}
+      <div
+        id="tabpanel-vaardigheden"
+        role="tabpanel"
+        aria-labelledby="tab-vaardigheden"
+        hidden={activeTab !== 'vaardigheden'}
+      >
+        <div className="pangu-surface" style={{ padding: 24 }}>
+          <p className="pangu-section-title" style={{ marginBottom: 4 }}>Vaardigheden</p>
+          <p style={{ fontSize: 12, color: 'var(--muted)', marginTop: 0, marginBottom: 20 }}>
+            Gemarkeerde vaardigheden tellen je vaardigheidsbonus (+{character.proficiency_bonus}) mee.
+          </p>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))', gap: 8 }}>
+            {SKILLS.map((skill) => {
+              const isProficient = character.proficient_skills.includes(skill.name)
+              const baseScore = character[skill.ability] as number
+              const baseMod = Math.floor((baseScore - 10) / 2)
+              const totalMod = isProficient ? baseMod + character.proficiency_bonus : baseMod
+              const modLabel = totalMod >= 0 ? `+${totalMod}` : `${totalMod}`
+              return (
+                <div
+                  key={skill.name}
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 10,
+                    padding: '8px 12px',
+                    borderRadius: 8,
+                    background: isProficient ? 'rgba(139,92,246,0.08)' : 'var(--surface)',
+                    border: isProficient ? '1px solid rgba(139,92,246,0.3)' : '1px solid var(--hairline)',
+                    transition: 'background var(--t-fast), border-color var(--t-fast)',
+                  }}
+                >
+                  {/* Proficiency indicator */}
+                  <span
+                    aria-label={isProficient ? `${skill.name}: vaardig` : `${skill.name}: niet vaardig`}
+                    style={{
+                      width: 10, height: 10,
+                      borderRadius: '50%',
+                      flexShrink: 0,
+                      background: isProficient ? 'var(--violet)' : 'transparent',
+                      border: `2px solid ${isProficient ? 'var(--violet)' : 'var(--hairline-strong)'}`,
+                      transition: 'background var(--t-fast), border-color var(--t-fast)',
+                    }}
+                  />
+
+                  {/* Skill name + ability */}
+                  <span style={{ flex: 1, fontSize: 13, color: isProficient ? 'var(--ink)' : 'var(--ink-soft)', fontWeight: isProficient ? 600 : 400 }}>
+                    {skill.name}
+                    <span style={{ fontSize: 10, color: 'var(--muted)', marginLeft: 5, fontWeight: 400 }}>
+                      {skill.abbr}
+                    </span>
+                  </span>
+
+                  {/* Modifier */}
+                  <span style={{
+                    fontSize: 14, fontWeight: 700,
+                    fontFamily: 'var(--font-display)',
+                    color: isProficient ? 'var(--violet)' : 'var(--ink-soft)',
+                    minWidth: 28, textAlign: 'right',
+                  }}>
+                    {modLabel}
+                  </span>
+                </div>
+              )
+            })}
+          </div>
+        </div>
       </div>
 
       {/* Inventaris tab */}

@@ -1,4 +1,4 @@
-import { useId } from 'react'
+import { useId, useCallback } from 'react'
 import { useParams, useNavigate, useLocation } from 'react-router-dom'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { toast } from 'sonner'
@@ -10,6 +10,27 @@ import { useEntityEdit } from '@/hooks/useEntityEdit'
 import { useAuthStore } from '@/stores/auth.store'
 import type { Character, CharacterStatus } from '@/types/character.types'
 import type { Campaign } from '@/types/campaign.types'
+
+const SKILLS: { name: string; ability: string; abbr: string }[] = [
+  { name: 'Atletiek',          ability: 'Sterkte',       abbr: 'STR' },
+  { name: 'Acrobatiek',        ability: 'Behendigheid',  abbr: 'DEX' },
+  { name: 'Vingervlugheid',    ability: 'Behendigheid',  abbr: 'DEX' },
+  { name: 'Sluipen',           ability: 'Behendigheid',  abbr: 'DEX' },
+  { name: 'Magie',             ability: 'Intelligentie', abbr: 'INT' },
+  { name: 'Geschiedenis',      ability: 'Intelligentie', abbr: 'INT' },
+  { name: 'Onderzoek',         ability: 'Intelligentie', abbr: 'INT' },
+  { name: 'Natuur',            ability: 'Intelligentie', abbr: 'INT' },
+  { name: 'Religie',           ability: 'Intelligentie', abbr: 'INT' },
+  { name: 'Dierenverzorging',  ability: 'Wijsheid',      abbr: 'WIS' },
+  { name: 'Inzicht',           ability: 'Wijsheid',      abbr: 'WIS' },
+  { name: 'Geneeskunde',       ability: 'Wijsheid',      abbr: 'WIS' },
+  { name: 'Waarneming',        ability: 'Wijsheid',      abbr: 'WIS' },
+  { name: 'Overleven',         ability: 'Wijsheid',      abbr: 'WIS' },
+  { name: 'Bedrog',            ability: 'Charisma',      abbr: 'CHA' },
+  { name: 'Intimidatie',       ability: 'Charisma',      abbr: 'CHA' },
+  { name: 'Optreden',          ability: 'Charisma',      abbr: 'CHA' },
+  { name: 'Overtuigen',        ability: 'Charisma',      abbr: 'CHA' },
+]
 
 const statusOptions: { value: CharacterStatus; label: string }[] = [
   { value: 'active',   label: 'Actief'         },
@@ -88,6 +109,14 @@ export default function CharacterEditPage() {
     resetForm,
   } = useEntityEdit({ entity: characterData, isNew })
 
+  const toggleSkill = useCallback((skillName: string) => {
+    const current: string[] = form.proficient_skills ?? []
+    const updated = current.includes(skillName)
+      ? current.filter((s) => s !== skillName)
+      : [...current, skillName]
+    set('proficient_skills', updated)
+  }, [form.proficient_skills, set])
+
   // Load user's campaigns for the campaign selector
   const { data: userCampaigns } = useQuery<Pick<Campaign, 'id' | 'name'>[]>({
     queryKey: [...queryKeys.campaigns.all, 'names'],
@@ -137,6 +166,7 @@ export default function CharacterEditPage() {
           description: form.description ?? null,
           notes: form.notes ?? null,
           status: form.status,
+          proficient_skills: form.proficient_skills ?? [],
           updated_at: new Date().toISOString(),
         })
         .eq('id', id!)
@@ -435,6 +465,59 @@ export default function CharacterEditPage() {
             <NumericField id="char-int" label="Intelligentie (INT)" value={form.stat_int ?? 10} onChange={(v) => set('stat_int', Math.min(30, Math.max(1, v)))} min={1} max={30} />
             <NumericField id="char-wis" label="Wijsheid (WIS)" value={form.stat_wis ?? 10} onChange={(v) => set('stat_wis', Math.min(30, Math.max(1, v)))} min={1} max={30} />
             <NumericField id="char-cha" label="Charisma (CHA)" value={form.stat_cha ?? 10} onChange={(v) => set('stat_cha', Math.min(30, Math.max(1, v)))} min={1} max={30} />
+          </div>
+        </div>
+
+        {/* ── Vaardigheden ── */}
+        <div className="pangu-surface" style={{ padding: 28, marginBottom: 16 }}>
+          <p className="pangu-section-title" style={{ marginBottom: 4 }}>Vaardigheden</p>
+          <p style={{ fontSize: 12, color: 'var(--muted)', marginTop: 0, marginBottom: 20 }}>
+            Klik op een vaardigheid om te markeren als vaardig. Vaardigheidsbonus (+{form.proficiency_bonus ?? 2}) wordt automatisch meegeteld.
+          </p>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: 8 }}>
+            {SKILLS.map((skill) => {
+              const proficients: string[] = form.proficient_skills ?? []
+              const isProficient = proficients.includes(skill.name)
+              return (
+                <button
+                  key={skill.name}
+                  type="button"
+                  onClick={() => toggleSkill(skill.name)}
+                  aria-pressed={isProficient}
+                  aria-label={`${skill.name} (${skill.abbr}): ${isProficient ? 'vaardig' : 'niet vaardig'}`}
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 10,
+                    padding: '8px 12px',
+                    borderRadius: 8,
+                    cursor: 'pointer',
+                    textAlign: 'left',
+                    background: isProficient ? 'rgba(139,92,246,0.08)' : 'var(--surface)',
+                    border: isProficient ? '1px solid rgba(139,92,246,0.3)' : '1px solid var(--hairline)',
+                    transition: 'background var(--t-fast), border-color var(--t-fast)',
+                  }}
+                >
+                  <span
+                    aria-hidden="true"
+                    style={{
+                      width: 10, height: 10,
+                      borderRadius: '50%',
+                      flexShrink: 0,
+                      background: isProficient ? 'var(--violet)' : 'transparent',
+                      border: `2px solid ${isProficient ? 'var(--violet)' : 'var(--hairline-strong)'}`,
+                      transition: 'background var(--t-fast), border-color var(--t-fast)',
+                    }}
+                  />
+                  <span style={{ flex: 1, fontSize: 13, color: isProficient ? 'var(--ink)' : 'var(--ink-soft)', fontWeight: isProficient ? 600 : 400 }}>
+                    {skill.name}
+                    <span style={{ fontSize: 10, color: 'var(--muted)', marginLeft: 5, fontWeight: 400 }}>
+                      {skill.abbr}
+                    </span>
+                  </span>
+                </button>
+              )
+            })}
           </div>
         </div>
 

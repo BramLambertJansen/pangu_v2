@@ -270,6 +270,7 @@ interface Session { id, campaign_id, user_id, name, subtitle, description, notes
 | 007 | `007_sessions.sql` | Sessions tabel + RLS + index + `update_sessions_updated_at` trigger |
 | 015 | `015_bestiaries.sql` | Bestiaries tabel + RLS + index op `(world_id, created_at DESC)` + `update_bestiaries_updated_at` trigger |
 | 018 | `018_encounters.sql` | Encounters tabel + RLS + index + `update_encounters_updated_at` trigger; encounter_monsters junction tabel + RLS + index |
+| 020 | `020_characters_proficient_skills.sql` | `proficient_skills text[]` kolom op characters — D&D 5e skill proficiencies |
 
 ---
 
@@ -476,12 +477,13 @@ npm run type-check   # tsc --noEmit
 - [x] `campaign_id` op characters (`018_campaign_id_to_characters.sql`) — karakter koppelen aan één kroniek
 - [x] Karakters overzicht `/characters` — grid met CharacterCard + ForgeCharacterCard, zoekfilter
 - [x] Karakter aanmaken — direct aanmaken + redirect naar bewerken
-- [x] Karakter bewerken `/characters/:id/edit` — naam, klasse, subklasse, ras, level, XP, HP, AC, snelheid, initiatief, vaardigheidsbonus, 6 eigenschappen, schatkist, achtergrond, privénotities, **kroniek-koppeling**
-- [x] Karakter-detailpagina `/characters/:id` — Stats/Lore/Inventaris tabs, inline HP ±1, XP-balk, eigenschappen-grid met modifiers, schatkist, inventaris met "Teruggeven aan DM"
+- [x] Karakter bewerken `/characters/:id/edit` — naam, klasse, subklasse, ras, level, XP, HP, AC, snelheid, initiatief, vaardigheidsbonus, 6 eigenschappen, **vaardigheden (18 skills)**, schatkist, achtergrond, privénotities, **kroniek-koppeling**
+- [x] Karakter-detailpagina `/characters/:id` — Stats/Vaardigheden/Lore/Inventaris tabs, inline HP ±1, XP-balk, eigenschappen-grid met modifiers, vaardigheidstab met proficiency-indicator + berekende modifiers, schatkist, inventaris met "Teruggeven aan DM"
 - [x] Karakter verwijderen — met bevestigingsdialoog
 - [x] Navigatie-item "Karakters" in sidebar
 - [x] Karakters zichtbaar in kroniek-detailpagina (via campaign_id)
-- [ ] Vaardigheden & spreuken (v2 — vereist JSONB-tabel)
+- [x] Vaardigheden (skill proficiencies) — `proficient_skills text[]` op characters (`020_characters_proficient_skills.sql`); 18 D&D 5e vaardigheden, klikbare toggle in edit, berekende modifiers in detail
+- [ ] Spreuken (v2 — vereist JSONB-tabel)
 
 ### Items / Schatkist
 - [x] Items tabel + RLS (`019_items.sql`) — campaign-scoped, character_id nullable (DM-pool vs toegewezen)

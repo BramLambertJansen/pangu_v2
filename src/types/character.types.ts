@@ -30,6 +30,7 @@ export interface Character {
   description: string | null
   notes: string | null
   status: CharacterStatus
+  proficient_skills: string[]
   created_at: string
   updated_at: string
 }
