@@ -14,6 +14,7 @@ const SettingsPage = lazy(() => import('@/pages/SettingsPage'))
 const WorldsPage = lazy(() => import('@/pages/WorldsPage'))
 const WorldDetailPage = lazy(() => import('@/pages/WorldDetailPage'))
 const WorldEditPage = lazy(() => import('@/pages/WorldEditPage'))
+const CampaignsPage = lazy(() => import('@/pages/CampaignsPage'))
 const CampaignDetailPage = lazy(() => import('@/pages/CampaignDetailPage'))
 const CampaignEditPage = lazy(() => import('@/pages/CampaignEditPage'))
 const LocationsPage = lazy(() => import('@/pages/LocationsPage'))
@@ -173,6 +174,11 @@ export const router = createBrowserRouter([
         path: '/worlds/:id/edit',
         loader: requireAuth,
         element: wrap(WorldEditPage),
+      },
+      {
+        path: '/campaigns',
+        loader: requireAuth,
+        element: wrap(CampaignsPage),
       },
       {
         path: '/campaigns/:id',

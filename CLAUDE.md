@@ -313,14 +313,9 @@ Routes zijn gedefinieerd in `src/routes/index.tsx`. Lazy-loading voor alle pagin
 | `/characters` | `CharactersPage` | `requireAuth` | ✅ |
 | `/characters/:id` | `CharacterDetailPage` | `requireAuth` | ✅ |
 | `/characters/:id/edit` | `CharacterEditPage` | `requireAuth` | ✅ |
+| `/campaigns` | `CampaignsPage` | `requireAuth` | ✅ |
 | `/campaigns/:id/items` | `CampaignItemsPage` | `requireAuth` | ✅ |
 | `/items/:id/edit` | `ItemEditPage` | `requireAuth` | ✅ |
-
-### Geplande routes (nog niet geïmplementeerd)
-
-```
-/campaigns               → overzicht alle campaigns
-```
 
 ### Auth loaders
 
@@ -439,7 +434,7 @@ npm run type-check   # tsc --noEmit
 - [x] Campaign bewerken `/campaigns/:id/edit` — volledig formulier, drag-to-reposition, status
 - [x] Campaign verwijderen — met bevestigingsdialoog
 - [x] Campaign detail `/campaigns/:id` — breadcrumbs, header, status badge, sessies lijst, actieknoppen
-- [ ] Campaign overzicht `/campaigns` — lijst/dashboard van alle campaigns
+- [x] Campaign overzicht `/campaigns` — grid per wereld met CampaignCard + ForgeCampaignCard, lege staat
 
 ### Sessies
 - [x] Sessies tabel + RLS (`007_sessions.sql`)
