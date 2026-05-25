@@ -306,20 +306,40 @@ export default function AppLayout() {
         className="main-content flex-1 overflow-auto"
         style={{ position: 'relative', zIndex: 10 }}
       >
-        <button
-          onClick={() => setMobileOpen(true)}
-          className="mobile-menu-btn nav-item"
-          aria-label="Menu openen"
-          aria-expanded={mobileOpen}
-          aria-controls="sidebar-nav"
-        >
-          <svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round">
-            <line x1="3" y1="6" x2="21" y2="6" />
-            <line x1="3" y1="12" x2="21" y2="12" />
-            <line x1="3" y1="18" x2="21" y2="18" />
-          </svg>
-          <span>Menu</span>
-        </button>
+        {/* ── Mobile top bar (sticky, hidden on desktop) ── */}
+        <header className="mobile-topbar" aria-label="Mobiele navigatiebalk">
+          <button
+            onClick={() => setMobileOpen(true)}
+            className="mobile-topbar-btn"
+            aria-label="Menu openen"
+            aria-expanded={mobileOpen}
+            aria-controls="sidebar-nav"
+          >
+            <svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round">
+              <line x1="3" y1="6" x2="21" y2="6" />
+              <line x1="3" y1="12" x2="21" y2="12" />
+              <line x1="3" y1="18" x2="21" y2="18" />
+            </svg>
+          </button>
+          <div className="mobile-topbar-logo" aria-hidden="true">
+            <svg width="22" height="22" viewBox="0 0 28 28" fill="none">
+              <circle cx="14" cy="14" r="12" stroke="#f5c842" strokeWidth="1" strokeOpacity="0.5" />
+              <circle cx="14" cy="14" r="8" stroke="#9b8aff" strokeWidth="1.5" />
+              <circle cx="14" cy="14" r="3" fill="#9b8aff" />
+              <circle cx="14" cy="5" r="1.5" fill="#f5c842" />
+              <circle cx="22" cy="18" r="1" fill="#9b8aff" opacity="0.7" />
+            </svg>
+            <div>
+              <p style={{ fontFamily: 'var(--font-display)', fontSize: '12px', fontWeight: 600, letterSpacing: '0.18em', color: 'var(--ink)', margin: 0 }}>
+                PANGU
+              </p>
+              <p style={{ fontSize: '9px', letterSpacing: '0.22em', color: 'var(--muted)', margin: '1px 0 0' }}>
+                SANCTUM · II
+              </p>
+            </div>
+          </div>
+          <div className="mobile-topbar-spacer" aria-hidden="true" />
+        </header>
         <Outlet />
       </main>
     </div>

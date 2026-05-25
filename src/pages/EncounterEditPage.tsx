@@ -492,10 +492,11 @@ export default function EncounterEditPage() {
                       aria-label={`${m.name} één minder`}
                       onClick={() => changeCount(m.bestiary_id, -1)}
                       style={{
-                        width: 28, height: 28, display: 'flex', alignItems: 'center', justifyContent: 'center',
+                        width: 36, height: 36, minWidth: 36, minHeight: 36,
+                        display: 'flex', alignItems: 'center', justifyContent: 'center',
                         border: '1px solid var(--hairline-strong)', borderRadius: 6,
                         background: 'none', cursor: 'pointer', color: 'var(--ink-soft)',
-                        fontSize: 16, lineHeight: 1,
+                        fontSize: 16, lineHeight: 1, touchAction: 'manipulation',
                         transition: 'border-color var(--t-fast), color var(--t-fast)',
                       }}
                       onMouseEnter={(e) => { e.currentTarget.style.borderColor = 'var(--crimson)'; e.currentTarget.style.color = 'var(--crimson)' }}
@@ -511,10 +512,11 @@ export default function EncounterEditPage() {
                       aria-label={`${m.name} één meer`}
                       onClick={() => changeCount(m.bestiary_id, 1)}
                       style={{
-                        width: 28, height: 28, display: 'flex', alignItems: 'center', justifyContent: 'center',
+                        width: 36, height: 36, minWidth: 36, minHeight: 36,
+                        display: 'flex', alignItems: 'center', justifyContent: 'center',
                         border: '1px solid var(--hairline-strong)', borderRadius: 6,
                         background: 'none', cursor: 'pointer', color: 'var(--ink-soft)',
-                        fontSize: 16, lineHeight: 1,
+                        fontSize: 16, lineHeight: 1, touchAction: 'manipulation',
                         transition: 'border-color var(--t-fast), color var(--t-fast)',
                       }}
                       onMouseEnter={(e) => { e.currentTarget.style.borderColor = 'var(--teal)'; e.currentTarget.style.color = 'var(--teal)' }}
@@ -529,9 +531,10 @@ export default function EncounterEditPage() {
                       aria-label={`${m.name} verwijderen`}
                       onClick={() => removeMonster(m.bestiary_id)}
                       style={{
-                        width: 28, height: 28, display: 'flex', alignItems: 'center', justifyContent: 'center',
+                        width: 36, height: 36, minWidth: 36, minHeight: 36,
+                        display: 'flex', alignItems: 'center', justifyContent: 'center',
                         border: 'none', background: 'none', cursor: 'pointer',
-                        color: 'var(--muted)', marginLeft: 4,
+                        color: 'var(--muted)', marginLeft: 4, touchAction: 'manipulation',
                         transition: 'color var(--t-fast)',
                       }}
                       onMouseEnter={(e) => (e.currentTarget.style.color = 'var(--crimson)')}
@@ -582,7 +585,7 @@ export default function EncounterEditPage() {
               </div>
 
               <div
-                style={{ maxHeight: 280, overflowY: 'auto' }}
+                style={{ maxHeight: 'min(280px, calc(100dvh - 260px))', overflowY: 'auto' }}
                 role="listbox"
                 aria-label="Beschikbare monsters"
               >
