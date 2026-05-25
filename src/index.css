@@ -202,6 +202,84 @@ body {
   outline-offset: 2px;
 }
 
+/* ── Tab bar underline variant ──────────────────────────── */
+
+.pangu-tab-bar--line {
+  display: flex;
+  gap: 0;
+  border-bottom: 1px solid var(--hairline);
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+}
+
+.pangu-tab-bar--line::-webkit-scrollbar {
+  display: none;
+}
+
+.pangu-tab--line {
+  flex: 0 0 auto;
+  background: none;
+  border: none;
+  border-bottom: 2px solid transparent;
+  color: var(--muted);
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  font-family: var(--font-body);
+  padding: 10px 16px;
+  margin-bottom: -1px;
+  white-space: nowrap;
+  min-height: 44px;
+  transition: color var(--t-fast), border-color var(--t-fast);
+}
+
+.pangu-tab--line:hover {
+  color: var(--ink-soft);
+}
+
+.pangu-tab--line[aria-selected='true'] {
+  border-bottom-color: var(--azure);
+  color: var(--ink);
+}
+
+[data-accent='gold'] .pangu-tab--line[aria-selected='true'] {
+  border-bottom-color: var(--gold);
+}
+
+.pangu-tab--line:focus-visible {
+  outline: 2px solid var(--violet);
+  outline-offset: 2px;
+}
+
+/* ── Tab bar — mobile responsive ────────────────────────── */
+
+@media (max-width: 767px) {
+  .pangu-tab-bar {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+  }
+
+  .pangu-tab-bar::-webkit-scrollbar {
+    display: none;
+  }
+
+  .pangu-tab {
+    flex: 1 1 auto;
+    padding: 9px 11px;
+    letter-spacing: 0.1em;
+  }
+
+  .pangu-tab--line {
+    padding: 9px 12px;
+    font-size: 11px;
+    letter-spacing: 0.08em;
+  }
+}
+
 /* ── Settings avatar ────────────────────────────────────── */
 
 .settings-avatar {
