@@ -551,15 +551,23 @@ body {
   outline-offset: 2px;
 }
 
-.mobile-topbar-logo {
+.mobile-topbar-brand {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 9px;
 }
 
-.mobile-topbar-spacer {
-  width: 44px;
+.mobile-topbar-wordmark {
+  font-family: var(--font-display);
+  font-size: 14px;
+  font-weight: 600;
+  letter-spacing: 0.22em;
+  color: var(--ink);
+}
+
+.mobile-topbar-avatar {
   flex-shrink: 0;
+  pointer-events: none;
 }
 
 /* ── Mobile responsive ────────────────────────────────────── */
@@ -636,15 +644,21 @@ body {
     align-items: center;
     justify-content: space-between;
     padding: 0 var(--sp-3);
-    height: 52px;
-    position: sticky;
+    height: 56px;
+    position: fixed;
     top: 0;
-    z-index: 20;
-    background: rgba(10, 10, 20, 0.92);
-    backdrop-filter: blur(8px);
-    -webkit-backdrop-filter: blur(8px);
+    left: 0;
+    right: 0;
+    z-index: 55;
+    background: linear-gradient(
+      180deg,
+      var(--void-2) 0%,
+      rgba(15, 14, 28, 0.97) 100%
+    );
+    backdrop-filter: blur(16px) saturate(1.6);
+    -webkit-backdrop-filter: blur(16px) saturate(1.6);
     border-bottom: 1px solid var(--hairline);
-    flex-shrink: 0;
+    box-shadow: 0 1px 0 rgba(155, 138, 255, 0.06);
   }
 
   .sidebar-close-btn {
@@ -656,7 +670,8 @@ body {
   }
 
   .main-content {
-    padding: var(--sp-4) var(--sp-4) max(var(--sp-20), env(safe-area-inset-bottom, var(--sp-20))) !important;
+    /* 56px clears the fixed topbar; sides 16px; bottom respects iOS home indicator */
+    padding: calc(56px + var(--sp-4)) var(--sp-4) max(var(--sp-16), env(safe-area-inset-bottom, var(--sp-16))) !important;
   }
 
   .settings-form-grid {
