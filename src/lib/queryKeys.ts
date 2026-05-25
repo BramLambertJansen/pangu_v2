@@ -20,6 +20,8 @@ export const queryKeys = {
     loreDetailFull: (loreId: string) => ['lore', loreId, 'full'] as const,
     sessions: (campaignId: string) => ['campaigns', campaignId, 'sessions'] as const,
     sessionDetail: (sessionId: string) => ['sessions', sessionId] as const,
+    // Separate key for the variant that joins campaigns+worlds (used by SessionDetailPage)
+    sessionDetailFull: (sessionId: string) => ['sessions', sessionId, 'full'] as const,
     quests: (id: string) => ['campaigns', id, 'quests'] as const,
     questDetail: (questId: string) => ['quests', questId] as const,
     questDetailFull: (questId: string) => ['quests', questId, 'full'] as const,
