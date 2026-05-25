@@ -313,6 +313,8 @@ Routes zijn gedefinieerd in `src/routes/index.tsx`. Lazy-loading voor alle pagin
 | `/characters` | `CharactersPage` | `requireAuth` | ✅ |
 | `/characters/:id` | `CharacterDetailPage` | `requireAuth` | ✅ |
 | `/characters/:id/edit` | `CharacterEditPage` | `requireAuth` | ✅ |
+| `/campaigns/:id/items` | `CampaignItemsPage` | `requireAuth` | ✅ |
+| `/items/:id/edit` | `ItemEditPage` | `requireAuth` | ✅ |
 
 ### Geplande routes (nog niet geïmplementeerd)
 
@@ -473,14 +475,24 @@ npm run type-check   # tsc --noEmit
 
 ### Karakter (Spelersperspectief)
 - [x] Characters tabel + RLS (`014_characters.sql`) — global per user, full D&D stat block
+- [x] `campaign_id` op characters (`018_campaign_id_to_characters.sql`) — karakter koppelen aan één kroniek
 - [x] Karakters overzicht `/characters` — grid met CharacterCard + ForgeCharacterCard, zoekfilter
 - [x] Karakter aanmaken — direct aanmaken + redirect naar bewerken
-- [x] Karakter bewerken `/characters/:id/edit` — naam, klasse, subklasse, ras, level, XP, HP, AC, snelheid, initiatief, vaardigheidsbonus, 6 eigenschappen, schatkist, achtergrond, privénotities
-- [x] Karakter-detailpagina `/characters/:id` — Stats/Lore tabs, inline HP ±1, XP-balk, eigenschappen-grid met modifiers, schatkist
+- [x] Karakter bewerken `/characters/:id/edit` — naam, klasse, subklasse, ras, level, XP, HP, AC, snelheid, initiatief, vaardigheidsbonus, 6 eigenschappen, schatkist, achtergrond, privénotities, **kroniek-koppeling**
+- [x] Karakter-detailpagina `/characters/:id` — Stats/Lore/Inventaris tabs, inline HP ±1, XP-balk, eigenschappen-grid met modifiers, schatkist, inventaris met "Teruggeven aan DM"
 - [x] Karakter verwijderen — met bevestigingsdialoog
 - [x] Navigatie-item "Karakters" in sidebar
-- [ ] Inventaris beheren (v2 — vereist JSONB-tabel)
+- [x] Karakters zichtbaar in kroniek-detailpagina (via campaign_id)
 - [ ] Vaardigheden & spreuken (v2 — vereist JSONB-tabel)
+
+### Items / Schatkist
+- [x] Items tabel + RLS (`019_items.sql`) — campaign-scoped, character_id nullable (DM-pool vs toegewezen)
+- [x] Item aanmaken vanuit kroniek-detailpagina — ForgeItemCard → redirect naar bewerken
+- [x] Item bewerken `/items/:id/edit` — naam, type, zeldzaamheid, magisch, aantal, gewicht, beschrijving, toewijzen aan karakter
+- [x] Items overzicht per kroniek `/campaigns/:id/items` — filter op alles/schatkist/karakter
+- [x] Items in kroniek-detailpagina (DM-pool preview max 6 + "Alle items bekijken →")
+- [x] Inventaris-tab in karakter-detailpagina — lijst van toegewezen items + "Teruggeven aan DM"
+- [x] ItemCard + ForgeItemCard component (`src/components/item/ItemCard.tsx`)
 
 ### Wereld — Quests
 - [x] Quests tabel + RLS (`017_quests.sql`) — campaign-scoped, status (draft/active/completed/failed/archived), type, difficulty, reward

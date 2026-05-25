@@ -3,6 +3,7 @@ export type CharacterStatus = 'active' | 'inactive' | 'retired' | 'archived'
 export interface Character {
   id: string
   user_id: string
+  campaign_id: string | null
   name: string
   subtitle: string | null
   character_class: string | null

@@ -13,6 +13,8 @@ import { LoreCard, ForgeLoreCard } from '@/components/lore/LoreCard'
 import { NpcCard, ForgeNpcCard } from '@/components/npc/NpcCard'
 import { QuestCard, ForgeQuestCard } from '@/components/quest/QuestCard'
 import { EncounterCard, ForgeEncounterCard } from '@/components/encounter/EncounterCard'
+import { CharacterCard } from '@/components/character/CharacterCard'
+import { ItemCard, ForgeItemCard } from '@/components/item/ItemCard'
 import { useCampaignWithWorld } from '@/hooks/queries/useCampaign'
 import { useCampaignSessions } from '@/hooks/queries/useCampaignSessions'
 import { useCampaignLocations } from '@/hooks/queries/useCampaignLocations'
@@ -20,6 +22,8 @@ import { useCampaignNpcs } from '@/hooks/queries/useCampaignNpcs'
 import { useCampaignLore } from '@/hooks/queries/useCampaignLore'
 import { useCampaignQuests } from '@/hooks/queries/useCampaignQuests'
 import { useCampaignEncounters } from '@/hooks/queries/useCampaignEncounters'
+import { useCampaignCharacters } from '@/hooks/queries/useCampaignCharacters'
+import { useCampaignItems } from '@/hooks/queries/useCampaignItems'
 import { pickGradient, coverGradients } from '@/utils/pickGradient'
 import { sanitizeImageUrl } from '@/utils/sanitizeUrl'
 import { campaignStatusLabel } from '@/lib/statusMaps'
@@ -29,6 +33,7 @@ import type { Lore } from '@/types/lore.types'
 import type { Npc } from '@/types/npc.types'
 import type { Quest } from '@/types/quest.types'
 import type { Encounter } from '@/types/encounter.types'
+import type { Item } from '@/types/item.types'
 
 const scrimGradient =
   'linear-gradient(to top, var(--void) 0%, rgba(10,10,22,0.97) 20%, rgba(10,10,22,0.72) 40%, rgba(10,10,22,0.18) 62%, transparent 82%)'
@@ -41,6 +46,8 @@ export default function CampaignDetailPage() {
 
   const { data: campaign, isLoading } = useCampaignWithWorld(id)
   const { data: sessions, isLoading: isLoadingSessions } = useCampaignSessions(id)
+  const { data: characters, isLoading: isLoadingCharacters } = useCampaignCharacters(id)
+  const { data: allItems, isLoading: isLoadingItems } = useCampaignItems(id)
 
   const createSession = useMutation({
     mutationFn: async () => {
@@ -170,6 +177,26 @@ export default function CampaignDetailPage() {
     },
     onError: () => {
       toast.error('Gevecht aanmaken mislukt')
+    },
+  })
+
+  const createItem = useMutation({
+    mutationFn: async () => {
+      if (!user) throw new Error('Niet ingelogd')
+      const { data, error } = await supabase
+        .from('items')
+        .insert({ campaign_id: id!, name: 'Nieuw item', item_type: 'misc', rarity: 'common', is_magical: false, quantity: 1 })
+        .select()
+        .single()
+      if (error) throw error
+      return data as Item
+    },
+    onSuccess: (newItem) => {
+      queryClient.invalidateQueries({ queryKey: queryKeys.items.byCampaign(id!) })
+      navigate(`/items/${newItem.id}/edit`, { state: { isNew: true, campaignId: id } })
+    },
+    onError: () => {
+      toast.error('Item aanmaken mislukt')
     },
   })
 
@@ -406,6 +433,46 @@ export default function CampaignDetailPage() {
           </div>
         </div>
       </div>
+
+      <WorldDetailDivider label={`Karakters in deze kroniek${characters && characters.length > 0 ? ` (${characters.length})` : ''}`} />
+
+      {/* Characters list */}
+      {isLoadingCharacters ? (
+        <div style={{ display: 'flex', justifyContent: 'center', padding: '40px 0' }} aria-live="polite" aria-label="Karakters laden..." aria-busy="true">
+          <Spinner size="md" />
+        </div>
+      ) : characters && characters.length > 0 ? (
+        <ul
+          style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))',
+            gap: 'var(--sp-5)',
+            listStyle: 'none',
+            padding: 0,
+            margin: 0,
+          }}
+          role="list"
+          aria-label="Karakters in deze kroniek"
+        >
+          {characters.map((character) => (
+            <li key={character.id}>
+              <CharacterCard character={character} />
+            </li>
+          ))}
+        </ul>
+      ) : (
+        <div
+          className="pangu-surface"
+          style={{ padding: 24, textAlign: 'center', borderStyle: 'dashed' }}
+        >
+          <p style={{ fontSize: 14, color: 'var(--muted)', margin: '0 0 6px', fontStyle: 'italic' }}>
+            Nog geen karakters gekoppeld aan deze kroniek.
+          </p>
+          <p style={{ fontSize: 12, color: 'var(--subtle)', margin: 0 }}>
+            Spelers kunnen hun karakter koppelen via het karakterscherm (Karakters → Bewerken → Kampagne).
+          </p>
+        </div>
+      )}
 
       <WorldDetailDivider label={`Sessies in deze kroniek${sessions && sessions.length > 0 ? ` (${sessions.length})` : ''}`} />
 
@@ -657,6 +724,59 @@ export default function CampaignDetailPage() {
           )}
         </>
       )}
+
+      {/* Items / DM pool */}
+      {(() => {
+        const dmPoolItems = allItems?.filter(i => !i.character_id) ?? []
+        const totalItems = allItems?.length ?? 0
+        const label = `Schatkist${totalItems > 0 ? ` (${dmPoolItems.length} in DM-pool, ${totalItems} totaal)` : ''}`
+        return (
+          <>
+            <WorldDetailDivider label={label} />
+
+            {isLoadingItems ? (
+              <div style={{ display: 'flex', justifyContent: 'center', padding: '40px 0' }} aria-live="polite" aria-label="Items laden..." aria-busy="true">
+                <Spinner size="md" />
+              </div>
+            ) : (
+              <>
+                <ul
+                  style={{
+                    display: 'grid',
+                    gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))',
+                    gap: 'var(--sp-5)',
+                    listStyle: 'none',
+                    padding: 0,
+                    margin: 0,
+                  }}
+                  role="list"
+                  aria-label="Items in DM-schatkist"
+                >
+                  {dmPoolItems.slice(0, 6).map((item) => (
+                    <li key={item.id}>
+                      <ItemCard item={item} />
+                    </li>
+                  ))}
+                  <li>
+                    <ForgeItemCard onClick={() => createItem.mutate()} loading={createItem.isPending} />
+                  </li>
+                </ul>
+                {totalItems > 0 && (
+                  <div style={{ marginTop: 16, display: 'flex', justifyContent: 'flex-end' }}>
+                    <button
+                      type="button"
+                      className="pangu-btn pangu-btn-ghost pangu-btn-sm"
+                      onClick={() => navigate(`/campaigns/${id}/items`)}
+                    >
+                      Alle items bekijken →
+                    </button>
+                  </div>
+                )}
+              </>
+            )}
+          </>
+        )
+      })()}
     </div>
   )
 }

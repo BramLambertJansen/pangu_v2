@@ -7,7 +7,9 @@ import { queryKeys } from '@/lib/queryKeys'
 import { Modal } from '@/components/ui/Modal'
 import { Spinner } from '@/components/ui/Spinner'
 import { useEntityEdit } from '@/hooks/useEntityEdit'
+import { useAuthStore } from '@/stores/auth.store'
 import type { Character, CharacterStatus } from '@/types/character.types'
+import type { Campaign } from '@/types/campaign.types'
 
 const statusOptions: { value: CharacterStatus; label: string }[] = [
   { value: 'active',   label: 'Actief'         },
@@ -50,6 +52,7 @@ export default function CharacterEditPage() {
   const navigate = useNavigate()
   const location = useLocation()
   const queryClient = useQueryClient()
+  const user = useAuthStore(s => s.user)
 
   const descriptionId = useId()
   const notesId = useId()
@@ -58,6 +61,7 @@ export default function CharacterEditPage() {
   const subclassId = useId()
   const raceId = useId()
   const subtitleId = useId()
+  const campaignSelectId = useId()
 
   const locationState = location.state as { isNew?: boolean } | null
   const isNew = locationState?.isNew ?? false
@@ -84,6 +88,23 @@ export default function CharacterEditPage() {
     resetForm,
   } = useEntityEdit({ entity: characterData, isNew })
 
+  // Load user's campaigns for the campaign selector
+  const { data: userCampaigns } = useQuery<Pick<Campaign, 'id' | 'name'>[]>({
+    queryKey: [...queryKeys.campaigns.all, 'names'],
+    queryFn: async () => {
+      if (!user) return []
+      const { data, error } = await supabase
+        .from('campaigns')
+        .select('id, name')
+        .eq('user_id', user.id)
+        .order('name', { ascending: true })
+      if (error) throw error
+      return data as Pick<Campaign, 'id' | 'name'>[]
+    },
+    enabled: !!user,
+    staleTime: 1000 * 60,
+  })
+
   const saveCharacter = useMutation({
     mutationFn: async () => {
       const { error } = await supabase
@@ -94,6 +115,7 @@ export default function CharacterEditPage() {
           character_class: form.character_class ?? null,
           character_subclass: form.character_subclass ?? null,
           character_race: form.character_race ?? null,
+          campaign_id: form.campaign_id ?? null,
           level: form.level,
           xp: form.xp,
           xp_next: form.xp_next,
@@ -123,6 +145,8 @@ export default function CharacterEditPage() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: queryKeys.characters.all })
       queryClient.invalidateQueries({ queryKey: queryKeys.characters.detail(id!) })
+      // Invalidate campaign character views for both old and new campaign
+      queryClient.invalidateQueries({ queryKey: ['characters', 'campaign'] })
       setCommitted(true)
       setDirty(false)
     },
@@ -269,6 +293,20 @@ export default function CharacterEditPage() {
               >
                 {statusOptions.map((o) => (
                   <option key={o.value} value={o.value}>{o.label}</option>
+                ))}
+              </select>
+            </div>
+            <div>
+              <label className="pangu-label" htmlFor={campaignSelectId}>Kroniek</label>
+              <select
+                id={campaignSelectId}
+                className="pangu-select"
+                value={form.campaign_id ?? ''}
+                onChange={(e) => set('campaign_id', e.target.value || null)}
+              >
+                <option value="">Geen kroniek</option>
+                {userCampaigns?.map((c) => (
+                  <option key={c.id} value={c.id}>{c.name}</option>
                 ))}
               </select>
             </div>
