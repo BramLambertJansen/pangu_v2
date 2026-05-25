@@ -102,7 +102,6 @@ export default function CampaignsPage() {
   }
 
   const worldGroups = worlds && campaigns ? buildWorldGroups(worlds, campaigns) : []
-  const totalCount = campaigns?.length ?? 0
   const hasNoWorlds = !isLoading && (!worlds || worlds.length === 0)
 
   return (
@@ -151,30 +150,6 @@ export default function CampaignsPage() {
         />
       ) : (
         <>
-          {totalCount > 0 && (
-            <div style={{ display: 'flex', alignItems: 'center', gap: 0, marginBottom: 32 }} aria-hidden="true">
-              <div style={{ flex: 1, height: 1, background: 'linear-gradient(to right, transparent, var(--hairline-strong))' }} />
-              <div style={{
-                display: 'inline-flex', alignItems: 'center', gap: 10,
-                padding: '7px 18px',
-                border: '1px solid var(--hairline-strong)',
-                borderRadius: 'var(--r-full)',
-                background: 'var(--void-2)',
-                flexShrink: 0,
-              }}>
-                <span style={{ color: 'var(--gold)', fontSize: 9 }}>✦</span>
-                <span style={{
-                  fontFamily: 'var(--font-body)', fontSize: 10, fontWeight: 700,
-                  letterSpacing: '0.28em', textTransform: 'uppercase', color: 'var(--gold)',
-                }}>
-                  {totalCount} {totalCount === 1 ? 'kroniek' : 'kronieken'}
-                </span>
-                <span style={{ color: 'var(--gold)', fontSize: 9 }}>✦</span>
-              </div>
-              <div style={{ flex: 1, height: 1, background: 'linear-gradient(to left, transparent, var(--hairline-strong))' }} />
-            </div>
-          )}
-
           {worldGroups.map(({ worldId, worldName, campaigns: worldCampaigns }) => (
             <section key={worldId} aria-label={worldName}>
               <WorldDetailDivider label={worldName} />
