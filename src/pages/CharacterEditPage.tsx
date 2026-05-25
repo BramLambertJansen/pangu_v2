@@ -428,7 +428,7 @@ export default function CharacterEditPage() {
         {/* ── Eigenschappen ── */}
         <div className="pangu-surface" style={{ padding: 28, marginBottom: 16 }}>
           <p className="pangu-section-title" style={{ marginBottom: 16 }}>Eigenschappen</p>
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+          <div className="grid grid-cols-2 gap-4 sm:grid-cols-3">
             <NumericField id="char-str" label="Sterkte (STR)" value={form.stat_str ?? 10} onChange={(v) => set('stat_str', Math.min(30, Math.max(1, v)))} min={1} max={30} />
             <NumericField id="char-dex" label="Behendigheid (DEX)" value={form.stat_dex ?? 10} onChange={(v) => set('stat_dex', Math.min(30, Math.max(1, v)))} min={1} max={30} />
             <NumericField id="char-con" label="Constitutie (CON)" value={form.stat_con ?? 10} onChange={(v) => set('stat_con', Math.min(30, Math.max(1, v)))} min={1} max={30} />
@@ -441,7 +441,7 @@ export default function CharacterEditPage() {
         {/* ── Schatkist ── */}
         <div className="pangu-surface" style={{ padding: 28, marginBottom: 16 }}>
           <p className="pangu-section-title" style={{ marginBottom: 16 }}>Schatkist</p>
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+          <div className="grid grid-cols-2 gap-4 sm:grid-cols-3">
             <NumericField id="char-gold" label="Goud" value={form.gold ?? 0} onChange={(v) => set('gold', Math.max(0, v))} />
             <NumericField id="char-silver" label="Zilver" value={form.silver ?? 0} onChange={(v) => set('silver', Math.max(0, v))} />
             <NumericField id="char-copper" label="Koper" value={form.copper ?? 0} onChange={(v) => set('copper', Math.max(0, v))} />

@@ -90,6 +90,7 @@ body {
   align-items: center;
   gap: 14px;
   padding: 11px 14px;
+  min-height: 44px;
   border-radius: var(--r-sm);
   color: var(--muted);
   font-size: 14px;
@@ -519,6 +520,82 @@ body {
   color: var(--muted);
 }
 
+/* ── Mobile top bar ───────────────────────────────────────── */
+
+.mobile-topbar {
+  display: none;
+}
+
+.mobile-topbar-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  color: var(--ink-soft);
+  border-radius: var(--r-sm);
+  transition: background var(--t-fast), color var(--t-fast);
+  flex-shrink: 0;
+}
+
+.mobile-topbar-btn:hover {
+  background: var(--surface-hover);
+  color: var(--ink);
+}
+
+.mobile-topbar-btn:focus-visible {
+  outline: 2px solid var(--violet);
+  outline-offset: 2px;
+}
+
+.mobile-topbar-brand {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  text-decoration: none;
+  outline: none;
+}
+
+.mobile-topbar-brand:focus-visible {
+  outline: 2px solid var(--violet);
+  outline-offset: 3px;
+  border-radius: var(--r-sm);
+}
+
+.mobile-topbar-wordmark {
+  font-family: var(--font-display);
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.22em;
+  color: var(--ink);
+}
+
+.mobile-topbar-avatar-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  border-radius: var(--r-full);
+  flex-shrink: 0;
+  transition: opacity var(--t-fast);
+}
+
+.mobile-topbar-avatar-btn:hover {
+  opacity: 0.8;
+}
+
+.mobile-topbar-avatar-btn:focus-visible {
+  outline: 2px solid var(--violet);
+  outline-offset: 2px;
+}
+
 /* ── Mobile responsive ────────────────────────────────────── */
 
 .sidebar-backdrop {
@@ -585,7 +662,34 @@ body {
   }
 
   .mobile-menu-btn {
+    display: none;
+  }
+
+  .mobile-topbar {
     display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 var(--sp-3);
+    height: 48px;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 55;
+    background: linear-gradient(
+      180deg,
+      var(--void-2) 0%,
+      rgba(15, 14, 28, 0.97) 100%
+    );
+    backdrop-filter: blur(16px) saturate(1.6);
+    -webkit-backdrop-filter: blur(16px) saturate(1.6);
+    border-bottom: 1px solid var(--hairline);
+    box-shadow: 0 1px 0 rgba(155, 138, 255, 0.06);
+    transition: transform var(--t-base) var(--ease-out);
+  }
+
+  .mobile-topbar--hidden {
+    transform: translateY(-100%);
   }
 
   .sidebar-close-btn {
@@ -597,7 +701,8 @@ body {
   }
 
   .main-content {
-    padding: var(--sp-6) var(--sp-5) var(--sp-20) !important;
+    /* 48px clears the fixed topbar; sides 16px; bottom respects iOS home indicator */
+    padding: calc(48px + var(--sp-4)) var(--sp-4) max(var(--sp-16), env(safe-area-inset-bottom, var(--sp-16))) !important;
   }
 
   .settings-form-grid {
@@ -611,6 +716,12 @@ body {
   .about-stats-grid {
     grid-template-columns: repeat(2, 1fr);
   }
+
+  /* Prevent hero cards from dominating the viewport on small phones */
+  .entity-card[data-variant="hero"],
+  .forge-card[data-variant="hero"] {
+    height: clamp(280px, 65vh, 420px);
+  }
 }
 
 /* ── WorldDetailHeader responsive layout ── */
@@ -622,7 +733,7 @@ body {
 .wdh-mobile {
   position: relative;
   z-index: 2;
-  min-height: 520px;
+  min-height: clamp(300px, 55vh, 520px);
   display: flex;
   flex-direction: column;
 }
@@ -685,7 +796,9 @@ body {
   border: none;
   cursor: pointer;
   color: var(--muted);
-  padding: 0;
+  padding: 6px 4px;
+  margin: -6px -4px;
+  min-height: 44px;
   transition: color var(--t-fast);
 }
 
@@ -863,11 +976,41 @@ body {
   padding: 3px 10px;
   border-radius: var(--r-full);
   font-family: var(--font-body);
-  font-size: 9px;
+  font-size: 11px;
   font-weight: 700;
   letter-spacing: 0.16em;
   text-transform: uppercase;
   color: var(--void);
+}
+
+/* ── Suppress hover effects on touch-only devices ───────── */
+
+@media (hover: none) {
+  .entity-card:hover,
+  .entity-card[data-variant="hero"]:hover {
+    border-color: var(--hairline);
+    box-shadow: none;
+    transform: none;
+  }
+
+  .forge-card[data-accent="violet"]:hover,
+  .forge-card[data-accent="gold"]:hover,
+  .forge-card[data-accent="teal"]:hover,
+  .forge-card[data-accent="crimson"]:hover,
+  .forge-card[data-accent="azure"]:hover {
+    border-color: var(--hairline-strong);
+    background: transparent;
+  }
+
+  .nav-item:hover {
+    background: transparent;
+    color: var(--muted);
+  }
+
+  .pangu-btn-primary:hover,
+  .pangu-btn-gold:hover {
+    transform: none;
+  }
 }
 
 /* ── Motion safety ───────────────────────────────────────── */

@@ -317,7 +317,7 @@ export default function BestiaryEditPage() {
         {/* Statistieken */}
         <div className="pangu-surface" style={{ padding: 28, marginBottom: 16 }}>
           <p className="pangu-section-title" style={{ marginBottom: 20 }}>Gevechtsstats</p>
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3">
             <NumericField id="bestiary-hp"    label="HP"                  value={form.hp    ?? 10} onChange={(v) => set('hp',    v)} min={0} />
             <NumericField id="bestiary-ac"    label="Wapenrusting (AC)"   value={form.ac    ?? 10} onChange={(v) => set('ac',    v)} min={0} />
             <NumericField id="bestiary-speed" label="Snelheid (ft)"       value={form.speed ?? 30} onChange={(v) => set('speed', v)} min={0} />

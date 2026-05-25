@@ -1,10 +1,11 @@
-import { Outlet, NavLink, useNavigate } from 'react-router-dom'
+import { Outlet, NavLink, Link, useNavigate } from 'react-router-dom'
 import { useUIStore } from '@/stores/ui.store'
 import { useAuthStore } from '@/stores/auth.store'
 import { supabase } from '@/lib/supabase'
 import { queryClient } from '@/lib/queryClient'
 import { toast } from 'sonner'
-import { useMemo, useState } from 'react'
+import { useMemo, useState, useEffect, useRef } from 'react'
+import { Avatar } from '@/components/ui/Avatar'
 
 interface Star {
   id: number
@@ -146,6 +147,26 @@ export default function AppLayout() {
     toast.success('Uitgelogd')
     navigate('/login', { replace: true })
   }
+
+  const topbarRef = useRef<HTMLElement>(null)
+  const mainRef = useRef<HTMLElement>(null)
+  const lastScrollY = useRef(0)
+
+  useEffect(() => {
+    const main = mainRef.current
+    if (!main) return
+
+    const onScroll = () => {
+      const y = main.scrollTop
+      // Hide when scrolling down past 80px; reveal on any upward scroll
+      const hide = y > lastScrollY.current && y > 80
+      topbarRef.current?.classList.toggle('mobile-topbar--hidden', hide)
+      lastScrollY.current = y
+    }
+
+    main.addEventListener('scroll', onScroll, { passive: true })
+    return () => main.removeEventListener('scroll', onScroll)
+  }, [])
 
   const iconOnly = `nav-item nav-item--icon-only`
   const sidebarWidth = sidebarCollapsed ? '56px' : '240px'
@@ -312,24 +333,50 @@ export default function AppLayout() {
 
       {/* ── Main content ── */}
       <main
+        ref={mainRef}
         id="main-content"
         className="main-content flex-1 overflow-auto"
         style={{ position: 'relative', zIndex: 10 }}
       >
-        <button
-          onClick={() => setMobileOpen(true)}
-          className="mobile-menu-btn nav-item"
-          aria-label="Menu openen"
-          aria-expanded={mobileOpen}
-          aria-controls="sidebar-nav"
-        >
-          <svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round">
-            <line x1="3" y1="6" x2="21" y2="6" />
-            <line x1="3" y1="12" x2="21" y2="12" />
-            <line x1="3" y1="18" x2="21" y2="18" />
-          </svg>
-          <span>Menu</span>
-        </button>
+        {/* ── Mobile top bar (fixed, hidden on desktop) ── */}
+        <header ref={topbarRef} className="mobile-topbar" aria-label="Mobiele navigatiebalk">
+          <button
+            onClick={() => setMobileOpen(true)}
+            className="mobile-topbar-btn"
+            aria-label="Menu openen"
+            aria-expanded={mobileOpen}
+            aria-controls="sidebar-nav"
+          >
+            <svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <line x1="3" y1="6" x2="21" y2="6" />
+              <line x1="3" y1="12" x2="21" y2="12" />
+              <line x1="3" y1="18" x2="21" y2="18" />
+            </svg>
+          </button>
+
+          <Link to="/dashboard" className="mobile-topbar-brand" aria-label="Naar dashboard">
+            <svg width="20" height="20" viewBox="0 0 28 28" fill="none" aria-hidden="true">
+              <circle cx="14" cy="14" r="12" stroke="#f5c842" strokeWidth="1" strokeOpacity="0.6" />
+              <circle cx="14" cy="14" r="8" stroke="#9b8aff" strokeWidth="1.5" />
+              <circle cx="14" cy="14" r="3" fill="#9b8aff" />
+              <circle cx="14" cy="5" r="1.5" fill="#f5c842" />
+              <circle cx="22" cy="18" r="1" fill="#9b8aff" opacity="0.7" />
+            </svg>
+            <span className="mobile-topbar-wordmark" aria-hidden="true">PANGU</span>
+          </Link>
+
+          <button
+            onClick={() => navigate('/settings')}
+            className="mobile-topbar-avatar-btn"
+            aria-label="Naar instellingen"
+          >
+            <Avatar
+              fallback={(profile?.display_name ?? '?').slice(0, 2).toUpperCase()}
+              alt={profile?.display_name ?? 'Gebruiker'}
+              size="sm"
+            />
+          </button>
+        </header>
         <Outlet />
       </main>
     </div>
