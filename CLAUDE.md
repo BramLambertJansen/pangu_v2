@@ -282,7 +282,7 @@ Routes zijn gedefinieerd in `src/routes/index.tsx`. Lazy-loading voor alle pagin
 |---|---|---|---|
 | `/` | redirect → `/dashboard` | — | ✅ |
 | `/login` | `LoginPage` | nee (AuthLayout) | ✅ |
-| `/register` | `RegisterPage` | nee (AuthLayout) | ⚠️ stub |
+| `/register` | `RegisterPage` | nee (AuthLayout) | ✅ |
 | `/dashboard` | `DashboardPage` | `requireAuth` | ✅ |
 | `/admin` | `AdminPage` | `requireAdmin` | ✅ |
 | `/settings` | `SettingsPage` | `requireAuth` | ✅ |
@@ -395,7 +395,7 @@ npm run type-check   # tsc --noEmit
 
 ### Authenticatie
 - [x] Login pagina (email + wachtwoord, validatie, redirect op rol)
-- [ ] Registratie pagina ⚠️ stub — formulier nog te bouwen (email, wachtwoord, display_name + Supabase signup)
+- [x] Registratie pagina — formulier met naam, e-mail, wachtwoord + bevestiging; Supabase signup; e-mailbevestiging afhandeling
 - [x] Supabase Auth integratie (`signInWithPassword`, `signOut`)
 - [x] Protected routes (loaders: `requireAuth`, `requireAdmin`)
 - [x] Auth store (Zustand) — `user`, `profile`, `setUser`, `setProfile`, `signOut`
