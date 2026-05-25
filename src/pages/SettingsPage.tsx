@@ -7,7 +7,7 @@ import { supabase } from '@/lib/supabase'
 import { useAuthStore } from '@/stores/auth.store'
 import { usePreferencesStore, type PreferencesLanguage } from '@/stores/preferences.store'
 
-type Tab = 'profile' | 'prefs' | 'about'
+type Tab = 'profile' | 'prefs' | 'ai' | 'about'
 
 interface ProfileForm {
   display_name: string
@@ -380,6 +380,220 @@ function VoorkeurenTab() {
   )
 }
 
+// ── AI keys tab ──────────────────────────────────────
+
+interface ProviderKeyCardProps {
+  title: string
+  description: string
+  isSet: boolean
+  fieldId: string
+  onSave: (key: string) => void
+  onClear: () => void
+  isSavePending: boolean
+  isClearPending: boolean
+}
+
+function ProviderKeyCard({
+  title,
+  description,
+  isSet,
+  fieldId,
+  onSave,
+  onClear,
+  isSavePending,
+  isClearPending,
+}: ProviderKeyCardProps) {
+  const [keyInput, setKeyInput] = useState('')
+  const [showKey, setShowKey] = useState(false)
+
+  return (
+    <div className="pangu-surface" style={{ padding: 24 }}>
+      <div className="flex items-start justify-between gap-4" style={{ marginBottom: 20 }}>
+        <div>
+          <p className="pangu-section-title" style={{ marginBottom: 2 }}>{title}</p>
+          <p style={{ fontSize: 13, color: 'var(--muted)' }}>{description}</p>
+        </div>
+        <span
+          style={{
+            flexShrink: 0,
+            fontSize: 11,
+            fontWeight: 600,
+            letterSpacing: '0.08em',
+            textTransform: 'uppercase',
+            padding: '3px 10px',
+            borderRadius: 'var(--r-full)',
+            background: isSet ? 'color-mix(in srgb, var(--teal) 15%, transparent)' : 'color-mix(in srgb, var(--muted) 12%, transparent)',
+            color: isSet ? 'var(--teal)' : 'var(--muted)',
+            border: `1px solid ${isSet ? 'color-mix(in srgb, var(--teal) 30%, transparent)' : 'var(--hairline)'}`,
+          }}
+          aria-label={isSet ? 'Sleutel ingesteld' : 'Sleutel niet ingesteld'}
+        >
+          {isSet ? 'Ingesteld' : 'Niet ingesteld'}
+        </span>
+      </div>
+
+      <div>
+        <label className="pangu-label" htmlFor={fieldId}>
+          API-sleutel
+        </label>
+        <div style={{ position: 'relative' }}>
+          <input
+            id={fieldId}
+            type={showKey ? 'text' : 'password'}
+            className="pangu-input"
+            value={keyInput}
+            onChange={(e) => setKeyInput(e.target.value)}
+            placeholder={isSet ? '••••••••  (voer een nieuwe sleutel in om te vervangen)' : 'sk-...'}
+            autoComplete="off"
+            spellCheck={false}
+            style={{ paddingRight: 44 }}
+          />
+          <button
+            type="button"
+            onClick={() => setShowKey((v) => !v)}
+            aria-label={showKey ? 'Sleutel verbergen' : 'Sleutel tonen'}
+            style={{
+              position: 'absolute',
+              right: 12,
+              top: '50%',
+              transform: 'translateY(-50%)',
+              background: 'none',
+              border: 'none',
+              cursor: 'pointer',
+              color: 'var(--muted)',
+              padding: 0,
+              lineHeight: 0,
+            }}
+          >
+            {showKey ? (
+              // eye-off icon
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94" />
+                <path d="M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19" />
+                <line x1="1" y1="1" x2="23" y2="23" />
+              </svg>
+            ) : (
+              // eye icon
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
+                <circle cx="12" cy="12" r="3" />
+              </svg>
+            )}
+          </button>
+        </div>
+      </div>
+
+      <div className="flex items-center justify-end gap-3" style={{ marginTop: 16 }}>
+        {isSet && (
+          <button
+            type="button"
+            className="pangu-btn pangu-btn-ghost"
+            onClick={onClear}
+            disabled={isClearPending || isSavePending}
+          >
+            {isClearPending ? 'Wissen...' : 'Wissen'}
+          </button>
+        )}
+        <button
+          type="button"
+          className="pangu-btn pangu-btn-primary"
+          onClick={() => {
+            if (keyInput.trim()) onSave(keyInput.trim())
+          }}
+          disabled={!keyInput.trim() || isSavePending || isClearPending}
+        >
+          {isSavePending ? 'Opslaan...' : 'Opslaan'}
+        </button>
+      </div>
+    </div>
+  )
+}
+
+function AISleutelsTab() {
+  const profile = useAuthStore(s => s.profile)
+  const setProfile = useAuthStore(s => s.setProfile)
+
+  const openaiMutation = useMutation({
+    mutationFn: async (key: string | null) => {
+      if (!profile) throw new Error('no_profile')
+      const { data, error } = await supabase
+        .from('profiles')
+        .update({ openai_api_key: key })
+        .eq('id', profile.id)
+        .select()
+        .single()
+      if (error) throw error
+      return data
+    },
+    onSuccess: (data) => {
+      setProfile({ ...profile!, ...data })
+      toast.success(data.openai_api_key ? 'OpenAI-sleutel opgeslagen' : 'OpenAI-sleutel gewist')
+    },
+    onError: () => toast.error('Opslaan mislukt'),
+  })
+
+  const anthropicMutation = useMutation({
+    mutationFn: async (key: string | null) => {
+      if (!profile) throw new Error('no_profile')
+      const { data, error } = await supabase
+        .from('profiles')
+        .update({ anthropic_api_key: key })
+        .eq('id', profile.id)
+        .select()
+        .single()
+      if (error) throw error
+      return data
+    },
+    onSuccess: (data) => {
+      setProfile({ ...profile!, ...data })
+      toast.success(data.anthropic_api_key ? 'Anthropic-sleutel opgeslagen' : 'Anthropic-sleutel gewist')
+    },
+    onError: () => toast.error('Opslaan mislukt'),
+  })
+
+  return (
+    <div className="flex flex-col gap-4">
+      {/* Info callout */}
+      <div
+        className="pangu-surface"
+        style={{
+          padding: '16px 20px',
+          borderLeft: '3px solid var(--violet)',
+          background: 'color-mix(in srgb, var(--violet) 6%, var(--surface))',
+        }}
+      >
+        <p style={{ fontSize: 13, color: 'var(--ink-soft)', lineHeight: 1.6 }}>
+          <strong style={{ color: 'var(--ink)' }}>Eigen AI-sleutels (BYOK)</strong> — Gebruik je eigen API-sleutels voor AI-functies in het Sanctum.
+          Sleutels worden per account opgeslagen en zijn uitsluitend voor jou zichtbaar.
+          Ze worden nooit gedeeld of gebruikt buiten jouw sessies.
+        </p>
+      </div>
+
+      <ProviderKeyCard
+        title="OpenAI"
+        description="GPT-4o en andere OpenAI-modellen voor lore-generatie."
+        isSet={profile?.openai_api_key != null}
+        fieldId="ai-openai-key"
+        onSave={(key) => openaiMutation.mutate(key)}
+        onClear={() => openaiMutation.mutate(null)}
+        isSavePending={openaiMutation.isPending && openaiMutation.variables !== null}
+        isClearPending={openaiMutation.isPending && openaiMutation.variables === null}
+      />
+
+      <ProviderKeyCard
+        title="Anthropic (Claude)"
+        description="Claude Sonnet en Opus voor consistente verhaalintelligentie."
+        isSet={profile?.anthropic_api_key != null}
+        fieldId="ai-anthropic-key"
+        onSave={(key) => anthropicMutation.mutate(key)}
+        onClear={() => anthropicMutation.mutate(null)}
+        isSavePending={anthropicMutation.isPending && anthropicMutation.variables !== null}
+        isClearPending={anthropicMutation.isPending && anthropicMutation.variables === null}
+      />
+    </div>
+  )
+}
+
 // ── About tab ─────────────────────────────────────────────
 
 function OverTab() {
@@ -441,6 +655,7 @@ export default function SettingsPage() {
   const tabs: { id: Tab; label: string }[] = [
     { id: 'profile', label: 'Profiel' },
     { id: 'prefs', label: 'Voorkeuren' },
+    { id: 'ai', label: 'AI' },
     { id: 'about', label: 'Over' },
   ]
 
@@ -483,6 +698,7 @@ export default function SettingsPage() {
       >
         {activeTab === 'profile' && <ProfielTab />}
         {activeTab === 'prefs' && <VoorkeurenTab />}
+        {activeTab === 'ai' && <AISleutelsTab />}
         {activeTab === 'about' && <OverTab />}
       </div>
     </div></div>

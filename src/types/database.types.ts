@@ -721,6 +721,8 @@ export type Database = {
           avatar_url: string | null
           role: ProfileRole
           created_at: string
+          openai_api_key: string | null
+          anthropic_api_key: string | null
         }
         Insert: {
           id: string
@@ -731,6 +733,8 @@ export type Database = {
           avatar_url?: string | null
           role?: ProfileRole
           created_at?: string
+          openai_api_key?: string | null
+          anthropic_api_key?: string | null
         }
         Update: {
           id?: string
@@ -741,6 +745,8 @@ export type Database = {
           avatar_url?: string | null
           role?: ProfileRole
           created_at?: string
+          openai_api_key?: string | null
+          anthropic_api_key?: string | null
         }
         Relationships: []
       }
@@ -769,4 +775,6 @@ export interface Profile {
   avatar_url: string | null
   role: ProfileRole
   created_at: string
+  openai_api_key: string | null
+  anthropic_api_key: string | null
 }
