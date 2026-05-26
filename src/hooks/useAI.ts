@@ -2,8 +2,15 @@ import { useState, useCallback } from "react";
 import { supabase } from "@/lib/supabase";
 import type { AIResponse, ErrorResponse, Message, Provider } from "@/types/ai";
 
+export interface AIResult {
+  reply: string;
+  provider: Provider;
+  model: string;
+  windowRemaining: number;
+}
+
 interface UseAIReturn {
-  ask: (messages: Message[]) => Promise<string>;
+  ask: (messages: Message[]) => Promise<AIResult>;
   loading: boolean;
   /** Remaining free-tier requests this window. null = not yet fetched. -1 = BYOK (no cap). */
   windowRemaining: number | null;
@@ -22,7 +29,7 @@ export function useAI(): UseAIReturn {
   const [lastProvider, setLastProvider] = useState<Provider | null>(null);
   const [lastModel, setLastModel]       = useState<string | null>(null);
 
-  const ask = useCallback(async (messages: Message[]): Promise<string> => {
+  const ask = useCallback(async (messages: Message[]): Promise<AIResult> => {
     setLoading(true);
     try {
       const { data: { session } } = await supabase.auth.getSession();
@@ -51,10 +58,19 @@ export function useAI(): UseAIReturn {
       }
 
       const ok = data as AIResponse;
+      // Update state for consumers that read hook values between renders
       setRemaining(ok.window_remaining);
       setLastProvider(ok.provider);
       setLastModel(ok.model);
-      return ok.reply;
+
+      // Return fresh metadata directly — callers must not rely on state
+      // which may not have flushed yet (async React batching).
+      return {
+        reply:           ok.reply,
+        provider:        ok.provider,
+        model:           ok.model,
+        windowRemaining: ok.window_remaining,
+      };
 
     } finally {
       setLoading(false);

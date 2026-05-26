@@ -31,26 +31,24 @@ export default function AdminPage() {
   const [createOpen, setCreateOpen] = useState(false)
   const [testResult, setTestResult] = useState<AITestResult | null>(null)
 
-  const { ask, loading, lastProvider, lastModel, windowRemaining } = useAI()
+  const { ask, loading } = useAI()
 
   async function handleTestAI() {
     setTestResult(null)
     try {
-      const reply = await ask([
+      const result = await ask([
         {
           role: 'user',
           content:
             'Reageer in het Nederlands. Zeg in één zin welke AI-provider en model je bent, en geef een kort D&D-gezegde.',
         },
       ])
-      if (lastProvider && lastModel) {
-        setTestResult({
-          reply,
-          provider: lastProvider,
-          model: lastModel,
-          windowRemaining,
-        })
-      }
+      setTestResult({
+        reply:           result.reply,
+        provider:        result.provider,
+        model:           result.model,
+        windowRemaining: result.windowRemaining,
+      })
       toast.success('AI-test geslaagd')
     } catch (err) {
       toast.error(err instanceof Error ? err.message : 'AI-test mislukt')
