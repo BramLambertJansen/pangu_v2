@@ -5,6 +5,7 @@ import { toast } from 'sonner'
 import { supabase } from '@/lib/supabase'
 import { queryKeys } from '@/lib/queryKeys'
 import { Spinner } from '@/components/ui/Spinner'
+import { Breadcrumb } from '@/components/ui/Breadcrumb'
 import { characterStatusLabel, characterStatusColor, itemRarityLabel, itemRarityColor, itemTypeLabel } from '@/lib/statusMaps'
 import { useCharacterItems } from '@/hooks/queries/useCharacterItems'
 import type { Character } from '@/types/character.types'
@@ -147,28 +148,33 @@ export default function CharacterDetailPage() {
 
   return (
     <div>
-      {/* Back link */}
-      <button
-        type="button"
-        onClick={() => navigate('/characters')}
-        aria-label="Terug naar karakters"
-        style={{
-          display: 'inline-flex', alignItems: 'center', gap: 6,
-          background: 'none', border: 'none', cursor: 'pointer',
-          color: 'var(--muted)', fontSize: 12, fontWeight: 700,
-          letterSpacing: '0.18em', textTransform: 'uppercase',
-          fontFamily: 'var(--font-body)',
-          marginBottom: 24, padding: 0,
-          transition: 'color var(--t-fast)',
-        }}
-        onMouseEnter={(e) => (e.currentTarget.style.color = 'var(--ink-soft)')}
-        onMouseLeave={(e) => (e.currentTarget.style.color = 'var(--muted)')}
-      >
-        <svg aria-hidden="true" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-          <path d="M19 12H5" /><path d="M12 19l-7-7 7-7" />
-        </svg>
-        Terug naar karakters
-      </button>
+      <Breadcrumb
+        items={[
+          { label: 'Karakters', onClick: () => navigate('/characters') },
+          { label: character.name },
+        ]}
+        actions={
+          <Link
+            to={`/characters/${id}/edit`}
+            aria-label={`${character.name} bewerken`}
+            style={{
+              display: 'inline-flex', alignItems: 'center', gap: 6,
+              color: 'var(--muted)', fontSize: 12, fontWeight: 700,
+              letterSpacing: '0.18em', textTransform: 'uppercase',
+              fontFamily: 'var(--font-body)',
+              textDecoration: 'none',
+              transition: 'color var(--t-fast)',
+            }}
+            onMouseEnter={(e) => (e.currentTarget.style.color = 'var(--ink-soft)')}
+            onMouseLeave={(e) => (e.currentTarget.style.color = 'var(--muted)')}
+          >
+            <svg aria-hidden="true" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z" />
+            </svg>
+            Bewerken
+          </Link>
+        }
+      />
 
       {/* Hero header card */}
       <div

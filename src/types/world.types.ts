@@ -10,6 +10,7 @@ export interface World {
   header_image: string | null
   header_image_position: string | null
   status: WorldStatus
+  notes: string | null
   created_at: string
   updated_at: string
 }

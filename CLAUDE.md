@@ -78,7 +78,7 @@ src/
 │   ├── CampaignEditPage.tsx
 │   ├── DashboardPage.tsx
 │   ├── LoginPage.tsx
-│   ├── RegisterPage.tsx      # ⚠️ STUB
+│   ├── RegisterPage.tsx
 │   ├── SessionDetailPage.tsx
 │   ├── SessionEditPage.tsx
 │   ├── SessionsPage.tsx
@@ -271,6 +271,7 @@ interface Session { id, campaign_id, user_id, name, subtitle, description, notes
 | 015 | `015_bestiaries.sql` | Bestiaries tabel + RLS + index op `(world_id, created_at DESC)` + `update_bestiaries_updated_at` trigger |
 | 018 | `018_encounters.sql` | Encounters tabel + RLS + index + `update_encounters_updated_at` trigger; encounter_monsters junction tabel + RLS + index |
 | 020 | `020_characters_proficient_skills.sql` | `proficient_skills text[]` kolom op characters — D&D 5e skill proficiencies |
+| 021 | `021_worlds_campaigns_notes.sql` | `notes text` kolom op worlds en campaigns |
 
 ---
 
@@ -303,6 +304,7 @@ Routes zijn gedefinieerd in `src/routes/index.tsx`. Lazy-loading voor alle pagin
 | `/lore/:id` | `LoreDetailPage` | `requireAuth` | ✅ |
 | `/lore/:id/edit` | `LoreEditPage` | `requireAuth` | ✅ |
 | `/campaigns/:id/npcs` | `NpcsPage` | `requireAuth` | ✅ |
+| `/npcs/:id` | `NpcDetailPage` | `requireAuth` | ✅ |
 | `/npcs/:id/edit` | `NpcEditPage` | `requireAuth` | ✅ |
 | `/worlds/:id/bestiary` | `BestiariesPage` | `requireAuth` | ✅ |
 | `/bestiary/:id` | `BestiaryDetailPage` | `requireAuth` | ✅ |
@@ -423,20 +425,22 @@ npm run type-check   # tsc --noEmit
 ### Werelden (DM)
 - [x] Worlds tabel + RLS (`003_worlds.sql`)
 - [x] Header image positie (`004_worlds_header_image_position.sql`)
+- [x] DM-notities kolom (`021_worlds_campaigns_notes.sql`)
 - [x] Werelden overzicht `/worlds` — grid met WorldCard + ForgeWorldCard, lege staat, responsief
 - [x] Wereld aanmaken — direct aanmaken + redirect naar bewerken
-- [x] Wereld bewerken `/worlds/:id/edit` — naam, subtitle, quote, beschrijving, header image + drag-to-reposition, status
+- [x] Wereld bewerken `/worlds/:id/edit` — naam, subtitle, quote, beschrijving, DM-notities, header image + drag-to-reposition, status
 - [x] Wereld verwijderen — met bevestigingsdialoog
-- [x] Wereld detail `/worlds/:id` — WorldDetailHeader, WorldDetailDivider, CompassRose, campaigns lijst, bestiarium-link
+- [x] Wereld detail `/worlds/:id` — breadcrumbs, WorldDetailHeader, WorldDetailDivider, DM-notities, campaigns lijst, bestiarium-link
 - [x] Navigatie-item "Werelden" in sidebar
 
 ### Campaigns (DM)
 - [x] Campaigns tabel + RLS (`005_campaigns.sql`)
 - [x] Campaign header image (`006_campaigns_header_image.sql`)
+- [x] DM-notities kolom (`021_worlds_campaigns_notes.sql`)
 - [x] Campaign aanmaken (vanuit wereld detail, "+ Nieuwe kroniek") → direct redirect naar bewerken
-- [x] Campaign bewerken `/campaigns/:id/edit` — volledig formulier, drag-to-reposition, status
+- [x] Campaign bewerken `/campaigns/:id/edit` — volledig formulier, DM-notities, drag-to-reposition, status
 - [x] Campaign verwijderen — met bevestigingsdialoog
-- [x] Campaign detail `/campaigns/:id` — breadcrumbs, header, status badge, sessies lijst, actieknoppen
+- [x] Campaign detail `/campaigns/:id` — breadcrumbs, header, status badge, DM-notities, sessies lijst, actieknoppen
 - [x] Campaign overzicht `/campaigns` — grid per wereld met CampaignCard + ForgeCampaignCard, lege staat
 
 ### Sessies

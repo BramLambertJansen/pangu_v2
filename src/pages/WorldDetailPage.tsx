@@ -5,6 +5,7 @@ import { supabase } from '@/lib/supabase'
 import { queryKeys } from '@/lib/queryKeys'
 import { useAuthStore } from '@/stores/auth.store'
 import { Spinner } from '@/components/ui/Spinner'
+import { Breadcrumb } from '@/components/ui/Breadcrumb'
 import { WorldDetailHeader } from '@/components/world/WorldDetailHeader'
 import { WorldDetailDivider } from '@/components/world/WorldDetailDivider'
 import { CampaignCard, ForgeCampaignCard } from '@/components/campaign/CampaignCard'
@@ -96,49 +97,33 @@ export default function WorldDetailPage() {
 
   return (
     <div>
-      {/* Top bar */}
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 24 }}>
-        <button
-          type="button"
-          onClick={() => navigate('/worlds')}
-          aria-label="Terug naar werelden"
-          style={{
-            display: 'inline-flex', alignItems: 'center', gap: 6,
-            background: 'none', border: 'none', cursor: 'pointer',
-            color: 'var(--muted)', fontSize: 12, fontWeight: 700,
-            letterSpacing: '0.18em', textTransform: 'uppercase',
-            fontFamily: 'var(--font-body)', padding: 0,
-            transition: 'color var(--t-fast)',
-          }}
-          onMouseEnter={(e) => (e.currentTarget.style.color = 'var(--ink-soft)')}
-          onMouseLeave={(e) => (e.currentTarget.style.color = 'var(--muted)')}
-        >
-          <svg aria-hidden="true" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <path d="M19 12H5" /><path d="M12 19l-7-7 7-7" />
-          </svg>
-          Alle werelden
-        </button>
-
-        <Link
-          to={`/worlds/${id}/edit`}
-          aria-label={`${world.name} bewerken`}
-          style={{
-            display: 'inline-flex', alignItems: 'center', gap: 6,
-            color: 'var(--muted)', fontSize: 12, fontWeight: 700,
-            letterSpacing: '0.18em', textTransform: 'uppercase',
-            fontFamily: 'var(--font-body)',
-            textDecoration: 'none',
-            transition: 'color var(--t-fast)',
-          }}
-          onMouseEnter={(e) => (e.currentTarget.style.color = 'var(--ink-soft)')}
-          onMouseLeave={(e) => (e.currentTarget.style.color = 'var(--muted)')}
-        >
-          <svg aria-hidden="true" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z" />
-          </svg>
-          Bewerken
-        </Link>
-      </div>
+      <Breadcrumb
+        items={[
+          { label: 'Werelden', onClick: () => navigate('/worlds') },
+          { label: world.name },
+        ]}
+        actions={
+          <Link
+            to={`/worlds/${id}/edit`}
+            aria-label={`${world.name} bewerken`}
+            style={{
+              display: 'inline-flex', alignItems: 'center', gap: 6,
+              color: 'var(--muted)', fontSize: 12, fontWeight: 700,
+              letterSpacing: '0.18em', textTransform: 'uppercase',
+              fontFamily: 'var(--font-body)',
+              textDecoration: 'none',
+              transition: 'color var(--t-fast)',
+            }}
+            onMouseEnter={(e) => (e.currentTarget.style.color = 'var(--ink-soft)')}
+            onMouseLeave={(e) => (e.currentTarget.style.color = 'var(--muted)')}
+          >
+            <svg aria-hidden="true" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z" />
+            </svg>
+            Bewerken
+          </Link>
+        }
+      />
 
       <WorldDetailHeader
         world={world}
@@ -175,6 +160,40 @@ export default function WorldDetailPage() {
             <ForgeCampaignCard onClick={handleCreateCampaign} loading={createCampaign.isPending} />
           </li>
         </ul>
+      )}
+
+      <WorldDetailDivider label="DM-notities" />
+
+      {/* DM notes */}
+      {world.notes ? (
+        <div
+          className="pangu-surface"
+          style={{
+            padding: 28,
+            borderColor: 'rgba(245,180,50,0.22)',
+            background: 'linear-gradient(180deg, rgba(245,180,50,0.04), transparent)',
+          }}
+        >
+          <p style={{
+            fontFamily: 'var(--font-body)',
+            fontSize: 10, fontWeight: 700,
+            letterSpacing: '0.18em', textTransform: 'uppercase',
+            color: 'var(--gold)', margin: '0 0 12px',
+          }}>
+            ✦ Alleen zichtbaar voor de DM
+          </p>
+          <p style={{
+            fontSize: 14, lineHeight: 1.75,
+            color: 'var(--ink-soft)', margin: 0,
+            whiteSpace: 'pre-wrap',
+          }}>
+            {world.notes}
+          </p>
+        </div>
+      ) : (
+        <p style={{ fontSize: 14, color: 'var(--muted)', fontStyle: 'italic', margin: 0 }}>
+          Nog geen DM-notities.
+        </p>
       )}
 
       <WorldDetailDivider label="Bestiarium" />

@@ -726,6 +726,39 @@ export default function CampaignDetailPage() {
         </>
       )}
 
+      {/* DM notes */}
+      <WorldDetailDivider label="DM-notities" />
+      {campaign.notes ? (
+        <div
+          className="pangu-surface"
+          style={{
+            padding: 28,
+            borderColor: 'rgba(245,180,50,0.22)',
+            background: 'linear-gradient(180deg, rgba(245,180,50,0.04), transparent)',
+          }}
+        >
+          <p style={{
+            fontFamily: 'var(--font-body)',
+            fontSize: 10, fontWeight: 700,
+            letterSpacing: '0.18em', textTransform: 'uppercase',
+            color: 'var(--gold)', margin: '0 0 12px',
+          }}>
+            ✦ Alleen zichtbaar voor de DM
+          </p>
+          <p style={{
+            fontSize: 14, lineHeight: 1.75,
+            color: 'var(--ink-soft)', margin: 0,
+            whiteSpace: 'pre-wrap',
+          }}>
+            {campaign.notes}
+          </p>
+        </div>
+      ) : (
+        <p style={{ fontSize: 14, color: 'var(--muted)', fontStyle: 'italic', margin: 0 }}>
+          Nog geen DM-notities.
+        </p>
+      )}
+
       {/* Items / DM pool */}
       {(() => {
         const dmPoolItems = allItems?.filter(i => !i.character_id) ?? []
