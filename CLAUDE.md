@@ -23,15 +23,17 @@ PANGU is een AI-ondersteund campaign management platform voor tabletop RPGs (PWA
 |---|---|
 | Framework | React 19 + Vite 6 |
 | Taal | TypeScript (strict mode) |
-| Styling | TailwindCSS v4 |
+| Styling | TailwindCSS v4 (vite plugin, geen config-bestand) |
 | Client state | Zustand v5 (persisted) |
 | Server state | TanStack Query v5 (mutations + cache invalidation) |
 | Routing | react-router-dom v7 |
 | Validatie | Zod |
 | Toasts | Sonner |
+| Testing | Vitest + jsdom |
 | Backend | Supabase (auth, database, storage, realtime) |
 | PWA | vite-plugin-pwa |
 | API | Vercel serverless functions (`api/admin/`) |
+| AI | Supabase Edge Function (`supabase/functions/ai-chat/`) |
 
 ---
 
@@ -41,22 +43,51 @@ PANGU is een AI-ondersteund campaign management platform voor tabletop RPGs (PWA
 src/
 ├── App.tsx                  # Root: QueryClientProvider, RouterProvider, Toaster
 ├── main.tsx                 # Entry point
+├── index.css                # CSS design tokens (TailwindCSS v4, :root vars)
+├── vite-env.d.ts
 ├── components/
+│   ├── AuthInitializer.tsx  # Supabase auth state listener, initializes auth store
+│   ├── ErrorBoundary.tsx    # React error boundary (top-level)
 │   ├── ui/                  # Herbruikbare basis-componenten
 │   │   ├── Avatar.tsx
 │   │   ├── Badge.tsx
+│   │   ├── Breadcrumb.tsx   # Enkele breadcrumb-item
+│   │   ├── Breadcrumbs.tsx  # Breadcrumb-container met items array
 │   │   ├── Button.tsx
 │   │   ├── Card.tsx
+│   │   ├── ConfirmDialog.tsx # Herbruikbare bevestigingsdialoog (verwijderen, etc.)
+│   │   ├── EmptyState.tsx   # Lege staat placeholder voor lijsten
+│   │   ├── EntityCard.tsx   # Generieke entiteitskaart (basis voor feature cards)
+│   │   ├── EntityCardSkeleton.tsx # Skeleton-loader voor entiteitskaarten
+│   │   ├── ForgeCard.tsx    # Generieke "nieuw aanmaken" placeholder-kaart
 │   │   ├── Input.tsx
 │   │   ├── Modal.tsx
-│   │   └── Spinner.tsx
+│   │   ├── Skeleton.tsx     # Basis skeleton-loader
+│   │   ├── Spinner.tsx
+│   │   └── StatusBadge.tsx  # Badge met status-kleur via statusMaps
 │   ├── admin/               # Admin feature components
 │   │   ├── CreateUserModal.tsx
 │   │   ├── DeleteUserModal.tsx
 │   │   ├── EditUserModal.tsx
 │   │   └── UserTable.tsx
+│   ├── bestiary/
+│   │   └── BestiaryCard.tsx
 │   ├── campaign/
 │   │   └── CampaignCard.tsx  # CampaignCard + ForgeCampaignCard
+│   ├── character/
+│   │   └── CharacterCard.tsx
+│   ├── encounter/
+│   │   └── EncounterCard.tsx
+│   ├── item/
+│   │   └── ItemCard.tsx
+│   ├── location/
+│   │   └── LocationCard.tsx
+│   ├── lore/
+│   │   └── LoreCard.tsx
+│   ├── npc/
+│   │   └── NpcCard.tsx
+│   ├── quest/
+│   │   └── QuestCard.tsx
 │   ├── session/
 │   │   └── SessionCard.tsx   # SessionCard + ForgeSessionCard
 │   └── world/
@@ -64,20 +95,65 @@ src/
 │       ├── WorldCard.tsx      # WorldCard + ForgeWorldCard
 │       ├── WorldDetailDivider.tsx
 │       └── WorldDetailHeader.tsx
-├── hooks/                   # Custom React hooks (momenteel leeg)
+├── hooks/                   # Custom React hooks
+│   ├── useAI.ts             # AI chat integration (calls ai-chat Edge Function)
+│   ├── useEditGuard.ts      # Voorkomt navigeren weg bij unsaved changes
+│   ├── useEntityEdit.ts     # Generieke edit form state (dirty, committed, delete)
+│   ├── useImagePositioning.ts # Drag-to-reposition voor header images
+│   ├── useUnsavedChangesPrompt.ts # Browser beforeunload dialog
+│   └── queries/             # TanStack Query custom hooks (1 per entity)
+│       ├── useCampaign.ts
+│       ├── useCampaignCharacters.ts
+│       ├── useCampaignEncounters.ts
+│       ├── useCampaignItems.ts
+│       ├── useCampaignLocations.ts
+│       ├── useCampaignLore.ts
+│       ├── useCampaignNpcs.ts
+│       ├── useCampaignQuests.ts
+│       ├── useCampaignSessions.ts
+│       ├── useCharacterItems.ts
+│       ├── useCharacters.ts
+│       ├── useSession.ts
+│       ├── useWorld.ts
+│       └── useWorldBestiaries.ts
 ├── layouts/
 │   ├── AppLayout.tsx         # Sidebar + starfield achtergrond
 │   └── AuthLayout.tsx
 ├── lib/
 │   ├── queryClient.ts        # TanStack Query client instantie
 │   ├── queryKeys.ts          # Gecentraliseerde query key constanten
+│   ├── statusMaps.ts         # Status label + kleurkaarten (alle entiteiten)
 │   └── supabase.ts           # Supabase client (getypeerd via Database)
-├── pages/
+├── pages/                   # 37 pagina-componenten (lazy-loaded via routes)
 │   ├── AdminPage.tsx
+│   ├── BestiariesPage.tsx
+│   ├── BestiaryDetailPage.tsx
+│   ├── BestiaryEditPage.tsx
 │   ├── CampaignDetailPage.tsx
 │   ├── CampaignEditPage.tsx
+│   ├── CampaignItemsPage.tsx
+│   ├── CampaignsPage.tsx
+│   ├── CharacterDetailPage.tsx
+│   ├── CharacterEditPage.tsx
+│   ├── CharactersPage.tsx
 │   ├── DashboardPage.tsx
+│   ├── EncounterDetailPage.tsx
+│   ├── EncounterEditPage.tsx
+│   ├── EncountersPage.tsx
+│   ├── ItemEditPage.tsx
+│   ├── LocationDetailPage.tsx
+│   ├── LocationEditPage.tsx
+│   ├── LocationsPage.tsx
 │   ├── LoginPage.tsx
+│   ├── LoreDetailPage.tsx
+│   ├── LoreEditPage.tsx
+│   ├── LoresPage.tsx
+│   ├── NpcDetailPage.tsx
+│   ├── NpcEditPage.tsx
+│   ├── NpcsPage.tsx
+│   ├── QuestDetailPage.tsx
+│   ├── QuestEditPage.tsx
+│   ├── QuestsPage.tsx
 │   ├── RegisterPage.tsx
 │   ├── SessionDetailPage.tsx
 │   ├── SessionEditPage.tsx
@@ -87,20 +163,40 @@ src/
 │   ├── WorldEditPage.tsx
 │   └── WorldsPage.tsx
 ├── routes/
-│   └── index.tsx             # React Router config + auth loaders
+│   ├── index.tsx             # React Router config + auth loaders
+│   ├── loaders.ts            # requireAuth / requireAdmin loader functies
+│   ├── PageLoader.tsx        # Suspense fallback component
+│   └── RouteErrorPage.tsx    # Route-level error boundary pagina
 ├── stores/
 │   ├── auth.store.ts
 │   ├── campaign.store.ts
 │   ├── preferences.store.ts
 │   └── ui.store.ts
+├── test/
+│   ├── setup.ts              # Vitest setup (jsdom, @testing-library)
+│   ├── auth-loaders.test.ts
+│   ├── Input.test.tsx
+│   ├── Modal.test.tsx
+│   └── useEntityEdit.test.ts
 ├── types/
 │   ├── database.types.ts     # Auto-gegenereerd via Supabase CLI
+│   ├── ai.ts                 # Provider, Message, AIResponse, ErrorResponse
+│   ├── bestiary.types.ts
 │   ├── campaign.types.ts
+│   ├── character.types.ts
+│   ├── encounter.types.ts
+│   ├── item.types.ts
+│   ├── location.types.ts
+│   ├── lore.types.ts
+│   ├── npc.types.ts
+│   ├── quest.types.ts
 │   ├── session.types.ts
 │   └── world.types.ts
 └── utils/
     ├── apiError.ts           # getApiError() voor serverless responses
-    └── cn.ts                 # clsx + tailwind-merge
+    ├── cn.ts                 # clsx + tailwind-merge
+    ├── pickGradient.ts       # Hash-gebaseerde gradient paletten per entity-type
+    └── sanitizeUrl.ts        # sanitizeImageUrl() — valideert HTTPS URLs
 
 api/
 └── admin/
@@ -109,7 +205,14 @@ api/
     └── users/[id].ts         # PATCH (bewerken) + DELETE
 
 supabase/
-└── migrations/               # SQL-migraties (genummerd, chronologisch)
+├── migrations/               # SQL-migraties (genummerd, chronologisch)
+└── functions/
+    └── ai-chat/              # Supabase Edge Function voor AI content generatie
+        ├── index.ts          # Hoofd handler (auth, BYOK, routing, rate limiting)
+        ├── types.ts          # Gedeelde types (Provider, Message, AIResponse, etc.)
+        ├── providers.ts      # callGroq(), callGemini(), callAnthropic(), callOpenAI()
+        ├── config.ts         # AI_CONFIG (rate limits, modellen, system prompt)
+        └── ratelimit.ts      # getUserUsage(), getOrgUsage(), routeRequest(), incrementUsage()
 ```
 
 ### Path alias
@@ -141,13 +244,37 @@ Beschikbare componenten:
 - `Badge` — status-labels (semantisch neutraal)
 - `Card` — content-containers
 - `Avatar` — initials-weergave voor users/NPCs
+- `Breadcrumbs` / `Breadcrumb` — navigatie-breadcrumbs met items array
+- `ConfirmDialog` — herbruikbare bevestigingsdialoog (gebruikt voor verwijderen)
+- `EmptyState` — lege staat placeholder voor overzichtspagina's
+- `EntityCard` — generieke entiteitskaart (basis voor alle feature cards)
+- `EntityCardSkeleton` — skeleton-loader variant van EntityCard
+- `ForgeCard` — generieke "nieuw aanmaken" placeholder-kaart (basis voor ForgeXxxCard)
+- `Skeleton` — inline skeleton-loader blok
+- `StatusBadge` — badge met automatische kleur uit `statusMaps`
 
 ### Feature-componenten (`src/components/[feature]/`)
 
-Elk feature-domein heeft een map: `campaign/`, `session/`, `world/`, `admin/`.  
-Toekomstige domeinen: `character/`, `location/`, `npc/`, `lore/`.
+Elk feature-domein heeft een map: `campaign/`, `session/`, `world/`, `admin/`, `bestiary/`, `character/`, `encounter/`, `item/`, `location/`, `lore/`, `npc/`, `quest/`.
 
-**Forge-patroon:** elke lijst heeft een `Forge[Entity]Card` naast `[Entity]Card`. De ForgeCard is een placeholder-kaart waarmee een nieuwe entiteit direct aangemaakt wordt (click → mutation → redirect naar edit).
+**Forge-patroon:** elke lijst heeft een `Forge[Entity]Card` naast `[Entity]Card`. De ForgeCard is een placeholder-kaart waarmee een nieuwe entiteit direct aangemaakt wordt (click → mutation → redirect naar edit). De generieke `ForgeCard` UI-component is de basis; feature-specifieke ForgeCards wikkelen hier een mutation omheen.
+
+### Generieke hooks (`src/hooks/`)
+
+- **`useEntityEdit<T>`** — standaard edit-form state: `form`, `set(key, value)`, `dirty`, `committed`, `deleteOpen`, `resetForm`, `guard`. Gebruik voor alle edit-pagina's.
+- **`useEditGuard`** — blokkeert navigeren weg bij unsaved + uncommitted changes.
+- **`useImagePositioning`** — mouse/touch drag-to-reposition voor header images.
+- **`useUnsavedChangesPrompt`** — browser `beforeunload` dialog bij dirty forms.
+- **`useAI`** — AI chat integratie: `{ ask, loading, windowRemaining, windowResetsAt, lastProvider, lastModel }`.
+
+### Query hooks (`src/hooks/queries/`)
+
+Eén hook per entity type. Elke query hook bevat typisch `useQuery` voor fetching en `useMutation` met cache-invalidatie. Importeer via:
+
+```ts
+import { useCampaign } from '@/hooks/queries/useCampaign'
+import { useWorldBestiaries } from '@/hooks/queries/useWorldBestiaries'
+```
 
 ---
 
@@ -155,7 +282,7 @@ Toekomstige domeinen: `character/`, `location/`, `npc/`, `lore/`.
 
 ### CSS-variabelen (globaal)
 
-Gedefinieerd op `:root`, beschikbaar via `var(--naam)`:
+Gedefinieerd op `:root` in `src/index.css`, beschikbaar via `var(--naam)`:
 
 | Groep | Variabelen |
 |---|---|
@@ -172,13 +299,33 @@ Gedefinieerd op `:root`, beschikbaar via `var(--naam)`:
 
 Dark theme (void/indigo/gold). Nooit hardcoded HEX-waarden gebruiken buiten de variabele-definitie zelf.
 
-### Kaart-gradients
+### Kaart-gradients (`src/utils/pickGradient.ts`)
 
-`WorldCard`, `CampaignCard` en `SessionCard` berekenen een deterministische gradient op basis van de eerste 8 tekens van het entity-ID (hash → HSL palette). Geen externe kleurprop nodig.
+Alle entiteitskaarten gebruiken `pickGradient(id, gradients)` voor een deterministische gradient op basis van de eerste en laatste karakter van het entity-ID. Er zijn aparte paletten per entity-type:
+
+| Palet | Gebruik |
+|---|---|
+| `coverGradients` | Hero cards (WorldCard, CampaignDetailPage header) |
+| `accentGradients` | Compacte campaign cards (standaard) |
+| `sessionGradients` | SessionCard (zijdelings, lichter) |
+| `locationGradients` | LocationCard (teal-tinted) |
+| `loreGradients` | LoreCard (violet-tinted) |
+| `npcGradients` | NpcCard (crimson-tinted) |
+| `characterGradients` | CharacterCard (azure-tinted) |
+| `bestiaryGradients` | BestiaryCard (diep teal/groen) |
+| `encounterGradients` | EncounterCard (crimson/gevaar) |
+| `itemGradients` | ItemCard (goud/crimson) |
+| `questGradients` | QuestCard (goud-tinted) |
+
+Geen externe kleurprop nodig; importeer het juiste palet en geef het door aan `pickGradient`.
+
+### Status-kleuren en -labels (`src/lib/statusMaps.ts`)
+
+Gebruik altijd `statusMaps` voor het weergeven van statussen — nooit hardcoded labels of kleuren. Exporteert `[entity]StatusLabel`, `[entity]StatusColor`, `itemRarityLabel`, `itemRarityColor`, `itemTypeLabel` voor alle entity-types.
 
 ### Header-afbeelding positie
 
-`WorldEditPage` en `CampaignEditPage` ondersteunen drag-to-reposition van de header-afbeelding (mouse + touch events). De positie wordt opgeslagen als `"X% Y%"` string en teruggelezen als `object-position` op het `<img>`-element.
+`WorldEditPage` en `CampaignEditPage` ondersteunen drag-to-reposition van de header-afbeelding via `useImagePositioning` (mouse + touch events). De positie wordt opgeslagen als `"X% Y%"` string en teruggelezen als `object-position` op het `<img>`-element.
 
 ---
 
@@ -229,6 +376,7 @@ Regels:
 - Mutations invalideren altijd de relevante queries na succes
 - Optimistic updates voor snelle UI-feedback waar zinvol
 - `staleTime` instellen per query-type (geen globale standaard van 0)
+- Alle query/mutation logica in `src/hooks/queries/` — nooit inline in pagina's
 
 ---
 
@@ -246,87 +394,190 @@ Naast de auto-gegenereerde `database.types.ts` zijn er handmatige domain-types:
 ```ts
 // world.types.ts
 type WorldStatus = 'draft' | 'active' | 'archived'
-interface World { id, user_id, name, subtitle, quote, description, header_image, header_image_position, status, created_at, updated_at }
 
 // campaign.types.ts
 type CampaignStatus = 'draft' | 'active' | 'archived' | 'completed'
-interface Campaign { id, world_id, user_id, name, subtitle, description, header_image, header_image_position, status, created_at, updated_at }
 
 // session.types.ts
 type SessionStatus = 'planned' | 'active' | 'completed' | 'archived'
-interface Session { id, campaign_id, user_id, name, subtitle, description, notes, status, session_date, session_number, created_at, updated_at }
+
+// location.types.ts
+type LocationStatus = 'draft' | 'active' | 'discovered' | 'archived'
+
+// npc.types.ts
+type NpcStatus = 'draft' | 'active' | 'retired' | 'archived'
+
+// lore.types.ts
+type LoreStatus = 'draft' | 'active' | 'archived'
+
+// bestiary.types.ts
+type BestiaryStatus = 'draft' | 'active' | 'archived'
+
+// quest.types.ts
+type QuestStatus = 'draft' | 'active' | 'completed' | 'failed' | 'archived'
+
+// encounter.types.ts
+type EncounterStatus = 'draft' | 'ready' | 'active' | 'completed' | 'archived'
+
+// item.types.ts
+type ItemType = 'weapon' | 'armor' | 'potion' | 'ring' | 'rod' | 'scroll' | 'staff' | 'wand' | 'wondrous' | 'misc'
+type ItemRarity = 'common' | 'uncommon' | 'rare' | 'very_rare' | 'legendary' | 'artifact'
+
+// character.types.ts
+type CharacterStatus = 'active' | 'inactive' | 'retired' | 'archived'
+
+// ai.ts
+type Provider = 'groq' | 'gemini' | 'anthropic' | 'openai'
+interface AIResponse { reply, provider, model, window_remaining }
+interface ErrorResponse { error, code, window_resets_at? }
 ```
+
+### Database tabellen (via `database.types.ts`)
+
+| Tabel | Scope | Beschrijving |
+|---|---|---|
+| `profiles` | global | Gebruikersprofielen met rol (`user`/`admin`) |
+| `worlds` | user | DM-owned campaign settings |
+| `campaigns` | world | Kronieken binnen een wereld |
+| `sessions` | campaign | Spelsessies binnen een kroniek |
+| `locations` | campaign | Locaties binnen een kroniek |
+| `npcs` | campaign | NPCs binnen een kroniek |
+| `lore` | campaign | Lore-items binnen een kroniek |
+| `bestiaries` | world | Wezens/monsters (D&D stat blocks) |
+| `characters` | user | Spelerkarakters (globaal, optioneel campaign-gekoppeld) |
+| `encounters` | campaign | Gevechtsencounters (optioneel sessie-gekoppeld) |
+| `encounter_monsters` | encounter | Junction: wezens met aantallen per encounter |
+| `items` | campaign | Items/loot (DM-pool of toegewezen aan karakter) |
+| `quests` | campaign | Quests binnen een kroniek |
+
+Alle tabellen hebben `committed boolean DEFAULT false` — bestaande rijen zijn `true`, nieuwe forge-aanmaak start als `false` (redirect naar edit voor invulling).
 
 ### Migraties (chronologisch)
 
 | # | Bestand | Inhoud |
 |---|---|---|
-| 001 | `001_profiles.sql` | Profiles tabel + RLS + `handle_new_user` trigger (auto-profile bij signup) |
-| 002 | `002_profile_settings.sql` | Profile settings (gereserveerd) |
+| 001 | `001_profiles.sql` | Profiles tabel + RLS + `handle_new_user` trigger |
+| 002 | `002_profile_settings.sql` | Profile settings |
 | 003 | `003_worlds.sql` | Worlds tabel + RLS |
 | 004 | `004_worlds_header_image_position.sql` | Header image positie voor worlds |
-| 005 | `005_campaigns.sql` | Campaigns tabel + RLS + index op `(world_id, created_at DESC)` |
+| 005 | `005_campaigns.sql` | Campaigns tabel + RLS |
 | 006 | `006_campaigns_header_image.sql` | Header image + positie voor campaigns |
-| 007 | `007_sessions.sql` | Sessions tabel + RLS + index + `update_sessions_updated_at` trigger |
-| 015 | `015_bestiaries.sql` | Bestiaries tabel + RLS + index op `(world_id, created_at DESC)` + `update_bestiaries_updated_at` trigger |
-| 018 | `018_encounters.sql` | Encounters tabel + RLS + index + `update_encounters_updated_at` trigger; encounter_monsters junction tabel + RLS + index |
-| 020 | `020_characters_proficient_skills.sql` | `proficient_skills text[]` kolom op characters — D&D 5e skill proficiencies |
+| 007 | `007_sessions.sql` | Sessions tabel + RLS + `update_sessions_updated_at` trigger |
+| 008 | `008_locations.sql` | Locations tabel + RLS |
+| 009 | `009_lore.sql` | Lore tabel + RLS |
+| 010 | `010_npcs.sql` | NPCs tabel + RLS |
+| 011 | `011_worlds_updated_at.sql` | `updated_at` trigger voor worlds |
+| 012 | `012_campaigns_updated_at.sql` | `updated_at` trigger voor campaigns |
+| 013 | `013_missing_indexes.sql` | Ontbrekende indexes |
+| 014 | `014_characters.sql` | Characters tabel + RLS (D&D stat block) |
+| 015 | `015_bestiaries.sql` | Bestiaries tabel + RLS + index op `(world_id, created_at DESC)` |
+| 016 | `016_fix_characters_updated_at.sql` | Fix `updated_at` trigger voor characters |
+| 017 | `017_avatar.sql` | Avatar kolom op profiles |
+| 017 | `017_quests.sql` | Quests tabel + RLS |
+| 018 | `018_campaign_id_to_characters.sql` | `campaign_id` FK op characters |
+| 018 | `018_encounters.sql` | Encounters + `encounter_monsters` junction tabel + RLS |
+| 019 | `019_items.sql` | Items tabel + RLS |
+| 020 | `020_characters_proficient_skills.sql` | `proficient_skills text[]` op characters |
+| 020 | `020_profile_ai_keys.sql` | `byok_keys jsonb` op profiles (Anthropic + OpenAI) |
+| 021 | `021_ai_usage.sql` | `ai_usage` + `ai_org_usage` tabellen + RLS + atomische RPC-functies |
 | 021 | `021_worlds_campaigns_notes.sql` | `notes text` kolom op worlds en campaigns |
-| 022 | `022_committed_column.sql` | `committed boolean DEFAULT false` op alle entity-tabellen (worlds, campaigns, sessions, locations, lore, npcs, bestiaries, quests, encounters, characters, items); bestaande rijen → `committed = true` |
+| 022 | `022_committed_column.sql` | `committed boolean` op alle entity-tabellen |
+
+---
+
+## AI-integratie (Lore Forge)
+
+### Frontend (`src/hooks/useAI.ts`)
+
+```ts
+const { ask, loading, windowRemaining, windowResetsAt, lastProvider, lastModel } = useAI()
+
+// Gebruik
+await ask({ messages: [{ role: 'user', content: prompt }] })
+```
+
+### Backend (`supabase/functions/ai-chat/`)
+
+- **Cascaderende free-tier providers:** Groq (llama-3.3-70b) → Gemini 2.5 Flash-Lite
+- **BYOK:** Anthropic + OpenAI via `byok_keys jsonb` op het gebruikersprofiel
+- **Per-user rate limiting:** configureerbaar via `config.ts` (standaard 5 req / 5 uur)
+- **Org-level Groq soft cap:** configureerbaar max requests/dag
+- **Usage tracking:** `ai_usage` (per user), `ai_org_usage` (org-breed)
+- **System prompt:** "Pangu Oracle" DM-assistent persona (in `config.ts`)
+
+Routing-beslissing: BYOK keys aanwezig → gebruik BYOK provider. Anders: Groq (gratis) → Gemini (gratis) → rate-limit fout.
 
 ---
 
 ## Routing
 
-Routes zijn gedefinieerd in `src/routes/index.tsx`. Lazy-loading voor alle pagina-routes via React Suspense.
+Routes zijn gedefinieerd in `src/routes/index.tsx`. Lazy-loading voor alle pagina-routes via React Suspense + `PageLoader` fallback.
 
 ### Huidige routes
 
-| Route | Pagina | Auth | Status |
-|---|---|---|---|
-| `/` | redirect → `/dashboard` | — | ✅ |
-| `/login` | `LoginPage` | nee (AuthLayout) | ✅ |
-| `/register` | `RegisterPage` | nee (AuthLayout) | ✅ |
-| `/dashboard` | `DashboardPage` | `requireAuth` | ✅ |
-| `/admin` | `AdminPage` | `requireAdmin` | ✅ |
-| `/settings` | `SettingsPage` | `requireAuth` | ✅ |
-| `/worlds` | `WorldsPage` | `requireAuth` | ✅ |
-| `/worlds/:id` | `WorldDetailPage` | `requireAuth` | ✅ |
-| `/worlds/:id/edit` | `WorldEditPage` | `requireAuth` | ✅ |
-| `/campaigns/:id` | `CampaignDetailPage` | `requireAuth` | ✅ |
-| `/campaigns/:id/edit` | `CampaignEditPage` | `requireAuth` | ✅ |
-| `/campaigns/:id/sessions` | `SessionsPage` | `requireAuth` | ✅ |
-| `/sessions/:id` | `SessionDetailPage` | `requireAuth` | ✅ |
-| `/sessions/:id/edit` | `SessionEditPage` | `requireAuth` | ✅ |
-| `/campaigns/:id/locations` | `LocationsPage` | `requireAuth` | ✅ |
-| `/locations/:id` | `LocationDetailPage` | `requireAuth` | ✅ |
-| `/locations/:id/edit` | `LocationEditPage` | `requireAuth` | ✅ |
-| `/campaigns/:id/lore` | `LoresPage` | `requireAuth` | ✅ |
-| `/lore/:id` | `LoreDetailPage` | `requireAuth` | ✅ |
-| `/lore/:id/edit` | `LoreEditPage` | `requireAuth` | ✅ |
-| `/campaigns/:id/npcs` | `NpcsPage` | `requireAuth` | ✅ |
-| `/npcs/:id` | `NpcDetailPage` | `requireAuth` | ✅ |
-| `/npcs/:id/edit` | `NpcEditPage` | `requireAuth` | ✅ |
-| `/worlds/:id/bestiary` | `BestiariesPage` | `requireAuth` | ✅ |
-| `/bestiary/:id` | `BestiaryDetailPage` | `requireAuth` | ✅ |
-| `/bestiary/:id/edit` | `BestiaryEditPage` | `requireAuth` | ✅ |
-| `/campaigns/:id/quests` | `QuestsPage` | `requireAuth` | ✅ |
-| `/quests/:id` | `QuestDetailPage` | `requireAuth` | ✅ |
-| `/quests/:id/edit` | `QuestEditPage` | `requireAuth` | ✅ |
-| `/campaigns/:id/encounters` | `EncountersPage` | `requireAuth` | ✅ |
-| `/encounters/:id` | `EncounterDetailPage` | `requireAuth` | ✅ |
-| `/encounters/:id/edit` | `EncounterEditPage` | `requireAuth` | ✅ |
-| `/characters` | `CharactersPage` | `requireAuth` | ✅ |
-| `/characters/:id` | `CharacterDetailPage` | `requireAuth` | ✅ |
-| `/characters/:id/edit` | `CharacterEditPage` | `requireAuth` | ✅ |
-| `/campaigns` | `CampaignsPage` | `requireAuth` | ✅ |
-| `/campaigns/:id/items` | `CampaignItemsPage` | `requireAuth` | ✅ |
-| `/items/:id/edit` | `ItemEditPage` | `requireAuth` | ✅ |
+| Route | Pagina | Auth |
+|---|---|---|
+| `/` | redirect → `/dashboard` | — |
+| `/login` | `LoginPage` | nee (AuthLayout) |
+| `/register` | `RegisterPage` | nee (AuthLayout) |
+| `/dashboard` | `DashboardPage` | `requireAuth` |
+| `/admin` | `AdminPage` | `requireAdmin` |
+| `/settings` | `SettingsPage` | `requireAuth` |
+| `/worlds` | `WorldsPage` | `requireAuth` |
+| `/worlds/:id` | `WorldDetailPage` | `requireAuth` |
+| `/worlds/:id/edit` | `WorldEditPage` | `requireAuth` |
+| `/campaigns` | `CampaignsPage` | `requireAuth` |
+| `/campaigns/:id` | `CampaignDetailPage` | `requireAuth` |
+| `/campaigns/:id/edit` | `CampaignEditPage` | `requireAuth` |
+| `/campaigns/:id/sessions` | `SessionsPage` | `requireAuth` |
+| `/campaigns/:id/locations` | `LocationsPage` | `requireAuth` |
+| `/campaigns/:id/lore` | `LoresPage` | `requireAuth` |
+| `/campaigns/:id/npcs` | `NpcsPage` | `requireAuth` |
+| `/campaigns/:id/quests` | `QuestsPage` | `requireAuth` |
+| `/campaigns/:id/encounters` | `EncountersPage` | `requireAuth` |
+| `/campaigns/:id/items` | `CampaignItemsPage` | `requireAuth` |
+| `/sessions/:id` | `SessionDetailPage` | `requireAuth` |
+| `/sessions/:id/edit` | `SessionEditPage` | `requireAuth` |
+| `/locations/:id` | `LocationDetailPage` | `requireAuth` |
+| `/locations/:id/edit` | `LocationEditPage` | `requireAuth` |
+| `/lore/:id` | `LoreDetailPage` | `requireAuth` |
+| `/lore/:id/edit` | `LoreEditPage` | `requireAuth` |
+| `/npcs/:id` | `NpcDetailPage` | `requireAuth` |
+| `/npcs/:id/edit` | `NpcEditPage` | `requireAuth` |
+| `/worlds/:id/bestiary` | `BestiariesPage` | `requireAuth` |
+| `/bestiary/:id` | `BestiaryDetailPage` | `requireAuth` |
+| `/bestiary/:id/edit` | `BestiaryEditPage` | `requireAuth` |
+| `/quests/:id` | `QuestDetailPage` | `requireAuth` |
+| `/quests/:id/edit` | `QuestEditPage` | `requireAuth` |
+| `/encounters/:id` | `EncounterDetailPage` | `requireAuth` |
+| `/encounters/:id/edit` | `EncounterEditPage` | `requireAuth` |
+| `/characters` | `CharactersPage` | `requireAuth` |
+| `/characters/:id` | `CharacterDetailPage` | `requireAuth` |
+| `/characters/:id/edit` | `CharacterEditPage` | `requireAuth` |
+| `/items/:id/edit` | `ItemEditPage` | `requireAuth` |
 
-### Auth loaders
+### Auth loaders (`src/routes/loaders.ts`)
 
 - `requireAuth` — redirect naar `/login` als geen sessie actief
 - `requireAdmin` — redirect naar `/dashboard` als rol ≠ `'admin'`
+
+---
+
+## Testing
+
+Tests staan in `src/test/`. Framework: **Vitest** met jsdom-environment en `@testing-library/react`.
+
+```bash
+npm run test        # Vitest (watch mode)
+npm run type-check  # tsc --noEmit
+npm run lint        # ESLint
+```
+
+Huidige testbestanden:
+- `auth-loaders.test.ts` — route loader logica
+- `Input.test.tsx` — Input component
+- `Modal.test.tsx` — Modal component
+- `useEntityEdit.test.ts` — edit form hook
 
 ---
 
@@ -353,7 +604,10 @@ Elke feature is pas **klaar** als alle punten gehaald zijn:
 4. **Foutafhandeling alleen aan systeemgrenzen** — gebruikersinput, externe APIs. Vertrouw interne code en framework-garanties.
 5. **TypeScript strict** — geen `any`, geen `@ts-ignore` zonder uitleg.
 6. **Elke nieuwe feature documenteren** in de Feature Status hieronder.
-7. **Hooks directory** — extraheer herbruikbare query/state logica naar `src/hooks/` zodra dezelfde logica op ≥2 plekken voorkomt (bv. `useImagePositioning`, `useWorld`).
+7. **Query logica in `src/hooks/queries/`** — nooit inline TanStack Query in pagina-componenten.
+8. **Status labels/kleuren via `statusMaps`** — nooit hardcoded in componenten.
+9. **Gradients via `pickGradient`** — importeer het juiste palet uit `pickGradient.ts`.
+10. **`useEntityEdit` voor edit-pagina's** — standaard hook voor form state, dirty tracking, delete dialoog.
 
 ---
 
@@ -365,6 +619,7 @@ npm run build        # Production build
 npm run preview      # Preview production build
 npm run lint         # ESLint
 npm run type-check   # tsc --noEmit
+npm run test         # Vitest
 ```
 
 ---
@@ -375,7 +630,7 @@ npm run type-check   # tsc --noEmit
 
 ### Infrastructuur
 - [x] Vite + React 19 + TypeScript setup
-- [x] TailwindCSS v4 configuratie + CSS design tokens
+- [x] TailwindCSS v4 configuratie + CSS design tokens (`src/index.css`)
 - [x] Supabase client + types
 - [x] TanStack Query client + gecentraliseerde query keys
 - [x] Zustand stores (auth, campaign, ui, preferences)
@@ -384,6 +639,9 @@ npm run type-check   # tsc --noEmit
 - [x] PWA-configuratie (vite-plugin-pwa, manifest, icons)
 - [x] Vercel serverless API (`api/admin/`)
 - [x] `@`-path alias (Vite + TypeScript)
+- [x] Vitest + jsdom test setup (`src/test/`)
+- [x] `AuthInitializer` — Supabase auth state listener
+- [x] `ErrorBoundary` — top-level React error boundary
 
 ### UI Basis-componenten (`src/components/ui/`)
 - [x] `Button` (variants: primary/secondary/ghost/danger, sizes: sm/md/lg, loading state)
@@ -393,6 +651,13 @@ npm run type-check   # tsc --noEmit
 - [x] `Badge`
 - [x] `Card`
 - [x] `Avatar` (initials-weergave)
+- [x] `Breadcrumb` + `Breadcrumbs` (navigatie-breadcrumbs)
+- [x] `ConfirmDialog` (herbruikbare bevestigingsdialoog)
+- [x] `EmptyState` (lege staat placeholder)
+- [x] `EntityCard` + `EntityCardSkeleton` (generieke entiteitskaart basis)
+- [x] `ForgeCard` (generieke "nieuw aanmaken" placeholder)
+- [x] `Skeleton` (inline skeleton-loader)
+- [x] `StatusBadge` (status-badge met kleur uit statusMaps)
 
 ### Authenticatie
 - [x] Login pagina (email + wachtwoord, validatie, redirect op rol)
@@ -410,6 +675,7 @@ npm run type-check   # tsc --noEmit
 - [x] Zelf-verwijdering-preventie in DELETE endpoint
 - [x] Rol-gebaseerde navigatie (Accountbeheer zichtbaar voor admins)
 - [x] Uitloggen via sidebar
+- [x] Admin AI-testpaneel — "Test Gemini / Groq" knop met provider-badge, model-naam en resterend-verzoeken-teller
 
 ### Instellingen
 - [x] Instellingen pagina `/settings` (3 tabs: Profiel, Voorkeuren, Info)
@@ -417,6 +683,7 @@ npm run type-check   # tsc --noEmit
 - [x] Voorkeuren-tab — sessieherinneringen, geluidseffecten, autosave, lore-suggesties, taal (nl/en/de/fr)
 - [x] Info-tab — PANGU branding, versie, status, licentie
 - [x] Preferences store (Zustand, per-gebruiker geïsoleerd via user ID)
+- [x] BYOK keys — Anthropic + OpenAI API keys opslaan via `byok_keys jsonb` op profiel (`020_profile_ai_keys.sql`)
 
 ### Dashboard
 - [x] Dashboard pagina `/dashboard` — recent: 4 werelden, 4 actieve campaigns, 6 geplande sessies
@@ -449,28 +716,31 @@ npm run type-check   # tsc --noEmit
 - [x] `update_sessions_updated_at` trigger
 - [x] Sessie-overzicht per campaign `/campaigns/:id/sessions` — grid met SessionCard + ForgeSessionCard
 - [x] Sessie aanmaken — direct aanmaken + redirect naar bewerken
-- [x] Sessie bewerken `/sessions/:id/edit` — naam, subtitle, sessienummer, datum, status (planned/active/completed/archived), beschrijving, DM-notities
-- [x] Sessie-detailpagina `/sessions/:id` — breadcrumbs (wereld · kroniek · sessies), header met sessienummer-, datum- en statusbadge, beschrijving, DM-notities
+- [x] Sessie bewerken `/sessions/:id/edit` — naam, subtitle, sessienummer, datum, status, beschrijving, DM-notities
+- [x] Sessie-detailpagina `/sessions/:id` — breadcrumbs, header met sessienummer-, datum- en statusbadge, beschrijving, DM-notities
 - [x] Sessie verwijderen — met bevestigingsdialoog
 
 ### Wereld — Locaties
-- [x] Locatie-overzicht per campaign (`/campaigns/:id/locations`)
+- [x] Locations tabel + RLS (`008_locations.sql`)
+- [x] Locatie-overzicht per campaign `/campaigns/:id/locations`
 - [x] Locatie aanmaken / bewerken / verwijderen
-- [x] Locatie-detailpagina `/locations/:id` — breadcrumbs (wereld · kroniek · locaties), header met type- en status-badge, beschrijving, DM-notities
+- [x] Locatie-detailpagina `/locations/:id` — breadcrumbs (wereld · kroniek · locaties), header met type- en statusbadge, beschrijving, DM-notities
 
 ### Wereld — NPCs
-- [x] NPC-overzicht per campaign (`/campaigns/:id/npcs`)
+- [x] NPCs tabel + RLS (`010_npcs.sql`)
+- [x] NPC-overzicht per campaign `/campaigns/:id/npcs`
 - [x] NPC aanmaken / bewerken / verwijderen
-- [x] NPC-detailpagina `/npcs/:id` — breadcrumbs (wereld · kroniek · NPCs), header met rol- en statusbadge, beschrijving, DM-notities
+- [x] NPC-detailpagina `/npcs/:id` — breadcrumbs, header met rol- en statusbadge, beschrijving, DM-notities
 
 ### Wereld — Lore
-- [x] Lore-overzicht per campaign (`/campaigns/:id/lore`)
+- [x] Lore tabel + RLS (`009_lore.sql`)
+- [x] Lore-overzicht per campaign `/campaigns/:id/lore`
 - [x] Lore-item aanmaken / bewerken / verwijderen
-- [x] Lore-detailpagina `/lore/:id` — breadcrumbs (wereld · kroniek · lore), header met categorie- en statusbadge, beschrijving, DM-notities
+- [x] Lore-detailpagina `/lore/:id` — breadcrumbs, header met categorie- en statusbadge, beschrijving, DM-notities
 
 ### Wereld — Bestiarium
 - [x] Bestiaries tabel + RLS (`015_bestiaries.sql`) — world-scoped, full D&D stat block (HP, AC, speed, 6 eigenschappen)
-- [x] Bestiarium-overzicht per wereld (`/worlds/:id/bestiary`) — grid met BestiaryCard + ForgeBestiaryCard, lege staat
+- [x] Bestiarium-overzicht per wereld `/worlds/:id/bestiary` — grid met BestiaryCard + ForgeBestiaryCard, lege staat
 - [x] Wezen aanmaken — direct aanmaken + redirect naar bewerken
 - [x] Wezen bewerken `/bestiary/:id/edit` — naam, subtitel, type, dreigingsniveau, leefgebied, status, HP/AC/snelheid, 6 eigenschappen, beschrijving, DM-notities
 - [x] Wezen-detailpagina `/bestiary/:id` — breadcrumbs (wereld · bestiarium), header met type- en dreigingsbadges, stat block met modifiers, beschrijving, DM-notities
@@ -482,7 +752,7 @@ npm run type-check   # tsc --noEmit
 - [x] `campaign_id` op characters (`018_campaign_id_to_characters.sql`) — karakter koppelen aan één kroniek
 - [x] Karakters overzicht `/characters` — grid met CharacterCard + ForgeCharacterCard, zoekfilter
 - [x] Karakter aanmaken — direct aanmaken + redirect naar bewerken
-- [x] Karakter bewerken `/characters/:id/edit` — naam, klasse, subklasse, ras, level, XP, HP, AC, snelheid, initiatief, vaardigheidsbonus, 6 eigenschappen, **vaardigheden (18 skills)**, schatkist, achtergrond, privénotities, **kroniek-koppeling**
+- [x] Karakter bewerken `/characters/:id/edit` — naam, klasse, subklasse, ras, level, XP, HP, AC, snelheid, initiatief, vaardigheidsbonus, 6 eigenschappen, vaardigheden (18 skills), schatkist, achtergrond, privénotities, kroniek-koppeling
 - [x] Karakter-detailpagina `/characters/:id` — Stats/Vaardigheden/Lore/Inventaris tabs, inline HP ±1, XP-balk, eigenschappen-grid met modifiers, vaardigheidstab met proficiency-indicator + berekende modifiers, schatkist, inventaris met "Teruggeven aan DM"
 - [x] Karakter verwijderen — met bevestigingsdialoog
 - [x] Navigatie-item "Karakters" in sidebar
@@ -500,8 +770,8 @@ npm run type-check   # tsc --noEmit
 - [x] ItemCard + ForgeItemCard component (`src/components/item/ItemCard.tsx`)
 
 ### Wereld — Quests
-- [x] Quests tabel + RLS (`017_quests.sql`) — campaign-scoped, status (draft/active/completed/failed/archived), type, difficulty, reward
-- [x] Quest-overzicht per campaign (`/campaigns/:id/quests`) — grid met QuestCard + ForgeQuestCard, lege staat
+- [x] Quests tabel + RLS (`017_quests.sql`) — campaign-scoped, status (draft/active/completed/failed/archived)
+- [x] Quest-overzicht per campaign `/campaigns/:id/quests` — grid met QuestCard + ForgeQuestCard, lege staat
 - [x] Quest aanmaken — direct aanmaken + redirect naar bewerken
 - [x] Quest bewerken `/quests/:id/edit` — naam, subtitel, type, moeilijkheidsgraad, status, beloning, beschrijving, DM-notities
 - [x] Quest-detailpagina `/quests/:id` — breadcrumbs (wereld · kroniek · quests), header met type- en statusbadge, beschrijving, beloning, DM-notities
@@ -509,25 +779,26 @@ npm run type-check   # tsc --noEmit
 - [x] Quest-preview in kroniek-detailpagina (inline grid + "Alle quests bekijken →")
 
 ### Gevechten — Encounter Builder
-- [x] Encounters tabel + RLS + `session_id` FK (optionele koppeling aan sessie) (`018_encounters.sql`)
-- [x] `encounter_monsters` junction tabel + RLS (bestiary creatures met aantallen)
-- [x] Gevechten-overzicht per kroniek (`/campaigns/:id/encounters`) — grid met EncounterCard + ForgeEncounterCard
+- [x] Encounters tabel + RLS + `session_id` FK (`018_encounters.sql`)
+- [x] `encounter_monsters` junction tabel + RLS
+- [x] Gevechten-overzicht per kroniek `/campaigns/:id/encounters` — grid met EncounterCard + ForgeEncounterCard
 - [x] Gevecht aanmaken — direct aanmaken + redirect naar bewerken
 - [x] Gevecht bewerken `/encounters/:id/edit` — naam, subtitel, omgeving, moeilijkheidsgraad, status, sessie-koppeling, beschrijving, DM-notities
-- [x] Monster builder in edit pagina — inline picker met zoekveld, alle wezens uit wereld-bestiarium, aantalcontrols (+ / −), verwijderknop; save via full-replace strategie
+- [x] Monster builder in edit pagina — inline picker met zoekveld, wezens uit wereld-bestiarium, aantalcontrols, verwijderknop; save via full-replace strategie
 - [x] Gevecht-detailpagina `/encounters/:id` — breadcrumbs, header met moeilijkheid- en omgevingsbadges, monsters-tabel met stats, beschrijving, DM-notities
-- [x] Gevecht verwijderen — met bevestigingsdialoog (cascade verwijdert ook encounter_monsters)
-- [x] Gevechten-preview in kroniek-detailpagina (inline grid max 3 + "Alle gevechten bekijken →")
+- [x] Gevecht verwijderen — met bevestigingsdialoog (cascade verwijdert encounter_monsters)
+- [x] Gevechten-preview in kroniek-detailpagina (max 3 + "Alle gevechten bekijken →")
 
 ### AI-integratie (Lore Forge)
 - [x] Supabase Edge Function `ai-chat` (`supabase/functions/ai-chat/`)
   - [x] Cascaderende free-tier providers: Groq (llama-3.3-70b) → Gemini 2.5 Flash-Lite
   - [x] Per-user rate limiting via `ai_usage` tabel (configureerbaar via `config.ts`)
   - [x] Org-level Groq soft cap via `ai_org_usage` tabel
-  - [x] BYOK: uitbreidbare `byok_keys jsonb` map (nu: Anthropic + OpenAI)
-  - [x] `useAI()` hook (`src/hooks/useAI.ts`) + types (`src/types/ai.ts`) — exposeert `lastProvider` + `lastModel`
-  - [x] Migratie `021_ai_usage.sql` uitgerold naar productie (tabellen + RLS + atomische RPC-functies)
-- [x] Admin AI-testpaneel (`/admin`) — "Test Gemini / Groq" knop met provider-badge, model-naam en resterend-verzoeken-teller
+  - [x] BYOK: `byok_keys jsonb` op profiles (Anthropic + OpenAI)
+  - [x] `useAI()` hook (`src/hooks/useAI.ts`) + types (`src/types/ai.ts`)
+  - [x] Migratie `021_ai_usage.sql` uitgerold (tabellen + RLS + atomische RPC-functies)
+  - [x] `020_profile_ai_keys.sql` — BYOK keys opslag op profiel
+- [x] Admin AI-testpaneel (`/admin`) — provider-badge, model-naam, resterend-verzoeken-teller
 - [x] Content genereren voor locaties (UI integratie)
 - [x] Content genereren voor NPCs (UI integratie)
 - [x] Content genereren voor lore (UI integratie)
