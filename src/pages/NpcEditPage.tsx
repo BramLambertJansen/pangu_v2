@@ -1,4 +1,4 @@
-import { useId } from 'react'
+import { useId, useState } from 'react'
 import { useParams, useNavigate, useLocation } from 'react-router-dom'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { toast } from 'sonner'
@@ -8,6 +8,7 @@ import { Modal } from '@/components/ui/Modal'
 import { ConfirmDialog } from '@/components/ui/ConfirmDialog'
 import { Spinner } from '@/components/ui/Spinner'
 import { useEntityEdit } from '@/hooks/useEntityEdit'
+import { useAI } from '@/hooks/useAI'
 import type { Npc, NpcStatus } from '@/types/npc.types'
 
 const statusOptions: { value: NpcStatus; label: string }[] = [
@@ -27,6 +28,9 @@ export default function NpcEditPage() {
   const notesId = useId()
   const statusId = useId()
   const npcRoleId = useId()
+
+  const { ask, loading: aiLoading } = useAI()
+  const [aiPreview, setAiPreview] = useState<string | null>(null)
 
   const locationState = location.state as { isNew?: boolean; campaignId?: string } | null
   const isNew = locationState?.isNew ?? false
@@ -136,6 +140,44 @@ export default function NpcEditPage() {
     } else {
       if (campaignId) navigate(`/campaigns/${campaignId}/npcs`)
       else navigate('/dashboard')
+    }
+  }
+
+  async function handleGenerateDescription() {
+    const name = form.name?.trim()
+    if (!name) {
+      toast.error('Vul eerst een naam in voordat je genereert')
+      return
+    }
+    const roleHint = form.npc_role ? ` (${form.npc_role})` : ''
+    const subtitleHint = form.subtitle ? ` — ${form.subtitle}` : ''
+    const existingHint = form.description?.trim()
+      ? ` De huidige beschrijving luidt: "${form.description.trim()}". Verbeter of breid deze uit.`
+      : ''
+    try {
+      const reply = await ask([
+        {
+          role: 'user',
+          content:
+            `Je bent een creatieve schrijver voor een tabletop RPG-campagne (D&D-stijl). ` +
+            `Schrijf een levendige beschrijving (3–5 zinnen in het Nederlands) voor het personage ` +
+            `"${name}"${roleHint}${subtitleHint}. ` +
+            `Beschrijf uiterlijk, persoonlijkheid en eerste indruk; geef het personage karakter.` +
+            existingHint +
+            ` Geef alleen de beschrijvingstekst terug, zonder koptekst of uitleg.`,
+        },
+      ])
+      setAiPreview(reply.trim())
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : 'Genereren mislukt')
+    }
+  }
+
+  function handleAcceptGenerated() {
+    if (aiPreview !== null) {
+      set('description', aiPreview || null)
+      setAiPreview(null)
+      toast.success('Beschrijving overgenomen')
     }
   }
 
@@ -263,15 +305,67 @@ export default function NpcEditPage() {
             </div>
 
             <div className="sm:col-span-2">
-              <label className="pangu-label" htmlFor={descriptionId}>Beschrijving</label>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 4 }}>
+                <label className="pangu-label" htmlFor={descriptionId} style={{ margin: 0 }}>Beschrijving</label>
+                <button
+                  type="button"
+                  onClick={handleGenerateDescription}
+                  disabled={aiLoading}
+                  aria-label="Genereer beschrijving met AI"
+                  style={{
+                    display: 'inline-flex', alignItems: 'center', gap: 5,
+                    background: 'none', border: '1px solid var(--hairline)',
+                    borderRadius: 6, cursor: aiLoading ? 'not-allowed' : 'pointer',
+                    color: aiLoading ? 'var(--subtle)' : 'var(--violet)',
+                    fontSize: 11, fontWeight: 600, letterSpacing: '0.06em',
+                    padding: '3px 8px', fontFamily: 'var(--font-body)',
+                    transition: 'color var(--t-fast), border-color var(--t-fast)',
+                    opacity: aiLoading ? 0.6 : 1,
+                  }}
+                  onMouseEnter={(e) => { if (!aiLoading) e.currentTarget.style.borderColor = 'var(--violet)' }}
+                  onMouseLeave={(e) => { e.currentTarget.style.borderColor = 'var(--hairline)' }}
+                >
+                  {aiLoading
+                    ? <><Spinner size="sm" /> Genereren...</>
+                    : <>✦ Genereer</>
+                  }
+                </button>
+              </div>
               <textarea
                 id={descriptionId}
                 className="pangu-textarea"
                 value={form.description ?? ''}
-                onChange={(e) => set('description', e.target.value || null)}
+                onChange={(e) => { set('description', e.target.value || null); setAiPreview(null) }}
                 placeholder="Beschrijf het personage, uiterlijk, persoonlijkheid en achtergrond..."
                 rows={4}
               />
+              {aiPreview !== null && (
+                <div
+                  role="status"
+                  aria-live="polite"
+                  style={{
+                    marginTop: 8, padding: '12px 14px',
+                    background: 'color-mix(in srgb, var(--violet) 8%, var(--surface-2))',
+                    border: '1px solid color-mix(in srgb, var(--violet) 25%, transparent)',
+                    borderRadius: 8,
+                  }}
+                >
+                  <p style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.1em', color: 'var(--violet)', marginBottom: 6, textTransform: 'uppercase' }}>
+                    AI-suggestie
+                  </p>
+                  <p style={{ fontSize: 14, color: 'var(--ink-soft)', whiteSpace: 'pre-wrap', lineHeight: 1.6, margin: 0 }}>
+                    {aiPreview}
+                  </p>
+                  <div style={{ display: 'flex', gap: 8, marginTop: 12 }}>
+                    <button type="button" className="pangu-btn pangu-btn-secondary pangu-btn-sm" onClick={handleAcceptGenerated}>
+                      Overnemen
+                    </button>
+                    <button type="button" className="pangu-btn pangu-btn-ghost pangu-btn-sm" onClick={() => setAiPreview(null)}>
+                      Negeren
+                    </button>
+                  </div>
+                </div>
+              )}
             </div>
 
             <div className="sm:col-span-2">
