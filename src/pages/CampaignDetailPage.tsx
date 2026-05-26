@@ -13,7 +13,7 @@ import { LoreCard, ForgeLoreCard } from '@/components/lore/LoreCard'
 import { NpcCard, ForgeNpcCard } from '@/components/npc/NpcCard'
 import { QuestCard, ForgeQuestCard } from '@/components/quest/QuestCard'
 import { EncounterCard, ForgeEncounterCard } from '@/components/encounter/EncounterCard'
-import { CharacterCard } from '@/components/character/CharacterCard'
+import { PartyMemberRow } from '@/components/character/CharacterCard'
 import { ItemCard, ForgeItemCard } from '@/components/item/ItemCard'
 import { useCampaignWithWorld } from '@/hooks/queries/useCampaign'
 import { useCampaignSessions } from '@/hooks/queries/useCampaignSessions'
@@ -435,29 +435,42 @@ export default function CampaignDetailPage() {
         </div>
       </div>
 
-      <WorldDetailDivider label={`Karakters in deze kroniek${characters && characters.length > 0 ? ` (${characters.length})` : ''}`} />
+      {/* ── The Party ── */}
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', margin: '36px 0 16px' }}>
+        <h2 style={{
+          fontFamily: 'var(--font-display)',
+          fontSize: 'clamp(22px, 4vw, 30px)',
+          fontWeight: 600,
+          letterSpacing: '0.06em',
+          textTransform: 'uppercase',
+          color: 'var(--ink)',
+          margin: 0,
+        }}>
+          The Party
+        </h2>
+        <button
+          type="button"
+          className="pangu-btn pangu-btn-ghost pangu-btn-sm"
+          onClick={() => navigate('/characters')}
+          aria-label="Held toevoegen — ga naar karakters"
+        >
+          + Held toevoegen
+        </button>
+      </div>
 
-      {/* Characters list */}
       {isLoadingCharacters ? (
         <div style={{ display: 'flex', justifyContent: 'center', padding: '40px 0' }} aria-live="polite" aria-label="Karakters laden..." aria-busy="true">
           <Spinner size="md" />
         </div>
       ) : characters && characters.length > 0 ? (
         <ul
-          style={{
-            display: 'grid',
-            gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))',
-            gap: 'var(--sp-5)',
-            listStyle: 'none',
-            padding: 0,
-            margin: 0,
-          }}
+          style={{ display: 'flex', flexDirection: 'column', gap: 12, listStyle: 'none', padding: 0, margin: 0 }}
           role="list"
           aria-label="Karakters in deze kroniek"
         >
           {characters.map((character) => (
             <li key={character.id}>
-              <CharacterCard character={character} />
+              <PartyMemberRow character={character} />
             </li>
           ))}
         </ul>
@@ -467,7 +480,7 @@ export default function CampaignDetailPage() {
           style={{ padding: 24, textAlign: 'center', borderStyle: 'dashed' }}
         >
           <p style={{ fontSize: 14, color: 'var(--muted)', margin: '0 0 6px', fontStyle: 'italic' }}>
-            Nog geen karakters gekoppeld aan deze kroniek.
+            Nog geen helden in deze kroniek.
           </p>
           <p style={{ fontSize: 12, color: 'var(--subtle)', margin: 0 }}>
             Spelers kunnen hun karakter koppelen via het karakterscherm (Karakters → Bewerken → Kampagne).

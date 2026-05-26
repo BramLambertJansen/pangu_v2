@@ -93,3 +93,12 @@ export function pickGradient(id: string, gradients: string[] = accentGradients):
   const code = (id.charCodeAt(0) || 0) + (id.charCodeAt(id.length - 1) || 0)
   return gradients[code % gradients.length]
 }
+
+const characterAccents = ['var(--violet)', 'var(--azure)', 'var(--teal)', 'var(--gold)'] as const
+
+// Returns a deterministic accent color for a character based on their ID hash.
+// Index mapping: 0→violet, 1→azure, 2→teal, 3→gold — same hash as pickGradient.
+export function pickCharacterAccent(id: string): string {
+  const code = (id.charCodeAt(0) || 0) + (id.charCodeAt(id.length - 1) || 0)
+  return characterAccents[code % characterAccents.length]
+}

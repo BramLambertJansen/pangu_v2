@@ -5,6 +5,8 @@ import { queryKeys } from '@/lib/queryKeys'
 import { Spinner } from '@/components/ui/Spinner'
 import { Breadcrumb } from '@/components/ui/Breadcrumb'
 import { WorldDetailDivider } from '@/components/world/WorldDetailDivider'
+import { PartyMemberRow } from '@/components/character/CharacterCard'
+import { useCampaignCharacters } from '@/hooks/queries/useCampaignCharacters'
 import { sessionStatusLabel, sessionStatusColor } from '@/lib/statusMaps'
 import type { Session, SessionStatus } from '@/types/session.types'
 
@@ -53,6 +55,9 @@ export default function SessionDetailPage() {
     enabled: !!id,
     staleTime: 1000 * 60,
   })
+
+  const campaignId = session?.campaign_id ?? undefined
+  const { data: partyMembers } = useCampaignCharacters(campaignId)
 
   if (isLoading) {
     return (
@@ -270,6 +275,24 @@ export default function SessionDetailPage() {
         <p style={{ fontSize: 14, color: 'var(--muted)', fontStyle: 'italic', margin: 0 }}>
           Nog geen DM-notities.
         </p>
+      )}
+
+      {/* The Party — only shown when characters are linked to this campaign */}
+      {partyMembers && partyMembers.length > 0 && (
+        <>
+          <WorldDetailDivider label="The Party" />
+          <ul
+            style={{ display: 'flex', flexDirection: 'column', gap: 12, listStyle: 'none', padding: 0, margin: 0 }}
+            role="list"
+            aria-label="Karakters in deze sessie"
+          >
+            {partyMembers.slice(0, 4).map((character) => (
+              <li key={character.id}>
+                <PartyMemberRow character={character} />
+              </li>
+            ))}
+          </ul>
+        </>
       )}
     </div>
   )
