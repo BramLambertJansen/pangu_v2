@@ -12,5 +12,5 @@ export default defineConfig({
       padding: 0.1,
     },
   },
-  images: ['public/pangu.svg'],
+  images: ['public/pangu-logo.png'],
 })
