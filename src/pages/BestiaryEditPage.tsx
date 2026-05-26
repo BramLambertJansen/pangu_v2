@@ -5,6 +5,7 @@ import { toast } from 'sonner'
 import { supabase } from '@/lib/supabase'
 import { queryKeys } from '@/lib/queryKeys'
 import { Modal } from '@/components/ui/Modal'
+import { ConfirmDialog } from '@/components/ui/ConfirmDialog'
 import { Spinner } from '@/components/ui/Spinner'
 import { useEntityEdit } from '@/hooks/useEntityEdit'
 import type { Bestiary, BestiaryStatus } from '@/types/bestiary.types'
@@ -78,7 +79,7 @@ export default function BestiaryEditPage() {
     form, set, dirty, setDirty,
     committed, setCommitted,
     deleteOpen, setDeleteOpen,
-    resetForm,
+    resetForm, guard,
   } = useEntityEdit({ entity: bestiaryData, isNew })
 
   const worldId = bestiaryData?.world_id ?? worldIdFromState
@@ -105,6 +106,7 @@ export default function BestiaryEditPage() {
           stat_int: form.stat_int,
           stat_wis: form.stat_wis,
           stat_cha: form.stat_cha,
+          committed: true,
           updated_at: new Date().toISOString(),
         })
         .eq('id', id!)
@@ -144,24 +146,38 @@ export default function BestiaryEditPage() {
     },
   })
 
+  async function handleDiscardConfirm() {
+    const { error } = await supabase.from('bestiaries').delete().eq('id', id!)
+    if (!error) {
+      queryClient.removeQueries({ queryKey: queryKeys.worlds.bestiaryDetail(id!) })
+      queryClient.removeQueries({ queryKey: queryKeys.worlds.bestiaryDetailFull(id!) })
+      if (worldId) {
+        queryClient.invalidateQueries({ queryKey: queryKeys.worlds.bestiaries(worldId) })
+      }
+    }
+    const handled = guard.confirmLeave()
+    if (!handled) {
+      if (worldId) navigate(`/worlds/${worldId}/bestiary`)
+      else navigate('/worlds')
+    }
+  }
+
   function handleCancel() {
     if (!committed) {
-      if (worldId) {
-        navigate(`/worlds/${worldId}/bestiary`)
-      } else {
-        navigate('/worlds')
-      }
+      guard.requestDiscard()
     } else {
       resetForm()
       if (worldId) navigate(`/worlds/${worldId}/bestiary`)
+      else navigate('/worlds')
     }
   }
 
   function handleBack() {
-    if (worldId) {
-      navigate(`/worlds/${worldId}/bestiary`)
+    if (!committed) {
+      guard.requestDiscard()
     } else {
-      navigate('/worlds')
+      if (worldId) navigate(`/worlds/${worldId}/bestiary`)
+      else navigate('/worlds')
     }
   }
 
@@ -431,6 +447,22 @@ export default function BestiaryEditPage() {
           </button>
         </div>
       </Modal>
+
+      {/* Discard dialog */}
+      <ConfirmDialog
+        open={guard.discardOpen}
+        onClose={guard.cancelLeave}
+        onConfirm={handleDiscardConfirm}
+        title={guard.isDraftDiscard ? 'Wezen weggooien?' : 'Niet-opgeslagen wijzigingen'}
+        confirmLabel={guard.isDraftDiscard ? 'Weggooien' : 'Verlaten'}
+        cancelLabel={guard.isDraftDiscard ? 'Annuleren' : 'Blijven'}
+        confirmVariant="crimson"
+      >
+        {guard.isDraftDiscard
+          ? 'Dit item is nog niet opgeslagen en wordt permanent verwijderd. Doorgaan?'
+          : 'Je hebt niet-opgeslagen wijzigingen. Weet je zeker dat je de pagina wilt verlaten?'
+        }
+      </ConfirmDialog>
     </div>
   )
 }

@@ -272,6 +272,7 @@ interface Session { id, campaign_id, user_id, name, subtitle, description, notes
 | 018 | `018_encounters.sql` | Encounters tabel + RLS + index + `update_encounters_updated_at` trigger; encounter_monsters junction tabel + RLS + index |
 | 020 | `020_characters_proficient_skills.sql` | `proficient_skills text[]` kolom op characters — D&D 5e skill proficiencies |
 | 021 | `021_worlds_campaigns_notes.sql` | `notes text` kolom op worlds en campaigns |
+| 022 | `022_committed_column.sql` | `committed boolean DEFAULT false` op alle entity-tabellen (worlds, campaigns, sessions, locations, lore, npcs, bestiaries, quests, encounters, characters, items); bestaande rijen → `committed = true` |
 
 ---
 

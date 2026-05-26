@@ -11,6 +11,7 @@ export function useCampaignSessions(campaignId: string | undefined) {
         .from('sessions')
         .select('*')
         .eq('campaign_id', campaignId!)
+        .eq('committed', true)
         .order('session_number', { ascending: true, nullsFirst: false })
         .order('created_at', { ascending: false })
       if (error) throw error

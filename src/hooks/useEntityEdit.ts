@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from 'react'
+import { useEditGuard, type EditGuard } from './useEditGuard'
 
 interface UseEntityEditOptions<T> {
   entity: T | undefined
@@ -10,6 +11,8 @@ export function useEntityEdit<T>({ entity, isNew }: UseEntityEditOptions<T>) {
   const [deleteOpen, setDeleteOpen] = useState(false)
   const [form, setForm] = useState<Partial<T>>({})
   const [dirty, setDirty] = useState(false)
+
+  const guard: EditGuard = useEditGuard({ committed, dirty })
 
   useEffect(() => {
     if (entity) {
@@ -44,5 +47,6 @@ export function useEntityEdit<T>({ entity, isNew }: UseEntityEditOptions<T>) {
     deleteOpen,
     setDeleteOpen,
     resetForm,
+    guard,
   }
 }

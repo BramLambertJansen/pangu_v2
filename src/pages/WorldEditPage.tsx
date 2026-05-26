@@ -8,7 +8,7 @@ import { Spinner } from '@/components/ui/Spinner'
 import { ConfirmDialog } from '@/components/ui/ConfirmDialog'
 import { useWorld } from '@/hooks/queries/useWorld'
 import { useImagePositioning } from '@/hooks/useImagePositioning'
-import { useUnsavedChangesPrompt } from '@/hooks/useUnsavedChangesPrompt'
+import { useEditGuard } from '@/hooks/useEditGuard'
 import type { World, WorldStatus } from '@/types/world.types'
 
 const statusOptions: { value: WorldStatus; label: string }[] = [
@@ -34,7 +34,7 @@ export default function WorldEditPage() {
   const [form, setForm] = useState<Partial<World>>({})
   const [dirty, setDirty] = useState(false)
 
-  const unsaved = useUnsavedChangesPrompt(dirty)
+  const guard = useEditGuard({ committed, dirty })
 
   const handlePositionChange = useCallback((posString: string) => {
     setForm((prev) => ({ ...prev, header_image_position: posString }))
@@ -68,6 +68,7 @@ export default function WorldEditPage() {
           header_image_position: form.header_image_position ?? 'center',
           status: form.status,
           notes: form.notes ?? null,
+          committed: true,
           updated_at: new Date().toISOString(),
         })
         .eq('id', id!)
@@ -105,7 +106,7 @@ export default function WorldEditPage() {
 
   function handleCancel() {
     if (!committed) {
-      navigate('/worlds')
+      guard.requestDiscard()
     } else {
       setForm(world!)
       setDirty(false)
@@ -116,9 +117,20 @@ export default function WorldEditPage() {
 
   function handleBack() {
     if (!committed) {
-      navigate('/worlds')
+      guard.requestDiscard()
     } else {
       navigate(`/worlds/${id}`)
+    }
+  }
+
+  async function handleDiscardConfirm() {
+    const { error } = await supabase.from('worlds').delete().eq('id', id!)
+    if (!error) {
+      queryClient.invalidateQueries({ queryKey: queryKeys.worlds.all })
+    }
+    const blockerHandled = guard.confirmLeave()
+    if (!blockerHandled) {
+      navigate('/worlds')
     }
   }
 
@@ -389,15 +401,18 @@ export default function WorldEditPage() {
       </ConfirmDialog>
 
       <ConfirmDialog
-        open={unsaved.blocked}
-        onClose={unsaved.reset}
-        onConfirm={unsaved.proceed}
-        title="Niet-opgeslagen wijzigingen"
-        confirmLabel="Verlaten"
-        cancelLabel="Blijven"
+        open={guard.discardOpen}
+        onClose={guard.cancelLeave}
+        onConfirm={handleDiscardConfirm}
+        title={guard.isDraftDiscard ? 'Item weggooien?' : 'Niet-opgeslagen wijzigingen'}
+        confirmLabel={guard.isDraftDiscard ? 'Weggooien' : 'Verlaten'}
+        cancelLabel={guard.isDraftDiscard ? 'Annuleren' : 'Blijven'}
         confirmVariant="crimson"
       >
-        Je hebt niet-opgeslagen wijzigingen. Weet je zeker dat je de pagina wilt verlaten?
+        {guard.isDraftDiscard
+          ? 'Dit item is nog niet opgeslagen en wordt permanent verwijderd. Doorgaan?'
+          : 'Je hebt niet-opgeslagen wijzigingen. Weet je zeker dat je de pagina wilt verlaten?'
+        }
       </ConfirmDialog>
     </div>
   )

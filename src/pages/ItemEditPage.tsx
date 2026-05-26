@@ -5,6 +5,7 @@ import { toast } from 'sonner'
 import { supabase } from '@/lib/supabase'
 import { queryKeys } from '@/lib/queryKeys'
 import { Modal } from '@/components/ui/Modal'
+import { ConfirmDialog } from '@/components/ui/ConfirmDialog'
 import { Spinner } from '@/components/ui/Spinner'
 import { useEntityEdit } from '@/hooks/useEntityEdit'
 import type { Item, ItemType, ItemRarity } from '@/types/item.types'
@@ -68,7 +69,7 @@ export default function ItemEditPage() {
     form, set, dirty, setDirty,
     committed, setCommitted,
     deleteOpen, setDeleteOpen,
-    resetForm,
+    resetForm, guard,
   } = useEntityEdit({ entity: itemData, isNew })
 
   const campaignId = itemData?.campaign_id ?? campaignIdFromState
@@ -102,6 +103,7 @@ export default function ItemEditPage() {
           quantity: form.quantity ?? 1,
           weight: form.weight ?? null,
           character_id: form.character_id ?? null,
+          committed: true,
           updated_at: new Date().toISOString(),
         })
         .eq('id', id!)
@@ -142,17 +144,33 @@ export default function ItemEditPage() {
     },
   })
 
+  async function handleDiscardConfirm() {
+    const { error } = await supabase.from('items').delete().eq('id', id!)
+    if (!error) {
+      queryClient.removeQueries({ queryKey: queryKeys.items.detail(id!) })
+      if (campaignId) {
+        queryClient.invalidateQueries({ queryKey: queryKeys.items.byCampaign(campaignId) })
+      }
+    }
+    const handled = guard.confirmLeave()
+    if (!handled) {
+      if (campaignId) navigate(`/campaigns/${campaignId}/items`)
+      else navigate('/dashboard')
+    }
+  }
+
   function handleBack() {
-    if (campaignId) {
-      navigate(`/campaigns/${campaignId}/items`)
+    if (!committed) {
+      guard.requestDiscard()
     } else {
-      navigate('/dashboard')
+      if (campaignId) navigate(`/campaigns/${campaignId}/items`)
+      else navigate('/dashboard')
     }
   }
 
   function handleCancel() {
     if (!committed) {
-      handleBack()
+      guard.requestDiscard()
     } else {
       resetForm()
     }
@@ -441,6 +459,22 @@ export default function ItemEditPage() {
           </button>
         </div>
       </Modal>
+
+      {/* Discard dialog */}
+      <ConfirmDialog
+        open={guard.discardOpen}
+        onClose={guard.cancelLeave}
+        onConfirm={handleDiscardConfirm}
+        title={guard.isDraftDiscard ? 'Item weggooien?' : 'Niet-opgeslagen wijzigingen'}
+        confirmLabel={guard.isDraftDiscard ? 'Weggooien' : 'Verlaten'}
+        cancelLabel={guard.isDraftDiscard ? 'Annuleren' : 'Blijven'}
+        confirmVariant="crimson"
+      >
+        {guard.isDraftDiscard
+          ? 'Dit item is nog niet opgeslagen en wordt permanent verwijderd. Doorgaan?'
+          : 'Je hebt niet-opgeslagen wijzigingen. Weet je zeker dat je de pagina wilt verlaten?'
+        }
+      </ConfirmDialog>
     </div>
   )
 }

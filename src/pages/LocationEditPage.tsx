@@ -5,6 +5,7 @@ import { toast } from 'sonner'
 import { supabase } from '@/lib/supabase'
 import { queryKeys } from '@/lib/queryKeys'
 import { Modal } from '@/components/ui/Modal'
+import { ConfirmDialog } from '@/components/ui/ConfirmDialog'
 import { Spinner } from '@/components/ui/Spinner'
 import { useEntityEdit } from '@/hooks/useEntityEdit'
 import type { Location, LocationStatus } from '@/types/location.types'
@@ -50,7 +51,7 @@ export default function LocationEditPage() {
     form, set, dirty, setDirty,
     committed, setCommitted,
     deleteOpen, setDeleteOpen,
-    resetForm,
+    resetForm, guard,
   } = useEntityEdit({ entity: locationData, isNew })
 
   const campaignId = locationData?.campaign_id ?? campaignIdFromState
@@ -66,6 +67,7 @@ export default function LocationEditPage() {
           notes: form.notes,
           status: form.status,
           location_type: form.location_type ?? null,
+          committed: true,
           updated_at: new Date().toISOString(),
         })
         .eq('id', id!)
@@ -103,13 +105,24 @@ export default function LocationEditPage() {
     },
   })
 
+  async function handleDiscardConfirm() {
+    const { error } = await supabase.from('locations').delete().eq('id', id!)
+    if (!error) {
+      queryClient.removeQueries({ queryKey: queryKeys.campaigns.locationDetail(id!) })
+      if (campaignId) {
+        queryClient.invalidateQueries({ queryKey: queryKeys.campaigns.locations(campaignId) })
+      }
+    }
+    const handled = guard.confirmLeave()
+    if (!handled) {
+      if (campaignId) navigate(`/campaigns/${campaignId}/locations`)
+      else navigate('/dashboard')
+    }
+  }
+
   function handleCancel() {
     if (!committed) {
-      if (campaignId) {
-        navigate(`/campaigns/${campaignId}/locations`)
-      } else {
-        navigate('/dashboard')
-      }
+      guard.requestDiscard()
     } else {
       resetForm()
       navigate(`/locations/${id}`)
@@ -118,11 +131,7 @@ export default function LocationEditPage() {
 
   function handleBack() {
     if (!committed) {
-      if (campaignId) {
-        navigate(`/campaigns/${campaignId}/locations`)
-      } else {
-        navigate('/dashboard')
-      }
+      guard.requestDiscard()
     } else {
       navigate(`/locations/${id}`)
     }
@@ -340,6 +349,22 @@ export default function LocationEditPage() {
           </button>
         </div>
       </Modal>
+
+      {/* Discard dialog */}
+      <ConfirmDialog
+        open={guard.discardOpen}
+        onClose={guard.cancelLeave}
+        onConfirm={handleDiscardConfirm}
+        title={guard.isDraftDiscard ? 'Locatie weggooien?' : 'Niet-opgeslagen wijzigingen'}
+        confirmLabel={guard.isDraftDiscard ? 'Weggooien' : 'Verlaten'}
+        cancelLabel={guard.isDraftDiscard ? 'Annuleren' : 'Blijven'}
+        confirmVariant="crimson"
+      >
+        {guard.isDraftDiscard
+          ? 'Dit item is nog niet opgeslagen en wordt permanent verwijderd. Doorgaan?'
+          : 'Je hebt niet-opgeslagen wijzigingen. Weet je zeker dat je de pagina wilt verlaten?'
+        }
+      </ConfirmDialog>
     </div>
   )
 }

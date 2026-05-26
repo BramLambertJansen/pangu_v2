@@ -1,3 +1,4 @@
+import { useEffect } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { useNavigate } from 'react-router-dom'
 import { toast } from 'sonner'
@@ -19,12 +20,25 @@ export default function WorldsPage() {
       const { data, error } = await supabase
         .from('worlds')
         .select('*')
+        .eq('committed', true)
         .order('created_at', { ascending: false })
       if (error) throw error
       return data as World[]
     },
     staleTime: 1000 * 60,
   })
+
+  // Garbage-collect uncommitted drafts older than 30 minutes
+  useEffect(() => {
+    if (!user?.id) return
+    const cutoff = new Date(Date.now() - 30 * 60 * 1000).toISOString()
+    void supabase
+      .from('worlds')
+      .delete()
+      .eq('user_id', user.id)
+      .eq('committed', false)
+      .lt('created_at', cutoff)
+  }, [user?.id])
 
   const createWorld = useMutation({
     mutationFn: async () => {

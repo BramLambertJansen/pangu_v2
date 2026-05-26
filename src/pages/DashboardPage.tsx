@@ -52,6 +52,7 @@ export default function DashboardPage() {
       const { data, error } = await supabase
         .from('worlds')
         .select('*')
+        .eq('committed', true)
         .order('created_at', { ascending: false })
         .limit(4)
       if (error) throw error
@@ -66,6 +67,7 @@ export default function DashboardPage() {
       const { data, error } = await supabase
         .from('campaigns')
         .select('*')
+        .eq('committed', true)
         .eq('status', 'active')
         .order('created_at', { ascending: false })
         .limit(4)
@@ -81,6 +83,7 @@ export default function DashboardPage() {
       const { data, error } = await supabase
         .from('sessions')
         .select('*')
+        .eq('committed', true)
         .eq('status', 'planned')
         .order('session_date', { ascending: true, nullsFirst: false })
         .order('created_at', { ascending: false })

@@ -35,6 +35,7 @@ export type Database = {
           stat_int: number
           stat_wis: number
           stat_cha: number
+          committed: boolean
           created_at: string
           updated_at: string
         }
@@ -59,6 +60,7 @@ export type Database = {
           stat_int?: number
           stat_wis?: number
           stat_cha?: number
+          committed?: boolean
           created_at?: string
           updated_at?: string
         }
@@ -83,6 +85,7 @@ export type Database = {
           stat_int?: number
           stat_wis?: number
           stat_cha?: number
+          committed?: boolean
           created_at?: string
           updated_at?: string
         }
@@ -107,6 +110,7 @@ export type Database = {
           header_image_position: string
           status: string
           notes: string | null
+          committed: boolean
           created_at: string
           updated_at: string
         }
@@ -121,6 +125,7 @@ export type Database = {
           header_image_position?: string
           status?: string
           notes?: string | null
+          committed?: boolean
           created_at?: string
           updated_at?: string
         }
@@ -135,6 +140,7 @@ export type Database = {
           header_image_position?: string
           status?: string
           notes?: string | null
+          committed?: boolean
           created_at?: string
           updated_at?: string
         }
@@ -159,6 +165,7 @@ export type Database = {
           header_image_position: string
           status: string
           notes: string | null
+          committed: boolean
           created_at: string
           updated_at: string
         }
@@ -173,6 +180,7 @@ export type Database = {
           header_image_position?: string
           status?: string
           notes?: string | null
+          committed?: boolean
           created_at?: string
           updated_at?: string
         }
@@ -187,6 +195,7 @@ export type Database = {
           header_image_position?: string
           status?: string
           notes?: string | null
+          committed?: boolean
           created_at?: string
           updated_at?: string
         }
@@ -204,6 +213,7 @@ export type Database = {
           status: string
           session_date: string | null
           session_number: number | null
+          committed: boolean
           created_at: string
           updated_at: string
         }
@@ -218,6 +228,7 @@ export type Database = {
           status?: string
           session_date?: string | null
           session_number?: number | null
+          committed?: boolean
           created_at?: string
           updated_at?: string
         }
@@ -232,6 +243,7 @@ export type Database = {
           status?: string
           session_date?: string | null
           session_number?: number | null
+          committed?: boolean
           created_at?: string
           updated_at?: string
         }
@@ -255,6 +267,7 @@ export type Database = {
           notes: string | null
           status: string
           location_type: string | null
+          committed: boolean
           created_at: string
           updated_at: string
         }
@@ -268,6 +281,7 @@ export type Database = {
           notes?: string | null
           status?: string
           location_type?: string | null
+          committed?: boolean
           created_at?: string
           updated_at?: string
         }
@@ -281,6 +295,7 @@ export type Database = {
           notes?: string | null
           status?: string
           location_type?: string | null
+          committed?: boolean
           created_at?: string
           updated_at?: string
         }
@@ -304,6 +319,7 @@ export type Database = {
           notes: string | null
           status: string
           lore_category: string | null
+          committed: boolean
           created_at: string
           updated_at: string
         }
@@ -317,6 +333,7 @@ export type Database = {
           notes?: string | null
           status?: string
           lore_category?: string | null
+          committed?: boolean
           created_at?: string
           updated_at?: string
         }
@@ -330,6 +347,7 @@ export type Database = {
           notes?: string | null
           status?: string
           lore_category?: string | null
+          committed?: boolean
           created_at?: string
           updated_at?: string
         }
@@ -353,6 +371,7 @@ export type Database = {
           notes: string | null
           status: string
           npc_role: string | null
+          committed: boolean
           created_at: string
           updated_at: string
         }
@@ -366,6 +385,7 @@ export type Database = {
           notes?: string | null
           status?: string
           npc_role?: string | null
+          committed?: boolean
           created_at?: string
           updated_at?: string
         }
@@ -379,6 +399,7 @@ export type Database = {
           notes?: string | null
           status?: string
           npc_role?: string | null
+          committed?: boolean
           created_at?: string
           updated_at?: string
         }
@@ -423,6 +444,7 @@ export type Database = {
           notes: string | null
           status: string
           proficient_skills: string[]
+          committed: boolean
           created_at: string
           updated_at: string
         }
@@ -457,6 +479,7 @@ export type Database = {
           notes?: string | null
           status?: string
           proficient_skills?: string[]
+          committed?: boolean
           created_at?: string
           updated_at?: string
         }
@@ -491,6 +514,7 @@ export type Database = {
           notes?: string | null
           status?: string
           proficient_skills?: string[]
+          committed?: boolean
           created_at?: string
           updated_at?: string
         }
@@ -516,6 +540,7 @@ export type Database = {
           quest_type: string | null
           difficulty: string | null
           reward: string | null
+          committed: boolean
           created_at: string
           updated_at: string
         }
@@ -531,6 +556,7 @@ export type Database = {
           quest_type?: string | null
           difficulty?: string | null
           reward?: string | null
+          committed?: boolean
           created_at?: string
           updated_at?: string
         }
@@ -546,6 +572,7 @@ export type Database = {
           quest_type?: string | null
           difficulty?: string | null
           reward?: string | null
+          committed?: boolean
           created_at?: string
           updated_at?: string
         }
@@ -571,6 +598,7 @@ export type Database = {
           status: string
           environment: string | null
           difficulty: string | null
+          committed: boolean
           created_at: string
           updated_at: string
         }
@@ -586,6 +614,7 @@ export type Database = {
           status?: string
           environment?: string | null
           difficulty?: string | null
+          committed?: boolean
           created_at?: string
           updated_at?: string
         }
@@ -601,6 +630,7 @@ export type Database = {
           status?: string
           environment?: string | null
           difficulty?: string | null
+          committed?: boolean
           created_at?: string
           updated_at?: string
         }
@@ -672,6 +702,7 @@ export type Database = {
           quantity: number
           weight: number | null
           properties: Json
+          committed: boolean
           created_at: string
           updated_at: string
         }
@@ -687,6 +718,7 @@ export type Database = {
           quantity?: number
           weight?: number | null
           properties?: Json
+          committed?: boolean
           created_at?: string
           updated_at?: string
         }
@@ -702,6 +734,7 @@ export type Database = {
           quantity?: number
           weight?: number | null
           properties?: Json
+          committed?: boolean
           created_at?: string
           updated_at?: string
         }

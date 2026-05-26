@@ -5,6 +5,7 @@ import { toast } from 'sonner'
 import { supabase } from '@/lib/supabase'
 import { queryKeys } from '@/lib/queryKeys'
 import { Modal } from '@/components/ui/Modal'
+import { ConfirmDialog } from '@/components/ui/ConfirmDialog'
 import { Spinner } from '@/components/ui/Spinner'
 import { useEntityEdit } from '@/hooks/useEntityEdit'
 import { useAuthStore } from '@/stores/auth.store'
@@ -106,7 +107,7 @@ export default function CharacterEditPage() {
     form, set, dirty, setDirty,
     committed, setCommitted,
     deleteOpen, setDeleteOpen,
-    resetForm,
+    resetForm, guard,
   } = useEntityEdit({ entity: characterData, isNew })
 
   const toggleSkill = useCallback((skillName: string) => {
@@ -167,6 +168,7 @@ export default function CharacterEditPage() {
           notes: form.notes ?? null,
           status: form.status,
           proficient_skills: form.proficient_skills ?? [],
+          committed: true,
           updated_at: new Date().toISOString(),
         })
         .eq('id', id!)
@@ -200,9 +202,21 @@ export default function CharacterEditPage() {
     },
   })
 
+  async function handleDiscardConfirm() {
+    const { error } = await supabase.from('characters').delete().eq('id', id!)
+    if (!error) {
+      queryClient.removeQueries({ queryKey: queryKeys.characters.detail(id!) })
+      queryClient.invalidateQueries({ queryKey: queryKeys.characters.all })
+    }
+    const handled = guard.confirmLeave()
+    if (!handled) {
+      navigate('/characters')
+    }
+  }
+
   function handleBack() {
     if (!committed) {
-      navigate('/characters')
+      guard.requestDiscard()
     } else {
       navigate(`/characters/${id}`)
     }
@@ -210,7 +224,7 @@ export default function CharacterEditPage() {
 
   function handleCancel() {
     if (!committed) {
-      navigate('/characters')
+      guard.requestDiscard()
     } else {
       resetForm()
       navigate(`/characters/${id}`)
@@ -620,6 +634,22 @@ export default function CharacterEditPage() {
           </button>
         </div>
       </Modal>
+
+      {/* Discard dialog */}
+      <ConfirmDialog
+        open={guard.discardOpen}
+        onClose={guard.cancelLeave}
+        onConfirm={handleDiscardConfirm}
+        title={guard.isDraftDiscard ? 'Karakter weggooien?' : 'Niet-opgeslagen wijzigingen'}
+        confirmLabel={guard.isDraftDiscard ? 'Weggooien' : 'Verlaten'}
+        cancelLabel={guard.isDraftDiscard ? 'Annuleren' : 'Blijven'}
+        confirmVariant="crimson"
+      >
+        {guard.isDraftDiscard
+          ? 'Dit item is nog niet opgeslagen en wordt permanent verwijderd. Doorgaan?'
+          : 'Je hebt niet-opgeslagen wijzigingen. Weet je zeker dat je de pagina wilt verlaten?'
+        }
+      </ConfirmDialog>
     </div>
   )
 }

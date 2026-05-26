@@ -40,6 +40,7 @@ export default function WorldDetailPage() {
         .from('campaigns')
         .select('*')
         .eq('world_id', id!)
+        .eq('committed', true)
         .order('created_at', { ascending: false })
       if (error) throw error
       return data as Campaign[]

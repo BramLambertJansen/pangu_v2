@@ -11,6 +11,7 @@ export function useWorldBestiaries(worldId: string | undefined) {
         .from('bestiaries')
         .select('*')
         .eq('world_id', worldId!)
+        .eq('committed', true)
         .order('created_at', { ascending: false })
       if (error) throw error
       return data as Bestiary[]

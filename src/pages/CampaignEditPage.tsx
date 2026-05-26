@@ -8,7 +8,7 @@ import { Spinner } from '@/components/ui/Spinner'
 import { ConfirmDialog } from '@/components/ui/ConfirmDialog'
 import { useCampaign } from '@/hooks/queries/useCampaign'
 import { useImagePositioning } from '@/hooks/useImagePositioning'
-import { useUnsavedChangesPrompt } from '@/hooks/useUnsavedChangesPrompt'
+import { useEditGuard } from '@/hooks/useEditGuard'
 import type { Campaign, CampaignStatus } from '@/types/campaign.types'
 
 const statusOptions: { value: CampaignStatus; label: string }[] = [
@@ -37,7 +37,7 @@ export default function CampaignEditPage() {
   const [form, setForm] = useState<Partial<Campaign>>({})
   const [dirty, setDirty] = useState(false)
 
-  const unsaved = useUnsavedChangesPrompt(dirty)
+  const guard = useEditGuard({ committed, dirty })
 
   const handlePositionChange = useCallback((posString: string) => {
     setForm((prev) => ({ ...prev, header_image_position: posString }))
@@ -70,6 +70,7 @@ export default function CampaignEditPage() {
           header_image_position: form.header_image_position ?? 'center',
           status: form.status,
           notes: form.notes ?? null,
+          committed: true,
           updated_at: new Date().toISOString(),
         })
         .eq('id', id!)
@@ -117,11 +118,7 @@ export default function CampaignEditPage() {
 
   function handleCancel() {
     if (!committed) {
-      if (worldIdFromState) {
-        navigate(`/worlds/${worldIdFromState}`)
-      } else {
-        navigate('/dashboard')
-      }
+      guard.requestDiscard()
     } else {
       setForm(campaign!)
       setDirty(false)
@@ -132,13 +129,23 @@ export default function CampaignEditPage() {
 
   function handleBack() {
     if (!committed) {
-      if (worldIdFromState) {
-        navigate(`/worlds/${worldIdFromState}`)
-      } else {
-        navigate('/dashboard')
-      }
+      guard.requestDiscard()
     } else {
       navigate(`/campaigns/${id}`)
+    }
+  }
+
+  async function handleDiscardConfirm() {
+    const { error } = await supabase.from('campaigns').delete().eq('id', id!)
+    if (!error) {
+      const worldId = campaign?.world_id ?? worldIdFromState
+      queryClient.invalidateQueries({ queryKey: queryKeys.campaigns.all })
+      if (worldId) queryClient.invalidateQueries({ queryKey: queryKeys.campaigns.byWorld(worldId) })
+    }
+    const blockerHandled = guard.confirmLeave()
+    if (!blockerHandled) {
+      const worldId = campaign?.world_id ?? worldIdFromState
+      navigate(worldId ? `/worlds/${worldId}` : '/dashboard')
     }
   }
 
@@ -396,15 +403,18 @@ export default function CampaignEditPage() {
       </ConfirmDialog>
 
       <ConfirmDialog
-        open={unsaved.blocked}
-        onClose={unsaved.reset}
-        onConfirm={unsaved.proceed}
-        title="Niet-opgeslagen wijzigingen"
-        confirmLabel="Verlaten"
-        cancelLabel="Blijven"
+        open={guard.discardOpen}
+        onClose={guard.cancelLeave}
+        onConfirm={handleDiscardConfirm}
+        title={guard.isDraftDiscard ? 'Item weggooien?' : 'Niet-opgeslagen wijzigingen'}
+        confirmLabel={guard.isDraftDiscard ? 'Weggooien' : 'Verlaten'}
+        cancelLabel={guard.isDraftDiscard ? 'Annuleren' : 'Blijven'}
         confirmVariant="crimson"
       >
-        Je hebt niet-opgeslagen wijzigingen. Weet je zeker dat je de pagina wilt verlaten?
+        {guard.isDraftDiscard
+          ? 'Dit item is nog niet opgeslagen en wordt permanent verwijderd. Doorgaan?'
+          : 'Je hebt niet-opgeslagen wijzigingen. Weet je zeker dat je de pagina wilt verlaten?'
+        }
       </ConfirmDialog>
     </div>
   )

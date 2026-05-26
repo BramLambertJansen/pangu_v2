@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { toast } from 'sonner'
@@ -43,6 +43,7 @@ export default function SessionsPage() {
         .from('sessions')
         .select('*')
         .eq('campaign_id', campaignId!)
+        .eq('committed', true)
         .order('session_number', { ascending: true, nullsFirst: false })
         .order('created_at', { ascending: false })
       if (error) throw error
@@ -51,6 +52,18 @@ export default function SessionsPage() {
     enabled: !!campaignId,
     staleTime: 1000 * 30,
   })
+
+  // Garbage-collect uncommitted drafts older than 30 minutes
+  useEffect(() => {
+    if (!user?.id) return
+    const cutoff = new Date(Date.now() - 30 * 60 * 1000).toISOString()
+    void supabase
+      .from('sessions')
+      .delete()
+      .eq('campaign_id', campaignId!)
+      .eq('committed', false)
+      .lt('created_at', cutoff)
+  }, [user?.id])
 
   const createSession = useMutation({
     mutationFn: async () => {
