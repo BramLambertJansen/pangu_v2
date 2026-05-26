@@ -234,28 +234,25 @@ export default function AppLayout() {
           <div
             className="flex items-center shrink-0"
             style={{
-              gap: '12px',
               paddingBottom: 'var(--sp-5)',
               borderBottom: '1px solid var(--hairline)',
-              justifyContent: sidebarCollapsed ? 'center' : undefined,
+              justifyContent: 'center',
             }}
           >
-            <svg width="28" height="28" viewBox="0 0 28 28" fill="none" aria-hidden="true" style={{ flexShrink: 0 }}>
-              <circle cx="14" cy="14" r="12" stroke="#f5c842" strokeWidth="1" strokeOpacity="0.5" />
-              <circle cx="14" cy="14" r="8" stroke="#9b8aff" strokeWidth="1.5" />
-              <circle cx="14" cy="14" r="3" fill="#9b8aff" />
-              <circle cx="14" cy="5" r="1.5" fill="#f5c842" />
-              <circle cx="22" cy="18" r="1" fill="#9b8aff" opacity="0.7" />
-            </svg>
-            {!sidebarCollapsed && (
-              <div>
-                <p style={{ fontFamily: 'var(--font-display)', fontSize: '13px', fontWeight: 600, letterSpacing: '0.18em', color: 'var(--ink)', margin: 0 }}>
-                  PANGU
-                </p>
-                <p style={{ fontSize: '10px', letterSpacing: '0.22em', color: 'var(--muted)', margin: '2px 0 0' }}>
-                  SANCTUM · II
-                </p>
-              </div>
+            {sidebarCollapsed ? (
+              <img
+                src="/pangu-logo.png"
+                alt="PANGU"
+                width={36}
+                height={36}
+                style={{ borderRadius: '6px', display: 'block', flexShrink: 0 }}
+              />
+            ) : (
+              <img
+                src="/pangu-logo.png"
+                alt="PANGU Sanctum II"
+                style={{ width: '120px', height: 'auto', borderRadius: '8px', display: 'block' }}
+              />
             )}
           </div>
 
@@ -355,14 +352,14 @@ export default function AppLayout() {
           </button>
 
           <Link to="/dashboard" className="mobile-topbar-brand" aria-label="Naar dashboard">
-            <svg width="20" height="20" viewBox="0 0 28 28" fill="none" aria-hidden="true">
-              <circle cx="14" cy="14" r="12" stroke="#f5c842" strokeWidth="1" strokeOpacity="0.6" />
-              <circle cx="14" cy="14" r="8" stroke="#9b8aff" strokeWidth="1.5" />
-              <circle cx="14" cy="14" r="3" fill="#9b8aff" />
-              <circle cx="14" cy="5" r="1.5" fill="#f5c842" />
-              <circle cx="22" cy="18" r="1" fill="#9b8aff" opacity="0.7" />
-            </svg>
-            <span className="mobile-topbar-wordmark" aria-hidden="true">PANGU</span>
+            <img
+              src="/pangu-logo.png"
+              alt="PANGU"
+              width={28}
+              height={28}
+              aria-hidden="true"
+              style={{ borderRadius: '4px', display: 'block', flexShrink: 0 }}
+            />
           </Link>
 
           <button
