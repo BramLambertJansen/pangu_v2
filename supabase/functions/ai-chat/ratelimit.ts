@@ -83,6 +83,8 @@ export async function getOrgUsage(supabase: SupabaseClient): Promise<OrgUsage> {
 /**
  * Decide which provider/model to use based on current usage.
  * Returns null when the user has exhausted their free-tier window limit.
+ *
+ * If GROQ_API_KEY is absent, the full window quota is served by Gemini alone.
  */
 export function routeRequest(
   usage: UserUsage,
@@ -92,13 +94,19 @@ export function routeRequest(
 
   if (totalUsed >= AI_CONFIG.FREE_REQUESTS_PER_WINDOW) return null;
 
+  const groqAvailable = !!Deno.env.get("GROQ_API_KEY");
   const groqOrgExhausted = orgUsage.groq_total >= AI_CONFIG.GROQ_ORG_DAILY_SOFT_CAP;
 
-  if (!groqOrgExhausted && usage.groq_count < AI_CONFIG.GROQ_REQUESTS_PER_WINDOW) {
+  if (groqAvailable && !groqOrgExhausted && usage.groq_count < AI_CONFIG.GROQ_REQUESTS_PER_WINDOW) {
     return { provider: "groq", model: AI_CONFIG.GROQ_MODEL };
   }
 
-  if (usage.gemini_count < AI_CONFIG.GEMINI_REQUESTS_PER_WINDOW) {
+  // When Groq is unavailable, allow the full window quota on Gemini.
+  const geminiLimit = groqAvailable
+    ? AI_CONFIG.GEMINI_REQUESTS_PER_WINDOW
+    : AI_CONFIG.FREE_REQUESTS_PER_WINDOW;
+
+  if (usage.gemini_count < geminiLimit) {
     return { provider: "gemini", model: AI_CONFIG.GEMINI_MODEL };
   }
 
