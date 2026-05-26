@@ -515,8 +515,14 @@ npm run type-check   # tsc --noEmit
 - [x] Gevechten-preview in kroniek-detailpagina (inline grid max 3 + "Alle gevechten bekijken →")
 
 ### AI-integratie (Lore Forge)
-- [ ] AI-agent configuratie
-- [ ] Content genereren voor locaties
-- [ ] Content genereren voor NPCs
-- [ ] Content genereren voor lore
+- [x] Supabase Edge Function `ai-chat` (`supabase/functions/ai-chat/`)
+  - [x] Cascaderende free-tier providers: Groq (llama-3.3-70b) → Gemini 2.5 Flash-Lite
+  - [x] Per-user rate limiting via `ai_usage` tabel (configureerbaar via `config.ts`)
+  - [x] Org-level Groq soft cap via `ai_org_usage` tabel
+  - [x] BYOK: uitbreidbare `byok_keys jsonb` map (nu: Anthropic + OpenAI)
+  - [x] `useAI()` hook (`src/hooks/useAI.ts`) + types (`src/types/ai.ts`)
+  - [x] Migratie `021_ai_usage.sql` (tabellen + atomische RPC-functies)
+- [ ] Content genereren voor locaties (UI integratie)
+- [ ] Content genereren voor NPCs (UI integratie)
+- [ ] Content genereren voor lore (UI integratie)
 - [ ] Consistentiecheck op gegenereerde content
