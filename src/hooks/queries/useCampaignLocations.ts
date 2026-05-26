@@ -11,6 +11,7 @@ export function useCampaignLocations(campaignId: string | undefined) {
         .from('locations')
         .select('*')
         .eq('campaign_id', campaignId!)
+        .eq('committed', true)
         .order('created_at', { ascending: false })
       if (error) throw error
       return data as Location[]

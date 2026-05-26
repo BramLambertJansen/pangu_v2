@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { toast } from 'sonner'
@@ -24,6 +24,18 @@ export default function BestiariesPage() {
 
   const { data: world, isLoading: worldLoading } = useWorld(worldId)
   const { data: bestiaries, isLoading: bestiariesLoading } = useWorldBestiaries(worldId)
+
+  // Garbage-collect uncommitted drafts older than 30 minutes
+  useEffect(() => {
+    if (!user?.id) return
+    const cutoff = new Date(Date.now() - 30 * 60 * 1000).toISOString()
+    void supabase
+      .from('bestiaries')
+      .delete()
+      .eq('world_id', worldId!)
+      .eq('committed', false)
+      .lt('created_at', cutoff)
+  }, [user?.id])
 
   const createBestiary = useMutation({
     mutationFn: async () => {

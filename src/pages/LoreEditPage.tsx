@@ -5,6 +5,7 @@ import { toast } from 'sonner'
 import { supabase } from '@/lib/supabase'
 import { queryKeys } from '@/lib/queryKeys'
 import { Modal } from '@/components/ui/Modal'
+import { ConfirmDialog } from '@/components/ui/ConfirmDialog'
 import { Spinner } from '@/components/ui/Spinner'
 import { useEntityEdit } from '@/hooks/useEntityEdit'
 import type { Lore, LoreStatus } from '@/types/lore.types'
@@ -49,7 +50,7 @@ export default function LoreEditPage() {
     form, set, dirty, setDirty,
     committed, setCommitted,
     deleteOpen, setDeleteOpen,
-    resetForm,
+    resetForm, guard,
   } = useEntityEdit({ entity: loreData, isNew })
 
   const campaignId = loreData?.campaign_id ?? campaignIdFromState
@@ -65,6 +66,7 @@ export default function LoreEditPage() {
           notes: form.notes,
           status: form.status,
           lore_category: form.lore_category ?? null,
+          committed: true,
           updated_at: new Date().toISOString(),
         })
         .eq('id', id!)
@@ -102,28 +104,37 @@ export default function LoreEditPage() {
     },
   })
 
+  async function handleDiscardConfirm() {
+    const { error } = await supabase.from('lore').delete().eq('id', id!)
+    if (!error) {
+      queryClient.removeQueries({ queryKey: queryKeys.campaigns.loreDetail(id!) })
+      if (campaignId) {
+        queryClient.invalidateQueries({ queryKey: queryKeys.campaigns.lore(campaignId) })
+      }
+    }
+    const handled = guard.confirmLeave()
+    if (!handled) {
+      if (campaignId) navigate(`/campaigns/${campaignId}/lore`)
+      else navigate('/dashboard')
+    }
+  }
+
   function handleCancel() {
     if (!committed) {
-      if (campaignId) {
-        navigate(`/campaigns/${campaignId}/lore`)
-      } else {
-        navigate('/dashboard')
-      }
+      guard.requestDiscard()
     } else {
       resetForm()
-      navigate(`/campaigns/${campaignId}/lore`)
+      if (campaignId) navigate(`/campaigns/${campaignId}/lore`)
+      else navigate('/dashboard')
     }
   }
 
   function handleBack() {
     if (!committed) {
-      if (campaignId) {
-        navigate(`/campaigns/${campaignId}/lore`)
-      } else {
-        navigate('/dashboard')
-      }
+      guard.requestDiscard()
     } else {
-      navigate(`/campaigns/${campaignId}/lore`)
+      if (campaignId) navigate(`/campaigns/${campaignId}/lore`)
+      else navigate('/dashboard')
     }
   }
 
@@ -339,6 +350,22 @@ export default function LoreEditPage() {
           </button>
         </div>
       </Modal>
+
+      {/* Discard dialog */}
+      <ConfirmDialog
+        open={guard.discardOpen}
+        onClose={guard.cancelLeave}
+        onConfirm={handleDiscardConfirm}
+        title={guard.isDraftDiscard ? 'Lore weggooien?' : 'Niet-opgeslagen wijzigingen'}
+        confirmLabel={guard.isDraftDiscard ? 'Weggooien' : 'Verlaten'}
+        cancelLabel={guard.isDraftDiscard ? 'Annuleren' : 'Blijven'}
+        confirmVariant="crimson"
+      >
+        {guard.isDraftDiscard
+          ? 'Dit item is nog niet opgeslagen en wordt permanent verwijderd. Doorgaan?'
+          : 'Je hebt niet-opgeslagen wijzigingen. Weet je zeker dat je de pagina wilt verlaten?'
+        }
+      </ConfirmDialog>
     </div>
   )
 }

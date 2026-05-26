@@ -14,6 +14,7 @@ export function useCharacters() {
         .from('characters')
         .select('*')
         .eq('user_id', user!.id)
+        .eq('committed', true)
         .order('created_at', { ascending: false })
       if (error) throw error
       return data as Character[]

@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { toast } from 'sonner'
@@ -26,6 +26,18 @@ export default function CampaignItemsPage() {
   const { data: campaign, isLoading: isLoadingCampaign } = useCampaignWithWorld(id)
   const { data: items, isLoading: isLoadingItems } = useCampaignItems(id)
   const { data: characters, isLoading: isLoadingCharacters } = useCampaignCharacters(id)
+
+  // Garbage-collect uncommitted drafts older than 30 minutes
+  useEffect(() => {
+    if (!id) return
+    const cutoff = new Date(Date.now() - 30 * 60 * 1000).toISOString()
+    void supabase
+      .from('items')
+      .delete()
+      .eq('campaign_id', id)
+      .eq('committed', false)
+      .lt('created_at', cutoff)
+  }, [id])
 
   const createItem = useMutation({
     mutationFn: async () => {

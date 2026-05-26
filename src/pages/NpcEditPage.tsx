@@ -5,6 +5,7 @@ import { toast } from 'sonner'
 import { supabase } from '@/lib/supabase'
 import { queryKeys } from '@/lib/queryKeys'
 import { Modal } from '@/components/ui/Modal'
+import { ConfirmDialog } from '@/components/ui/ConfirmDialog'
 import { Spinner } from '@/components/ui/Spinner'
 import { useEntityEdit } from '@/hooks/useEntityEdit'
 import type { Npc, NpcStatus } from '@/types/npc.types'
@@ -50,7 +51,7 @@ export default function NpcEditPage() {
     form, set, dirty, setDirty,
     committed, setCommitted,
     deleteOpen, setDeleteOpen,
-    resetForm,
+    resetForm, guard,
   } = useEntityEdit({ entity: npcData, isNew })
 
   const campaignId = npcData?.campaign_id ?? campaignIdFromState
@@ -66,6 +67,7 @@ export default function NpcEditPage() {
           notes: form.notes,
           status: form.status,
           npc_role: form.npc_role ?? null,
+          committed: true,
           updated_at: new Date().toISOString(),
         })
         .eq('id', id!)
@@ -103,28 +105,37 @@ export default function NpcEditPage() {
     },
   })
 
+  async function handleDiscardConfirm() {
+    const { error } = await supabase.from('npcs').delete().eq('id', id!)
+    if (!error) {
+      queryClient.removeQueries({ queryKey: queryKeys.campaigns.npcDetail(id!) })
+      if (campaignId) {
+        queryClient.invalidateQueries({ queryKey: queryKeys.campaigns.npcs(campaignId) })
+      }
+    }
+    const handled = guard.confirmLeave()
+    if (!handled) {
+      if (campaignId) navigate(`/campaigns/${campaignId}/npcs`)
+      else navigate('/dashboard')
+    }
+  }
+
   function handleCancel() {
     if (!committed) {
-      if (campaignId) {
-        navigate(`/campaigns/${campaignId}/npcs`)
-      } else {
-        navigate('/dashboard')
-      }
+      guard.requestDiscard()
     } else {
       resetForm()
-      navigate(`/campaigns/${campaignId}/npcs`)
+      if (campaignId) navigate(`/campaigns/${campaignId}/npcs`)
+      else navigate('/dashboard')
     }
   }
 
   function handleBack() {
     if (!committed) {
-      if (campaignId) {
-        navigate(`/campaigns/${campaignId}/npcs`)
-      } else {
-        navigate('/dashboard')
-      }
+      guard.requestDiscard()
     } else {
-      navigate(`/campaigns/${campaignId}/npcs`)
+      if (campaignId) navigate(`/campaigns/${campaignId}/npcs`)
+      else navigate('/dashboard')
     }
   }
 
@@ -340,6 +351,22 @@ export default function NpcEditPage() {
           </button>
         </div>
       </Modal>
+
+      {/* Discard dialog */}
+      <ConfirmDialog
+        open={guard.discardOpen}
+        onClose={guard.cancelLeave}
+        onConfirm={handleDiscardConfirm}
+        title={guard.isDraftDiscard ? 'NPC weggooien?' : 'Niet-opgeslagen wijzigingen'}
+        confirmLabel={guard.isDraftDiscard ? 'Weggooien' : 'Verlaten'}
+        cancelLabel={guard.isDraftDiscard ? 'Annuleren' : 'Blijven'}
+        confirmVariant="crimson"
+      >
+        {guard.isDraftDiscard
+          ? 'Dit item is nog niet opgeslagen en wordt permanent verwijderd. Doorgaan?'
+          : 'Je hebt niet-opgeslagen wijzigingen. Weet je zeker dat je de pagina wilt verlaten?'
+        }
+      </ConfirmDialog>
     </div>
   )
 }

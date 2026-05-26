@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { toast } from 'sonner'
@@ -48,6 +48,7 @@ export default function CampaignsPage() {
       const { data, error } = await supabase
         .from('worlds')
         .select('*')
+        .eq('committed', true)
         .order('created_at', { ascending: false })
       if (error) throw error
       return data as World[]
@@ -61,6 +62,7 @@ export default function CampaignsPage() {
       const { data, error } = await supabase
         .from('campaigns')
         .select('*, worlds(id, name)')
+        .eq('committed', true)
         .order('created_at', { ascending: false })
       if (error) throw error
       return data as CampaignWithWorld[]
@@ -69,6 +71,18 @@ export default function CampaignsPage() {
   })
 
   const isLoading = worldsLoading || campaignsLoading
+
+  // Garbage-collect uncommitted drafts older than 30 minutes
+  useEffect(() => {
+    if (!user?.id) return
+    const cutoff = new Date(Date.now() - 30 * 60 * 1000).toISOString()
+    void supabase
+      .from('campaigns')
+      .delete()
+      .eq('user_id', user.id)
+      .eq('committed', false)
+      .lt('created_at', cutoff)
+  }, [user?.id])
 
   const createCampaign = useMutation({
     mutationFn: async (worldId: string) => {

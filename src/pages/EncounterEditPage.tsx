@@ -5,6 +5,7 @@ import { toast } from 'sonner'
 import { supabase } from '@/lib/supabase'
 import { queryKeys } from '@/lib/queryKeys'
 import { Modal } from '@/components/ui/Modal'
+import { ConfirmDialog } from '@/components/ui/ConfirmDialog'
 import { Spinner } from '@/components/ui/Spinner'
 import { useEntityEdit } from '@/hooks/useEntityEdit'
 import { useWorldBestiaries } from '@/hooks/queries/useWorldBestiaries'
@@ -120,7 +121,7 @@ export default function EncounterEditPage() {
     form, set, dirty, setDirty,
     committed, setCommitted,
     deleteOpen, setDeleteOpen,
-    resetForm,
+    resetForm, guard,
   } = useEntityEdit({ entity: encounterData, isNew })
 
   const isDirtyOverall = dirty || monstersDirty
@@ -139,6 +140,7 @@ export default function EncounterEditPage() {
           environment: form.environment ?? null,
           difficulty: form.difficulty ?? null,
           session_id: form.session_id ?? null,
+          committed: true,
           updated_at: new Date().toISOString(),
         })
         .eq('id', id!)
@@ -198,19 +200,39 @@ export default function EncounterEditPage() {
     },
   })
 
-  function handleCancel() {
-    if (!committed) {
+  async function handleDiscardConfirm() {
+    const { error } = await supabase.from('encounters').delete().eq('id', id!)
+    if (!error) {
+      queryClient.removeQueries({ queryKey: queryKeys.campaigns.encounterDetail(id!) })
+      queryClient.removeQueries({ queryKey: queryKeys.campaigns.encounterMonsters(id!) })
+      if (campaignId) {
+        queryClient.invalidateQueries({ queryKey: queryKeys.campaigns.encounters(campaignId) })
+      }
+    }
+    const handled = guard.confirmLeave()
+    if (!handled) {
       if (campaignId) navigate(`/campaigns/${campaignId}/encounters`)
       else navigate('/dashboard')
+    }
+  }
+
+  function handleCancel() {
+    if (!committed) {
+      guard.requestDiscard()
     } else {
       resetForm()
-      navigate(`/campaigns/${campaignId}/encounters`)
+      if (campaignId) navigate(`/campaigns/${campaignId}/encounters`)
+      else navigate('/dashboard')
     }
   }
 
   function handleBack() {
-    if (campaignId) navigate(`/campaigns/${campaignId}/encounters`)
-    else navigate('/dashboard')
+    if (!committed) {
+      guard.requestDiscard()
+    } else {
+      if (campaignId) navigate(`/campaigns/${campaignId}/encounters`)
+      else navigate('/dashboard')
+    }
   }
 
   function handleSave() {
@@ -688,6 +710,22 @@ export default function EncounterEditPage() {
           </button>
         </div>
       </Modal>
+
+      {/* Discard dialog */}
+      <ConfirmDialog
+        open={guard.discardOpen}
+        onClose={guard.cancelLeave}
+        onConfirm={handleDiscardConfirm}
+        title={guard.isDraftDiscard ? 'Gevecht weggooien?' : 'Niet-opgeslagen wijzigingen'}
+        confirmLabel={guard.isDraftDiscard ? 'Weggooien' : 'Verlaten'}
+        cancelLabel={guard.isDraftDiscard ? 'Annuleren' : 'Blijven'}
+        confirmVariant="crimson"
+      >
+        {guard.isDraftDiscard
+          ? 'Dit item is nog niet opgeslagen en wordt permanent verwijderd. Doorgaan?'
+          : 'Je hebt niet-opgeslagen wijzigingen. Weet je zeker dat je de pagina wilt verlaten?'
+        }
+      </ConfirmDialog>
     </div>
   )
 }
