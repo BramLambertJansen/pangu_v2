@@ -1,0 +1,544 @@
+import { useState, useRef, useCallback } from 'react'
+import { useParams, useNavigate } from 'react-router-dom'
+import { useQuery } from '@tanstack/react-query'
+import { toast } from 'sonner'
+import { supabase } from '@/lib/supabase'
+import { queryKeys } from '@/lib/queryKeys'
+import { useAI } from '@/hooks/useAI'
+import { Spinner } from '@/components/ui/Spinner'
+import { CompassRose } from '@/components/world/CompassRose'
+import type { World } from '@/types/world.types'
+
+interface Shortcut {
+  id: string
+  label: string
+  icon: React.ReactNode
+  buildPrompt: (worldName: string) => string
+}
+
+const shortcuts: Shortcut[] = [
+  {
+    id: 'location',
+    label: 'Location',
+    icon: (
+      <svg aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z" />
+        <circle cx="12" cy="9" r="2.5" />
+      </svg>
+    ),
+    buildPrompt: (name) =>
+      `Create a rich, atmospheric location for the world "${name}". Give it a compelling name, describe its physical environment, unique characteristics, and why adventurers might be drawn here. Include a sense of mystery or danger. Write 2-3 paragraphs.`,
+  },
+  {
+    id: 'npc',
+    label: 'NPC',
+    icon: (
+      <svg aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+        <circle cx="9" cy="7" r="3" />
+        <circle cx="15" cy="7" r="3" />
+        <path d="M3 21v-2a6 6 0 0 1 6-6h6a6 6 0 0 1 6 6v2" />
+      </svg>
+    ),
+    buildPrompt: (name) =>
+      `Create a memorable NPC for the world "${name}". Give them a name, a role or profession, a striking physical trait, a strong motivation, and a secret or hidden agenda. Make them feel real and three-dimensional. Write 2-3 paragraphs.`,
+  },
+  {
+    id: 'quest',
+    label: 'Quest',
+    icon: (
+      <svg aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+        <rect x="4" y="2" width="16" height="20" rx="2" />
+        <line x1="8" y1="7" x2="16" y2="7" />
+        <line x1="8" y1="11" x2="16" y2="11" />
+        <line x1="8" y1="15" x2="12" y2="15" />
+      </svg>
+    ),
+    buildPrompt: (name) =>
+      `Design a compelling quest hook for the world "${name}". Include a quest name, a gripping opening scenario that pulls players in, the main objective, one or two complications, and a meaningful reward. Write 2-3 paragraphs.`,
+  },
+  {
+    id: 'twist',
+    label: 'Twist',
+    icon: (
+      <svg aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M12 2l2.4 7.4H22l-6.2 4.5 2.4 7.4L12 17l-6.2 4.3 2.4-7.4L2 9.4h7.6z" />
+      </svg>
+    ),
+    buildPrompt: (name) =>
+      `Invent a surprising plot twist for an adventure in the world "${name}". The twist should recontextualise something the players thought they understood, raise the stakes, and open up new story possibilities. Write 1-2 paragraphs.`,
+  },
+  {
+    id: 'rumour',
+    label: 'Rumour',
+    icon: (
+      <svg aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M12 19l-7-7 7-7" />
+        <path d="M19 12H5" />
+        <path d="M17 5c0 4.4-2.7 8-6 10" />
+      </svg>
+    ),
+    buildPrompt: (name) =>
+      `Write an intriguing tavern rumour that adventurers might overhear in the world "${name}". It should hint at a larger mystery, local danger, or opportunity — but leave enough ambiguity that it could be true or false. Write 1 short paragraph, in-world voice.`,
+  },
+  {
+    id: 'loot',
+    label: 'Loot',
+    icon: (
+      <svg aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M3 6l9-4 9 4v6c0 5-4 9-9 10C7 21 3 17 3 12V6z" />
+        <path d="M9 12l2 2 4-4" />
+      </svg>
+    ),
+    buildPrompt: (name) =>
+      `Describe a unique magical item found in the world "${name}". Give it a name, evocative appearance, origin story, and one or two interesting properties or powers. Make it feel like it belongs to this world specifically. Write 1-2 paragraphs.`,
+  },
+]
+
+export default function WorldBuilderPage() {
+  const { id } = useParams<{ id: string }>()
+  const navigate = useNavigate()
+  const { ask, loading: aiLoading, lastProvider, lastModel } = useAI()
+
+  const [prompt, setPrompt] = useState('')
+  const [response, setResponse] = useState<string | null>(null)
+  const [copied, setCopied] = useState(false)
+
+  const textareaRef = useRef<HTMLTextAreaElement>(null)
+  const forgeCardRef = useRef<HTMLDivElement>(null)
+
+  const { data: world, isLoading } = useQuery<World>({
+    queryKey: queryKeys.worlds.detail(id!),
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('worlds')
+        .select('*')
+        .eq('id', id!)
+        .single()
+      if (error) throw error
+      return data as World
+    },
+    enabled: !!id,
+    staleTime: 1000 * 60,
+  })
+
+  const handleShortcut = useCallback((shortcut: Shortcut) => {
+    if (!world) return
+    const filled = shortcut.buildPrompt(world.name)
+    setPrompt(filled)
+    // Scroll forge card into view and focus textarea
+    setTimeout(() => {
+      forgeCardRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+      textareaRef.current?.focus()
+    }, 50)
+  }, [world])
+
+  async function handleGenerate() {
+    if (!prompt.trim()) {
+      toast.error('Beschrijf eerst wat je wil genereren')
+      return
+    }
+    try {
+      const worldCtx = world
+        ? `World: "${world.name}". ${world.description ? world.description.trim() : ''}`
+        : ''
+      const fullPrompt = worldCtx
+        ? `${worldCtx}\n\n${prompt.trim()}`
+        : prompt.trim()
+
+      const reply = await ask([{ role: 'user', content: fullPrompt }])
+      setResponse(reply)
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : 'Genereren mislukt')
+    }
+  }
+
+  async function handleCopy() {
+    if (!response) return
+    try {
+      await navigator.clipboard.writeText(response)
+      setCopied(true)
+      setTimeout(() => setCopied(false), 2000)
+    } catch {
+      toast.error('Kopiëren mislukt')
+    }
+  }
+
+  if (isLoading) {
+    return (
+      <div style={{ display: 'flex', justifyContent: 'center', padding: '80px 0' }} aria-live="polite" aria-label="Laden...">
+        <Spinner size="lg" />
+      </div>
+    )
+  }
+
+  if (!world) {
+    return (
+      <div>
+        <p style={{ color: 'var(--muted)' }}>Wereld niet gevonden.</p>
+        <button type="button" className="pangu-btn pangu-btn-ghost" onClick={() => navigate('/worlds')} style={{ marginTop: 16 }}>
+          ← Terug naar werelden
+        </button>
+      </div>
+    )
+  }
+
+  return (
+    <div style={{ maxWidth: 680, margin: '0 auto', paddingBottom: 80 }}>
+
+      {/* Back navigation */}
+      <button
+        type="button"
+        onClick={() => navigate(`/worlds/${id}`)}
+        style={{
+          display: 'inline-flex', alignItems: 'center', gap: 8,
+          background: 'none', border: 'none', cursor: 'pointer', padding: '0 0 32px',
+          fontFamily: 'var(--font-body)', fontSize: 11, fontWeight: 700,
+          letterSpacing: '0.18em', textTransform: 'uppercase',
+          color: 'var(--muted)',
+          transition: 'color var(--t-fast)',
+        }}
+        onMouseEnter={(e) => (e.currentTarget.style.color = 'var(--ink-soft)')}
+        onMouseLeave={(e) => (e.currentTarget.style.color = 'var(--muted)')}
+        aria-label={`Terug naar ${world.name}`}
+      >
+        <svg aria-hidden="true" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M19 12H5M12 5l-7 7 7 7" />
+        </svg>
+        Terug naar {world.name}
+      </button>
+
+      {/* Hero header */}
+      <div style={{ display: 'flex', alignItems: 'flex-start', gap: 20, marginBottom: 40 }}>
+        <div style={{ flexShrink: 0, marginTop: 6, opacity: 0.7 }}>
+          <CompassRose size={52} />
+        </div>
+        <div style={{ minWidth: 0 }}>
+          <p style={{
+            fontFamily: 'var(--font-body)', fontSize: 11, fontWeight: 700,
+            letterSpacing: '0.2em', textTransform: 'uppercase',
+            color: 'var(--violet)', margin: '0 0 8px',
+          }}>
+            Lore Forge · {world.name}
+          </p>
+          <h1 style={{
+            fontFamily: 'var(--font-display)',
+            fontSize: 'clamp(36px, 8vw, 56px)',
+            fontWeight: 600, lineHeight: 0.9,
+            letterSpacing: '0.04em', textTransform: 'uppercase',
+            color: 'var(--ink)', margin: '0 0 16px',
+          }}>
+            The World Builder
+          </h1>
+          <p style={{
+            fontSize: 15, lineHeight: 1.65,
+            color: 'var(--ink-soft)', margin: 0,
+          }}>
+            Consult the kosmos. Ask for what your story needs. Add it to your world with a touch.
+          </p>
+        </div>
+      </div>
+
+      {/* Forge input card */}
+      <div
+        ref={forgeCardRef}
+        className="pangu-surface"
+        style={{ padding: 28, marginBottom: 32 }}
+      >
+        <p style={{
+          fontFamily: 'var(--font-body)', fontSize: 11, fontWeight: 700,
+          letterSpacing: '0.2em', textTransform: 'uppercase',
+          color: 'var(--violet)', margin: '0 0 10px',
+        }}>
+          Forge New Lore
+        </p>
+        <h2 style={{
+          fontFamily: 'var(--font-display)',
+          fontSize: 'clamp(22px, 5vw, 30px)',
+          fontWeight: 600, lineHeight: 1,
+          letterSpacing: '0.04em', textTransform: 'uppercase',
+          color: 'var(--ink)', margin: '0 0 20px',
+        }}>
+          Ask, and the stars answer.
+        </h2>
+
+        <textarea
+          ref={textareaRef}
+          value={prompt}
+          onChange={(e) => setPrompt(e.target.value)}
+          placeholder="e.g. 'A dungeon built into the ribcage of a dead god'"
+          disabled={aiLoading}
+          aria-label="Beschrijf wat je wil genereren"
+          onKeyDown={(e) => {
+            if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) {
+              e.preventDefault()
+              handleGenerate()
+            }
+          }}
+          style={{
+            width: '100%', boxSizing: 'border-box',
+            minHeight: 120,
+            padding: '14px 16px',
+            background: 'var(--void)',
+            border: '1px solid var(--hairline)',
+            borderRadius: 12,
+            color: 'var(--ink)',
+            fontSize: 15, lineHeight: 1.6,
+            fontFamily: 'var(--font-body)',
+            resize: 'vertical',
+            outline: 'none',
+            transition: 'border-color var(--t-fast)',
+            opacity: aiLoading ? 0.6 : 1,
+          }}
+          onFocus={(e) => (e.currentTarget.style.borderColor = 'rgba(155,138,255,0.45)')}
+          onBlur={(e) => (e.currentTarget.style.borderColor = 'var(--hairline)')}
+        />
+
+        <button
+          type="button"
+          onClick={handleGenerate}
+          disabled={aiLoading}
+          aria-label="Genereer content"
+          style={{
+            marginTop: 14,
+            width: '100%',
+            display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: 8,
+            padding: '14px 24px',
+            background: aiLoading
+              ? 'rgba(155,138,255,0.15)'
+              : 'linear-gradient(135deg, rgba(155,138,255,0.25) 0%, rgba(155,138,255,0.12) 100%)',
+            border: '1px solid rgba(155,138,255,0.35)',
+            borderRadius: 'var(--r-full)',
+            color: 'var(--violet)',
+            fontFamily: 'var(--font-body)', fontSize: 11, fontWeight: 700,
+            letterSpacing: '0.18em', textTransform: 'uppercase',
+            cursor: aiLoading ? 'not-allowed' : 'pointer',
+            transition: 'background var(--t-fast), border-color var(--t-fast)',
+          }}
+          onMouseEnter={(e) => {
+            if (!aiLoading) {
+              e.currentTarget.style.background = 'rgba(155,138,255,0.22)'
+              e.currentTarget.style.borderColor = 'rgba(155,138,255,0.55)'
+            }
+          }}
+          onMouseLeave={(e) => {
+            if (!aiLoading) {
+              e.currentTarget.style.background = 'linear-gradient(135deg, rgba(155,138,255,0.25) 0%, rgba(155,138,255,0.12) 100%)'
+              e.currentTarget.style.borderColor = 'rgba(155,138,255,0.35)'
+            }
+          }}
+        >
+          {aiLoading ? (
+            <>
+              <Spinner size="sm" />
+              Genereren...
+            </>
+          ) : (
+            <>
+              <svg aria-hidden="true" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M12 2l2.4 7.4H22l-6.2 4.5 2.4 7.4L12 17l-6.2 4.3 2.4-7.4L2 9.4h7.6z" />
+              </svg>
+              Generate
+            </>
+          )}
+        </button>
+      </div>
+
+      {/* Shortcuts */}
+      <p style={{
+        fontFamily: 'var(--font-body)', fontSize: 11, fontWeight: 700,
+        letterSpacing: '0.2em', textTransform: 'uppercase',
+        color: 'var(--muted)', margin: '0 0 14px',
+      }}>
+        Shortcuts
+      </p>
+      <div
+        role="group"
+        aria-label="Snelkoppelingen voor contentgeneratie"
+        style={{
+          display: 'grid',
+          gridTemplateColumns: '1fr 1fr',
+          gap: 10,
+          marginBottom: 32,
+        }}
+      >
+        {shortcuts.map((sc) => (
+          <button
+            key={sc.id}
+            type="button"
+            onClick={() => handleShortcut(sc)}
+            disabled={aiLoading}
+            aria-label={`Shortcut: ${sc.label}`}
+            style={{
+              display: 'flex', flexDirection: 'column',
+              alignItems: 'center', justifyContent: 'center', gap: 10,
+              padding: '22px 16px',
+              background: 'var(--surface)',
+              border: '1px solid var(--hairline)',
+              borderRadius: 14,
+              color: 'var(--muted)',
+              fontFamily: 'var(--font-body)', fontSize: 10, fontWeight: 700,
+              letterSpacing: '0.18em', textTransform: 'uppercase',
+              cursor: aiLoading ? 'not-allowed' : 'pointer',
+              transition: 'background var(--t-fast), border-color var(--t-fast), color var(--t-fast)',
+              opacity: aiLoading ? 0.5 : 1,
+            }}
+            onMouseEnter={(e) => {
+              if (!aiLoading) {
+                e.currentTarget.style.background = 'var(--surface-2)'
+                e.currentTarget.style.borderColor = 'rgba(155,138,255,0.3)'
+                e.currentTarget.style.color = 'var(--ink-soft)'
+              }
+            }}
+            onMouseLeave={(e) => {
+              if (!aiLoading) {
+                e.currentTarget.style.background = 'var(--surface)'
+                e.currentTarget.style.borderColor = 'var(--hairline)'
+                e.currentTarget.style.color = 'var(--muted)'
+              }
+            }}
+          >
+            {sc.icon}
+            {sc.label}
+          </button>
+        ))}
+      </div>
+
+      {/* Response area */}
+      {response ? (
+        <div
+          className="pangu-surface"
+          style={{
+            padding: 28,
+            background: 'color-mix(in srgb, var(--violet) 6%, var(--surface))',
+            borderColor: 'rgba(155,138,255,0.2)',
+          }}
+        >
+          {/* Response header */}
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
+            <p style={{
+              fontFamily: 'var(--font-body)', fontSize: 11, fontWeight: 700,
+              letterSpacing: '0.2em', textTransform: 'uppercase',
+              color: 'var(--violet)', margin: 0,
+            }}>
+              ✦ De kosmos spreekt
+            </p>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+              {lastProvider && (
+                <span style={{
+                  fontFamily: 'var(--font-body)', fontSize: 9, fontWeight: 700,
+                  letterSpacing: '0.12em', textTransform: 'uppercase',
+                  color: 'var(--subtle)',
+                  padding: '3px 8px',
+                  background: 'var(--surface-2)',
+                  border: '1px solid var(--hairline)',
+                  borderRadius: 'var(--r-full)',
+                }}>
+                  {lastProvider}{lastModel ? ` · ${lastModel}` : ''}
+                </span>
+              )}
+              <button
+                type="button"
+                onClick={handleCopy}
+                aria-label="Kopieer naar klembord"
+                style={{
+                  display: 'inline-flex', alignItems: 'center', gap: 5,
+                  padding: '5px 12px',
+                  background: copied ? 'rgba(62,207,178,0.12)' : 'var(--surface-2)',
+                  border: `1px solid ${copied ? 'rgba(62,207,178,0.35)' : 'var(--hairline)'}`,
+                  borderRadius: 'var(--r-full)',
+                  color: copied ? 'var(--teal)' : 'var(--muted)',
+                  fontFamily: 'var(--font-body)', fontSize: 10, fontWeight: 700,
+                  letterSpacing: '0.14em', textTransform: 'uppercase',
+                  cursor: 'pointer',
+                  transition: 'all var(--t-fast)',
+                }}
+              >
+                {copied ? (
+                  <>
+                    <svg aria-hidden="true" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M20 6L9 17l-5-5" />
+                    </svg>
+                    Gekopieerd
+                  </>
+                ) : (
+                  <>
+                    <svg aria-hidden="true" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <rect x="9" y="9" width="13" height="13" rx="2" />
+                      <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" />
+                    </svg>
+                    Kopieer
+                  </>
+                )}
+              </button>
+            </div>
+          </div>
+
+          {/* Response text */}
+          <p style={{
+            fontSize: 15, lineHeight: 1.8,
+            color: 'var(--ink-soft)',
+            margin: 0,
+            whiteSpace: 'pre-wrap',
+          }}>
+            {response}
+          </p>
+
+          {/* Generate again */}
+          <button
+            type="button"
+            onClick={handleGenerate}
+            disabled={aiLoading}
+            style={{
+              marginTop: 20,
+              display: 'inline-flex', alignItems: 'center', gap: 6,
+              background: 'none', border: 'none',
+              color: 'var(--violet)', cursor: aiLoading ? 'not-allowed' : 'pointer',
+              fontFamily: 'var(--font-body)', fontSize: 10, fontWeight: 700,
+              letterSpacing: '0.16em', textTransform: 'uppercase',
+              padding: 0, opacity: aiLoading ? 0.5 : 1,
+              transition: 'opacity var(--t-fast)',
+            }}
+            aria-label="Opnieuw genereren"
+          >
+            <svg aria-hidden="true" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M23 4v6h-6M1 20v-6h6" />
+              <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15" />
+            </svg>
+            Opnieuw genereren
+          </button>
+        </div>
+      ) : (
+        /* Empty / awaiting state */
+        <div
+          style={{
+            display: 'flex', flexDirection: 'column',
+            alignItems: 'center', justifyContent: 'center',
+            padding: '52px 24px',
+            border: '1.5px dashed var(--hairline)',
+            borderRadius: 'var(--r-xl)',
+            textAlign: 'center',
+          }}
+        >
+          <div style={{ opacity: 0.18, marginBottom: 20 }}>
+            <CompassRose size={80} />
+          </div>
+          <h3 style={{
+            fontFamily: 'var(--font-display)',
+            fontSize: 'clamp(20px, 4vw, 26px)',
+            fontWeight: 600, lineHeight: 1,
+            letterSpacing: '0.05em', textTransform: 'uppercase',
+            color: 'var(--ink-soft)', margin: '0 0 10px',
+          }}>
+            Awaiting the Kosmos
+          </h3>
+          <p style={{
+            fontSize: 14, lineHeight: 1.6,
+            color: 'var(--muted)', margin: 0, maxWidth: 280,
+          }}>
+            Pick a shortcut, or describe what you need. The stars are patient.
+          </p>
+        </div>
+      )}
+    </div>
+  )
+}

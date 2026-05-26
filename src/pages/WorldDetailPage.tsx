@@ -77,6 +77,10 @@ export default function WorldDetailPage() {
     })
   }
 
+  function handleLoreForge() {
+    navigate(`/worlds/${id}/world-builder`)
+  }
+
   if (isLoading) {
     return (
       <div style={{ display: 'flex', justifyContent: 'center', padding: '80px 0' }} aria-live="polite" aria-label="Wereld laden...">
@@ -130,6 +134,7 @@ export default function WorldDetailPage() {
         world={world}
         onCreateCampaign={handleCreateCampaign}
         isCreatingCampaign={createCampaign.isPending}
+        onLoreForge={handleLoreForge}
       />
 
       <WorldDetailDivider label="Kronieken in deze wereld" />
