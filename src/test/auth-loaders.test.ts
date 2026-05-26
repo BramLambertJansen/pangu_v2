@@ -27,7 +27,7 @@ vi.mock('react-router-dom', async (importOriginal) => {
 })
 
 // Import loaders AFTER mocks are registered
-const { requireAuth, requireAdmin } = await import('@/routes/index')
+const { requireAuth, requireAdmin } = await import('@/routes/loaders')
 
 function sessionOf(role?: string) {
   return {
