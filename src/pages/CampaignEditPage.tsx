@@ -24,6 +24,7 @@ export default function CampaignEditPage() {
   const location = useLocation()
   const queryClient = useQueryClient()
   const descriptionId = useId()
+  const notesId = useId()
   const statusId = useId()
   const headerImageId = useId()
 
@@ -68,6 +69,7 @@ export default function CampaignEditPage() {
           header_image: form.header_image,
           header_image_position: form.header_image_position ?? 'center',
           status: form.status,
+          notes: form.notes ?? null,
           updated_at: new Date().toISOString(),
         })
         .eq('id', id!)
@@ -321,6 +323,18 @@ export default function CampaignEditPage() {
                 onChange={(e) => set('description', e.target.value || null as unknown as string)}
                 placeholder="Beschrijf de kroniek, haar sfeer en achtergrond..."
                 rows={5}
+              />
+            </div>
+
+            <div className="sm:col-span-2">
+              <label className="pangu-label" htmlFor={notesId}>DM-notities</label>
+              <textarea
+                id={notesId}
+                className="pangu-textarea"
+                value={form.notes ?? ''}
+                onChange={(e) => set('notes', e.target.value || null as unknown as string)}
+                placeholder="Geheimen, hints, campagne-aantekeningen..."
+                rows={6}
               />
             </div>
           </div>

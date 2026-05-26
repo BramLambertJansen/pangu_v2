@@ -10,6 +10,7 @@ export interface Campaign {
   header_image: string | null
   header_image_position: string
   status: CampaignStatus
+  notes: string | null
   created_at: string
   updated_at: string
 }

@@ -23,6 +23,7 @@ export default function WorldEditPage() {
   const location = useLocation()
   const queryClient = useQueryClient()
   const descriptionId = useId()
+  const notesId = useId()
   const quoteId = useId()
   const statusId = useId()
   const headerImageId = useId()
@@ -66,6 +67,7 @@ export default function WorldEditPage() {
           header_image: form.header_image,
           header_image_position: form.header_image_position ?? 'center',
           status: form.status,
+          notes: form.notes ?? null,
           updated_at: new Date().toISOString(),
         })
         .eq('id', id!)
@@ -314,6 +316,18 @@ export default function WorldEditPage() {
                 onChange={(e) => set('description', e.target.value || null as unknown as string)}
                 placeholder="Beschrijf de wereld, haar sfeer en achtergrond..."
                 rows={5}
+              />
+            </div>
+
+            <div className="sm:col-span-2">
+              <label className="pangu-label" htmlFor={notesId}>DM-notities</label>
+              <textarea
+                id={notesId}
+                className="pangu-textarea"
+                value={form.notes ?? ''}
+                onChange={(e) => set('notes', e.target.value || null as unknown as string)}
+                placeholder="Geheimen, hints, worldbuilding-aantekeningen..."
+                rows={6}
               />
             </div>
           </div>
