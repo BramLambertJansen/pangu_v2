@@ -1,6 +1,6 @@
 import { useState, useCallback } from "react";
 import { supabase } from "@/lib/supabase";
-import type { AIResponse, ErrorResponse, Message } from "@/types/ai";
+import type { AIResponse, ErrorResponse, Message, Provider } from "@/types/ai";
 
 interface UseAIReturn {
   ask: (messages: Message[]) => Promise<string>;
@@ -9,12 +9,18 @@ interface UseAIReturn {
   windowRemaining: number | null;
   /** ISO timestamp when the rate-limit window resets. null = not yet reached. */
   windowResetsAt: string | null;
+  /** Provider used for the last successful request. null = not yet used. */
+  lastProvider: Provider | null;
+  /** Model used for the last successful request. null = not yet used. */
+  lastModel: string | null;
 }
 
 export function useAI(): UseAIReturn {
   const [loading, setLoading]           = useState(false);
   const [windowRemaining, setRemaining] = useState<number | null>(null);
   const [windowResetsAt, setResetsAt]   = useState<string | null>(null);
+  const [lastProvider, setLastProvider] = useState<Provider | null>(null);
+  const [lastModel, setLastModel]       = useState<string | null>(null);
 
   const ask = useCallback(async (messages: Message[]): Promise<string> => {
     setLoading(true);
@@ -46,6 +52,8 @@ export function useAI(): UseAIReturn {
 
       const ok = data as AIResponse;
       setRemaining(ok.window_remaining);
+      setLastProvider(ok.provider);
+      setLastModel(ok.model);
       return ok.reply;
 
     } finally {
@@ -53,5 +61,5 @@ export function useAI(): UseAIReturn {
     }
   }, []);
 
-  return { ask, loading, windowRemaining, windowResetsAt };
+  return { ask, loading, windowRemaining, windowResetsAt, lastProvider, lastModel };
 }

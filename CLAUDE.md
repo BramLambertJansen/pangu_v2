@@ -524,8 +524,9 @@ npm run type-check   # tsc --noEmit
   - [x] Per-user rate limiting via `ai_usage` tabel (configureerbaar via `config.ts`)
   - [x] Org-level Groq soft cap via `ai_org_usage` tabel
   - [x] BYOK: uitbreidbare `byok_keys jsonb` map (nu: Anthropic + OpenAI)
-  - [x] `useAI()` hook (`src/hooks/useAI.ts`) + types (`src/types/ai.ts`)
-  - [x] Migratie `021_ai_usage.sql` (tabellen + atomische RPC-functies)
+  - [x] `useAI()` hook (`src/hooks/useAI.ts`) + types (`src/types/ai.ts`) — exposeert `lastProvider` + `lastModel`
+  - [x] Migratie `021_ai_usage.sql` uitgerold naar productie (tabellen + RLS + atomische RPC-functies)
+- [x] Admin AI-testpaneel (`/admin`) — "Test Gemini / Groq" knop met provider-badge, model-naam en resterend-verzoeken-teller
 - [ ] Content genereren voor locaties (UI integratie)
 - [ ] Content genereren voor NPCs (UI integratie)
 - [ ] Content genereren voor lore (UI integratie)
