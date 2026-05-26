@@ -119,11 +119,12 @@ export function WorldDetailHeader({ world, onCreateCampaign, isCreatingCampaign 
           )}
           <h1 style={{
             fontFamily: 'var(--font-display)',
-            fontSize: 'clamp(40px, 12vw, 56px)',
+            fontSize: 'clamp(24px, 6.5vw, 34px)',
             fontWeight: 600, lineHeight: 0.92,
             letterSpacing: '0.04em', textTransform: 'uppercase',
             color: 'var(--ink)', margin: '0 0 14px',
             overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
+            maxWidth: '100%',
           }}>
             {world.name}
           </h1>
@@ -198,7 +199,7 @@ export function WorldDetailHeader({ world, onCreateCampaign, isCreatingCampaign 
 
           <h1 style={{
             fontFamily: 'var(--font-display)',
-            fontSize: 'clamp(56px, 6.5vw, 96px)',
+            fontSize: 'clamp(44px, 5.5vw, 80px)',
             fontWeight: 600, lineHeight: 0.92,
             letterSpacing: '0.04em', textTransform: 'uppercase',
             color: 'var(--ink)', margin: '0 0 18px',
