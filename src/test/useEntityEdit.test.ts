@@ -1,6 +1,14 @@
 import { renderHook, act } from '@testing-library/react'
-import { describe, it, expect } from 'vitest'
+import { describe, it, expect, vi } from 'vitest'
 import { useEntityEdit } from '@/hooks/useEntityEdit'
+
+vi.mock('react-router-dom', async () => {
+  const actual = await vi.importActual<typeof import('react-router-dom')>('react-router-dom')
+  return {
+    ...actual,
+    useBlocker: () => ({ state: 'unblocked', proceed: vi.fn(), reset: vi.fn() }),
+  }
+})
 
 interface Entity {
   id: string
