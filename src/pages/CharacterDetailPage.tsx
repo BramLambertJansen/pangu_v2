@@ -323,7 +323,6 @@ export default function CharacterDetailPage() {
   const headerGradient = headerGradients[code % headerGradients.length]
   const dots = starfieldDots(id!)
 
-  const classLabel = [character.character_class, character.character_subclass].filter(Boolean).join(' · ')
   const eyebrowParts = [character.character_race, character.character_class, character.character_subclass].filter(Boolean)
   const xpPct = character.xp_next > 0 ? Math.min(100, Math.round((character.xp / character.xp_next) * 100)) : 0
   const hpPct = character.hp_max > 0 ? Math.min(100, Math.round((character.hp_current / character.hp_max) * 100)) : 0
