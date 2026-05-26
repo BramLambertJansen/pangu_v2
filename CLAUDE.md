@@ -528,7 +528,7 @@ npm run type-check   # tsc --noEmit
   - [x] `useAI()` hook (`src/hooks/useAI.ts`) + types (`src/types/ai.ts`) — exposeert `lastProvider` + `lastModel`
   - [x] Migratie `021_ai_usage.sql` uitgerold naar productie (tabellen + RLS + atomische RPC-functies)
 - [x] Admin AI-testpaneel (`/admin`) — "Test Gemini / Groq" knop met provider-badge, model-naam en resterend-verzoeken-teller
-- [ ] Content genereren voor locaties (UI integratie)
-- [ ] Content genereren voor NPCs (UI integratie)
-- [ ] Content genereren voor lore (UI integratie)
+- [x] Content genereren voor locaties (UI integratie)
+- [x] Content genereren voor NPCs (UI integratie)
+- [x] Content genereren voor lore (UI integratie)
 - [ ] Consistentiecheck op gegenereerde content
