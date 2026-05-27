@@ -100,6 +100,7 @@ src/
 │   ├── useEditGuard.ts      # Voorkomt navigeren weg bij unsaved changes
 │   ├── useEntityEdit.ts     # Generieke edit form state (dirty, committed, delete)
 │   ├── useImagePositioning.ts # Drag-to-reposition voor header images
+│   ├── useOnlineStatus.ts   # Browser online/offline status via navigator.onLine + events
 │   ├── useUnsavedChangesPrompt.ts # Browser beforeunload dialog
 │   └── queries/             # TanStack Query custom hooks (1 per entity)
 │       ├── useCampaign.ts
@@ -120,11 +121,14 @@ src/
 │   ├── AppLayout.tsx         # Sidebar + starfield achtergrond
 │   └── AuthLayout.tsx
 ├── lib/
+│   ├── constants.ts          # VITE_DEV_MODE env flag (`DEV_MODE` boolean export)
+│   ├── localDb.ts            # Generic localStorage CRUD layer voor DEV_MODE (per-user namespace)
 │   ├── queryClient.ts        # TanStack Query client instantie
 │   ├── queryKeys.ts          # Gecentraliseerde query key constanten
 │   ├── statusMaps.ts         # Status label + kleurkaarten (alle entiteiten)
-│   └── supabase.ts           # Supabase client (getypeerd via Database)
-├── pages/                   # 37 pagina-componenten (lazy-loaded via routes)
+│   ├── supabase.ts           # Supabase client (getypeerd via Database); in DEV_MODE gewrapped via adapter
+│   └── supabaseLocal.ts      # Supabase-compatible localStorage adapter voor DEV_MODE (LocalQueryBuilder)
+├── pages/                   # 38 pagina-componenten (lazy-loaded via routes)
 │   ├── AdminPage.tsx
 │   ├── BestiariesPage.tsx
 │   ├── BestiaryDetailPage.tsx
@@ -159,6 +163,7 @@ src/
 │   ├── SessionEditPage.tsx
 │   ├── SessionsPage.tsx
 │   ├── SettingsPage.tsx
+│   ├── WorldBuilderPage.tsx  # AI Wereldbouwer: vrije prompt + shortcuts voor Lore Forge
 │   ├── WorldDetailPage.tsx
 │   ├── WorldEditPage.tsx
 │   └── WorldsPage.tsx
@@ -195,6 +200,7 @@ src/
 └── utils/
     ├── apiError.ts           # getApiError() voor serverless responses
     ├── cn.ts                 # clsx + tailwind-merge
+    ├── equipmentUtils.ts     # Equipment slots: labels, icons, ALLOWED_SLOTS_BY_TYPE, calculateEffectiveStats, getEquippedItemsBySlot, formatItemBonuses
     ├── pickGradient.ts       # Hash-gebaseerde gradient paletten per entity-type
     └── sanitizeUrl.ts        # sanitizeImageUrl() — valideert HTTPS URLs
 
@@ -264,6 +270,7 @@ Elk feature-domein heeft een map: `campaign/`, `session/`, `world/`, `admin/`, `
 - **`useEntityEdit<T>`** — standaard edit-form state: `form`, `set(key, value)`, `dirty`, `committed`, `deleteOpen`, `resetForm`, `guard`. Gebruik voor alle edit-pagina's.
 - **`useEditGuard`** — blokkeert navigeren weg bij unsaved + uncommitted changes.
 - **`useImagePositioning`** — mouse/touch drag-to-reposition voor header images.
+- **`useOnlineStatus`** — geeft `boolean` terug; luistert naar `window` `online`/`offline` events.
 - **`useUnsavedChangesPrompt`** — browser `beforeunload` dialog bij dirty forms.
 - **`useAI`** — AI chat integratie: `{ ask, loading, windowRemaining, windowResetsAt, lastProvider, lastModel }`.
 
@@ -318,6 +325,20 @@ Alle entiteitskaarten gebruiken `pickGradient(id, gradients)` voor een determini
 | `questGradients` | QuestCard (goud-tinted) |
 
 Geen externe kleurprop nodig; importeer het juiste palet en geef het door aan `pickGradient`.
+
+### Equipment utilities (`src/utils/equipmentUtils.ts`)
+
+Gebruik voor alle logica rond uitrusting — nooit hardcoded in componenten:
+
+| Export | Beschrijving |
+|---|---|
+| `EQUIPMENT_SLOT_LABELS` | `Record<EquipmentSlot, string>` — Nederlandse slot-namen (Hoofd, Hals, Torso, …) |
+| `EQUIPMENT_SLOT_ICONS` | `Record<EquipmentSlot, string>` — Emoji per slot |
+| `ALLOWED_SLOTS_BY_TYPE` | `Record<ItemType, EquipmentSlot[]>` — Welke slots geldig zijn per item-type; potions/scrolls hebben `[]` (niet uitrustbaar) |
+| `isEquippable(itemType)` | Retourneert `true` als het item-type uitrustbaar is |
+| `calculateEffectiveStats(character, equippedItems)` | Sommeert alle stat-bonussen van uitgeruste items, retourneert `EffectiveStats` |
+| `getEquippedItemsBySlot(items)` | Geeft `Partial<Record<EquipmentSlot, Item>>` terug voor snelle slot-lookup |
+| `formatItemBonuses(props)` | Formatteert niet-nul bonussen als leesbare strings (bijv. `+2 AC`) |
 
 ### Status-kleuren en -labels (`src/lib/statusMaps.ts`)
 
@@ -380,9 +401,40 @@ Regels:
 
 ---
 
+## DEV_MODE (offline development)
+
+Wanneer `VITE_DEV_MODE=true` in de omgeving staat, worden alle Supabase database-calls onderschept en gerouteerd naar localStorage via een compatibele adapter. Auth en storage blijven op de echte Supabase client.
+
+### Hoe het werkt
+
+| Bestand | Rol |
+|---|---|
+| `src/lib/constants.ts` | Exporteert `DEV_MODE: boolean` (`VITE_DEV_MODE === 'true'`) |
+| `src/lib/localDb.ts` | CRUD-laag op localStorage; namespace `pangu-dev-db:<userId>` |
+| `src/lib/supabaseLocal.ts` | `createLocalSupabaseAdapter()` wraps de Supabase client zodat `.from()` → `LocalQueryBuilder` → `localDb` gaat |
+
+### Ondersteunde query-patronen (LocalQueryBuilder)
+
+- `.select('*').eq().order().limit()`
+- `.select('*').eq().single()` / `.maybeSingle()`
+- `.select('*, alias:table(cols)').eq().single()` — join-resolutie via `${alias}_id` FK
+- `.select('*').eq().eq()` — meerdere eq-filters
+- `.select('*').in(field, vals)` — IN-filter
+- `.not(field, 'is', null)` — NOT NULL filter
+- `.insert({}).select().single()` — insert + return
+- `.insert([])` — bulk insert
+- `.update({}).eq('id', id)`
+- `.delete().eq('id', id)` en bulk delete via filters
+
+### Admin dev modus toggle
+
+In de Admin-pagina (`/admin`) kan de dev-modus run-time worden in/uitgeschakeld. Bij uitschakelen worden de cache gewist en de DB-data herladen vanuit Supabase.
+
+---
+
 ## Supabase
 
-- Client: `src/lib/supabase.ts` — één instantie, getypeerd via `createClient<Database>`
+- Client: `src/lib/supabase.ts` — één instantie, getypeerd via `createClient<Database>`; in DEV_MODE gewrapped via `createLocalSupabaseAdapter`
 - RLS (Row Level Security) is altijd ingeschakeld op alle tabellen
 - Migraties in `supabase/migrations/`
 - Types regenereren: `npx supabase gen types typescript --local > src/types/database.types.ts`
@@ -422,6 +474,9 @@ type EncounterStatus = 'draft' | 'ready' | 'active' | 'completed' | 'archived'
 // item.types.ts
 type ItemType = 'weapon' | 'armor' | 'potion' | 'ring' | 'rod' | 'scroll' | 'staff' | 'wand' | 'wondrous' | 'misc'
 type ItemRarity = 'common' | 'uncommon' | 'rare' | 'very_rare' | 'legendary' | 'artifact'
+type EquipmentSlot = 'head' | 'neck' | 'chest' | 'cloak' | 'gloves' | 'ring1' | 'ring2' | 'boots' | 'main_hand' | 'off_hand'
+interface ItemStatBonuses { ac_bonus?, str_bonus?, dex_bonus?, con_bonus?, int_bonus?, wis_bonus?, cha_bonus?, hp_bonus?, speed_bonus?, initiative_bonus?, attack_bonus?, damage_bonus?, damage_dice?, stealth_disadvantage?, skill_bonuses? }
+// Item has: equipped_slot: EquipmentSlot | null, properties: ItemStatBonuses
 
 // character.types.ts
 type CharacterStatus = 'active' | 'inactive' | 'retired' | 'archived'
@@ -482,6 +537,7 @@ Alle tabellen hebben `committed boolean DEFAULT false` — bestaande rijen zijn 
 | 021 | `021_ai_usage.sql` | `ai_usage` + `ai_org_usage` tabellen + RLS + atomische RPC-functies |
 | 021 | `021_worlds_campaigns_notes.sql` | `notes text` kolom op worlds en campaigns |
 | 022 | `022_committed_column.sql` | `committed boolean` op alle entity-tabellen |
+| 023 | `023_item_equipped_slot.sql` | `equipped_slot text` op items + unique index per (character_id, slot) |
 
 ---
 
@@ -526,6 +582,7 @@ Routes zijn gedefinieerd in `src/routes/index.tsx`. Lazy-loading voor alle pagin
 | `/worlds` | `WorldsPage` | `requireAuth` |
 | `/worlds/:id` | `WorldDetailPage` | `requireAuth` |
 | `/worlds/:id/edit` | `WorldEditPage` | `requireAuth` |
+| `/worlds/:id/world-builder` | `WorldBuilderPage` | `requireAuth` |
 | `/campaigns` | `CampaignsPage` | `requireAuth` |
 | `/campaigns/:id` | `CampaignDetailPage` | `requireAuth` |
 | `/campaigns/:id/edit` | `CampaignEditPage` | `requireAuth` |
@@ -608,6 +665,8 @@ Elke feature is pas **klaar** als alle punten gehaald zijn:
 8. **Status labels/kleuren via `statusMaps`** — nooit hardcoded in componenten.
 9. **Gradients via `pickGradient`** — importeer het juiste palet uit `pickGradient.ts`.
 10. **`useEntityEdit` voor edit-pagina's** — standaard hook voor form state, dirty tracking, delete dialoog.
+11. **Equipment logica via `equipmentUtils`** — nooit slot-labels, -icons of stat-calculaties hardcoden; gebruik `EQUIPMENT_SLOT_LABELS`, `ALLOWED_SLOTS_BY_TYPE`, `calculateEffectiveStats`, etc.
+12. **Geen directe DB-calls buiten DEV_MODE-context** — `supabase.ts` exporteert de (eventueel gewrapped) client; importeer altijd via `@/lib/supabase`.
 
 ---
 
@@ -642,6 +701,7 @@ npm run test         # Vitest
 - [x] Vitest + jsdom test setup (`src/test/`)
 - [x] `AuthInitializer` — Supabase auth state listener
 - [x] `ErrorBoundary` — top-level React error boundary
+- [x] DEV_MODE systeem — `VITE_DEV_MODE=true` schakelt localStorage-adapter in voor Supabase (`constants.ts`, `localDb.ts`, `supabaseLocal.ts`)
 
 ### UI Basis-componenten (`src/components/ui/`)
 - [x] `Button` (variants: primary/secondary/ghost/danger, sizes: sm/md/lg, loading state)
@@ -769,6 +829,9 @@ npm run test         # Vitest
 - [x] Items in kroniek-detailpagina (DM-pool preview max 6 + "Alle items bekijken →")
 - [x] Inventaris-tab in karakter-detailpagina — lijst van toegewezen items + "Teruggeven aan DM"
 - [x] ItemCard + ForgeItemCard component (`src/components/item/ItemCard.tsx`)
+- [x] Equipment slots — `equipped_slot text` op items (`023_item_equipped_slot.sql`); 10 slots (head/neck/chest/cloak/gloves/ring1/ring2/boots/main_hand/off_hand); uniek per character via partial index
+- [x] `EquipmentSlot` type + `ItemStatBonuses` interface in `src/types/item.types.ts`
+- [x] `equipmentUtils.ts` — slot-labels (NL), slot-icons, `ALLOWED_SLOTS_BY_TYPE`, `calculateEffectiveStats`, `getEquippedItemsBySlot`, `formatItemBonuses`
 
 ### Wereld — Quests
 - [x] Quests tabel + RLS (`017_quests.sql`) — campaign-scoped, status (draft/active/completed/failed/archived)
@@ -803,4 +866,5 @@ npm run test         # Vitest
 - [x] Content genereren voor locaties (UI integratie)
 - [x] Content genereren voor NPCs (UI integratie)
 - [x] Content genereren voor lore (UI integratie)
+- [x] Wereldbouwer pagina `/worlds/:id/world-builder` — vrije prompt + 6 snelkoppelingen (Locatie, NPC, Quest, Wending, Gerucht, Buit); world-context wordt automatisch prepended; kopieer-knop + "Opnieuw genereren"; provider/model badge in response; Ctrl/Cmd+Enter om te genereren
 - [ ] Consistentiecheck op gegenereerde content
