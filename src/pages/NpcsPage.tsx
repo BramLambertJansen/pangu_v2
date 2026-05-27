@@ -29,12 +29,17 @@ export default function NpcsPage() {
   useEffect(() => {
     if (!user?.id) return
     const cutoff = new Date(Date.now() - 30 * 60 * 1000).toISOString()
-    void supabase
-      .from('npcs')
-      .delete()
-      .eq('campaign_id', campaignId!)
-      .eq('committed', false)
-      .lt('created_at', cutoff)
+    void (async () => {
+      const { data } = await supabase
+        .from('npcs')
+        .select('id')
+        .eq('campaign_id', campaignId!)
+        .eq('committed', false)
+        .lt('created_at', cutoff)
+      if (data?.length) {
+        await supabase.from('npcs').delete().in('id', data.map((r) => r.id))
+      }
+    })()
   }, [user?.id])
 
   const createNpc = useMutation({

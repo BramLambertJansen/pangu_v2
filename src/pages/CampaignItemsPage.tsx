@@ -31,12 +31,17 @@ export default function CampaignItemsPage() {
   useEffect(() => {
     if (!id) return
     const cutoff = new Date(Date.now() - 30 * 60 * 1000).toISOString()
-    void supabase
-      .from('items')
-      .delete()
-      .eq('campaign_id', id)
-      .eq('committed', false)
-      .lt('created_at', cutoff)
+    void (async () => {
+      const { data } = await supabase
+        .from('items')
+        .select('id')
+        .eq('campaign_id', id)
+        .eq('committed', false)
+        .lt('created_at', cutoff)
+      if (data?.length) {
+        await supabase.from('items').delete().in('id', data.map((r) => r.id))
+      }
+    })()
   }, [id])
 
   const createItem = useMutation({

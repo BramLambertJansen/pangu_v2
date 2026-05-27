@@ -29,12 +29,17 @@ export default function BestiariesPage() {
   useEffect(() => {
     if (!user?.id) return
     const cutoff = new Date(Date.now() - 30 * 60 * 1000).toISOString()
-    void supabase
-      .from('bestiaries')
-      .delete()
-      .eq('world_id', worldId!)
-      .eq('committed', false)
-      .lt('created_at', cutoff)
+    void (async () => {
+      const { data } = await supabase
+        .from('bestiaries')
+        .select('id')
+        .eq('world_id', worldId!)
+        .eq('committed', false)
+        .lt('created_at', cutoff)
+      if (data?.length) {
+        await supabase.from('bestiaries').delete().in('id', data.map((r) => r.id))
+      }
+    })()
   }, [user?.id])
 
   const createBestiary = useMutation({

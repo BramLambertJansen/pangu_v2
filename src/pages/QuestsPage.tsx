@@ -29,12 +29,17 @@ export default function QuestsPage() {
   useEffect(() => {
     if (!user?.id) return
     const cutoff = new Date(Date.now() - 30 * 60 * 1000).toISOString()
-    void supabase
-      .from('quests')
-      .delete()
-      .eq('campaign_id', campaignId!)
-      .eq('committed', false)
-      .lt('created_at', cutoff)
+    void (async () => {
+      const { data } = await supabase
+        .from('quests')
+        .select('id')
+        .eq('campaign_id', campaignId!)
+        .eq('committed', false)
+        .lt('created_at', cutoff)
+      if (data?.length) {
+        await supabase.from('quests').delete().in('id', data.map((r) => r.id))
+      }
+    })()
   }, [user?.id])
 
   const createQuest = useMutation({

@@ -76,12 +76,17 @@ export default function CampaignsPage() {
   useEffect(() => {
     if (!user?.id) return
     const cutoff = new Date(Date.now() - 30 * 60 * 1000).toISOString()
-    void supabase
-      .from('campaigns')
-      .delete()
-      .eq('user_id', user.id)
-      .eq('committed', false)
-      .lt('created_at', cutoff)
+    void (async () => {
+      const { data } = await supabase
+        .from('campaigns')
+        .select('id')
+        .eq('user_id', user.id)
+        .eq('committed', false)
+        .lt('created_at', cutoff)
+      if (data?.length) {
+        await supabase.from('campaigns').delete().in('id', data.map((r) => r.id))
+      }
+    })()
   }, [user?.id])
 
   const createCampaign = useMutation({

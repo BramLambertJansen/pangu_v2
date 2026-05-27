@@ -32,12 +32,20 @@ export default function WorldsPage() {
   useEffect(() => {
     if (!user?.id) return
     const cutoff = new Date(Date.now() - 30 * 60 * 1000).toISOString()
-    void supabase
-      .from('worlds')
-      .delete()
-      .eq('user_id', user.id)
-      .eq('committed', false)
-      .lt('created_at', cutoff)
+    void (async () => {
+      const { data } = await supabase
+        .from('worlds')
+        .select('id')
+        .eq('user_id', user.id)
+        .eq('committed', false)
+        .lt('created_at', cutoff)
+      if (data?.length) {
+        await supabase
+          .from('worlds')
+          .delete()
+          .in('id', data.map((w) => w.id))
+      }
+    })()
   }, [user?.id])
 
   const createWorld = useMutation({
