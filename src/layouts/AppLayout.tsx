@@ -1,6 +1,8 @@
 import { Outlet, NavLink, Link, useNavigate } from 'react-router-dom'
 import { useUIStore } from '@/stores/ui.store'
 import { useAuthStore } from '@/stores/auth.store'
+import { useSyncStore } from '@/stores/sync.store'
+import { useOnlineStatus } from '@/hooks/useOnlineStatus'
 import { supabase } from '@/lib/supabase'
 import { queryClient } from '@/lib/queryClient'
 import { toast } from 'sonner'
@@ -131,6 +133,8 @@ export default function AppLayout() {
   const toggleSidebar = useUIStore(s => s.toggleSidebar)
   const profile = useAuthStore(s => s.profile)
   const signOut = useAuthStore(s => s.signOut)
+  const syncEnabled = useSyncStore(s => s.syncEnabled)
+  const isOnline = useOnlineStatus()
   const navigate = useNavigate()
   const [mobileOpen, setMobileOpen] = useState(false)
 
@@ -280,6 +284,68 @@ export default function AppLayout() {
 
           {/* Footer */}
           <div className="flex flex-col shrink-0" style={{ gap: 'var(--sp-2)' }}>
+            {/* ── Online / sync status indicator ── */}
+            {(!isOnline || !syncEnabled) && (
+              <div
+                role="status"
+                aria-live="polite"
+                style={{
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: 4,
+                  padding: sidebarCollapsed ? '4px 0' : '4px 8px',
+                }}
+              >
+                {!isOnline && (
+                  <div
+                    title="Geen internetverbinding"
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: 6,
+                      fontSize: 11,
+                      fontWeight: 600,
+                      color: 'var(--gold)',
+                      justifyContent: sidebarCollapsed ? 'center' : 'flex-start',
+                    }}
+                  >
+                    {/* Wifi-off icon */}
+                    <svg aria-hidden="true" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0 }}>
+                      <line x1="1" y1="1" x2="23" y2="23" />
+                      <path d="M16.72 11.06A10.94 10.94 0 0 1 19 12.55" />
+                      <path d="M5 12.55a10.94 10.94 0 0 1 5.17-2.39" />
+                      <path d="M10.71 5.05A16 16 0 0 1 22.56 9" />
+                      <path d="M1.42 9a15.91 15.91 0 0 1 4.7-2.88" />
+                      <path d="M8.53 16.11a6 6 0 0 1 6.95 0" />
+                      <line x1="12" y1="20" x2="12.01" y2="20" />
+                    </svg>
+                    {!sidebarCollapsed && <span>Offline</span>}
+                  </div>
+                )}
+                {!syncEnabled && (
+                  <div
+                    title="Synchronisatie uitgeschakeld"
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: 6,
+                      fontSize: 11,
+                      fontWeight: 600,
+                      color: 'var(--muted)',
+                      justifyContent: sidebarCollapsed ? 'center' : 'flex-start',
+                    }}
+                  >
+                    {/* Link-off icon */}
+                    <svg aria-hidden="true" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0 }}>
+                      <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" />
+                      <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" />
+                      <line x1="1" y1="1" x2="23" y2="23" />
+                    </svg>
+                    {!sidebarCollapsed && <span>Sync uit</span>}
+                  </div>
+                )}
+              </div>
+            )}
             <div aria-hidden="true" style={{ height: '1px', background: 'var(--hairline)', margin: '0 8px' }} />
             <button
               onClick={() => setMobileOpen(false)}

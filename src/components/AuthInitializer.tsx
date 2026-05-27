@@ -12,9 +12,15 @@ async function syncProfile(userId: string) {
   if (data) useAuthStore.getState().setProfile(data)
 }
 
+function clearPersistedCache(userId: string) {
+  localStorage.removeItem(`rq-cache:${userId}`)
+}
+
 /**
  * Mounts once at app root; keeps Zustand auth state in sync with
  * Supabase session changes (tab restore, token refresh, sign-out).
+ * Also clears the persisted query cache on sign-out so the next user
+ * on the same device cannot access a previous user's data.
  * Renders nothing — pure side-effect.
  */
 export function AuthInitializer() {
@@ -32,10 +38,21 @@ export function AuthInitializer() {
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       (event, session) => {
         if (event === 'SIGNED_OUT') {
+          const userId = useAuthStore.getState().user?.id
           signOut()
           queryClient.clear()
+          if (userId) clearPersistedCache(userId)
           return
         }
+
+        // If a different user signs in, clear the previous user's in-memory cache
+        // so stale data from the old session is not shown.
+        const prevUserId = useAuthStore.getState().user?.id
+        const nextUserId = session?.user?.id
+        if (prevUserId && nextUserId && prevUserId !== nextUserId) {
+          queryClient.clear()
+        }
+
         setUser(session?.user ?? null)
         if (session?.user) syncProfile(session.user.id)
         if (event === 'USER_UPDATED') {
