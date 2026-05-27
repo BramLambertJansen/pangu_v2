@@ -77,6 +77,7 @@ export default function CampaignsPage() {
     if (!user?.id) return
     const cutoff = new Date(Date.now() - 30 * 60 * 1000).toISOString()
     void (async () => {
+      try {
       const { data } = await supabase
         .from('campaigns')
         .select('id')
@@ -85,6 +86,9 @@ export default function CampaignsPage() {
         .lt('created_at', cutoff)
       if (data?.length) {
         await supabase.from('campaigns').delete().in('id', data.map((r) => r.id))
+      }
+      } catch (err) {
+        console.warn("[GC] draft cleanup failed:", err)
       }
     })()
   }, [user?.id])

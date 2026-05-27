@@ -8,7 +8,8 @@ import {
   getUserUsage,
   getOrgUsage,
   routeRequest,
-  incrementUsage,
+  claimAiRequest,
+  incrementOrgGroqUsage,
 } from "./ratelimit.ts";
 import { callGroq, callGemini, callAnthropic, callOpenAI } from "./providers.ts";
 
@@ -130,26 +131,64 @@ Deno.serve(async (req: Request) => {
       );
     }
 
-    // ── 5. Call provider ──────────────────────────────────────────────────────
+    // ── 5. Atomically claim request slot BEFORE calling provider ─────────────
+    //
+    // claimAiRequest does a conditional UPDATE (check + increment in one
+    // statement), preventing concurrent requests from bypassing the limit.
+    // If it returns false, the limit was hit at the DB level.
+
+    let usedProvider = route.provider;
+    let usedModel    = route.model;
+
+    const claimed = await claimAiRequest(
+      supabaseUser,
+      user.id,
+      windowStart,
+      route.provider,
+      AI_CONFIG.FREE_REQUESTS_PER_WINDOW,
+    );
+
+    if (!claimed) {
+      const windowEnd = getWindowEnd(windowStart);
+      return errorResponse(
+        "free_limit_reached",
+        `Limiet van ${AI_CONFIG.FREE_REQUESTS_PER_WINDOW} verzoeken per ${AI_CONFIG.WINDOW_HOURS}u bereikt.`,
+        429,
+        { window_resets_at: windowEnd.toISOString() }
+      );
+    }
+
+    // ── 6. Call provider (Groq → Gemini cascade on error) ────────────────────
 
     let reply: string;
+
     if (route.provider === "groq") {
-      reply = await callGroq(messages, route.model);
+      try {
+        reply = await callGroq(messages, route.model);
+      } catch (groqErr) {
+        // Groq failed — cascade to Gemini as documented fallback.
+        console.warn("Groq call failed, falling back to Gemini:", groqErr);
+        usedProvider = "gemini";
+        usedModel    = AI_CONFIG.GEMINI_MODEL;
+        reply        = await callGemini(messages, usedModel);
+      }
     } else {
       reply = await callGemini(messages, route.model);
     }
 
-    // ── 6. Increment usage counters (after successful call) ───────────────────
+    // ── 7. Increment org Groq counter after successful call ───────────────────
 
-    await incrementUsage(supabaseUser, user.id, windowStart, route.provider);
+    if (usedProvider === "groq") {
+      await incrementOrgGroqUsage(supabaseService);
+    }
 
     const newTotal  = usage.groq_count + usage.gemini_count + 1;
     const remaining = AI_CONFIG.FREE_REQUESTS_PER_WINDOW - newTotal;
 
     return jsonResponse<AIResponse>({
       reply,
-      provider: route.provider,
-      model: route.model,
+      provider: usedProvider as Provider,
+      model: usedModel,
       window_remaining: remaining,
     });
 

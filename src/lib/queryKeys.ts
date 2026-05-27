@@ -54,4 +54,5 @@ export const queryKeys = {
   admin: {
     users: ['admin', 'users'] as const,
   },
+  userAiSettings: (userId: string) => ['user_ai_settings', userId] as const,
 }

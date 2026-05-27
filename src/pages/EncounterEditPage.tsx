@@ -722,7 +722,7 @@ export default function EncounterEditPage() {
         confirmVariant="crimson"
       >
         {guard.isDraftDiscard
-          ? 'Dit item is nog niet opgeslagen en wordt permanent verwijderd. Doorgaan?'
+          ? 'Dit gevecht is nog niet opgeslagen en wordt permanent verwijderd. Doorgaan?'
           : 'Je hebt niet-opgeslagen wijzigingen. Weet je zeker dat je de pagina wilt verlaten?'
         }
       </ConfirmDialog>

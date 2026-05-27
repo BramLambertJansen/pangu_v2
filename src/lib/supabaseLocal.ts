@@ -8,9 +8,11 @@
  * Supported query patterns (all variants found in this codebase):
  *   .select('*').eq().order().limit()
  *   .select('*').eq().single() / .maybeSingle()
- *   .select('*, alias:table(cols)').eq().single()   — join resolution
+ *   .select('*, table(cols)').eq().single()          — join resolution (shorthand)
+ *   .select('*, alias:table(cols)').eq().single()   — join resolution (explicit alias)
  *   .select('*').eq().eq()                          — multiple eq filters
  *   .select('*').in(field, vals)                    — IN filter
+ *   .select('*').lt(field, val)                     — less-than filter (used by draft GC)
  *   .not(field, 'is', null)                         — NOT NULL filter
  *   .insert({}).select().single()                   — insert + return
  *   .insert([])                                     — bulk insert
@@ -30,6 +32,10 @@ type Filter =
   | { type: 'eq'; field: string; value: unknown }
   | { type: 'neq'; field: string; value: unknown }
   | { type: 'in'; field: string; values: unknown[] }
+  | { type: 'lt'; field: string; value: unknown }
+  | { type: 'lte'; field: string; value: unknown }
+  | { type: 'gt'; field: string; value: unknown }
+  | { type: 'gte'; field: string; value: unknown }
   | { type: 'not-is-null'; field: string }
   | { type: 'is-null'; field: string }
 
@@ -75,6 +81,26 @@ class LocalQueryBuilder {
 
   in(field: string, values: unknown[]): this {
     this._filters.push({ type: 'in', field, values })
+    return this
+  }
+
+  lt(field: string, value: unknown): this {
+    this._filters.push({ type: 'lt', field, value })
+    return this
+  }
+
+  lte(field: string, value: unknown): this {
+    this._filters.push({ type: 'lte', field, value })
+    return this
+  }
+
+  gt(field: string, value: unknown): this {
+    this._filters.push({ type: 'gt', field, value })
+    return this
+  }
+
+  gte(field: string, value: unknown): this {
+    this._filters.push({ type: 'gte', field, value })
     return this
   }
 
@@ -149,6 +175,14 @@ class LocalQueryBuilder {
             return row[f.field] !== f.value
           case 'in':
             return f.values.includes(row[f.field])
+          case 'lt':
+            return (row[f.field] as string | number) < (f.value as string | number)
+          case 'lte':
+            return (row[f.field] as string | number) <= (f.value as string | number)
+          case 'gt':
+            return (row[f.field] as string | number) > (f.value as string | number)
+          case 'gte':
+            return (row[f.field] as string | number) >= (f.value as string | number)
           case 'not-is-null':
             return row[f.field] !== null && row[f.field] !== undefined
           case 'is-null':
@@ -180,30 +214,38 @@ class LocalQueryBuilder {
 
   /**
    * Resolves join specs in the select column string.
-   * Format: `alias:table(col1, col2)` or `alias:table(*)`.
-   * Looks up the related row from localDb using the `${alias}_id` FK field.
+   * Supports two formats:
+   *   `alias:table(col1, col2)` — explicit alias; FK field = `${alias}_id`
+   *   `table(col1, col2)`       — shorthand (PostgREST default); FK field =
+   *                               `${singularized-table}_id` (e.g. worlds → world_id)
    */
   private _resolveJoins(row: Row): Row {
     const result: Row = { ...row }
-    const joinRe = /(\w+):(\w+)\(([^)]+)\)/g
+    // Match optional `alias:` prefix followed by `table(colSpec)`
+    const joinRe = /(?:(\w+):)?(\w+)\(([^)]+)\)/g
     let m: RegExpExecArray | null
     while ((m = joinRe.exec(this._selectCols)) !== null) {
       const [, alias, joinTable, colSpec] = m
-      const fkValue = row[`${alias}_id`] as string | undefined
+      // When no alias: key in result = table name; FK = singular table name + '_id'
+      const resultKey = alias ?? joinTable
+      const fkField = alias
+        ? `${alias}_id`
+        : `${joinTable.replace(/s$/, '')}_id`
+      const fkValue = row[fkField] as string | undefined
       if (fkValue) {
         const joinedRow = localDb.getById(joinTable, fkValue) as Row | undefined
         if (joinedRow) {
           if (colSpec.trim() === '*') {
-            result[alias] = joinedRow
+            result[resultKey] = joinedRow
           } else {
             const cols = colSpec.split(',').map((c) => c.trim())
-            result[alias] = Object.fromEntries(cols.map((c) => [c, joinedRow[c]]))
+            result[resultKey] = Object.fromEntries(cols.map((c) => [c, joinedRow[c]]))
           }
         } else {
-          result[alias] = null
+          result[resultKey] = null
         }
       } else {
-        result[alias] = null
+        result[resultKey] = null
       }
     }
     return result
@@ -217,7 +259,8 @@ class LocalQueryBuilder {
         rows = this._applyOrder(rows)
         if (this._limitN !== undefined) rows = rows.slice(0, this._limitN)
 
-        const hasJoins = this._selectCols.includes(':')
+        // Detect both `alias:table(cols)` and plain `table(cols)` join patterns
+        const hasJoins = /\w+\(/.test(this._selectCols)
         const result = hasJoins ? rows.map((r) => this._resolveJoins(r)) : rows
 
         if (this._singleMode === 'single') {
