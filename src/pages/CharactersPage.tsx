@@ -27,6 +27,7 @@ export default function CharactersPage() {
     const cutoff = new Date(Date.now() - 30 * 60 * 1000).toISOString()
     void (async () => {
       try {
+      try {
         const { data } = await supabase
           .from('characters')
           .select('id, created_at')
@@ -38,6 +39,9 @@ export default function CharactersPage() {
         }
       } catch {
         // Silently ignore draft cleanup errors
+      }
+      } catch (err) {
+        console.warn("[GC] draft cleanup failed:", err)
       }
     })()
   }, [user?.id])

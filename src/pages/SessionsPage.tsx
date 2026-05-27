@@ -58,6 +58,7 @@ export default function SessionsPage() {
     if (!user?.id) return
     const cutoff = new Date(Date.now() - 30 * 60 * 1000).toISOString()
     void (async () => {
+      try {
       const { data } = await supabase
         .from('sessions')
         .select('id')
@@ -66,6 +67,9 @@ export default function SessionsPage() {
         .lt('created_at', cutoff)
       if (data?.length) {
         await supabase.from('sessions').delete().in('id', data.map((r) => r.id))
+      }
+      } catch (err) {
+        console.warn("[GC] draft cleanup failed:", err)
       }
     })()
   }, [user?.id])

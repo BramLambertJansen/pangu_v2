@@ -30,6 +30,7 @@ export default function QuestsPage() {
     if (!user?.id) return
     const cutoff = new Date(Date.now() - 30 * 60 * 1000).toISOString()
     void (async () => {
+      try {
       const { data } = await supabase
         .from('quests')
         .select('id')
@@ -38,6 +39,9 @@ export default function QuestsPage() {
         .lt('created_at', cutoff)
       if (data?.length) {
         await supabase.from('quests').delete().in('id', data.map((r) => r.id))
+      }
+      } catch (err) {
+        console.warn("[GC] draft cleanup failed:", err)
       }
     })()
   }, [user?.id])

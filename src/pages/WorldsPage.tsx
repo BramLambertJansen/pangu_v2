@@ -33,6 +33,7 @@ export default function WorldsPage() {
     if (!user?.id) return
     const cutoff = new Date(Date.now() - 30 * 60 * 1000).toISOString()
     void (async () => {
+      try {
       const { data } = await supabase
         .from('worlds')
         .select('id')
@@ -44,6 +45,9 @@ export default function WorldsPage() {
           .from('worlds')
           .delete()
           .in('id', data.map((w) => w.id))
+      }
+      } catch (err) {
+        console.warn("[GC] draft cleanup failed:", err)
       }
     })()
   }, [user?.id])

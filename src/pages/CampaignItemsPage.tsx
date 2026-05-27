@@ -32,6 +32,7 @@ export default function CampaignItemsPage() {
     if (!id) return
     const cutoff = new Date(Date.now() - 30 * 60 * 1000).toISOString()
     void (async () => {
+      try {
       const { data } = await supabase
         .from('items')
         .select('id')
@@ -40,6 +41,9 @@ export default function CampaignItemsPage() {
         .lt('created_at', cutoff)
       if (data?.length) {
         await supabase.from('items').delete().in('id', data.map((r) => r.id))
+      }
+      } catch (err) {
+        console.warn("[GC] draft cleanup failed:", err)
       }
     })()
   }, [id])
