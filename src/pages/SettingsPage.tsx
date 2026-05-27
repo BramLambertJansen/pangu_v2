@@ -1,7 +1,7 @@
 import { useState, useId, useRef } from 'react'
 import { CompassRose } from '@/components/world/CompassRose'
 import { Spinner } from '@/components/ui/Spinner'
-import { useMutation } from '@tanstack/react-query'
+import { useMutation, useQuery } from '@tanstack/react-query'
 import { toast } from 'sonner'
 import { supabase } from '@/lib/supabase'
 import { useAuthStore } from '@/stores/auth.store'
@@ -510,42 +510,51 @@ function ProviderKeyCard({
 
 function AISleutelsTab() {
   const profile = useAuthStore(s => s.profile)
-  const setProfile = useAuthStore(s => s.setProfile)
 
-  const openaiMutation = useMutation({
-    mutationFn: async (key: string | null) => {
-      if (!profile) throw new Error('no_profile')
-      const { data, error } = await supabase
-        .from('profiles')
-        .update({ openai_api_key: key })
-        .eq('id', profile.id)
-        .select()
-        .single()
-      if (error) throw error
+  const { data: aiSettings, refetch: refetchSettings } = useQuery({
+    queryKey: ['user_ai_settings', profile?.id],
+    queryFn: async () => {
+      if (!profile) return null
+      const { data } = await supabase
+        .from('user_ai_settings')
+        .select('byok_keys')
+        .eq('user_id', profile.id)
+        .maybeSingle()
       return data
     },
-    onSuccess: (data) => {
-      setProfile({ ...profile!, ...data })
-      toast.success(data.openai_api_key ? 'OpenAI-sleutel opgeslagen' : 'OpenAI-sleutel gewist')
+    enabled: !!profile,
+  })
+
+  const byokKeys = (aiSettings?.byok_keys ?? {}) as Record<string, string>
+
+  async function upsertKey(provider: string, key: string | null): Promise<void> {
+    if (!profile) throw new Error('no_profile')
+    const updated = { ...byokKeys }
+    if (key === null) {
+      delete updated[provider]
+    } else {
+      updated[provider] = key
+    }
+    const { error } = await supabase
+      .from('user_ai_settings')
+      .upsert({ user_id: profile.id, byok_keys: updated }, { onConflict: 'user_id' })
+    if (error) throw error
+  }
+
+  const openaiMutation = useMutation({
+    mutationFn: (key: string | null) => upsertKey('openai', key),
+    onSuccess: (_, key) => {
+      refetchSettings()
+      toast.success(key !== null ? 'OpenAI-sleutel opgeslagen' : 'OpenAI-sleutel gewist')
     },
     onError: () => toast.error('Opslaan mislukt'),
   })
 
   const anthropicMutation = useMutation({
-    mutationFn: async (key: string | null) => {
-      if (!profile) throw new Error('no_profile')
-      const { data, error } = await supabase
-        .from('profiles')
-        .update({ anthropic_api_key: key })
-        .eq('id', profile.id)
-        .select()
-        .single()
-      if (error) throw error
-      return data
-    },
-    onSuccess: (data) => {
-      setProfile({ ...profile!, ...data })
-      toast.success(data.anthropic_api_key ? 'Anthropic-sleutel opgeslagen' : 'Anthropic-sleutel gewist')
+    mutationFn: (key: string | null) => upsertKey('anthropic', key),
+    onSuccess: (_, key) => {
+      refetchSettings()
+      toast.success(key !== null ? 'Anthropic-sleutel opgeslagen' : 'Anthropic-sleutel gewist')
     },
     onError: () => toast.error('Opslaan mislukt'),
   })
@@ -571,7 +580,7 @@ function AISleutelsTab() {
       <ProviderKeyCard
         title="OpenAI"
         description="GPT-4o en andere OpenAI-modellen voor lore-generatie."
-        isSet={profile?.openai_api_key != null}
+        isSet={'openai' in byokKeys}
         fieldId="ai-openai-key"
         onSave={(key) => openaiMutation.mutate(key)}
         onClear={() => openaiMutation.mutate(null)}
@@ -582,7 +591,7 @@ function AISleutelsTab() {
       <ProviderKeyCard
         title="Anthropic (Claude)"
         description="Claude Sonnet en Opus voor consistente verhaalintelligentie."
-        isSet={profile?.anthropic_api_key != null}
+        isSet={'anthropic' in byokKeys}
         fieldId="ai-anthropic-key"
         onSave={(key) => anthropicMutation.mutate(key)}
         onClear={() => anthropicMutation.mutate(null)}

@@ -763,8 +763,6 @@ export type Database = {
           avatar_url: string | null
           role: ProfileRole
           created_at: string
-          openai_api_key: string | null
-          anthropic_api_key: string | null
         }
         Insert: {
           id: string
@@ -775,8 +773,6 @@ export type Database = {
           avatar_url?: string | null
           role?: ProfileRole
           created_at?: string
-          openai_api_key?: string | null
-          anthropic_api_key?: string | null
         }
         Update: {
           id?: string
@@ -787,8 +783,75 @@ export type Database = {
           avatar_url?: string | null
           role?: ProfileRole
           created_at?: string
-          openai_api_key?: string | null
-          anthropic_api_key?: string | null
+        }
+        Relationships: []
+      }
+      user_ai_settings: {
+        Row: {
+          user_id: string
+          byok_keys: Json
+          preferred_provider: string | null
+          preferred_model: string | null
+          updated_at: string
+        }
+        Insert: {
+          user_id: string
+          byok_keys?: Json
+          preferred_provider?: string | null
+          preferred_model?: string | null
+          updated_at?: string
+        }
+        Update: {
+          user_id?: string
+          byok_keys?: Json
+          preferred_provider?: string | null
+          preferred_model?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      ai_usage: {
+        Row: {
+          id: string
+          user_id: string
+          window_start: string
+          groq_count: number
+          gemini_count: number
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          user_id: string
+          window_start: string
+          groq_count?: number
+          gemini_count?: number
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          user_id?: string
+          window_start?: string
+          groq_count?: number
+          gemini_count?: number
+          created_at?: string
+        }
+        Relationships: []
+      }
+      ai_org_usage: {
+        Row: {
+          id: string
+          date: string
+          groq_total: number
+        }
+        Insert: {
+          id?: string
+          date?: string
+          groq_total?: number
+        }
+        Update: {
+          id?: string
+          date?: string
+          groq_total?: number
         }
         Relationships: []
       }
@@ -797,7 +860,14 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      increment_ai_usage: {
+        Args: { p_user_id: string; p_window_start: string; p_field: string }
+        Returns: undefined
+      }
+      increment_org_groq_usage: {
+        Args: { p_date: string }
+        Returns: undefined
+      }
     }
     Enums: {
       [_ in never]: never
@@ -817,6 +887,12 @@ export interface Profile {
   avatar_url: string | null
   role: ProfileRole
   created_at: string
-  openai_api_key: string | null
-  anthropic_api_key: string | null
+}
+
+export interface UserAISettings {
+  user_id: string
+  byok_keys: Record<string, string>
+  preferred_provider: string | null
+  preferred_model: string | null
+  updated_at: string
 }
