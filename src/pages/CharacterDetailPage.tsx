@@ -30,6 +30,15 @@ interface Skill {
   abbr: 'STR' | 'DEX' | 'CON' | 'INT' | 'WIS' | 'CHA'
 }
 
+const SAVING_THROWS: { label: string; abbr: string; statKey: 'stat_str' | 'stat_dex' | 'stat_con' | 'stat_int' | 'stat_wis' | 'stat_cha' }[] = [
+  { label: 'Sterkte',       abbr: 'STR', statKey: 'stat_str' },
+  { label: 'Behendigheid',  abbr: 'DEX', statKey: 'stat_dex' },
+  { label: 'Constitutie',   abbr: 'CON', statKey: 'stat_con' },
+  { label: 'Intelligentie', abbr: 'INT', statKey: 'stat_int' },
+  { label: 'Wijsheid',      abbr: 'WIS', statKey: 'stat_wis' },
+  { label: 'Charisma',      abbr: 'CHA', statKey: 'stat_cha' },
+]
+
 const SKILLS: Skill[] = [
   { name: 'Atletiek',         ability: 'stat_str', abbr: 'STR' },
   { name: 'Acrobatiek',       ability: 'stat_dex', abbr: 'DEX' },
@@ -517,6 +526,35 @@ export default function CharacterDetailPage() {
     onError: () => toast.error('HP bijwerken mislukt'),
   })
 
+  const toggleInspiration = useMutation({
+    mutationFn: async (value: boolean) => {
+      const { error } = await supabase
+        .from('characters')
+        .update({ inspiration: value, updated_at: new Date().toISOString() })
+        .eq('id', id!)
+      if (error) throw error
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: queryKeys.characters.detail(id!) })
+      queryClient.invalidateQueries({ queryKey: queryKeys.characters.all })
+    },
+    onError: () => toast.error('Inspiratie bijwerken mislukt'),
+  })
+
+  const updateDeathSaves = useMutation({
+    mutationFn: async ({ successes, failures }: { successes: number; failures: number }) => {
+      const { error } = await supabase
+        .from('characters')
+        .update({ death_save_successes: successes, death_save_failures: failures, updated_at: new Date().toISOString() })
+        .eq('id', id!)
+      if (error) throw error
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: queryKeys.characters.detail(id!) })
+    },
+    onError: () => toast.error('Stervensgooien bijwerken mislukt'),
+  })
+
   if (isLoading) {
     return (
       <div style={{ display: 'flex', justifyContent: 'center', padding: '80px 0' }} aria-live="polite">
@@ -561,6 +599,22 @@ export default function CharacterDetailPage() {
     .filter((i) => (i.properties.ac_bonus ?? 0) !== 0)
     .map((i) => i.name)
   const acSubtitle = acContributors.join(' + ')
+
+  // D&D 5.5e derived values
+  const profBonus      = character.proficiency_bonus ?? 2
+  const isInspired     = character.inspiration ?? false
+  const exhaustion     = character.exhaustion ?? 0
+  const hitDie         = character.hit_die ?? 'd8'
+  const hitDiceCurrent = character.hit_dice_current ?? 1
+  const deathSuccesses = character.death_save_successes ?? 0
+  const deathFailures  = character.death_save_failures  ?? 0
+
+  // Passive perception/investigation/insight (10 + ability mod + proficiency if applicable + item bonus)
+  const wisMod = Math.floor((eff.wis - 10) / 2)
+  const intMod = Math.floor((eff.int - 10) / 2)
+  const passivePerception   = 10 + wisMod + ((character.proficient_skills ?? []).includes('Waarneming')  ? profBonus : 0) + (eff.skillBonuses['Waarneming']  ?? 0)
+  const passiveInvestigation = 10 + intMod + ((character.proficient_skills ?? []).includes('Onderzoek')   ? profBonus : 0) + (eff.skillBonuses['Onderzoek']   ?? 0)
+  const passiveInsight       = 10 + wisMod + ((character.proficient_skills ?? []).includes('Inzicht')     ? profBonus : 0) + (eff.skillBonuses['Inzicht']     ?? 0)
 
   return (
     <div>
@@ -707,6 +761,158 @@ export default function CharacterDetailPage() {
           </div>
         </div>
 
+        {/* ── Inspiratie / Trefferdobbelstenen / Uitputting ── */}
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(180px, 1fr))', gap: 12, marginBottom: 16 }}>
+          {/* Inspiratie */}
+          <button
+            type="button"
+            aria-pressed={isInspired}
+            aria-label={isInspired ? 'Inspiratie actief — klik om te verwijderen' : 'Geen inspiratie — klik om toe te voegen'}
+            onClick={() => toggleInspiration.mutate(!isInspired)}
+            disabled={toggleInspiration.isPending}
+            className="pangu-surface"
+            style={{
+              padding: '16px 20px',
+              display: 'flex', alignItems: 'center', gap: 12,
+              cursor: 'pointer', textAlign: 'left',
+              background: isInspired ? 'rgba(234,179,8,0.08)' : undefined,
+              borderColor: isInspired ? 'rgba(234,179,8,0.35)' : undefined,
+              transition: 'background var(--t-fast), border-color var(--t-fast)',
+              border: `1px solid ${isInspired ? 'rgba(234,179,8,0.35)' : 'var(--hairline)'}`,
+            }}
+          >
+            <span aria-hidden="true" style={{ fontSize: 22, color: isInspired ? 'var(--gold)' : 'var(--muted)' }}>
+              {isInspired ? '✦' : '✧'}
+            </span>
+            <div>
+              <p style={{ fontSize: 10, fontWeight: 700, letterSpacing: '0.16em', textTransform: 'uppercase', color: isInspired ? 'var(--gold)' : 'var(--muted)', margin: '0 0 3px' }}>Inspiratie</p>
+              <p style={{ fontSize: 14, fontWeight: isInspired ? 700 : 400, color: isInspired ? 'var(--gold)' : 'var(--ink-soft)', margin: 0 }}>
+                {isInspired ? 'Geïnspireerd' : 'Geen'}
+              </p>
+            </div>
+          </button>
+
+          {/* Trefferdobbelstenen */}
+          <div className="pangu-surface" style={{ padding: '16px 20px' }}>
+            <p style={{ fontSize: 10, fontWeight: 700, letterSpacing: '0.16em', textTransform: 'uppercase', color: 'var(--muted)', margin: '0 0 8px' }}>
+              Trefferdobbelstenen
+            </p>
+            <p style={{ fontFamily: 'var(--font-display)', fontSize: 24, fontWeight: 700, color: 'var(--ink)', margin: '0 0 4px', lineHeight: 1 }}>
+              {hitDiceCurrent}<span style={{ fontSize: 14, fontWeight: 400, color: 'var(--muted)' }}>/{character.level} {hitDie}</span>
+            </p>
+            <div style={{ display: 'flex', gap: 3, flexWrap: 'wrap', marginTop: 4 }}>
+              {Array.from({ length: Math.min(character.level, 20) }, (_, i) => (
+                <div
+                  key={i}
+                  aria-hidden="true"
+                  style={{
+                    width: character.level > 12 ? 6 : 8,
+                    height: character.level > 12 ? 6 : 8,
+                    borderRadius: 2,
+                    background: i < hitDiceCurrent ? 'var(--teal)' : 'var(--hairline)',
+                  }}
+                />
+              ))}
+            </div>
+          </div>
+
+          {/* Uitputting */}
+          {exhaustion > 0 && (
+            <div className="pangu-surface" style={{ padding: '16px 20px', borderColor: exhaustion >= 5 ? 'rgba(220,38,38,0.3)' : 'rgba(234,179,8,0.25)', background: exhaustion >= 5 ? 'rgba(220,38,38,0.04)' : 'rgba(234,179,8,0.04)' }}>
+              <p style={{ fontSize: 10, fontWeight: 700, letterSpacing: '0.16em', textTransform: 'uppercase', color: exhaustion >= 5 ? 'var(--crimson)' : 'var(--gold)', margin: '0 0 4px' }}>Uitputting</p>
+              <p style={{ fontFamily: 'var(--font-display)', fontSize: 32, fontWeight: 700, color: exhaustion >= 5 ? 'var(--crimson)' : 'var(--gold)', margin: '0 0 4px', lineHeight: 1 }}>
+                {exhaustion}<span style={{ fontSize: 14, color: 'var(--muted)', fontWeight: 400 }}>/10</span>
+              </p>
+              <p style={{ fontSize: 11, color: exhaustion >= 5 ? 'var(--crimson)' : 'var(--gold)', margin: 0 }}>
+                {exhaustion === 10 ? 'Dood' : `−${exhaustion * 2} op d20-gooien`}
+              </p>
+            </div>
+          )}
+        </div>
+
+        {/* ── Stervensgooien (bij 0 HP) ── */}
+        {hpCurrent === 0 && (
+          <div className="pangu-surface" style={{ padding: 20, marginBottom: 16, borderColor: 'rgba(220,38,38,0.3)', background: 'rgba(220,38,38,0.04)' }}>
+            <p style={{ fontSize: 10, fontWeight: 700, letterSpacing: '0.16em', textTransform: 'uppercase', color: 'var(--crimson)', margin: '0 0 14px' }}>
+              Stervensgooien
+            </p>
+            <div style={{ display: 'flex', gap: 32, flexWrap: 'wrap' }}>
+              <div>
+                <p style={{ fontSize: 11, color: 'var(--teal)', fontWeight: 600, margin: '0 0 8px' }}>Successen</p>
+                <div style={{ display: 'flex', gap: 8 }}>
+                  {[1, 2, 3].map(n => {
+                    const filled = deathSuccesses >= n
+                    return (
+                      <button
+                        key={n}
+                        type="button"
+                        aria-label={`Succes ${n}: ${filled ? 'geslaagd' : 'leeg'}`}
+                        onClick={() => updateDeathSaves.mutate({ successes: filled ? n - 1 : n, failures: deathFailures })}
+                        disabled={updateDeathSaves.isPending}
+                        style={{
+                          width: 36, height: 36, borderRadius: 8,
+                          border: filled ? '2px solid rgba(62,207,178,0.6)' : '2px solid var(--hairline-strong)',
+                          background: filled ? 'rgba(62,207,178,0.15)' : 'var(--surface)',
+                          cursor: 'pointer', fontSize: 16,
+                          color: filled ? 'var(--teal)' : 'var(--muted)',
+                          transition: 'all var(--t-fast)',
+                          display: 'flex', alignItems: 'center', justifyContent: 'center',
+                        }}
+                      >
+                        {filled ? '✓' : '○'}
+                      </button>
+                    )
+                  })}
+                </div>
+              </div>
+              <div>
+                <p style={{ fontSize: 11, color: 'var(--crimson)', fontWeight: 600, margin: '0 0 8px' }}>Mislukkingen</p>
+                <div style={{ display: 'flex', gap: 8 }}>
+                  {[1, 2, 3].map(n => {
+                    const filled = deathFailures >= n
+                    return (
+                      <button
+                        key={n}
+                        type="button"
+                        aria-label={`Mislukking ${n}: ${filled ? 'mislukt' : 'leeg'}`}
+                        onClick={() => updateDeathSaves.mutate({ successes: deathSuccesses, failures: filled ? n - 1 : n })}
+                        disabled={updateDeathSaves.isPending}
+                        style={{
+                          width: 36, height: 36, borderRadius: 8,
+                          border: filled ? '2px solid rgba(220,38,38,0.5)' : '2px solid var(--hairline-strong)',
+                          background: filled ? 'rgba(220,38,38,0.12)' : 'var(--surface)',
+                          cursor: 'pointer', fontSize: 16,
+                          color: filled ? 'var(--crimson)' : 'var(--muted)',
+                          transition: 'all var(--t-fast)',
+                          display: 'flex', alignItems: 'center', justifyContent: 'center',
+                        }}
+                      >
+                        {filled ? '✕' : '○'}
+                      </button>
+                    )
+                  })}
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* ── Passieve stats ── */}
+        <div className="pangu-surface" style={{ padding: '14px 20px', marginBottom: 16 }}>
+          <div style={{ display: 'flex', gap: 24, flexWrap: 'wrap' }}>
+            {[
+              { label: 'Passieve Waarneming',   value: passivePerception    },
+              { label: 'Passieve Onderzoek',     value: passiveInvestigation },
+              { label: 'Passief Inzicht',        value: passiveInsight       },
+            ].map(({ label, value }) => (
+              <div key={label} style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                <span style={{ fontSize: 11, color: 'var(--muted)', fontWeight: 600, letterSpacing: '0.08em' }}>{label}</span>
+                <span style={{ fontFamily: 'var(--font-display)', fontSize: 18, fontWeight: 700, color: 'var(--ink)' }}>{value}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+
         {/* Ability scores */}
         <div className="pangu-surface" style={{ padding: 24, marginBottom: 16 }}>
           <p className="pangu-section-title" style={{ marginBottom: 16 }}>Eigenschappen</p>
@@ -729,6 +935,44 @@ export default function CharacterDetailPage() {
                       {bonus > 0 ? `+${bonus}` : bonus} uitrusting
                     </span>
                   )}
+                </div>
+              )
+            })}
+          </div>
+        </div>
+
+        {/* Reddingsgooien */}
+        <div className="pangu-surface" style={{ padding: 24, marginBottom: 16 }}>
+          <p className="pangu-section-title" style={{ marginBottom: 16 }}>Reddingsgooien</p>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 10 }}>
+            {SAVING_THROWS.map(({ label, abbr, statKey }) => {
+              const score = eff[statKey.replace('stat_', '') as 'str' | 'dex' | 'con' | 'int' | 'wis' | 'cha']
+              const mod = Math.floor((score - 10) / 2)
+              const isProficient = (character.saving_throw_proficiencies ?? []).includes(label)
+              const total = mod + (isProficient ? profBonus : 0)
+              const totalLabel = total >= 0 ? `+${total}` : `${total}`
+              return (
+                <div key={label} style={{
+                  display: 'flex', alignItems: 'center', gap: 8,
+                  padding: '10px 12px', borderRadius: 8,
+                  background: isProficient ? 'rgba(139,92,246,0.08)' : 'var(--surface)',
+                  border: isProficient ? '1px solid rgba(139,92,246,0.25)' : '1px solid var(--hairline)',
+                }}>
+                  <span aria-label={isProficient ? `${label}: vaardig` : `${label}: niet vaardig`} style={{
+                    width: 8, height: 8, borderRadius: '50%', flexShrink: 0,
+                    background: isProficient ? 'var(--violet)' : 'transparent',
+                    border: `2px solid ${isProficient ? 'var(--violet)' : 'var(--hairline-strong)'}`,
+                  }} />
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <span style={{ fontSize: 11, color: 'var(--muted)', display: 'block', fontWeight: 700, letterSpacing: '0.08em' }}>{abbr}</span>
+                    <span style={{ fontSize: 10, color: 'var(--subtle)' }}>{label}</span>
+                  </div>
+                  <span style={{
+                    fontFamily: 'var(--font-display)', fontSize: 18, fontWeight: 700,
+                    color: isProficient ? 'var(--violet)' : 'var(--ink-soft)',
+                  }}>
+                    {totalLabel}
+                  </span>
                 </div>
               )
             })}
@@ -887,29 +1131,47 @@ export default function CharacterDetailPage() {
         <div className="pangu-surface" style={{ padding: 24 }}>
           <p className="pangu-section-title" style={{ marginBottom: 4 }}>Vaardigheden</p>
           <p style={{ fontSize: 12, color: 'var(--muted)', marginTop: 0, marginBottom: 20 }}>
-            Gemarkeerde vaardigheden tellen je vaardigheidsbonus (+{character.proficiency_bonus ?? 0}) mee.
+            <span style={{ color: 'var(--violet)', fontWeight: 600 }}>●</span> vaardig (+{character.proficiency_bonus ?? 0}) &nbsp;·&nbsp;
+            <span style={{ color: 'var(--teal)', fontWeight: 600 }}>◎</span> expertise (×2 bonus)
           </p>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))', gap: 8 }}>
             {SKILLS.map((skill) => {
               const isProficient = (character.proficient_skills ?? []).includes(skill.name)
-              const baseScore = (character[skill.ability] as number | null) ?? 10
-              const baseMod   = Math.floor((baseScore - 10) / 2)
-              const profBonus = isProficient ? (character.proficiency_bonus ?? 0) : 0
-              const itemBonus = eff.skillBonuses[skill.name] ?? 0
-              const totalMod  = baseMod + profBonus + itemBonus
-              const modLabel  = totalMod >= 0 ? `+${totalMod}` : `${totalMod}`
+              const isExpert     = (character.expertise_skills  ?? []).includes(skill.name)
+              const baseScore    = (character[skill.ability] as number | null) ?? 10
+              const baseMod      = Math.floor((baseScore - 10) / 2)
+              const skillBonus   = isExpert ? (character.proficiency_bonus ?? 0) * 2 : isProficient ? (character.proficiency_bonus ?? 0) : 0
+              const itemBonus    = eff.skillBonuses[skill.name] ?? 0
+              const totalMod     = baseMod + skillBonus + itemBonus
+              const modLabel     = totalMod >= 0 ? `+${totalMod}` : `${totalMod}`
+              const state        = isExpert ? 'expertise' : isProficient ? 'vaardig' : 'geen'
               return (
-                <div key={skill.name} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '8px 12px', borderRadius: 8, background: isProficient ? 'rgba(139,92,246,0.08)' : 'var(--surface)', border: isProficient ? '1px solid rgba(139,92,246,0.3)' : '1px solid var(--hairline)', transition: 'background var(--t-fast), border-color var(--t-fast)' }}>
-                  <span aria-label={isProficient ? `${skill.name}: vaardig` : `${skill.name}: niet vaardig`} style={{ width: 10, height: 10, borderRadius: '50%', flexShrink: 0, background: isProficient ? 'var(--violet)' : 'transparent', border: `2px solid ${isProficient ? 'var(--violet)' : 'var(--hairline-strong)'}` }} />
-                  <span style={{ flex: 1, fontSize: 13, color: isProficient ? 'var(--ink)' : 'var(--ink-soft)', fontWeight: isProficient ? 600 : 400 }}>
+                <div key={skill.name} style={{
+                  display: 'flex', alignItems: 'center', gap: 10,
+                  padding: '8px 12px', borderRadius: 8,
+                  background: isExpert ? 'rgba(62,207,178,0.08)' : isProficient ? 'rgba(139,92,246,0.08)' : 'var(--surface)',
+                  border: isExpert ? '1px solid rgba(62,207,178,0.3)' : isProficient ? '1px solid rgba(139,92,246,0.3)' : '1px solid var(--hairline)',
+                  transition: 'background var(--t-fast), border-color var(--t-fast)',
+                }}>
+                  <span
+                    aria-label={`${skill.name}: ${state}`}
+                    style={{
+                      width: 10, height: 10, borderRadius: '50%', flexShrink: 0,
+                      background: isExpert ? 'var(--teal)' : isProficient ? 'var(--violet)' : 'transparent',
+                      border: `2px solid ${isExpert ? 'var(--teal)' : isProficient ? 'var(--violet)' : 'var(--hairline-strong)'}`,
+                      boxShadow: isExpert ? '0 0 0 2px rgba(62,207,178,0.3)' : 'none',
+                    }}
+                  />
+                  <span style={{ flex: 1, fontSize: 13, color: isExpert ? 'var(--teal)' : isProficient ? 'var(--ink)' : 'var(--ink-soft)', fontWeight: (isProficient || isExpert) ? 600 : 400 }}>
                     {skill.name}
                     <span style={{ fontSize: 10, color: 'var(--muted)', marginLeft: 5, fontWeight: 400 }}>{skill.abbr}</span>
+                    {isExpert && <span style={{ fontSize: 9, color: 'var(--teal)', marginLeft: 5, fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase' }}>EXP</span>}
                   </span>
                   <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
                     {itemBonus !== 0 && (
                       <span style={{ fontSize: 10, fontWeight: 700, color: 'var(--teal)' }}>{itemBonus > 0 ? `+${itemBonus}` : itemBonus}</span>
                     )}
-                    <span style={{ fontSize: 14, fontWeight: 700, fontFamily: 'var(--font-display)', color: isProficient ? 'var(--violet)' : 'var(--ink-soft)', minWidth: 28, textAlign: 'right' }}>
+                    <span style={{ fontSize: 14, fontWeight: 700, fontFamily: 'var(--font-display)', color: isExpert ? 'var(--teal)' : isProficient ? 'var(--violet)' : 'var(--ink-soft)', minWidth: 28, textAlign: 'right' }}>
                       {modLabel}
                     </span>
                   </div>
@@ -918,17 +1180,79 @@ export default function CharacterDetailPage() {
             })}
           </div>
         </div>
+
+        {/* Bekwaamheden & Talen (onderaan vaardigheden tab) */}
+        {(() => {
+          const languages      = character.languages ?? []
+          const toolProf       = character.tool_proficiencies ?? []
+          const weaponProf     = character.weapon_proficiencies ?? []
+          const armorProf      = character.armor_proficiencies ?? []
+          const hasAny         = languages.length > 0 || toolProf.length > 0 || weaponProf.length > 0 || armorProf.length > 0
+          if (!hasAny) return null
+          return (
+            <div className="pangu-surface" style={{ padding: 24, marginTop: 12 }}>
+              <p className="pangu-section-title" style={{ marginBottom: 16 }}>Bekwaamheden &amp; Talen</p>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+                {[
+                  { label: 'Talen',                     items: languages  },
+                  { label: 'Wapenbekwaamheden',          items: weaponProf },
+                  { label: 'Wapenrustingbekwaamheden',   items: armorProf  },
+                  { label: 'Gereedschapsbekwaamheden',   items: toolProf   },
+                ].filter(g => g.items.length > 0).map(({ label, items }) => (
+                  <div key={label}>
+                    <p style={{ fontSize: 10, fontWeight: 700, letterSpacing: '0.14em', textTransform: 'uppercase', color: 'var(--muted)', margin: '0 0 8px' }}>{label}</p>
+                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
+                      {items.map(item => (
+                        <span key={item} style={{ fontSize: 12, padding: '3px 10px', borderRadius: 999, background: 'var(--surface)', border: '1px solid var(--hairline)', color: 'var(--ink-soft)' }}>
+                          {item}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )
+        })()}
       </div>
 
       {/* ════════════════════════════════ LORE ════════════════════════════════ */}
       <div id="tabpanel-lore" role="tabpanel" aria-labelledby="tab-lore" hidden={activeTab !== 'lore'}>
+        {/* Achtergrond */}
         <div className="pangu-surface" style={{ padding: 28, marginBottom: 16 }}>
           <p className="pangu-section-title" style={{ marginBottom: 12 }}>Achtergrond</p>
+          {character.alignment && (
+            <p style={{ fontSize: 12, color: 'var(--muted)', margin: '0 0 12px', fontStyle: 'italic' }}>
+              Uitlijning: <span style={{ color: 'var(--ink-soft)', fontStyle: 'normal' }}>{character.alignment}</span>
+            </p>
+          )}
           {character.description
             ? <p style={{ fontSize: 14, lineHeight: 1.75, color: 'var(--ink-soft)', margin: 0, whiteSpace: 'pre-wrap' }}>{character.description}</p>
             : <p style={{ fontSize: 14, color: 'var(--muted)', fontStyle: 'italic' }}>Nog geen achtergrondverhaal toegevoegd.</p>
           }
         </div>
+
+        {/* Karaktereigenschappen */}
+        {(character.personality_traits || character.ideals || character.bonds || character.flaws) && (
+          <div className="pangu-surface" style={{ padding: 28, marginBottom: 16 }}>
+            <p className="pangu-section-title" style={{ marginBottom: 16 }}>Karaktereigenschappen</p>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: 16 }}>
+              {[
+                { label: 'Persoonlijkheidskenmerken', value: character.personality_traits },
+                { label: 'Idealen',                   value: character.ideals            },
+                { label: 'Banden',                    value: character.bonds             },
+                { label: 'Gebreken',                  value: character.flaws             },
+              ].filter(f => f.value).map(({ label, value }) => (
+                <div key={label}>
+                  <p style={{ fontSize: 10, fontWeight: 700, letterSpacing: '0.14em', textTransform: 'uppercase', color: 'var(--muted)', margin: '0 0 6px' }}>{label}</p>
+                  <p style={{ fontSize: 14, lineHeight: 1.7, color: 'var(--ink-soft)', margin: 0, whiteSpace: 'pre-wrap' }}>{value}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Privénotities */}
         <div className="pangu-surface" style={{ padding: 28, borderColor: 'rgba(107,167,255,0.18)', background: 'rgba(107,167,255,0.03)' }}>
           <p className="pangu-section-title" style={{ marginBottom: 4 }}>✦ Privénotities</p>
           <p style={{ fontSize: 12, color: 'var(--azure)', marginBottom: 16, marginTop: 0 }}>Alleen zichtbaar voor jou</p>

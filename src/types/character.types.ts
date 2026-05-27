@@ -1,4 +1,5 @@
 export type CharacterStatus = 'active' | 'inactive' | 'retired' | 'archived'
+export type HitDie = 'd6' | 'd8' | 'd10' | 'd12'
 
 export interface Character {
   id: string
@@ -31,6 +32,26 @@ export interface Character {
   notes: string | null
   status: CharacterStatus
   proficient_skills: string[]
+
+  // D&D 5.5e additions
+  saving_throw_proficiencies: string[]
+  expertise_skills: string[]
+  languages: string[]
+  tool_proficiencies: string[]
+  weapon_proficiencies: string[]
+  armor_proficiencies: string[]
+  inspiration: boolean
+  hit_die: HitDie
+  hit_dice_current: number
+  death_save_successes: number
+  death_save_failures: number
+  exhaustion: number
+  alignment: string | null
+  personality_traits: string | null
+  ideals: string | null
+  bonds: string | null
+  flaws: string | null
+
   created_at: string
   updated_at: string
 }
