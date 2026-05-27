@@ -18,12 +18,8 @@ export async function requireAdmin() {
   const { data: { session } } = await supabase.auth.getSession()
   if (!session) return redirect('/login')
 
-  // Use persisted profile from store to avoid an extra round-trip on every navigation
-  const { profile } = useAuthStore.getState()
-  if (profile !== null) {
-    return profile.role === 'admin' ? null : redirect('/dashboard')
-  }
-
+  // Always verify role from the database — never trust the cached store value,
+  // since a revoked admin would otherwise keep /admin access until logout.
   const { data } = await supabase
     .from('profiles')
     .select('role')
@@ -31,5 +27,12 @@ export async function requireAdmin() {
     .single()
 
   if (data?.role !== 'admin') return redirect('/dashboard')
+
+  // Keep the in-memory store in sync if role changed externally.
+  const { profile, setProfile } = useAuthStore.getState()
+  if (profile && profile.role !== data.role) {
+    setProfile({ ...profile, role: data.role as 'user' | 'admin' })
+  }
+
   return null
 }
