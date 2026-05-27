@@ -26,14 +26,18 @@ export default function CharactersPage() {
     if (!user?.id) return
     const cutoff = new Date(Date.now() - 30 * 60 * 1000).toISOString()
     void (async () => {
-      const { data } = await supabase
-        .from('characters')
-        .select('id')
-        .eq('user_id', user.id)
-        .eq('committed', false)
-        .lt('created_at', cutoff)
-      if (data?.length) {
-        await supabase.from('characters').delete().in('id', data.map((r) => r.id))
+      try {
+        const { data } = await supabase
+          .from('characters')
+          .select('id, created_at')
+          .eq('user_id', user.id)
+          .eq('committed', false)
+        const stale = (data ?? []).filter((r) => r.created_at < cutoff)
+        if (stale.length) {
+          await supabase.from('characters').delete().in('id', stale.map((r) => r.id))
+        }
+      } catch {
+        // Silently ignore draft cleanup errors
       }
     })()
   }, [user?.id])
