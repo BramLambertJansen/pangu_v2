@@ -390,7 +390,7 @@ export default function QuestEditPage() {
         confirmVariant="crimson"
       >
         {guard.isDraftDiscard
-          ? 'Dit item is nog niet opgeslagen en wordt permanent verwijderd. Doorgaan?'
+          ? 'Deze quest is nog niet opgeslagen en wordt permanent verwijderd. Doorgaan?'
           : 'Je hebt niet-opgeslagen wijzigingen. Weet je zeker dat je de pagina wilt verlaten?'
         }
       </ConfirmDialog>

@@ -124,7 +124,7 @@ Deno.serve(async (req: Request) => {
       const windowEnd = getWindowEnd(windowStart);
       return errorResponse(
         "free_limit_reached",
-        `Limiet van ${AI_CONFIG.FREE_REQUESTS_PER_WINDOW} requests per ${AI_CONFIG.WINDOW_HOURS}u bereikt.`,
+        `Limiet van ${AI_CONFIG.FREE_REQUESTS_PER_WINDOW} verzoeken per ${AI_CONFIG.WINDOW_HOURS}u bereikt.`,
         429,
         { window_resets_at: windowEnd.toISOString() }
       );
@@ -143,8 +143,8 @@ Deno.serve(async (req: Request) => {
 
     await incrementUsage(supabaseUser, user.id, windowStart, route.provider);
 
-    const totalAfter = usage.groq_count + usage.gemini_count + 1;
-    const remaining  = AI_CONFIG.FREE_REQUESTS_PER_WINDOW - totalAfter;
+    const newTotal  = usage.groq_count + usage.gemini_count + 1;
+    const remaining = AI_CONFIG.FREE_REQUESTS_PER_WINDOW - newTotal;
 
     return jsonResponse<AIResponse>({
       reply,
@@ -157,7 +157,7 @@ Deno.serve(async (req: Request) => {
     console.error("ai-chat error:", err);
     return errorResponse(
       "provider_error",
-      err instanceof Error ? err.message : "Unknown error",
+      "Er is een fout opgetreden bij de AI-provider. Probeer het opnieuw.",
       500
     );
   }

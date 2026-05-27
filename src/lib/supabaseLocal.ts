@@ -162,9 +162,16 @@ class LocalQueryBuilder {
     if (this._order.length === 0) return rows
     return [...rows].sort((a, b) => {
       for (const { column, ascending } of this._order) {
-        const av = (a[column] ?? '') as string
-        const bv = (b[column] ?? '') as string
-        const cmp = av < bv ? -1 : av > bv ? 1 : 0
+        const av = a[column] ?? ''
+        const bv = b[column] ?? ''
+        let cmp: number
+        if (typeof av === 'number' && typeof bv === 'number') {
+          cmp = av - bv
+        } else {
+          const as = String(av)
+          const bs = String(bv)
+          cmp = as < bs ? -1 : as > bs ? 1 : 0
+        }
         if (cmp !== 0) return ascending ? cmp : -cmp
       }
       return 0
