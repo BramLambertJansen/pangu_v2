@@ -676,6 +676,7 @@ npm run test         # Vitest
 - [x] Rol-gebaseerde navigatie (Accountbeheer zichtbaar voor admins)
 - [x] Uitloggen via sidebar
 - [x] Admin AI-testpaneel — "Test Gemini / Groq" knop met provider-badge, model-naam en resterend-verzoeken-teller
+- [x] Admin dev modus toggle — schakel sync uit voor lokaal testen; cache wissen en DB-data herladen bij uitschakelen
 
 ### Instellingen
 - [x] Instellingen pagina `/settings` (3 tabs: Profiel, Voorkeuren, Info)
