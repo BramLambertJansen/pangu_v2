@@ -1,11 +1,7 @@
-import { memo } from 'react'
+import { memo, useMemo, type KeyboardEvent } from 'react'
 import { useNavigate } from 'react-router-dom'
 import type { Character } from '@/types/character.types'
-import { EntityCard } from '@/components/ui/EntityCard'
-import { ForgeCard } from '@/components/ui/ForgeCard'
-import { StatusBadge } from '@/components/ui/StatusBadge'
 import { pickGradient, pickCharacterAccent, characterGradients } from '@/utils/pickGradient'
-import { characterStatusLabel, characterStatusColor } from '@/lib/statusMaps'
 
 // Returns a class-themed SVG icon path for PartyMemberRow avatars.
 function ClassIcon({ cls, accent }: { cls: string; accent: string }) {
@@ -80,115 +76,327 @@ export const CharacterCard = memo(function CharacterCard({ character }: Props) {
   const navigate = useNavigate()
   const gradient = pickGradient(character.id, characterGradients)
 
-  const classLabel = [character.character_class, character.character_subclass]
-    .filter(Boolean)
-    .join(' · ')
+  // Deterministic star positions from character ID — stable between renders
+  const stars = useMemo(() => {
+    const hash = character.id.split('').reduce((acc, c) => acc + c.charCodeAt(0), 0)
+    return Array.from({ length: 9 }, (_, i) => ({
+      x: ((hash * (i + 1) * 13 + i * 37) % 80) + 8,
+      y: ((hash * (i + 1) * 7 + i * 23) % 80) + 80,
+      size: i % 3 === 0 ? 2 : 1.5,
+      opacity: 0.25 + (i % 4) * 0.15,
+    }))
+  }, [character.id])
+
+  const raceClassParts = [
+    character.character_race,
+    [character.character_class, character.character_subclass].filter(Boolean).join(' · '),
+  ].filter(Boolean)
+
+  const hpLow = character.hp_current < character.hp_max * 0.3
+
+  function handleKeyDown(e: KeyboardEvent<HTMLElement>) {
+    if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault()
+      navigate(`/characters/${character.id}`)
+    }
+  }
 
   return (
-    <EntityCard
-      variant="compact"
-      ariaLabel={`Karakter: ${character.name}`}
+    <article
+      role="button"
+      tabIndex={0}
+      aria-label={`Karakter: ${character.name}`}
       onClick={() => navigate(`/characters/${character.id}`)}
+      onKeyDown={handleKeyDown}
+      style={{
+        position: 'relative',
+        display: 'flex',
+        flexDirection: 'column',
+        height: 480,
+        borderRadius: 'var(--r-xl)',
+        border: '1px solid var(--hairline)',
+        cursor: 'pointer',
+        outline: 'none',
+        overflow: 'hidden',
+        transition: 'border-color var(--t-base) var(--ease-out), box-shadow var(--t-base) var(--ease-out), transform var(--t-base) var(--ease-out)',
+      }}
+      onMouseEnter={e => {
+        const el = e.currentTarget
+        el.style.borderColor = 'var(--hairline-strong)'
+        el.style.transform = 'translateY(-2px)'
+        el.style.boxShadow = '0 8px 32px rgba(0,0,0,0.45)'
+      }}
+      onMouseLeave={e => {
+        const el = e.currentTarget
+        el.style.borderColor = 'var(--hairline)'
+        el.style.transform = ''
+        el.style.boxShadow = ''
+      }}
     >
-      {/* Gradient accent */}
+      {/* Level badge — top-right, floats above the night sky */}
       <div
-        aria-hidden="true"
+        aria-label={`Level ${character.level}`}
         style={{
-          position: 'absolute', inset: 0,
-          background: gradient,
-          pointerEvents: 'none',
+          position: 'absolute',
+          top: 14,
+          right: 14,
+          zIndex: 3,
+          width: 52,
+          height: 52,
+          borderRadius: '50%',
+          border: '2px solid var(--gold)',
+          background: 'rgba(10,10,20,0.85)',
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          justifyContent: 'center',
+          boxShadow: '0 0 14px rgba(245,180,50,0.3)',
+          backdropFilter: 'blur(4px)',
         }}
-      />
+      >
+        <span style={{
+          fontSize: 20,
+          fontWeight: 700,
+          color: 'var(--gold)',
+          lineHeight: 1,
+          fontFamily: 'var(--font-display)',
+        }}>
+          {character.level}
+        </span>
+        <span style={{
+          fontSize: 8,
+          letterSpacing: '0.14em',
+          color: 'var(--muted)',
+          textTransform: 'uppercase',
+          fontFamily: 'var(--font-body)',
+          marginTop: 2,
+        }}>
+          LV
+        </span>
+      </div>
 
-      {/* Content */}
-      <div style={{ position: 'relative', display: 'flex', flexDirection: 'column', gap: 8, flex: 1 }}>
-        <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 12 }}>
-          <div style={{ minWidth: 0 }}>
-            {character.subtitle && (
-              <p style={{
-                fontFamily: 'var(--font-quote)',
-                fontStyle: 'italic',
-                fontSize: 11, letterSpacing: '0.03em',
-                color: 'var(--gold)', margin: '0 0 2px',
-              }}>
-                {character.subtitle}
-              </p>
-            )}
-            <h2 style={{
-              fontFamily: 'var(--font-display)',
-              fontSize: 'clamp(18px, 3vw, 22px)',
-              fontWeight: 600, lineHeight: 1,
-              letterSpacing: '0.04em', textTransform: 'uppercase',
-              color: 'var(--ink)', margin: 0,
-              overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
+      {/* ── Night sky visual section ── */}
+      <div style={{
+        position: 'relative',
+        height: '57%',
+        flexShrink: 0,
+        background: 'linear-gradient(175deg, #141b3a 0%, #0d1228 60%, #0a0e20 100%)',
+        overflow: 'hidden',
+      }}>
+        {/* Atmospheric glow — deterministic per character */}
+        <div
+          aria-hidden="true"
+          style={{
+            position: 'absolute',
+            inset: 0,
+            background: gradient,
+            opacity: 0.65,
+            pointerEvents: 'none',
+          }}
+        />
+
+        {/* Star dots */}
+        {stars.map((star, i) => (
+          <div
+            key={i}
+            aria-hidden="true"
+            style={{
+              position: 'absolute',
+              left: `${star.x}%`,
+              top: `${star.y - 75}%`,
+              width: star.size,
+              height: star.size,
+              borderRadius: '50%',
+              background: 'white',
+              opacity: star.opacity,
+              pointerEvents: 'none',
+            }}
+          />
+        ))}
+
+        {/* Crescent moon */}
+        <svg
+          aria-hidden="true"
+          width="38"
+          height="38"
+          viewBox="0 0 24 24"
+          fill="none"
+          style={{
+            position: 'absolute',
+            left: '28%',
+            top: '30%',
+            opacity: 0.5,
+            pointerEvents: 'none',
+          }}
+        >
+          <path
+            d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"
+            stroke="rgba(107,167,255,0.9)"
+            strokeWidth="1.2"
+            fill="none"
+          />
+        </svg>
+
+        {/* Large decorative circle — cosmic body */}
+        <div
+          aria-hidden="true"
+          style={{
+            position: 'absolute',
+            right: '-8%',
+            top: '10%',
+            width: 170,
+            height: 170,
+            borderRadius: '50%',
+            border: '1px solid rgba(245,180,50,0.22)',
+            pointerEvents: 'none',
+          }}
+        />
+      </div>
+
+      {/* ── Character info section ── */}
+      <div style={{
+        flex: 1,
+        display: 'flex',
+        flexDirection: 'column',
+        justifyContent: 'space-between',
+        padding: '14px 20px 18px',
+        background: 'var(--surface)',
+      }}>
+        <div>
+          {/* Race · Class */}
+          {raceClassParts.length > 0 && (
+            <p style={{
+              margin: '0 0 5px',
+              fontSize: 10,
+              fontWeight: 600,
+              letterSpacing: '0.16em',
+              textTransform: 'uppercase',
+              color: 'var(--muted)',
+              fontFamily: 'var(--font-body)',
+              overflow: 'hidden',
+              textOverflow: 'ellipsis',
+              whiteSpace: 'nowrap',
             }}>
-              {character.name}
-            </h2>
+              {raceClassParts.join(' · ')}
+            </p>
+          )}
+
+          {/* Name */}
+          <h2 style={{
+            margin: '0 0 5px',
+            fontFamily: 'var(--font-display)',
+            fontSize: 'clamp(20px, 3vw, 26px)',
+            fontWeight: 600,
+            lineHeight: 1.1,
+            color: 'var(--ink)',
+            overflow: 'hidden',
+            textOverflow: 'ellipsis',
+            whiteSpace: 'nowrap',
+          }}>
+            {character.name}
+          </h2>
+
+          {/* Subtitle / campaign name */}
+          {character.subtitle && (
+            <p style={{
+              margin: 0,
+              fontSize: 13,
+              color: 'var(--muted)',
+              fontFamily: 'var(--font-body)',
+              overflow: 'hidden',
+              textOverflow: 'ellipsis',
+              whiteSpace: 'nowrap',
+            }}>
+              {character.subtitle}
+            </p>
+          )}
+        </div>
+
+        {/* Divider */}
+        <div style={{ height: 1, background: 'var(--hairline)', margin: '12px 0' }} />
+
+        {/* Stats row: HP · AC · SPD */}
+        <div style={{
+          display: 'flex',
+          justifyContent: 'space-around',
+          alignItems: 'center',
+          textAlign: 'center',
+        }}>
+          <div>
+            <p style={{
+              margin: '0 0 4px',
+              fontSize: 10,
+              letterSpacing: '0.14em',
+              textTransform: 'uppercase',
+              color: 'var(--muted)',
+              fontFamily: 'var(--font-body)',
+            }}>
+              HP
+            </p>
+            <p style={{
+              margin: 0,
+              fontSize: 18,
+              fontWeight: 700,
+              color: hpLow ? 'var(--crimson)' : 'var(--ink)',
+              fontFamily: 'var(--font-display)',
+              lineHeight: 1,
+            }}>
+              {character.hp_current}/{character.hp_max}
+            </p>
           </div>
 
-          <StatusBadge
-            label={characterStatusLabel[character.status]}
-            color={characterStatusColor[character.status]}
-            className="mt-0.5"
-          />
-        </div>
+          <div style={{ width: 1, height: 32, background: 'var(--hairline)', flexShrink: 0 }} />
 
-        {/* Class + Race row */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
-          {classLabel && (
+          <div>
             <p style={{
-              fontSize: 11, fontWeight: 700,
-              letterSpacing: '0.14em', textTransform: 'uppercase',
-              color: 'var(--azure)', margin: 0,
+              margin: '0 0 4px',
+              fontSize: 10,
+              letterSpacing: '0.14em',
+              textTransform: 'uppercase',
+              color: 'var(--muted)',
               fontFamily: 'var(--font-body)',
             }}>
-              {classLabel}
+              AC
             </p>
-          )}
-          {character.character_race && (
             <p style={{
-              fontSize: 11, letterSpacing: '0.1em', textTransform: 'uppercase',
-              color: 'var(--muted)', margin: 0,
+              margin: 0,
+              fontSize: 18,
+              fontWeight: 700,
+              color: 'var(--ink)',
+              fontFamily: 'var(--font-display)',
+              lineHeight: 1,
+            }}>
+              {character.armor_class}
+            </p>
+          </div>
+
+          <div style={{ width: 1, height: 32, background: 'var(--hairline)', flexShrink: 0 }} />
+
+          <div>
+            <p style={{
+              margin: '0 0 4px',
+              fontSize: 10,
+              letterSpacing: '0.14em',
+              textTransform: 'uppercase',
+              color: 'var(--muted)',
               fontFamily: 'var(--font-body)',
             }}>
-              {character.character_race}
+              SPD
             </p>
-          )}
+            <p style={{
+              margin: 0,
+              fontSize: 18,
+              fontWeight: 700,
+              color: 'var(--ink)',
+              fontFamily: 'var(--font-display)',
+              lineHeight: 1,
+            }}>
+              {character.speed}
+            </p>
+          </div>
         </div>
-
-        {/* Level + HP row */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginTop: 2 }}>
-          <span style={{
-            fontSize: 11, fontWeight: 700,
-            letterSpacing: '0.1em',
-            color: 'var(--ink-soft)',
-            fontFamily: 'var(--font-body)',
-          }}>
-            LVL {character.level}
-          </span>
-          <span style={{
-            fontSize: 11,
-            color: character.hp_current < character.hp_max * 0.3 ? 'var(--crimson)' : 'var(--ink-soft)',
-            fontFamily: 'var(--font-body)',
-          }}>
-            {character.hp_current}/{character.hp_max} HP
-          </span>
-          <span style={{
-            fontSize: 11,
-            color: 'var(--muted)',
-            fontFamily: 'var(--font-body)',
-          }}>
-            AC {character.armor_class}
-          </span>
-        </div>
-
-        {!classLabel && !character.character_race && !character.subtitle && (
-          <p style={{ fontSize: 13, color: 'var(--muted)', margin: 0, fontStyle: 'italic' }}>
-            Een nieuw held wacht op zijn verhaal.
-          </p>
-        )}
       </div>
-    </EntityCard>
+    </article>
   )
 })
 
@@ -328,30 +536,81 @@ interface ForgeProps {
 }
 
 export const ForgeCharacterCard = memo(function ForgeCharacterCard({ onClick, loading }: ForgeProps) {
+  function handleKeyDown(e: KeyboardEvent<HTMLElement>) {
+    if (loading) return
+    if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault()
+      onClick()
+    }
+  }
+
   return (
-    <ForgeCard
-      variant="compact"
-      accent="azure"
-      onClick={onClick}
-      loading={loading}
-      ariaLabel="Nieuw karakter aanmaken"
-      title="+ Karakter toevoegen"
-      subtitle="Maak een nieuw personage aan"
-      icon={
-        <svg
-          aria-hidden="true"
-          width="20" height="20"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="var(--azure)"
-          strokeWidth="1.5"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-          style={{ opacity: 0.7 }}
-        >
-          <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
-        </svg>
-      }
-    />
+    <article
+      role="button"
+      tabIndex={0}
+      aria-label="Nieuw karakter aanmaken"
+      onClick={() => { if (!loading) onClick() }}
+      onKeyDown={handleKeyDown}
+      style={{
+        position: 'relative',
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        justifyContent: 'center',
+        gap: 16,
+        height: 480,
+        borderRadius: 'var(--r-xl)',
+        border: '1px dashed rgba(107,167,255,0.35)',
+        background: 'rgba(107,167,255,0.03)',
+        cursor: loading ? 'wait' : 'pointer',
+        outline: 'none',
+        transition: 'border-color var(--t-base) var(--ease-out), background var(--t-base) var(--ease-out)',
+      }}
+      onMouseEnter={e => {
+        if (loading) return
+        const el = e.currentTarget
+        el.style.borderColor = 'rgba(107,167,255,0.6)'
+        el.style.background = 'rgba(107,167,255,0.06)'
+      }}
+      onMouseLeave={e => {
+        const el = e.currentTarget
+        el.style.borderColor = 'rgba(107,167,255,0.35)'
+        el.style.background = 'rgba(107,167,255,0.03)'
+      }}
+    >
+      {/* Dashed circle with + */}
+      <div style={{
+        width: 64,
+        height: 64,
+        borderRadius: '50%',
+        border: '1.5px dashed rgba(107,167,255,0.5)',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+      }}>
+        <span style={{
+          fontSize: 30,
+          lineHeight: 1,
+          fontWeight: 300,
+          color: 'var(--azure)',
+          marginTop: -2,
+        }}>
+          +
+        </span>
+      </div>
+
+      {/* Label */}
+      <p style={{
+        margin: 0,
+        fontSize: 12,
+        fontWeight: 700,
+        letterSpacing: '0.20em',
+        textTransform: 'uppercase',
+        color: 'var(--azure)',
+        fontFamily: 'var(--font-body)',
+      }}>
+        {loading ? 'Aanmaken...' : 'Nieuw Held'}
+      </p>
+    </article>
   )
 })
