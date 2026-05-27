@@ -79,6 +79,7 @@ export default function CampaignEditPage() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: queryKeys.campaigns.all })
       queryClient.invalidateQueries({ queryKey: queryKeys.campaigns.detail(id!) })
+      queryClient.invalidateQueries({ queryKey: queryKeys.campaigns.detailWithWorld(id!) })
       const worldId = campaign?.world_id ?? worldIdFromState
       if (worldId) {
         queryClient.invalidateQueries({ queryKey: queryKeys.campaigns.byWorld(worldId) })
