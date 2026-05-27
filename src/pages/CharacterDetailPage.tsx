@@ -19,7 +19,7 @@ import {
   calculateEffectiveStats,
   formatItemBonuses,
 } from '@/utils/equipmentUtils'
-import type { Character } from '@/types/character.types'
+import type { Character, SpellSlots, ClassResources } from '@/types/character.types'
 import type { EquipmentSlot, Item } from '@/types/item.types'
 
 type Tab = 'stats' | 'spreuken' | 'inventaris' | 'vaardigheden' | 'lore'
@@ -38,6 +38,21 @@ const SAVING_THROWS: { label: string; abbr: string; statKey: 'stat_str' | 'stat_
   { label: 'Wijsheid',      abbr: 'WIS', statKey: 'stat_wis' },
   { label: 'Charisma',      abbr: 'CHA', statKey: 'stat_cha' },
 ]
+
+// D&D 5.5e conditions (including 3 new: Daas, Zwijgen, Vertraagd)
+const CONDITIONS = [
+  'Verblind', 'Betoverd', 'Daas', 'Doof', 'Gevallen', 'Beangstigd',
+  'Gegrepen', 'Buiten gevecht', 'Onzichtbaar', 'Verlamd', 'Versteend',
+  'Vergiftigd', 'Beperkt', 'Zwijgen', 'Vertraagd', 'Bedwelmd', 'Bewusteloos',
+]
+
+const SPELLCASTING_ABILITY_LABELS: Record<string, string> = {
+  int: 'Intelligentie',
+  wis: 'Wijsheid',
+  cha: 'Charisma',
+}
+
+const SPELL_LEVEL_LABELS = ['1e', '2e', '3e', '4e', '5e', '6e', '7e', '8e', '9e']
 
 const SKILLS: Skill[] = [
   { name: 'Atletiek',         ability: 'stat_str', abbr: 'STR' },
@@ -555,6 +570,76 @@ export default function CharacterDetailPage() {
     onError: () => toast.error('Stervensgooien bijwerken mislukt'),
   })
 
+  const updateSpellSlot = useMutation({
+    mutationFn: async ({ level, current }: { level: string; current: number }) => {
+      const slots = { ...(character?.spell_slots ?? {}) } as SpellSlots
+      const key = level as keyof SpellSlots
+      if (slots[key]) {
+        slots[key] = { ...slots[key]!, current: Math.max(0, Math.min(current, slots[key]!.max)) }
+      }
+      const { error } = await supabase
+        .from('characters')
+        .update({ spell_slots: slots, updated_at: new Date().toISOString() })
+        .eq('id', id!)
+      if (error) throw error
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: queryKeys.characters.detail(id!) })
+    },
+    onError: () => toast.error('Spreukslots bijwerken mislukt'),
+  })
+
+  const toggleCondition = useMutation({
+    mutationFn: async (condition: string) => {
+      const current = character?.active_conditions ?? []
+      const updated = current.includes(condition)
+        ? current.filter(c => c !== condition)
+        : [...current, condition]
+      const { error } = await supabase
+        .from('characters')
+        .update({ active_conditions: updated, updated_at: new Date().toISOString() })
+        .eq('id', id!)
+      if (error) throw error
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: queryKeys.characters.detail(id!) })
+    },
+    onError: () => toast.error('Conditie bijwerken mislukt'),
+  })
+
+  const updateClassResource = useMutation({
+    mutationFn: async ({ name, current }: { name: string; current: number }) => {
+      const resources = { ...(character?.class_resources ?? {}) } as ClassResources
+      if (resources[name]) {
+        resources[name] = { ...resources[name], current: Math.max(0, Math.min(current, resources[name].max)) }
+      }
+      const { error } = await supabase
+        .from('characters')
+        .update({ class_resources: resources, updated_at: new Date().toISOString() })
+        .eq('id', id!)
+      if (error) throw error
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: queryKeys.characters.detail(id!) })
+    },
+    onError: () => toast.error('Resource bijwerken mislukt'),
+  })
+
+  const updateTempHp = useMutation({
+    mutationFn: async (value: number) => {
+      const { error } = await supabase
+        .from('characters')
+        .update({ temp_hp: Math.max(0, value), updated_at: new Date().toISOString() })
+        .eq('id', id!)
+      if (error) throw error
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: queryKeys.characters.detail(id!) })
+      queryClient.invalidateQueries({ queryKey: queryKeys.characters.all })
+    },
+    onError: () => toast.error('Tijdelijke HP bijwerken mislukt'),
+  })
+
   if (isLoading) {
     return (
       <div style={{ display: 'flex', justifyContent: 'center', padding: '80px 0' }} aria-live="polite">
@@ -615,6 +700,18 @@ export default function CharacterDetailPage() {
   const passivePerception   = 10 + wisMod + ((character.proficient_skills ?? []).includes('Waarneming')  ? profBonus : 0) + (eff.skillBonuses['Waarneming']  ?? 0)
   const passiveInvestigation = 10 + intMod + ((character.proficient_skills ?? []).includes('Onderzoek')   ? profBonus : 0) + (eff.skillBonuses['Onderzoek']   ?? 0)
   const passiveInsight       = 10 + wisMod + ((character.proficient_skills ?? []).includes('Inzicht')     ? profBonus : 0) + (eff.skillBonuses['Inzicht']     ?? 0)
+
+  // Spellcasting
+  const spellAbility = character.spellcasting_ability ?? null
+  const spellAbilityScore = spellAbility === 'int' ? eff.int : spellAbility === 'wis' ? eff.wis : eff.cha
+  const spellAbilityMod   = Math.floor((spellAbilityScore - 10) / 2)
+  const spellSaveDC        = spellAbility ? 8 + profBonus + spellAbilityMod : null
+  const spellAttackBonus   = spellAbility ? profBonus + spellAbilityMod : null
+
+  const activeConditions = character.active_conditions ?? []
+  const tempHp           = character.temp_hp ?? 0
+  const classResources   = (character.class_resources ?? {}) as ClassResources
+  const spellSlots       = (character.spell_slots ?? {}) as SpellSlots
 
   return (
     <div>
@@ -705,15 +802,29 @@ export default function CharacterDetailPage() {
         {/* 2×2 combat cards */}
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 12, marginBottom: 16 }}>
 
-          {/* HP */}
+          {/* HP + Temp HP */}
           <div className="pangu-surface" style={{ padding: '18px 20px', minHeight: 110, display: 'flex', flexDirection: 'column', gap: 8 }}>
-            <p style={{ fontSize: 10, fontWeight: 700, letterSpacing: '0.16em', textTransform: 'uppercase', color: hpLow ? 'var(--crimson)' : 'var(--muted)', margin: 0 }}>HP</p>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+              <p style={{ fontSize: 10, fontWeight: 700, letterSpacing: '0.16em', textTransform: 'uppercase', color: hpLow ? 'var(--crimson)' : 'var(--muted)', margin: 0 }}>HP</p>
+              {tempHp > 0 && (
+                <span style={{ fontSize: 9, fontWeight: 700, letterSpacing: '0.12em', textTransform: 'uppercase', color: 'var(--azure)', border: '1px solid rgba(107,167,255,0.35)', borderRadius: 999, padding: '1px 7px' }}>
+                  +{tempHp} TEMP
+                </span>
+              )}
+            </div>
             <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
               <button type="button" aria-label="HP verlagen" onClick={() => updateHp.mutate(Math.max(0, hpCurrent - 1))} disabled={updateHp.isPending || hpCurrent <= 0} style={{ width: 26, height: 26, borderRadius: '50%', border: '1px solid var(--hairline)', background: 'var(--surface)', color: 'var(--muted)', cursor: hpCurrent <= 0 ? 'not-allowed' : 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 14, opacity: hpCurrent <= 0 ? 0.4 : 1, flexShrink: 0 }}>−</button>
               <p style={{ fontFamily: 'var(--font-display)', fontSize: 28, fontWeight: 700, color: hpLow ? 'var(--crimson)' : 'var(--ink)', margin: 0, lineHeight: 1 }}>
                 {hpCurrent}<span style={{ fontSize: 18, color: 'var(--muted)', fontWeight: 400 }}>/{hpMax}</span>
               </p>
               <button type="button" aria-label="HP verhogen" onClick={() => updateHp.mutate(Math.min(hpMax, hpCurrent + 1))} disabled={updateHp.isPending || hpCurrent >= hpMax} style={{ width: 26, height: 26, borderRadius: '50%', border: '1px solid var(--hairline)', background: 'var(--surface)', color: 'var(--muted)', cursor: hpCurrent >= hpMax ? 'not-allowed' : 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 14, opacity: hpCurrent >= hpMax ? 0.4 : 1, flexShrink: 0 }}>+</button>
+            </div>
+            {/* Temp HP inline editor */}
+            <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginTop: 2 }}>
+              <span style={{ fontSize: 10, color: 'var(--muted)' }}>Temp HP:</span>
+              <button type="button" aria-label="Tijdelijke HP verlagen" onClick={() => updateTempHp.mutate(tempHp - 1)} disabled={updateTempHp.isPending || tempHp <= 0} style={{ width: 18, height: 18, borderRadius: '50%', border: '1px solid var(--hairline)', background: 'none', color: 'var(--muted)', cursor: tempHp <= 0 ? 'not-allowed' : 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 12, opacity: tempHp <= 0 ? 0.4 : 1 }}>−</button>
+              <span style={{ fontSize: 13, fontWeight: 700, color: 'var(--azure)', minWidth: 24, textAlign: 'center' }}>{tempHp}</span>
+              <button type="button" aria-label="Tijdelijke HP verhogen" onClick={() => updateTempHp.mutate(tempHp + 1)} disabled={updateTempHp.isPending} style={{ width: 18, height: 18, borderRadius: '50%', border: '1px solid var(--hairline)', background: 'none', color: 'var(--muted)', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 12 }}>+</button>
             </div>
             <div role="progressbar" aria-valuenow={hpCurrent} aria-valuemin={0} aria-valuemax={hpMax} aria-label={`${hpCurrent} van ${hpMax} HP`} style={{ height: 4, borderRadius: 2, background: 'var(--hairline)', overflow: 'hidden', marginTop: 'auto' }}>
               <div style={{ height: '100%', width: `${hpPct}%`, background: hpLow ? 'var(--crimson)' : 'var(--teal)', borderRadius: 2, transition: 'width 0.3s var(--ease-out)' }} />
@@ -755,9 +866,20 @@ export default function CharacterDetailPage() {
             <p style={{ fontFamily: 'var(--font-display)', fontSize: 36, fontWeight: 700, color: 'var(--ink)', margin: 0, lineHeight: 1 }}>
               {eff.speed}<span style={{ fontSize: 18, fontWeight: 400, color: 'var(--muted)', marginLeft: 4 }}>ft</span>
             </p>
-            <p style={{ fontSize: 12, color: 'var(--muted)', margin: 'auto 0 0', fontFamily: 'var(--font-body)' }}>
-              Proficiency +{character.proficiency_bonus}
-            </p>
+            {/* Alternative speeds */}
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginTop: 'auto' }}>
+              {[
+                { label: '🦅', key: 'fly_speed',    title: 'Vliegen'  },
+                { label: '🌊', key: 'swim_speed',   title: 'Zwemmen'  },
+                { label: '🧗', key: 'climb_speed',  title: 'Klimmen'  },
+                { label: '⛏️', key: 'burrow_speed', title: 'Graven'   },
+              ].filter(s => (character[s.key as keyof Character] as number ?? 0) > 0).map(s => (
+                <span key={s.key} title={s.title} style={{ fontSize: 11, color: 'var(--ink-soft)', display: 'flex', alignItems: 'center', gap: 3 }}>
+                  <span aria-hidden="true">{s.label}</span>
+                  {character[s.key as keyof Character] as number}ft
+                </span>
+              ))}
+            </div>
           </div>
         </div>
 
@@ -910,8 +1032,70 @@ export default function CharacterDetailPage() {
                 <span style={{ fontFamily: 'var(--font-display)', fontSize: 18, fontWeight: 700, color: 'var(--ink)' }}>{value}</span>
               </div>
             ))}
+            {(character.darkvision ?? 0) > 0 && (
+              <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                <span style={{ fontSize: 11, color: 'var(--muted)', fontWeight: 600, letterSpacing: '0.08em' }}>Duisterzicht</span>
+                <span style={{ fontFamily: 'var(--font-display)', fontSize: 18, fontWeight: 700, color: 'var(--ink)' }}>{character.darkvision} ft</span>
+              </div>
+            )}
+          </div>
+          {character.special_senses && (
+            <p style={{ fontSize: 12, color: 'var(--ink-soft)', marginTop: 8, marginBottom: 0 }}>
+              {character.special_senses}
+            </p>
+          )}
+        </div>
+
+        {/* ── Condities ── */}
+        <div className="pangu-surface" style={{ padding: '16px 20px', marginBottom: 16 }}>
+          <p style={{ fontSize: 10, fontWeight: 700, letterSpacing: '0.16em', textTransform: 'uppercase', color: 'var(--muted)', margin: '0 0 10px' }}>Condities</p>
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
+            {CONDITIONS.map(cond => {
+              const active = activeConditions.includes(cond)
+              return (
+                <button
+                  key={cond}
+                  type="button"
+                  aria-pressed={active}
+                  onClick={() => toggleCondition.mutate(cond)}
+                  disabled={toggleCondition.isPending}
+                  style={{
+                    fontSize: 11, padding: '4px 10px', borderRadius: 999, cursor: 'pointer',
+                    border: active ? '1px solid rgba(220,38,38,0.5)' : '1px solid var(--hairline)',
+                    background: active ? 'rgba(220,38,38,0.12)' : 'var(--surface)',
+                    color: active ? 'var(--crimson)' : 'var(--muted)',
+                    fontWeight: active ? 700 : 400,
+                    transition: 'all var(--t-fast)',
+                  }}
+                >
+                  {cond}
+                </button>
+              )
+            })}
           </div>
         </div>
+
+        {/* ── Klasseresources ── */}
+        {Object.keys(classResources).length > 0 && (
+          <div className="pangu-surface" style={{ padding: '16px 20px', marginBottom: 16 }}>
+            <p style={{ fontSize: 10, fontWeight: 700, letterSpacing: '0.16em', textTransform: 'uppercase', color: 'var(--muted)', margin: '0 0 12px' }}>Klasseresources</p>
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 12 }}>
+              {Object.entries(classResources).map(([name, res]) => (
+                <div key={name} style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '8px 14px', borderRadius: 10, background: 'var(--surface)', border: '1px solid var(--hairline)' }}>
+                  <div>
+                    <p style={{ fontSize: 10, fontWeight: 700, letterSpacing: '0.12em', textTransform: 'uppercase', color: 'var(--muted)', margin: '0 0 2px' }}>{name}</p>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                      <button type="button" aria-label={`${name} verlagen`} onClick={() => updateClassResource.mutate({ name, current: res.current - 1 })} disabled={updateClassResource.isPending || res.current <= 0} style={{ width: 20, height: 20, borderRadius: '50%', border: '1px solid var(--hairline)', background: 'none', color: 'var(--muted)', cursor: res.current <= 0 ? 'not-allowed' : 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 12, opacity: res.current <= 0 ? 0.4 : 1 }}>−</button>
+                      <span style={{ fontFamily: 'var(--font-display)', fontSize: 20, fontWeight: 700, color: 'var(--teal)', minWidth: 28, textAlign: 'center' }}>{res.current}</span>
+                      <span style={{ fontSize: 12, color: 'var(--muted)' }}>/{res.max}</span>
+                      <button type="button" aria-label={`${name} verhogen`} onClick={() => updateClassResource.mutate({ name, current: res.current + 1 })} disabled={updateClassResource.isPending || res.current >= res.max} style={{ width: 20, height: 20, borderRadius: '50%', border: '1px solid var(--hairline)', background: 'none', color: 'var(--muted)', cursor: res.current >= res.max ? 'not-allowed' : 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 12, opacity: res.current >= res.max ? 0.4 : 1 }}>+</button>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
 
         {/* Ability scores */}
         <div className="pangu-surface" style={{ padding: 24, marginBottom: 16 }}>
@@ -997,18 +1181,22 @@ export default function CharacterDetailPage() {
         </div>
 
         {/* Currency */}
-        {(character.gold > 0 || character.silver > 0 || character.copper > 0) && (
+        {(character.platinum > 0 || character.gold > 0 || character.electrum > 0 || character.silver > 0 || character.copper > 0) && (
           <div className="pangu-surface" style={{ padding: 24 }}>
             <p className="pangu-section-title" style={{ marginBottom: 16 }}>Schatkist</p>
             <div style={{ display: 'flex', gap: 20, flexWrap: 'wrap' }}>
               {[
-                { label: 'Goud',   value: character.gold,   color: 'var(--gold)'    },
-                { label: 'Zilver', value: character.silver, color: 'var(--ink-soft)'},
-                { label: 'Koper',  value: character.copper, color: '#b87333'        },
-              ].map(({ label, value, color }) => (
+                { label: 'Platina', value: character.platinum ?? 0, color: '#e5e7eb', suffix: 'pp' },
+                { label: 'Goud',    value: character.gold,          color: 'var(--gold)', suffix: 'gp' },
+                { label: 'Elektrum',value: character.electrum ?? 0, color: '#c0a060',  suffix: 'ep' },
+                { label: 'Zilver',  value: character.silver,        color: 'var(--ink-soft)', suffix: 'sp' },
+                { label: 'Koper',   value: character.copper,        color: '#b87333',  suffix: 'cp' },
+              ].filter(c => c.value > 0).map(({ label, value, color, suffix }) => (
                 <div key={label} style={{ textAlign: 'center', minWidth: 64 }}>
                   <p style={{ fontSize: 10, fontWeight: 700, letterSpacing: '0.14em', textTransform: 'uppercase', color: 'var(--muted)', margin: '0 0 4px' }}>{label}</p>
-                  <p style={{ fontSize: 22, fontWeight: 700, color, margin: 0, fontFamily: 'var(--font-display)' }}>{value}</p>
+                  <p style={{ fontSize: 22, fontWeight: 700, color, margin: 0, fontFamily: 'var(--font-display)' }}>
+                    {value}<span style={{ fontSize: 11, opacity: 0.6, marginLeft: 2 }}>{suffix}</span>
+                  </p>
                 </div>
               ))}
             </div>
@@ -1018,16 +1206,113 @@ export default function CharacterDetailPage() {
 
       {/* ════════════════════════════════ SPREUKEN ════════════════════════════ */}
       <div id="tabpanel-spreuken" role="tabpanel" aria-labelledby="tab-spreuken" hidden={activeTab !== 'spreuken'}>
-        <div className="pangu-surface" style={{ padding: '48px 28px', textAlign: 'center' }}>
-          <div style={{ marginBottom: 16 }}>
-            <svg aria-hidden="true" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="var(--violet)" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" style={{ opacity: 0.5 }}>
-              <path d="M12 2 L13.5 10.5 L22 12 L13.5 13.5 L12 22 L10.5 13.5 L2 12 L10.5 10.5 Z" fill="var(--violet)" stroke="none" opacity="0.3" />
-              <circle cx="12" cy="12" r="10" />
-            </svg>
+        {!spellAbility ? (
+          <div className="pangu-surface" style={{ padding: '32px 28px', textAlign: 'center' }}>
+            <p style={{ fontFamily: 'var(--font-display)', fontSize: 16, fontWeight: 600, letterSpacing: '0.06em', textTransform: 'uppercase', color: 'var(--ink-soft)', margin: '0 0 8px' }}>Geen toverbaarheid</p>
+            <p style={{ fontSize: 13, color: 'var(--muted)', margin: 0 }}>
+              Stel een toverbaarheids-eigenschap in via{' '}
+              <a href={`/characters/${id}/edit`} style={{ color: 'var(--violet)', textDecoration: 'none' }}>Bewerken</a>
+              {' '}om spreukslots te beheren.
+            </p>
           </div>
-          <p style={{ fontFamily: 'var(--font-display)', fontSize: 18, fontWeight: 600, letterSpacing: '0.06em', textTransform: 'uppercase', color: 'var(--ink-soft)', margin: '0 0 8px' }}>Spreuken</p>
-          <p style={{ fontSize: 14, color: 'var(--muted)', fontStyle: 'italic', margin: 0 }}>Spreuken zijn beschikbaar in een volgende update.</p>
-        </div>
+        ) : (
+          <div>
+            {/* Spellcasting header */}
+            <div className="pangu-surface" style={{ padding: '20px 24px', marginBottom: 16 }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 24, flexWrap: 'wrap' }}>
+                <div>
+                  <p style={{ fontSize: 10, fontWeight: 700, letterSpacing: '0.16em', textTransform: 'uppercase', color: 'var(--muted)', margin: '0 0 2px' }}>Toverbaarheid</p>
+                  <p style={{ fontSize: 16, fontWeight: 700, color: 'var(--violet)', margin: 0 }}>
+                    {SPELLCASTING_ABILITY_LABELS[spellAbility]}
+                  </p>
+                </div>
+                <div>
+                  <p style={{ fontSize: 10, fontWeight: 700, letterSpacing: '0.16em', textTransform: 'uppercase', color: 'var(--muted)', margin: '0 0 2px' }}>Spreuk-DC</p>
+                  <p style={{ fontFamily: 'var(--font-display)', fontSize: 28, fontWeight: 700, color: 'var(--gold)', margin: 0, lineHeight: 1 }}>{spellSaveDC}</p>
+                </div>
+                <div>
+                  <p style={{ fontSize: 10, fontWeight: 700, letterSpacing: '0.16em', textTransform: 'uppercase', color: 'var(--muted)', margin: '0 0 2px' }}>Spreukenaanval</p>
+                  <p style={{ fontFamily: 'var(--font-display)', fontSize: 28, fontWeight: 700, color: 'var(--gold)', margin: 0, lineHeight: 1 }}>
+                    {spellAttackBonus !== null ? (spellAttackBonus >= 0 ? `+${spellAttackBonus}` : `${spellAttackBonus}`) : '—'}
+                  </p>
+                </div>
+
+                {/* Concentration */}
+                <div style={{ marginLeft: 'auto' }}>
+                  <p style={{ fontSize: 10, fontWeight: 700, letterSpacing: '0.16em', textTransform: 'uppercase', color: 'var(--muted)', margin: '0 0 6px' }}>Concentratie</p>
+                  {character.concentrating ? (
+                    <div style={{ padding: '6px 12px', borderRadius: 8, background: 'rgba(62,207,178,0.1)', border: '1px solid rgba(62,207,178,0.4)' }}>
+                      <p style={{ fontSize: 12, fontWeight: 700, color: 'var(--teal)', margin: 0 }}>
+                        ◉ {character.concentration_spell ?? 'Concentreert...'}
+                      </p>
+                    </div>
+                  ) : (
+                    <p style={{ fontSize: 12, color: 'var(--muted)', fontStyle: 'italic', margin: 0 }}>Geen concentratie</p>
+                  )}
+                </div>
+              </div>
+            </div>
+
+            {/* Spell slots */}
+            <div className="pangu-surface" style={{ padding: 24 }}>
+              <p className="pangu-section-title" style={{ marginBottom: 4 }}>Spreukslots</p>
+              <p style={{ fontSize: 12, color: 'var(--muted)', marginTop: 0, marginBottom: 16 }}>
+                Klik op een slot om het te gebruiken of te herstellen.
+              </p>
+              {Object.keys(spellSlots).length === 0 ? (
+                <p style={{ fontSize: 13, color: 'var(--muted)', fontStyle: 'italic' }}>
+                  Stel spreukslots in via{' '}
+                  <a href={`/characters/${id}/edit`} style={{ color: 'var(--violet)', textDecoration: 'none' }}>Bewerken</a>.
+                </p>
+              ) : (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+                  {(['1','2','3','4','5','6','7','8','9'] as const).filter(level => {
+                    const slot = spellSlots[level]
+                    return slot && slot.max > 0
+                  }).map(level => {
+                    const slot = spellSlots[level]!
+                    const levelIdx = parseInt(level, 10) - 1
+                    return (
+                      <div key={level}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 6 }}>
+                          <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.12em', textTransform: 'uppercase', color: 'var(--muted)', minWidth: 64 }}>
+                            {SPELL_LEVEL_LABELS[levelIdx]} niveau
+                          </span>
+                          <span style={{ fontSize: 12, color: 'var(--ink-soft)' }}>{slot.current}/{slot.max}</span>
+                        </div>
+                        <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+                          {Array.from({ length: slot.max }, (_, i) => {
+                            const used = i >= slot.current
+                            return (
+                              <button
+                                key={i}
+                                type="button"
+                                aria-label={used ? `Slot ${i + 1} herstellen` : `Slot ${i + 1} gebruiken`}
+                                onClick={() => updateSpellSlot.mutate({ level, current: used ? slot.current + 1 : slot.current - 1 })}
+                                disabled={updateSpellSlot.isPending}
+                                style={{
+                                  width: 36, height: 36, borderRadius: 8, cursor: 'pointer',
+                                  border: used ? '2px solid var(--hairline-strong)' : '2px solid rgba(139,92,246,0.5)',
+                                  background: used ? 'var(--surface)' : 'rgba(139,92,246,0.12)',
+                                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                  transition: 'all var(--t-fast)',
+                                }}
+                              >
+                                <span aria-hidden="true" style={{ fontSize: 16, color: used ? 'var(--muted)' : 'var(--violet)' }}>
+                                  {used ? '○' : '✦'}
+                                </span>
+                              </button>
+                            )
+                          })}
+                        </div>
+                      </div>
+                    )
+                  })}
+                </div>
+              )}
+            </div>
+          </div>
+        )}
       </div>
 
       {/* ════════════════════════════════ INVENTARIS ══════════════════════════ */}
@@ -1091,15 +1376,17 @@ export default function CharacterDetailPage() {
             <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
 
               {/* Treasury */}
-              {(character.gold > 0 || character.silver > 0 || character.copper > 0) && (
+              {(character.platinum > 0 || character.gold > 0 || character.electrum > 0 || character.silver > 0 || character.copper > 0) && (
                 <div className="pangu-surface" style={{ padding: '16px 20px', width: 200 }}>
                   <p style={{ fontFamily: 'var(--font-body)', fontSize: 10, fontWeight: 700, letterSpacing: '0.18em', textTransform: 'uppercase', color: 'var(--muted)', margin: '0 0 12px' }}>Treasury</p>
                   <div style={{ display: 'flex', flexDirection: 'column', gap: 7 }}>
                     {[
-                      { label: 'Gold',   value: character.gold,   color: 'var(--gold)',     suffix: 'gp' },
-                      { label: 'Silver', value: character.silver, color: 'var(--ink-soft)', suffix: 'sp' },
-                      { label: 'Copper', value: character.copper, color: '#b87333',         suffix: 'cp' },
-                    ].map(({ label, value, color, suffix }) => (
+                      { label: 'Platina',  value: character.platinum ?? 0, color: '#e5e7eb',          suffix: 'pp' },
+                      { label: 'Gold',     value: character.gold,          color: 'var(--gold)',       suffix: 'gp' },
+                      { label: 'Elektrum', value: character.electrum ?? 0, color: '#c0a060',           suffix: 'ep' },
+                      { label: 'Silver',   value: character.silver,        color: 'var(--ink-soft)',   suffix: 'sp' },
+                      { label: 'Copper',   value: character.copper,        color: '#b87333',           suffix: 'cp' },
+                    ].filter(c => c.value > 0).map(({ label, value, color, suffix }) => (
                       <div key={label} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                         <span style={{ fontSize: 11, color: 'var(--muted)', fontFamily: 'var(--font-body)', letterSpacing: '0.12em', textTransform: 'uppercase' }}>{label}</span>
                         <span style={{ fontSize: 15, fontWeight: 700, color, fontFamily: 'var(--font-body)' }}>
@@ -1247,6 +1534,49 @@ export default function CharacterDetailPage() {
                   <p style={{ fontSize: 10, fontWeight: 700, letterSpacing: '0.14em', textTransform: 'uppercase', color: 'var(--muted)', margin: '0 0 6px' }}>{label}</p>
                   <p style={{ fontSize: 14, lineHeight: 1.7, color: 'var(--ink-soft)', margin: 0, whiteSpace: 'pre-wrap' }}>{value}</p>
                 </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Uiterlijk */}
+        {(character.age || character.height || character.weight || character.appearance) && (
+          <div className="pangu-surface" style={{ padding: 28, marginBottom: 16 }}>
+            <p className="pangu-section-title" style={{ marginBottom: 12 }}>Uiterlijk</p>
+            <div style={{ display: 'flex', gap: 20, flexWrap: 'wrap', marginBottom: character.appearance ? 14 : 0 }}>
+              {character.age    && <div><p style={{ fontSize: 10, fontWeight: 700, letterSpacing: '0.14em', textTransform: 'uppercase', color: 'var(--muted)', margin: '0 0 3px' }}>Leeftijd</p><p style={{ fontSize: 14, color: 'var(--ink-soft)', margin: 0 }}>{character.age}</p></div>}
+              {character.height && <div><p style={{ fontSize: 10, fontWeight: 700, letterSpacing: '0.14em', textTransform: 'uppercase', color: 'var(--muted)', margin: '0 0 3px' }}>Lengte</p><p style={{ fontSize: 14, color: 'var(--ink-soft)', margin: 0 }}>{character.height}</p></div>}
+              {character.weight && <div><p style={{ fontSize: 10, fontWeight: 700, letterSpacing: '0.14em', textTransform: 'uppercase', color: 'var(--muted)', margin: '0 0 3px' }}>Gewicht</p><p style={{ fontSize: 14, color: 'var(--ink-soft)', margin: 0 }}>{character.weight}</p></div>}
+            </div>
+            {character.appearance && (
+              <p style={{ fontSize: 14, lineHeight: 1.7, color: 'var(--ink-soft)', margin: 0, whiteSpace: 'pre-wrap' }}>{character.appearance}</p>
+            )}
+          </div>
+        )}
+
+        {/* Talenten */}
+        {(character.feats ?? []).length > 0 && (
+          <div className="pangu-surface" style={{ padding: 28, marginBottom: 16 }}>
+            <p className="pangu-section-title" style={{ marginBottom: 12 }}>Talenten</p>
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
+              {(character.feats ?? []).map(feat => (
+                <span key={feat} style={{ fontSize: 13, padding: '4px 12px', borderRadius: 8, background: 'rgba(139,92,246,0.08)', border: '1px solid rgba(139,92,246,0.25)', color: 'var(--ink-soft)' }}>
+                  {feat}
+                </span>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Wapenmeesters */}
+        {(character.weapon_masteries ?? []).length > 0 && (
+          <div className="pangu-surface" style={{ padding: 28, marginBottom: 16 }}>
+            <p className="pangu-section-title" style={{ marginBottom: 12 }}>Wapenmeesters</p>
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
+              {(character.weapon_masteries ?? []).map(m => (
+                <span key={m} style={{ fontSize: 13, padding: '4px 12px', borderRadius: 8, background: 'rgba(212,175,55,0.08)', border: '1px solid rgba(212,175,55,0.25)', color: 'var(--gold)' }}>
+                  {m}
+                </span>
               ))}
             </div>
           </div>
