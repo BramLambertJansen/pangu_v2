@@ -694,6 +694,7 @@ export type Database = {
           id: string
           campaign_id: string
           character_id: string | null
+          equipped_slot: string | null
           name: string
           description: string | null
           item_type: string
@@ -710,6 +711,7 @@ export type Database = {
           id?: string
           campaign_id: string
           character_id?: string | null
+          equipped_slot?: string | null
           name?: string
           description?: string | null
           item_type?: string
@@ -726,6 +728,7 @@ export type Database = {
           id?: string
           campaign_id?: string
           character_id?: string | null
+          equipped_slot?: string | null
           name?: string
           description?: string | null
           item_type?: string

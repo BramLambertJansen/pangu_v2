@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import { useParams, useNavigate, Link } from 'react-router-dom'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { toast } from 'sonner'
@@ -6,9 +6,21 @@ import { supabase } from '@/lib/supabase'
 import { queryKeys } from '@/lib/queryKeys'
 import { Spinner } from '@/components/ui/Spinner'
 import { Breadcrumb } from '@/components/ui/Breadcrumb'
-import { characterStatusLabel, characterStatusColor, itemRarityLabel, itemRarityColor, itemTypeLabel } from '@/lib/statusMaps'
+import {
+  characterStatusLabel, characterStatusColor,
+  itemRarityLabel, itemRarityColor, itemTypeLabel,
+} from '@/lib/statusMaps'
 import { useCharacterItems } from '@/hooks/queries/useCharacterItems'
+import {
+  EQUIPMENT_SLOT_LABELS,
+  EQUIPMENT_SLOT_ICONS,
+  ALLOWED_SLOTS_BY_TYPE,
+  isEquippable,
+  calculateEffectiveStats,
+  formatItemBonuses,
+} from '@/utils/equipmentUtils'
 import type { Character } from '@/types/character.types'
+import type { EquipmentSlot, Item } from '@/types/item.types'
 
 type Tab = 'stats' | 'spreuken' | 'inventaris' | 'vaardigheden' | 'lore'
 
@@ -19,33 +31,33 @@ interface Skill {
 }
 
 const SKILLS: Skill[] = [
-  { name: 'Atletiek',          ability: 'stat_str', abbr: 'STR' },
-  { name: 'Acrobatiek',        ability: 'stat_dex', abbr: 'DEX' },
-  { name: 'Vingervlugheid',    ability: 'stat_dex', abbr: 'DEX' },
-  { name: 'Sluipen',           ability: 'stat_dex', abbr: 'DEX' },
-  { name: 'Magie',             ability: 'stat_int', abbr: 'INT' },
-  { name: 'Geschiedenis',      ability: 'stat_int', abbr: 'INT' },
-  { name: 'Onderzoek',         ability: 'stat_int', abbr: 'INT' },
-  { name: 'Natuur',            ability: 'stat_int', abbr: 'INT' },
-  { name: 'Religie',           ability: 'stat_int', abbr: 'INT' },
-  { name: 'Dierenverzorging',  ability: 'stat_wis', abbr: 'WIS' },
-  { name: 'Inzicht',           ability: 'stat_wis', abbr: 'WIS' },
-  { name: 'Geneeskunde',       ability: 'stat_wis', abbr: 'WIS' },
-  { name: 'Waarneming',        ability: 'stat_wis', abbr: 'WIS' },
-  { name: 'Overleven',         ability: 'stat_wis', abbr: 'WIS' },
-  { name: 'Bedrog',            ability: 'stat_cha', abbr: 'CHA' },
-  { name: 'Intimidatie',       ability: 'stat_cha', abbr: 'CHA' },
-  { name: 'Optreden',          ability: 'stat_cha', abbr: 'CHA' },
-  { name: 'Overtuigen',        ability: 'stat_cha', abbr: 'CHA' },
+  { name: 'Atletiek',         ability: 'stat_str', abbr: 'STR' },
+  { name: 'Acrobatiek',       ability: 'stat_dex', abbr: 'DEX' },
+  { name: 'Vingervlugheid',   ability: 'stat_dex', abbr: 'DEX' },
+  { name: 'Sluipen',          ability: 'stat_dex', abbr: 'DEX' },
+  { name: 'Magie',            ability: 'stat_int', abbr: 'INT' },
+  { name: 'Geschiedenis',     ability: 'stat_int', abbr: 'INT' },
+  { name: 'Onderzoek',        ability: 'stat_int', abbr: 'INT' },
+  { name: 'Natuur',           ability: 'stat_int', abbr: 'INT' },
+  { name: 'Religie',          ability: 'stat_int', abbr: 'INT' },
+  { name: 'Dierenverzorging', ability: 'stat_wis', abbr: 'WIS' },
+  { name: 'Inzicht',          ability: 'stat_wis', abbr: 'WIS' },
+  { name: 'Geneeskunde',      ability: 'stat_wis', abbr: 'WIS' },
+  { name: 'Waarneming',       ability: 'stat_wis', abbr: 'WIS' },
+  { name: 'Overleven',        ability: 'stat_wis', abbr: 'WIS' },
+  { name: 'Bedrog',           ability: 'stat_cha', abbr: 'CHA' },
+  { name: 'Intimidatie',      ability: 'stat_cha', abbr: 'CHA' },
+  { name: 'Optreden',         ability: 'stat_cha', abbr: 'CHA' },
+  { name: 'Overtuigen',       ability: 'stat_cha', abbr: 'CHA' },
 ]
 
 const abilityScores: { key: keyof Character; abbr: string; label: string }[] = [
-  { key: 'stat_str', abbr: 'STR', label: 'Sterkte' },
+  { key: 'stat_str', abbr: 'STR', label: 'Sterkte'      },
   { key: 'stat_dex', abbr: 'DEX', label: 'Behendigheid' },
-  { key: 'stat_con', abbr: 'CON', label: 'Constitutie' },
-  { key: 'stat_int', abbr: 'INT', label: 'Intelligentie' },
-  { key: 'stat_wis', abbr: 'WIS', label: 'Wijsheid' },
-  { key: 'stat_cha', abbr: 'CHA', label: 'Charisma' },
+  { key: 'stat_con', abbr: 'CON', label: 'Constitutie'  },
+  { key: 'stat_int', abbr: 'INT', label: 'Intelligentie'},
+  { key: 'stat_wis', abbr: 'WIS', label: 'Wijsheid'     },
+  { key: 'stat_cha', abbr: 'CHA', label: 'Charisma'     },
 ]
 
 function abilityModifier(score: number): string {
@@ -64,43 +76,114 @@ const headerGradients = [
   'radial-gradient(ellipse 60% 80% at 25% 38%, rgba(56,152,255,0.26) 0%, rgba(62,207,178,0.16) 50%, var(--void) 78%)',
 ]
 
-// Generates deterministic starfield dot positions from character ID.
 function starfieldDots(id: string) {
   const dots = []
   for (let i = 0; i < 10; i++) {
     const seed = (id.charCodeAt(i % id.length) || 37) * (i + 1)
-    const x = ((seed * 13) % 90) + 5
-    const y = ((seed * 7) % 80) + 5
-    const size = ((seed % 3) + 1) * 1.5
-    const opacity = ((seed % 5) + 3) * 0.07
-    dots.push({ x, y, size, opacity })
+    dots.push({
+      x: ((seed * 13) % 90) + 5,
+      y: ((seed * 7)  % 80) + 5,
+      size: ((seed % 3) + 1) * 1.5,
+      opacity: ((seed % 5) + 3) * 0.07,
+    })
   }
   return dots
 }
 
-// Die roller component — pure client-side random rolling.
+// ─── Slot picker dropdown ──────────────────────────────────────────────────────
+function SlotPicker({
+  item,
+  onEquip,
+  onClose,
+}: {
+  item: Item
+  onEquip: (slot: EquipmentSlot) => void
+  onClose: () => void
+}) {
+  const ref = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    function handleClick(e: MouseEvent) {
+      if (ref.current && !ref.current.contains(e.target as Node)) onClose()
+    }
+    document.addEventListener('mousedown', handleClick)
+    return () => document.removeEventListener('mousedown', handleClick)
+  }, [onClose])
+
+  return (
+    <div
+      ref={ref}
+      role="listbox"
+      aria-label="Kies een uitrustingslot"
+      style={{
+        position: 'absolute', zIndex: 50, right: 0, top: '100%',
+        marginTop: 4, minWidth: 172,
+        background: 'var(--void-2)',
+        border: '1px solid var(--hairline-strong)',
+        borderRadius: 10, padding: '6px 4px',
+        boxShadow: '0 12px 32px rgba(0,0,0,0.55)',
+      }}
+    >
+      <p style={{
+        fontSize: 9, fontWeight: 700, letterSpacing: '0.18em',
+        textTransform: 'uppercase', color: 'var(--muted)',
+        margin: '0 8px 6px',
+      }}>
+        Uitrusten in slot
+      </p>
+      {ALLOWED_SLOTS_BY_TYPE[item.item_type].map((slot) => (
+        <button
+          key={slot}
+          type="button"
+          role="option"
+          onClick={() => { onEquip(slot); onClose() }}
+          style={{
+            display: 'flex', alignItems: 'center', gap: 8,
+            width: '100%', padding: '7px 10px',
+            borderRadius: 7, border: 'none',
+            background: 'transparent', cursor: 'pointer',
+            fontSize: 13, color: 'var(--ink-soft)',
+            transition: 'background var(--t-fast), color var(--t-fast)',
+            textAlign: 'left',
+          }}
+          onMouseEnter={(e) => {
+            const el = e.currentTarget as HTMLElement
+            el.style.background = 'rgba(139,92,246,0.12)'
+            el.style.color = 'var(--ink)'
+          }}
+          onMouseLeave={(e) => {
+            const el = e.currentTarget as HTMLElement
+            el.style.background = 'transparent'
+            el.style.color = 'var(--ink-soft)'
+          }}
+        >
+          <span aria-hidden="true" style={{ fontSize: 14, width: 20, textAlign: 'center' }}>
+            {EQUIPMENT_SLOT_ICONS[slot]}
+          </span>
+          <span>{EQUIPMENT_SLOT_LABELS[slot]}</span>
+        </button>
+      ))}
+    </div>
+  )
+}
+
+// ─── Dice roller ──────────────────────────────────────────────────────────────
 function DiceRoller() {
   const [selectedDie, setSelectedDie] = useState<number>(20)
   const [result, setResult] = useState<number | null>(null)
   const [visible, setVisible] = useState(true)
-
   const dice = [4, 6, 8, 10, 12, 20, 100]
 
   function roll(sides: number) {
-    const r = Math.floor(Math.random() * sides) + 1
     setSelectedDie(sides)
-    setResult(r)
+    setResult(Math.floor(Math.random() * sides) + 1)
   }
 
   if (!visible) {
     return (
-      <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: 8 }}>
-        <button
-          type="button"
-          className="pangu-btn pangu-btn-ghost pangu-btn-sm"
-          onClick={() => setVisible(true)}
-        >
-          ⬡ Dobbelstenen
+      <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
+        <button type="button" className="pangu-btn pangu-btn-ghost pangu-btn-sm" onClick={() => setVisible(true)}>
+          ⬡ Dice
         </button>
       </div>
     )
@@ -109,32 +192,18 @@ function DiceRoller() {
   return (
     <div
       className="pangu-surface"
-      style={{
-        padding: 20,
-        minWidth: 200,
-        flexShrink: 0,
-      }}
+      style={{ padding: 20, width: 200, flexShrink: 0 }}
     >
       {/* Header */}
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>
-        <span style={{
-          fontFamily: 'var(--font-body)',
-          fontSize: 11, fontWeight: 700,
-          letterSpacing: '0.18em', textTransform: 'uppercase',
-          color: 'var(--muted)',
-        }}>
+        <span style={{ fontSize: 10, fontWeight: 700, letterSpacing: '0.18em', textTransform: 'uppercase', color: 'var(--muted)' }}>
           Dice
         </span>
         <button
           type="button"
-          aria-label="Dobbelstenen verbergen"
+          aria-label="Verbergen"
           onClick={() => setVisible(false)}
-          style={{
-            background: 'none', border: 'none', cursor: 'pointer',
-            color: 'var(--muted)', fontSize: 14, lineHeight: 1,
-            padding: '2px 4px',
-            transition: 'color var(--t-fast)',
-          }}
+          style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--muted)', fontSize: 14, padding: '2px 4px', transition: 'color var(--t-fast)' }}
           onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.color = 'var(--ink)' }}
           onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.color = 'var(--muted)' }}
         >
@@ -142,96 +211,53 @@ function DiceRoller() {
         </button>
       </div>
 
-      {/* Die display area */}
+      {/* Roll area */}
       <button
         type="button"
         aria-label={`Gooi d${selectedDie}`}
         onClick={() => roll(selectedDie)}
         style={{
-          width: '100%',
-          background: 'var(--surface)',
-          border: '1px solid var(--hairline)',
-          borderRadius: 10,
-          padding: '16px 12px',
-          marginBottom: 12,
-          cursor: 'pointer',
-          display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'center',
-          gap: 4,
+          width: '100%', background: 'var(--surface)',
+          border: '1px solid var(--hairline)', borderRadius: 10,
+          padding: '16px 12px', marginBottom: 12, cursor: 'pointer',
+          display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4,
           transition: 'border-color var(--t-fast)',
         }}
         onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.borderColor = 'var(--violet)' }}
-        onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.borderColor = '' }}
+        onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.borderColor = 'var(--hairline)' }}
       >
-        {/* Diamond die icon */}
         <svg aria-hidden="true" width="36" height="36" viewBox="0 0 48 48" style={{ opacity: 0.6 }}>
           <polygon points="24,4 44,24 24,44 4,24" fill="none" stroke="var(--violet)" strokeWidth="2" />
-          {result !== null && (
-            <line x1="16" y1="24" x2="32" y2="24" stroke="var(--gold)" strokeWidth="2" strokeLinecap="round" />
-          )}
+          {result !== null && <line x1="16" y1="24" x2="32" y2="24" stroke="var(--gold)" strokeWidth="2" strokeLinecap="round" />}
         </svg>
-        <span style={{
-          fontFamily: 'var(--font-display)',
-          fontSize: result !== null ? 28 : 14,
-          fontWeight: 700,
-          color: result !== null ? 'var(--ink)' : 'var(--muted)',
-          lineHeight: 1,
-        }}>
+        <span style={{ fontFamily: 'var(--font-display)', fontSize: result !== null ? 28 : 14, fontWeight: 700, color: result !== null ? 'var(--ink)' : 'var(--muted)', lineHeight: 1 }}>
           {result !== null ? result : `D${selectedDie}`}
         </span>
-        {result === null && (
-          <span style={{ fontSize: 11, color: 'var(--subtle)', fontFamily: 'var(--font-body)' }}>
-            Klik om te gooien
-          </span>
-        )}
-        {result !== null && (
-          <span style={{
-            fontSize: 10, color: 'var(--muted)',
-            fontFamily: 'var(--font-body)',
-            letterSpacing: '0.12em', textTransform: 'uppercase',
-          }}>
-            D{selectedDie}
-          </span>
-        )}
+        {result === null
+          ? <span style={{ fontSize: 11, color: 'var(--subtle)', fontFamily: 'var(--font-body)' }}>Klik om te gooien</span>
+          : <span style={{ fontSize: 10, color: 'var(--muted)', fontFamily: 'var(--font-body)', letterSpacing: '0.12em', textTransform: 'uppercase' }}>D{selectedDie}</span>
+        }
       </button>
 
-      {/* Die selection grid */}
-      <div style={{
-        display: 'grid',
-        gridTemplateColumns: 'repeat(4, 1fr)',
-        gap: 6,
-      }}>
+      {/* Die grid */}
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 6 }}>
         {dice.map((d) => (
           <button
             key={d}
             type="button"
-            aria-label={`Selecteer d${d}`}
+            aria-label={`d${d}`}
             aria-pressed={selectedDie === d}
             onClick={() => roll(d)}
             style={{
-              padding: '8px 4px',
-              borderRadius: 8,
-              border: '1px solid',
+              padding: '8px 4px', borderRadius: 8, border: '1px solid',
               borderColor: selectedDie === d ? 'var(--violet)' : 'var(--hairline)',
               background: selectedDie === d ? 'rgba(139,92,246,0.15)' : 'var(--surface)',
               color: selectedDie === d ? 'var(--violet)' : 'var(--ink-soft)',
-              fontSize: 12, fontWeight: 700,
-              fontFamily: 'var(--font-body)',
-              cursor: 'pointer',
-              transition: 'all var(--t-fast)',
-              letterSpacing: '0.04em',
+              fontSize: 12, fontWeight: 700, fontFamily: 'var(--font-body)',
+              cursor: 'pointer', transition: 'all var(--t-fast)',
             }}
-            onMouseEnter={(e) => {
-              if (selectedDie !== d) {
-                (e.currentTarget as HTMLElement).style.borderColor = 'var(--hairline-strong)'
-              }
-            }}
-            onMouseLeave={(e) => {
-              if (selectedDie !== d) {
-                (e.currentTarget as HTMLElement).style.borderColor = 'var(--hairline)'
-              }
-            }}
+            onMouseEnter={(e) => { if (selectedDie !== d) (e.currentTarget as HTMLElement).style.borderColor = 'var(--hairline-strong)' }}
+            onMouseLeave={(e) => { if (selectedDie !== d) (e.currentTarget as HTMLElement).style.borderColor = 'var(--hairline)' }}
           >
             d{d}
           </button>
@@ -241,19 +267,219 @@ function DiceRoller() {
   )
 }
 
+// ─── Item row ─────────────────────────────────────────────────────────────────
+function ItemRow({
+  item,
+  index,
+  total,
+  onEquip,
+  onUnequip,
+  onReturn,
+  pickerOpen,
+  onOpenPicker,
+  onClosePicker,
+  isPending,
+}: {
+  item: Item
+  index: number
+  total: number
+  onEquip: (slot: EquipmentSlot) => void
+  onUnequip: () => void
+  onReturn: () => void
+  pickerOpen: boolean
+  onOpenPicker: () => void
+  onClosePicker: () => void
+  isPending: boolean
+}) {
+  const equippable = isEquippable(item.item_type)
+  const isEquipped = !!item.equipped_slot
+  const bonuses = formatItemBonuses(item.properties)
+  const subtitleParts = [itemTypeLabel[item.item_type], ...(bonuses.length > 0 ? [bonuses.join(' · ')] : [])]
+
+  return (
+    <div
+      style={{
+        display: 'flex', alignItems: 'center', gap: 12,
+        padding: '13px 0',
+        borderBottom: index < total - 1 ? '1px solid var(--hairline)' : 'none',
+      }}
+    >
+      {/* Icon */}
+      <div
+        aria-hidden="true"
+        style={{
+          width: 32, height: 32, borderRadius: 8, flexShrink: 0,
+          background: isEquipped ? 'rgba(212,175,55,0.10)' : 'var(--surface)',
+          border: `1px solid ${isEquipped ? 'rgba(212,175,55,0.30)' : 'var(--hairline)'}`,
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+          transition: 'background var(--t-fast), border-color var(--t-fast)',
+        }}
+      >
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke={isEquipped ? 'var(--gold)' : 'var(--muted)'} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z" />
+        </svg>
+      </div>
+
+      {/* Name + meta */}
+      <div style={{ flex: 1, minWidth: 0 }}>
+        <span style={{
+          fontFamily: 'var(--font-display)',
+          fontSize: 14, fontWeight: 600,
+          letterSpacing: '0.03em', color: 'var(--ink)',
+        }}>
+          {item.is_magical && <span style={{ color: 'var(--gold)', marginRight: 3 }} aria-hidden="true">✦</span>}
+          {item.name}
+        </span>
+        <p style={{
+          fontSize: 10, color: bonuses.length > 0 ? 'var(--teal)' : 'var(--muted)',
+          fontFamily: 'var(--font-body)',
+          letterSpacing: '0.12em', textTransform: 'uppercase',
+          margin: '2px 0 0', lineHeight: 1.4,
+        }}>
+          {subtitleParts.join(' · ')}
+        </p>
+      </div>
+
+      {/* Right: badges + actions */}
+      <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexShrink: 0 }}>
+        {/* Equipped slot badge */}
+        {isEquipped && (
+          <span style={{
+            display: 'inline-flex', alignItems: 'center', gap: 4,
+            padding: '2px 8px', borderRadius: 'var(--r-full)',
+            fontSize: 9, fontWeight: 700,
+            letterSpacing: '0.12em', textTransform: 'uppercase',
+            color: 'var(--gold)',
+            border: '1px solid rgba(212,175,55,0.35)',
+            background: 'rgba(212,175,55,0.08)',
+          }}>
+            <span aria-hidden="true">{EQUIPMENT_SLOT_ICONS[item.equipped_slot!]}</span>
+            {EQUIPMENT_SLOT_LABELS[item.equipped_slot!]}
+          </span>
+        )}
+
+        {/* Rarity badge */}
+        {item.rarity !== 'common' && (
+          <span style={{
+            display: 'inline-flex', alignItems: 'center',
+            padding: '2px 8px', borderRadius: 'var(--r-full)',
+            fontSize: 9, fontWeight: 700,
+            letterSpacing: '0.12em', textTransform: 'uppercase',
+            color: itemRarityColor[item.rarity],
+            border: `1px solid ${itemRarityColor[item.rarity]}55`,
+            background: `${itemRarityColor[item.rarity]}11`,
+          }}>
+            {itemRarityLabel[item.rarity]}
+          </span>
+        )}
+
+        {/* Quantity */}
+        {item.quantity > 1 && (
+          <span style={{ fontSize: 12, color: 'var(--ink-soft)', fontWeight: 600 }}>×{item.quantity}</span>
+        )}
+
+        {/* Equip / unequip */}
+        <div style={{ position: 'relative' }}>
+          {equippable && !isEquipped && (
+            <>
+              <button
+                type="button"
+                aria-label={`${item.name} equippen`}
+                onClick={onOpenPicker}
+                style={{
+                  background: 'none', border: '1px solid var(--hairline)', borderRadius: 6,
+                  padding: '4px 8px', cursor: 'pointer',
+                  fontSize: 11, fontWeight: 700,
+                  letterSpacing: '0.1em', textTransform: 'uppercase',
+                  color: 'var(--muted)',
+                  transition: 'all var(--t-fast)',
+                  fontFamily: 'var(--font-body)',
+                }}
+                onMouseEnter={(e) => {
+                  const el = e.currentTarget as HTMLElement
+                  el.style.borderColor = 'var(--violet)'
+                  el.style.color = 'var(--violet)'
+                }}
+                onMouseLeave={(e) => {
+                  const el = e.currentTarget as HTMLElement
+                  el.style.borderColor = 'var(--hairline)'
+                  el.style.color = 'var(--muted)'
+                }}
+              >
+                Equippen
+              </button>
+              {pickerOpen && (
+                <SlotPicker item={item} onEquip={onEquip} onClose={onClosePicker} />
+              )}
+            </>
+          )}
+          {isEquipped && (
+            <button
+              type="button"
+              aria-label={`${item.name} uitrusten`}
+              onClick={onUnequip}
+              style={{
+                background: 'none', border: '1px solid rgba(212,175,55,0.35)', borderRadius: 6,
+                padding: '4px 8px', cursor: 'pointer',
+                fontSize: 11, fontWeight: 700,
+                letterSpacing: '0.1em', textTransform: 'uppercase',
+                color: 'rgba(212,175,55,0.7)',
+                transition: 'all var(--t-fast)',
+                fontFamily: 'var(--font-body)',
+              }}
+              onMouseEnter={(e) => {
+                const el = e.currentTarget as HTMLElement
+                el.style.borderColor = 'rgba(255,107,107,0.4)'
+                el.style.color = 'var(--crimson)'
+              }}
+              onMouseLeave={(e) => {
+                const el = e.currentTarget as HTMLElement
+                el.style.borderColor = 'rgba(212,175,55,0.35)'
+                el.style.color = 'rgba(212,175,55,0.7)'
+              }}
+            >
+              Uitrusten
+            </button>
+          )}
+        </div>
+
+        {/* Return to DM */}
+        <button
+          type="button"
+          aria-label={`${item.name} teruggeven aan DM`}
+          onClick={onReturn}
+          disabled={isPending}
+          style={{
+            background: 'none', border: 'none', cursor: 'pointer',
+            color: 'var(--muted)', fontSize: 14, padding: '4px 6px',
+            lineHeight: 1, transition: 'color var(--t-fast)',
+            opacity: isPending ? 0.4 : 1,
+          }}
+          onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.color = 'var(--ink-soft)' }}
+          onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.color = 'var(--muted)' }}
+        >
+          ↩
+        </button>
+      </div>
+    </div>
+  )
+}
+
+// ─── Page ─────────────────────────────────────────────────────────────────────
 export default function CharacterDetailPage() {
   const { id } = useParams<{ id: string }>()
   const navigate = useNavigate()
   const queryClient = useQueryClient()
   const [activeTab, setActiveTab] = useState<Tab>('stats')
+  const [pickerItemId, setPickerItemId] = useState<string | null>(null)
 
-  const { data: items, isLoading: isLoadingItems } = useCharacterItems(id)
+  const { data: items, isLoading: isLoadingItems, equipItem, unequipItem } = useCharacterItems(id)
 
   const returnItemToDm = useMutation({
     mutationFn: async (itemId: string) => {
       const { error } = await supabase
         .from('items')
-        .update({ character_id: null, updated_at: new Date().toISOString() })
+        .update({ character_id: null, equipped_slot: null, updated_at: new Date().toISOString() })
         .eq('id', itemId)
       if (error) throw error
     },
@@ -262,19 +488,13 @@ export default function CharacterDetailPage() {
       queryClient.invalidateQueries({ queryKey: ['items'] })
       toast.success('Item teruggegeven aan de DM')
     },
-    onError: () => {
-      toast.error('Teruggeven mislukt')
-    },
+    onError: () => toast.error('Teruggeven mislukt'),
   })
 
   const { data: character, isLoading } = useQuery<Character>({
     queryKey: queryKeys.characters.detail(id!),
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from('characters')
-        .select('*')
-        .eq('id', id!)
-        .single()
+      const { data, error } = await supabase.from('characters').select('*').eq('id', id!).single()
       if (error) throw error
       return data as Character
     },
@@ -294,14 +514,12 @@ export default function CharacterDetailPage() {
       queryClient.invalidateQueries({ queryKey: queryKeys.characters.detail(id!) })
       queryClient.invalidateQueries({ queryKey: queryKeys.characters.all })
     },
-    onError: () => {
-      toast.error('HP bijwerken mislukt')
-    },
+    onError: () => toast.error('HP bijwerken mislukt'),
   })
 
   if (isLoading) {
     return (
-      <div style={{ display: 'flex', justifyContent: 'center', padding: '80px 0' }} aria-live="polite" aria-label="Karakter laden...">
+      <div style={{ display: 'flex', justifyContent: 'center', padding: '80px 0' }} aria-live="polite">
         <Spinner size="lg" />
       </div>
     )
@@ -323,15 +541,26 @@ export default function CharacterDetailPage() {
   const dots = starfieldDots(id!)
 
   const eyebrowParts = [character.character_race, character.character_class, character.character_subclass].filter(Boolean)
-  const xp = character.xp ?? 0
-  const xpNext = character.xp_next ?? 0
+  const xp      = character.xp      ?? 0
+  const xpNext  = character.xp_next ?? 0
   const hpCurrent = character.hp_current ?? 0
-  const hpMax = character.hp_max ?? 0
+  const hpMax     = character.hp_max     ?? 0
   const xpPct = xpNext > 0 ? Math.min(100, Math.round((xp / xpNext) * 100)) : 0
-  const hpPct = hpMax > 0 ? Math.min(100, Math.round((hpCurrent / hpMax) * 100)) : 0
+  const hpPct = hpMax  > 0 ? Math.min(100, Math.round((hpCurrent / hpMax) * 100)) : 0
   const hpLow = hpCurrent < hpMax * 0.3
-  const dexMod = Math.floor(((character.stat_dex ?? 10) - 10) / 2)
+  const dexMod  = Math.floor(((character.stat_dex ?? 10) - 10) / 2)
   const dexLabel = dexMod >= 0 ? `+${dexMod}` : `${dexMod}`
+
+  // Equipment-adjusted stats
+  const equippedItems = (items ?? []).filter((i) => i.equipped_slot !== null)
+  const eff = calculateEffectiveStats(character, equippedItems)
+  const acBonus = eff.ac - (character.armor_class ?? 0)
+
+  // Subtitle for AC card: names of equipped armor/shields contributing to AC
+  const acContributors = equippedItems
+    .filter((i) => (i.properties.ac_bonus ?? 0) !== 0)
+    .map((i) => i.name)
+  const acSubtitle = acContributors.join(' + ')
 
   return (
     <div>
@@ -344,14 +573,7 @@ export default function CharacterDetailPage() {
           <Link
             to={`/characters/${id}/edit`}
             aria-label={`${character.name} bewerken`}
-            style={{
-              display: 'inline-flex', alignItems: 'center', gap: 6,
-              color: 'var(--muted)', fontSize: 12, fontWeight: 700,
-              letterSpacing: '0.18em', textTransform: 'uppercase',
-              fontFamily: 'var(--font-body)',
-              textDecoration: 'none',
-              transition: 'color var(--t-fast)',
-            }}
+            style={{ display: 'inline-flex', alignItems: 'center', gap: 6, color: 'var(--muted)', fontSize: 12, fontWeight: 700, letterSpacing: '0.18em', textTransform: 'uppercase', fontFamily: 'var(--font-body)', textDecoration: 'none', transition: 'color var(--t-fast)' }}
             onMouseEnter={(e) => (e.currentTarget.style.color = 'var(--ink-soft)')}
             onMouseLeave={(e) => (e.currentTarget.style.color = 'var(--muted)')}
           >
@@ -365,160 +587,43 @@ export default function CharacterDetailPage() {
 
       {/* ── Hero header ── */}
       <div style={{ marginBottom: 24 }}>
-        {/* Starfield art area */}
-        <div
-          style={{
-            position: 'relative',
-            borderRadius: 'var(--r-xl)',
-            border: '1px solid var(--hairline)',
-            overflow: 'hidden',
-            height: 200,
-            background: `${headerGradient}, var(--void)`,
-          }}
-        >
-          {/* Deterministic starfield dots */}
+        <div style={{ position: 'relative', borderRadius: 'var(--r-xl)', border: '1px solid var(--hairline)', overflow: 'hidden', height: 200, background: `${headerGradient}, var(--void)` }}>
           {dots.map((dot, i) => (
-            <div
-              key={i}
-              aria-hidden="true"
-              style={{
-                position: 'absolute',
-                left: `${dot.x}%`,
-                top: `${dot.y}%`,
-                width: dot.size,
-                height: dot.size,
-                borderRadius: '50%',
-                background: 'var(--ink)',
-                opacity: dot.opacity,
-                pointerEvents: 'none',
-              }}
-            />
+            <div key={i} aria-hidden="true" style={{ position: 'absolute', left: `${dot.x}%`, top: `${dot.y}%`, width: dot.size, height: dot.size, borderRadius: '50%', background: 'var(--ink)', opacity: dot.opacity, pointerEvents: 'none' }} />
           ))}
-
-          {/* Watermark initial centered */}
-          <div
-            aria-hidden="true"
-            style={{
-              position: 'absolute',
-              left: '50%', top: '50%',
-              transform: 'translate(-50%, -50%)',
-              fontFamily: 'var(--font-display)',
-              fontSize: 'clamp(100px, 18vw, 160px)',
-              fontWeight: 700,
-              color: 'rgba(107,167,255,0.07)',
-              lineHeight: 1,
-              userSelect: 'none', pointerEvents: 'none',
-            }}
-          >
+          <div aria-hidden="true" style={{ position: 'absolute', left: '50%', top: '50%', transform: 'translate(-50%,-50%)', fontFamily: 'var(--font-display)', fontSize: 'clamp(100px,18vw,160px)', fontWeight: 700, color: 'rgba(107,167,255,0.07)', lineHeight: 1, userSelect: 'none', pointerEvents: 'none' }}>
             {character.name.charAt(0).toUpperCase()}
           </div>
-
-          {/* Status badge top-right */}
           <div style={{ position: 'absolute', top: 16, right: 16 }}>
-            <span style={{
-              display: 'inline-flex', alignItems: 'center',
-              padding: '3px 10px',
-              borderRadius: 'var(--r-full)',
-              fontSize: 10, fontWeight: 700,
-              letterSpacing: '0.14em', textTransform: 'uppercase',
-              color: characterStatusColor[character.status],
-              border: `1px solid ${characterStatusColor[character.status]}55`,
-              background: `${characterStatusColor[character.status]}11`,
-            }}>
+            <span style={{ display: 'inline-flex', alignItems: 'center', padding: '3px 10px', borderRadius: 'var(--r-full)', fontSize: 10, fontWeight: 700, letterSpacing: '0.14em', textTransform: 'uppercase', color: characterStatusColor[character.status], border: `1px solid ${characterStatusColor[character.status]}55`, background: `${characterStatusColor[character.status]}11` }}>
               {characterStatusLabel[character.status]}
             </span>
           </div>
         </div>
 
-        {/* Name + identity below art */}
         <div style={{ padding: '20px 4px 0' }}>
-          {/* Eyebrow: race · class · subclass */}
           {eyebrowParts.length > 0 && (
-            <p style={{
-              fontFamily: 'var(--font-body)',
-              fontSize: 11, fontWeight: 700,
-              letterSpacing: '0.18em', textTransform: 'uppercase',
-              color: 'var(--teal)',
-              margin: '0 0 6px',
-            }}>
+            <p style={{ fontFamily: 'var(--font-body)', fontSize: 11, fontWeight: 700, letterSpacing: '0.18em', textTransform: 'uppercase', color: 'var(--teal)', margin: '0 0 6px' }}>
               {eyebrowParts.join(' · ')}
             </p>
           )}
-
-          {/* Character name */}
-          <h1 style={{
-            fontFamily: 'var(--font-display)',
-            fontSize: 'clamp(36px, 8vw, 56px)',
-            fontWeight: 600,
-            lineHeight: 0.92,
-            letterSpacing: '0.04em',
-            textTransform: 'uppercase',
-            color: 'var(--ink)',
-            margin: '0 0 16px',
-          }}>
+          <h1 style={{ fontFamily: 'var(--font-display)', fontSize: 'clamp(36px,8vw,56px)', fontWeight: 600, lineHeight: 0.92, letterSpacing: '0.04em', textTransform: 'uppercase', color: 'var(--ink)', margin: '0 0 16px' }}>
             {character.name}
           </h1>
 
-          {/* Level + XP card */}
-          <div
-            className="pangu-surface"
-            style={{
-              padding: '16px 20px',
-              display: 'flex',
-              alignItems: 'center',
-              gap: 24,
-              flexWrap: 'wrap',
-            }}
-          >
-            {/* Level */}
+          {/* Level + XP */}
+          <div className="pangu-surface" style={{ padding: '16px 20px', display: 'flex', alignItems: 'center', gap: 24, flexWrap: 'wrap' }}>
             <div style={{ display: 'flex', alignItems: 'baseline', gap: 6 }}>
-              <span style={{
-                fontFamily: 'var(--font-body)',
-                fontSize: 11, fontWeight: 700,
-                letterSpacing: '0.2em', textTransform: 'uppercase',
-                color: 'var(--gold)',
-              }}>
-                Level
-              </span>
-              <span style={{
-                fontFamily: 'var(--font-display)',
-                fontSize: 42, fontWeight: 700,
-                color: 'var(--gold)', lineHeight: 1,
-              }}>
-                {character.level}
-              </span>
+              <span style={{ fontFamily: 'var(--font-body)', fontSize: 11, fontWeight: 700, letterSpacing: '0.2em', textTransform: 'uppercase', color: 'var(--gold)' }}>Level</span>
+              <span style={{ fontFamily: 'var(--font-display)', fontSize: 42, fontWeight: 700, color: 'var(--gold)', lineHeight: 1 }}>{character.level}</span>
             </div>
-
-            {/* XP bar */}
             <div style={{ flex: 1, minWidth: 160 }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 6 }}>
-                <span style={{
-                  fontFamily: 'var(--font-body)',
-                  fontSize: 10, fontWeight: 700,
-                  letterSpacing: '0.16em', textTransform: 'uppercase',
-                  color: 'var(--muted)',
-                }}>
-                  Experience
-                </span>
-                <span style={{ fontSize: 12, color: 'var(--ink-soft)', fontFamily: 'var(--font-body)' }}>
-                  {formatXP(xp)} / {formatXP(xpNext)} XP
-                </span>
+                <span style={{ fontFamily: 'var(--font-body)', fontSize: 10, fontWeight: 700, letterSpacing: '0.16em', textTransform: 'uppercase', color: 'var(--muted)' }}>Experience</span>
+                <span style={{ fontSize: 12, color: 'var(--ink-soft)', fontFamily: 'var(--font-body)' }}>{formatXP(xp)} / {formatXP(xpNext)} XP</span>
               </div>
-              <div
-                role="progressbar"
-                aria-valuenow={xp}
-                aria-valuemin={0}
-                aria-valuemax={xpNext}
-                aria-label={`${xp} van ${xpNext} ervaringspunten`}
-                style={{ height: 6, borderRadius: 3, background: 'var(--hairline)', overflow: 'hidden' }}
-              >
-                <div style={{
-                  height: '100%',
-                  width: `${xpPct}%`,
-                  background: 'var(--violet)',
-                  borderRadius: 3,
-                  transition: 'width 0.4s var(--ease-out)',
-                }} />
+              <div role="progressbar" aria-valuenow={xp} aria-valuemin={0} aria-valuemax={xpNext} aria-label={`${xp} van ${xpNext} ervaringspunten`} style={{ height: 6, borderRadius: 3, background: 'var(--hairline)', overflow: 'hidden' }}>
+                <div style={{ height: '100%', width: `${xpPct}%`, background: 'var(--violet)', borderRadius: 3, transition: 'width 0.4s var(--ease-out)' }} />
               </div>
             </div>
           </div>
@@ -526,178 +631,75 @@ export default function CharacterDetailPage() {
       </div>
 
       {/* ── Tabs ── */}
-      <div
-        role="tablist"
-        aria-label="Karakter tabs"
-        className="pangu-tab-bar--line"
-        style={{ marginBottom: 20 }}
-      >
-        {(
-          [
-            { key: 'stats',      label: 'Stats' },
-            { key: 'spreuken',   label: 'Spreuken' },
-            { key: 'inventaris', label: `Inventaris${items && items.length > 0 ? ` (${items.length})` : ''}` },
-            { key: 'vaardigheden', label: 'Vaardigheden' },
-            { key: 'lore',       label: 'Lore' },
-          ] as { key: Tab; label: string }[]
-        ).map(({ key, label }) => (
-          <button
-            key={key}
-            type="button"
-            role="tab"
-            aria-selected={activeTab === key}
-            aria-controls={`tabpanel-${key}`}
-            id={`tab-${key}`}
-            onClick={() => setActiveTab(key)}
-            className="pangu-tab--line"
-          >
+      <div role="tablist" aria-label="Karakter tabs" className="pangu-tab-bar--line" style={{ marginBottom: 20 }}>
+        {([
+          { key: 'stats',        label: 'Stats' },
+          { key: 'spreuken',     label: 'Spreuken' },
+          { key: 'inventaris',   label: `Inventaris${items && items.length > 0 ? ` (${items.length})` : ''}` },
+          { key: 'vaardigheden', label: 'Vaardigheden' },
+          { key: 'lore',         label: 'Lore' },
+        ] as { key: Tab; label: string }[]).map(({ key, label }) => (
+          <button key={key} type="button" role="tab" aria-selected={activeTab === key} aria-controls={`tabpanel-${key}`} id={`tab-${key}`} onClick={() => setActiveTab(key)} className="pangu-tab--line">
             {label}
           </button>
         ))}
       </div>
 
-      {/* ── Stats tab ── */}
+      {/* ════════════════════════════════ STATS ════════════════════════════════ */}
       <div id="tabpanel-stats" role="tabpanel" aria-labelledby="tab-stats" hidden={activeTab !== 'stats'}>
 
-        {/* 2×2 combat stat cards */}
+        {/* 2×2 combat cards */}
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 12, marginBottom: 16 }}>
 
-          {/* HP card */}
-          <div
-            className="pangu-surface"
-            style={{
-              padding: '18px 20px',
-              minHeight: 110,
-              display: 'flex', flexDirection: 'column', gap: 8,
-            }}
-          >
-            <p style={{ fontSize: 10, fontWeight: 700, letterSpacing: '0.16em', textTransform: 'uppercase', color: hpLow ? 'var(--crimson)' : 'var(--muted)', margin: 0 }}>
-              HP
-            </p>
-
-            {/* HP value + controls */}
+          {/* HP */}
+          <div className="pangu-surface" style={{ padding: '18px 20px', minHeight: 110, display: 'flex', flexDirection: 'column', gap: 8 }}>
+            <p style={{ fontSize: 10, fontWeight: 700, letterSpacing: '0.16em', textTransform: 'uppercase', color: hpLow ? 'var(--crimson)' : 'var(--muted)', margin: 0 }}>HP</p>
             <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-              <button
-                type="button"
-                aria-label="HP verlagen"
-                onClick={() => updateHp.mutate(Math.max(0, hpCurrent - 1))}
-                disabled={updateHp.isPending || hpCurrent <= 0}
-                style={{
-                  width: 26, height: 26, borderRadius: '50%',
-                  border: '1px solid var(--hairline)',
-                  background: 'var(--surface)',
-                  color: 'var(--muted)', cursor: hpCurrent <= 0 ? 'not-allowed' : 'pointer',
-                  display: 'flex', alignItems: 'center', justifyContent: 'center',
-                  fontSize: 14, lineHeight: 1,
-                  opacity: hpCurrent <= 0 ? 0.4 : 1,
-                  flexShrink: 0,
-                }}
-              >
-                −
-              </button>
-              <p style={{
-                fontFamily: 'var(--font-display)',
-                fontSize: 28, fontWeight: 700,
-                color: hpLow ? 'var(--crimson)' : 'var(--ink)',
-                margin: 0, lineHeight: 1,
-              }}>
-                <span>{hpCurrent}</span>
-                <span style={{ fontSize: 18, color: 'var(--muted)', fontWeight: 400 }}>/{hpMax}</span>
+              <button type="button" aria-label="HP verlagen" onClick={() => updateHp.mutate(Math.max(0, hpCurrent - 1))} disabled={updateHp.isPending || hpCurrent <= 0} style={{ width: 26, height: 26, borderRadius: '50%', border: '1px solid var(--hairline)', background: 'var(--surface)', color: 'var(--muted)', cursor: hpCurrent <= 0 ? 'not-allowed' : 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 14, opacity: hpCurrent <= 0 ? 0.4 : 1, flexShrink: 0 }}>−</button>
+              <p style={{ fontFamily: 'var(--font-display)', fontSize: 28, fontWeight: 700, color: hpLow ? 'var(--crimson)' : 'var(--ink)', margin: 0, lineHeight: 1 }}>
+                {hpCurrent}<span style={{ fontSize: 18, color: 'var(--muted)', fontWeight: 400 }}>/{hpMax}</span>
               </p>
-              <button
-                type="button"
-                aria-label="HP verhogen"
-                onClick={() => updateHp.mutate(Math.min(hpMax, hpCurrent + 1))}
-                disabled={updateHp.isPending || hpCurrent >= hpMax}
-                style={{
-                  width: 26, height: 26, borderRadius: '50%',
-                  border: '1px solid var(--hairline)',
-                  background: 'var(--surface)',
-                  color: 'var(--muted)', cursor: hpCurrent >= hpMax ? 'not-allowed' : 'pointer',
-                  display: 'flex', alignItems: 'center', justifyContent: 'center',
-                  fontSize: 14, lineHeight: 1,
-                  opacity: hpCurrent >= hpMax ? 0.4 : 1,
-                  flexShrink: 0,
-                }}
-              >
-                +
-              </button>
+              <button type="button" aria-label="HP verhogen" onClick={() => updateHp.mutate(Math.min(hpMax, hpCurrent + 1))} disabled={updateHp.isPending || hpCurrent >= hpMax} style={{ width: 26, height: 26, borderRadius: '50%', border: '1px solid var(--hairline)', background: 'var(--surface)', color: 'var(--muted)', cursor: hpCurrent >= hpMax ? 'not-allowed' : 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 14, opacity: hpCurrent >= hpMax ? 0.4 : 1, flexShrink: 0 }}>+</button>
             </div>
-
-            {/* HP bar */}
-            <div
-              role="progressbar"
-              aria-valuenow={hpCurrent}
-              aria-valuemin={0}
-              aria-valuemax={hpMax}
-              aria-label={`${hpCurrent} van ${hpMax} levenspunten`}
-              style={{ height: 4, borderRadius: 2, background: 'var(--hairline)', overflow: 'hidden', marginTop: 'auto' }}
-            >
-              <div style={{
-                height: '100%', width: `${hpPct}%`,
-                background: hpLow ? 'var(--crimson)' : 'var(--teal)',
-                borderRadius: 2, transition: 'width 0.3s var(--ease-out)',
-              }} />
+            <div role="progressbar" aria-valuenow={hpCurrent} aria-valuemin={0} aria-valuemax={hpMax} aria-label={`${hpCurrent} van ${hpMax} HP`} style={{ height: 4, borderRadius: 2, background: 'var(--hairline)', overflow: 'hidden', marginTop: 'auto' }}>
+              <div style={{ height: '100%', width: `${hpPct}%`, background: hpLow ? 'var(--crimson)' : 'var(--teal)', borderRadius: 2, transition: 'width 0.3s var(--ease-out)' }} />
             </div>
           </div>
 
-          {/* AC card */}
-          <div
-            className="pangu-surface"
-            style={{ padding: '18px 20px', minHeight: 110, display: 'flex', flexDirection: 'column', gap: 8 }}
-          >
+          {/* AC — shows contributing items as subtitle */}
+          <div className="pangu-surface" style={{ padding: '18px 20px', minHeight: 110, display: 'flex', flexDirection: 'column', gap: 8 }}>
             <p style={{ fontSize: 10, fontWeight: 700, letterSpacing: '0.16em', textTransform: 'uppercase', color: 'var(--muted)', margin: 0 }}>
               Armor Class
             </p>
-            <p style={{
-              fontFamily: 'var(--font-display)',
-              fontSize: 36, fontWeight: 700,
-              color: 'var(--ink)', margin: 0, lineHeight: 1,
-            }}>
-              {character.armor_class}
+            <p style={{ fontFamily: 'var(--font-display)', fontSize: 36, fontWeight: 700, color: 'var(--ink)', margin: 0, lineHeight: 1 }}>
+              {eff.ac}
+              {acBonus > 0 && (
+                <span style={{ fontSize: 14, fontWeight: 400, color: 'var(--teal)', marginLeft: 8 }}>+{acBonus}</span>
+              )}
             </p>
-            {character.subtitle && (
-              <p style={{ fontSize: 12, color: 'var(--ink-soft)', margin: 'auto 0 0', fontStyle: 'italic' }}>
-                {character.subtitle}
-              </p>
-            )}
+            {acSubtitle ? (
+              <p style={{ fontSize: 12, color: 'var(--ink-soft)', margin: 'auto 0 0', fontStyle: 'italic' }}>{acSubtitle}</p>
+            ) : character.subtitle ? (
+              <p style={{ fontSize: 12, color: 'var(--ink-soft)', margin: 'auto 0 0', fontStyle: 'italic' }}>{character.subtitle}</p>
+            ) : null}
           </div>
 
-          {/* Initiative card */}
-          <div
-            className="pangu-surface"
-            style={{ padding: '18px 20px', minHeight: 110, display: 'flex', flexDirection: 'column', gap: 8 }}
-          >
-            <p style={{ fontSize: 10, fontWeight: 700, letterSpacing: '0.16em', textTransform: 'uppercase', color: 'var(--muted)', margin: 0 }}>
-              Initiative
-            </p>
-            <p style={{
-              fontFamily: 'var(--font-display)',
-              fontSize: 36, fontWeight: 700,
-              color: 'var(--gold)', margin: 0, lineHeight: 1,
-            }}>
-              {character.initiative >= 0 ? `+${character.initiative}` : `${character.initiative}`}
+          {/* Initiative */}
+          <div className="pangu-surface" style={{ padding: '18px 20px', minHeight: 110, display: 'flex', flexDirection: 'column', gap: 8 }}>
+            <p style={{ fontSize: 10, fontWeight: 700, letterSpacing: '0.16em', textTransform: 'uppercase', color: 'var(--muted)', margin: 0 }}>Initiative</p>
+            <p style={{ fontFamily: 'var(--font-display)', fontSize: 36, fontWeight: 700, color: 'var(--gold)', margin: 0, lineHeight: 1 }}>
+              {eff.initiative >= 0 ? `+${eff.initiative}` : `${eff.initiative}`}
             </p>
             <p style={{ fontSize: 12, color: 'var(--muted)', margin: 'auto 0 0', fontFamily: 'var(--font-body)' }}>
               DEX modifier ({dexLabel})
             </p>
           </div>
 
-          {/* Speed card */}
-          <div
-            className="pangu-surface"
-            style={{ padding: '18px 20px', minHeight: 110, display: 'flex', flexDirection: 'column', gap: 8 }}
-          >
-            <p style={{ fontSize: 10, fontWeight: 700, letterSpacing: '0.16em', textTransform: 'uppercase', color: 'var(--muted)', margin: 0 }}>
-              Speed
-            </p>
-            <p style={{
-              fontFamily: 'var(--font-display)',
-              fontSize: 36, fontWeight: 700,
-              color: 'var(--ink)', margin: 0, lineHeight: 1,
-            }}>
-              {character.speed}
-              <span style={{ fontSize: 18, fontWeight: 400, color: 'var(--muted)', marginLeft: 4 }}>ft</span>
+          {/* Speed */}
+          <div className="pangu-surface" style={{ padding: '18px 20px', minHeight: 110, display: 'flex', flexDirection: 'column', gap: 8 }}>
+            <p style={{ fontSize: 10, fontWeight: 700, letterSpacing: '0.16em', textTransform: 'uppercase', color: 'var(--muted)', margin: 0 }}>Speed</p>
+            <p style={{ fontFamily: 'var(--font-display)', fontSize: 36, fontWeight: 700, color: 'var(--ink)', margin: 0, lineHeight: 1 }}>
+              {eff.speed}<span style={{ fontSize: 18, fontWeight: 400, color: 'var(--muted)', marginLeft: 4 }}>ft</span>
             </p>
             <p style={{ fontSize: 12, color: 'var(--muted)', margin: 'auto 0 0', fontFamily: 'var(--font-body)' }}>
               Proficiency +{character.proficiency_bonus}
@@ -705,56 +707,26 @@ export default function CharacterDetailPage() {
           </div>
         </div>
 
-        {/* Ability scores — modifier prominent, score in dark bubble */}
+        {/* Ability scores */}
         <div className="pangu-surface" style={{ padding: 24, marginBottom: 16 }}>
           <p className="pangu-section-title" style={{ marginBottom: 16 }}>Eigenschappen</p>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 12 }}>
             {abilityScores.map(({ key, abbr, label }) => {
-              const score = character[key] as number
-              const mod = abilityModifier(score)
-              const isSaveProficient = false // future: save proficiencies
+              const baseScore = character[key] as number
+              const effKey = key.replace('stat_', '') as 'str' | 'dex' | 'con' | 'int' | 'wis' | 'cha'
+              const effectiveScore = eff[effKey]
+              const bonus = effectiveScore - baseScore
+              const mod = abilityModifier(effectiveScore)
               return (
-                <div
-                  key={key}
-                  title={label}
-                  style={{
-                    background: 'var(--surface)',
-                    border: '1px solid var(--hairline)',
-                    borderRadius: 10,
-                    padding: '14px 8px 12px',
-                    textAlign: 'center',
-                    display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6,
-                  }}
-                >
-                  <p style={{ fontSize: 10, fontWeight: 700, letterSpacing: '0.14em', textTransform: 'uppercase', color: 'var(--muted)', margin: 0 }}>
-                    {abbr}
-                  </p>
-                  {/* Modifier — large, gold */}
-                  <p style={{
-                    fontFamily: 'var(--font-display)',
-                    fontSize: 28, fontWeight: 700,
-                    color: 'var(--gold)', margin: 0, lineHeight: 1,
-                  }}>
-                    {mod}
-                  </p>
-                  {/* Score in dark bubble */}
-                  <div style={{
-                    width: 28, height: 28,
-                    borderRadius: '50%',
-                    background: 'rgba(0,0,0,0.35)',
-                    display: 'flex', alignItems: 'center', justifyContent: 'center',
-                  }}>
-                    <span style={{
-                      fontFamily: 'var(--font-body)',
-                      fontSize: 11, fontWeight: 700,
-                      color: 'var(--ink-soft)',
-                    }}>
-                      {score}
-                    </span>
+                <div key={key} title={label} style={{ background: 'var(--surface)', border: `1px solid ${bonus !== 0 ? 'rgba(62,207,178,0.35)' : 'var(--hairline)'}`, borderRadius: 10, padding: '14px 8px 12px', textAlign: 'center', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6 }}>
+                  <p style={{ fontSize: 10, fontWeight: 700, letterSpacing: '0.14em', textTransform: 'uppercase', color: 'var(--muted)', margin: 0 }}>{abbr}</p>
+                  <p style={{ fontFamily: 'var(--font-display)', fontSize: 28, fontWeight: 700, color: 'var(--gold)', margin: 0, lineHeight: 1 }}>{mod}</p>
+                  <div style={{ width: 28, height: 28, borderRadius: '50%', background: 'rgba(0,0,0,0.35)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <span style={{ fontFamily: 'var(--font-body)', fontSize: 11, fontWeight: 700, color: 'var(--ink-soft)' }}>{effectiveScore}</span>
                   </div>
-                  {isSaveProficient && (
-                    <span style={{ fontSize: 9, fontWeight: 700, letterSpacing: '0.14em', textTransform: 'uppercase', color: 'var(--gold)' }}>
-                      Save Prof
+                  {bonus !== 0 && (
+                    <span style={{ fontSize: 9, fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', color: 'var(--teal)' }}>
+                      {bonus > 0 ? `+${bonus}` : bonus} uitrusting
                     </span>
                   )}
                 </div>
@@ -763,41 +735,21 @@ export default function CharacterDetailPage() {
           </div>
         </div>
 
-        {/* Traits section */}
+        {/* Traits */}
         <div style={{ marginBottom: 16 }}>
-          {/* Ornamental divider */}
-          <div style={{
-            display: 'flex', alignItems: 'center', gap: 12,
-            margin: '24px 0 16px',
-          }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 12, margin: '24px 0 16px' }}>
             <div style={{ flex: 1, height: 1, background: 'var(--hairline)' }} />
-            <span style={{
-              fontFamily: 'var(--font-body)',
-              fontSize: 10, fontWeight: 700,
-              letterSpacing: '0.22em', textTransform: 'uppercase',
-              color: 'var(--muted)',
-              display: 'flex', alignItems: 'center', gap: 8,
-            }}>
-              <span aria-hidden="true" style={{ color: 'var(--gold)', fontSize: 12 }}>✦</span>
-              Traits
-              <span aria-hidden="true" style={{ color: 'var(--gold)', fontSize: 12 }}>✦</span>
+            <span style={{ fontFamily: 'var(--font-body)', fontSize: 10, fontWeight: 700, letterSpacing: '0.22em', textTransform: 'uppercase', color: 'var(--muted)', display: 'flex', alignItems: 'center', gap: 8 }}>
+              <span aria-hidden="true" style={{ color: 'var(--gold)', fontSize: 12 }}>✦</span>Traits<span aria-hidden="true" style={{ color: 'var(--gold)', fontSize: 12 }}>✦</span>
             </span>
             <div style={{ flex: 1, height: 1, background: 'var(--hairline)' }} />
           </div>
-
-          {character.description ? (
-            <div className="pangu-surface" style={{ padding: '18px 20px' }}>
-              <p style={{ fontSize: 14, lineHeight: 1.75, color: 'var(--ink-soft)', margin: 0, whiteSpace: 'pre-wrap' }}>
-                {character.description}
-              </p>
-            </div>
-          ) : (
-            <div className="pangu-surface" style={{ padding: '18px 20px' }}>
-              <p style={{ fontSize: 13, color: 'var(--muted)', fontStyle: 'italic', margin: 0 }}>
-                Kenmerken worden hier weergegeven wanneer ze zijn toegevoegd.
-              </p>
-            </div>
-          )}
+          <div className="pangu-surface" style={{ padding: '18px 20px' }}>
+            {character.description
+              ? <p style={{ fontSize: 14, lineHeight: 1.75, color: 'var(--ink-soft)', margin: 0, whiteSpace: 'pre-wrap' }}>{character.description}</p>
+              : <p style={{ fontSize: 13, color: 'var(--muted)', fontStyle: 'italic', margin: 0 }}>Kenmerken worden hier weergegeven wanneer ze zijn toegevoegd.</p>
+            }
+          </div>
         </div>
 
         {/* Currency */}
@@ -806,17 +758,13 @@ export default function CharacterDetailPage() {
             <p className="pangu-section-title" style={{ marginBottom: 16 }}>Schatkist</p>
             <div style={{ display: 'flex', gap: 20, flexWrap: 'wrap' }}>
               {[
-                { label: 'Goud', value: character.gold, color: 'var(--gold)' },
-                { label: 'Zilver', value: character.silver, color: 'var(--ink-soft)' },
-                { label: 'Koper', value: character.copper, color: '#b87333' },
+                { label: 'Goud',   value: character.gold,   color: 'var(--gold)'    },
+                { label: 'Zilver', value: character.silver, color: 'var(--ink-soft)'},
+                { label: 'Koper',  value: character.copper, color: '#b87333'        },
               ].map(({ label, value, color }) => (
                 <div key={label} style={{ textAlign: 'center', minWidth: 64 }}>
-                  <p style={{ fontSize: 10, fontWeight: 700, letterSpacing: '0.14em', textTransform: 'uppercase', color: 'var(--muted)', margin: '0 0 4px' }}>
-                    {label}
-                  </p>
-                  <p style={{ fontSize: 22, fontWeight: 700, color, margin: 0, fontFamily: 'var(--font-display)' }}>
-                    {value}
-                  </p>
+                  <p style={{ fontSize: 10, fontWeight: 700, letterSpacing: '0.14em', textTransform: 'uppercase', color: 'var(--muted)', margin: '0 0 4px' }}>{label}</p>
+                  <p style={{ fontSize: 22, fontWeight: 700, color, margin: 0, fontFamily: 'var(--font-display)' }}>{value}</p>
                 </div>
               ))}
             </div>
@@ -824,34 +772,21 @@ export default function CharacterDetailPage() {
         )}
       </div>
 
-      {/* ── Spreuken tab ── */}
+      {/* ════════════════════════════════ SPREUKEN ════════════════════════════ */}
       <div id="tabpanel-spreuken" role="tabpanel" aria-labelledby="tab-spreuken" hidden={activeTab !== 'spreuken'}>
-        <div
-          className="pangu-surface"
-          style={{ padding: '48px 28px', textAlign: 'center' }}
-        >
-          {/* Spell icon */}
+        <div className="pangu-surface" style={{ padding: '48px 28px', textAlign: 'center' }}>
           <div style={{ marginBottom: 16 }}>
             <svg aria-hidden="true" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="var(--violet)" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" style={{ opacity: 0.5 }}>
               <path d="M12 2 L13.5 10.5 L22 12 L13.5 13.5 L12 22 L10.5 13.5 L2 12 L10.5 10.5 Z" fill="var(--violet)" stroke="none" opacity="0.3" />
               <circle cx="12" cy="12" r="10" />
             </svg>
           </div>
-          <p style={{
-            fontFamily: 'var(--font-display)',
-            fontSize: 18, fontWeight: 600,
-            letterSpacing: '0.06em', textTransform: 'uppercase',
-            color: 'var(--ink-soft)', margin: '0 0 8px',
-          }}>
-            Spreuken
-          </p>
-          <p style={{ fontSize: 14, color: 'var(--muted)', fontStyle: 'italic', margin: 0 }}>
-            Spreuken zijn beschikbaar in een volgende update.
-          </p>
+          <p style={{ fontFamily: 'var(--font-display)', fontSize: 18, fontWeight: 600, letterSpacing: '0.06em', textTransform: 'uppercase', color: 'var(--ink-soft)', margin: '0 0 8px' }}>Spreuken</p>
+          <p style={{ fontSize: 14, color: 'var(--muted)', fontStyle: 'italic', margin: 0 }}>Spreuken zijn beschikbaar in een volgende update.</p>
         </div>
       </div>
 
-      {/* ── Inventaris tab ── */}
+      {/* ════════════════════════════════ INVENTARIS ══════════════════════════ */}
       <div id="tabpanel-inventaris" role="tabpanel" aria-labelledby="tab-inventaris" hidden={activeTab !== 'inventaris'}>
         {isLoadingItems ? (
           <div style={{ display: 'flex', justifyContent: 'center', padding: '40px 0' }} aria-live="polite" aria-busy="true">
@@ -859,157 +794,96 @@ export default function CharacterDetailPage() {
           </div>
         ) : (
           <div style={{ display: 'flex', gap: 16, alignItems: 'flex-start', flexWrap: 'wrap' }}>
-            {/* Equipment list */}
+
+            {/* ── Main list ── */}
             <div style={{ flex: 1, minWidth: 260 }}>
-              {/* Equipment header */}
-              <div style={{
-                display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-                marginBottom: 12,
-              }}>
-                <span style={{
-                  fontFamily: 'var(--font-body)',
-                  fontSize: 11, fontWeight: 700,
-                  letterSpacing: '0.18em', textTransform: 'uppercase',
-                  color: 'var(--muted)',
-                }}>
+
+              {/* Section header */}
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 14 }}>
+                <span style={{ fontFamily: 'var(--font-body)', fontSize: 11, fontWeight: 700, letterSpacing: '0.18em', textTransform: 'uppercase', color: 'var(--muted)' }}>
                   Equipment
+                  {equippedItems.length > 0 && (
+                    <span style={{ marginLeft: 8, color: 'var(--gold)' }}>
+                      {equippedItems.length} uitgerust
+                    </span>
+                  )}
                 </span>
               </div>
 
+              {/* Item list */}
               {items && items.length > 0 ? (
-                <div style={{ display: 'flex', flexDirection: 'column' }}>
+                <div>
                   {items.map((item, idx) => (
-                    <div
+                    <ItemRow
                       key={item.id}
-                      style={{
-                        display: 'flex', alignItems: 'center', gap: 12,
-                        padding: '14px 0',
-                        borderBottom: idx < items.length - 1 ? '1px solid var(--hairline)' : 'none',
+                      item={item}
+                      index={idx}
+                      total={items.length}
+                      onEquip={(slot) => {
+                        equipItem.mutate({ itemId: item.id, slot })
+                        toast.success(`${item.name} uitgerust in ${EQUIPMENT_SLOT_LABELS[slot]}`)
                       }}
-                    >
-                      {/* Item icon placeholder */}
-                      <div style={{
-                        width: 36, height: 36,
-                        borderRadius: 8,
-                        background: 'var(--surface)',
-                        border: '1px solid var(--hairline)',
-                        display: 'flex', alignItems: 'center', justifyContent: 'center',
-                        flexShrink: 0,
-                      }}>
-                        <svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--muted)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-                          <path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z" />
-                        </svg>
-                      </div>
-
-                      {/* Item info */}
-                      <div style={{ flex: 1, minWidth: 0 }}>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
-                          <span style={{
-                            fontFamily: 'var(--font-display)',
-                            fontSize: 15, fontWeight: 600,
-                            letterSpacing: '0.03em',
-                            color: 'var(--ink)',
-                          }}>
-                            {item.is_magical && <span style={{ color: 'var(--gold)', marginRight: 4 }} aria-hidden="true">✦</span>}
-                            {item.name}
-                          </span>
-                          {item.rarity !== 'common' && (
-                            <span style={{
-                              display: 'inline-flex', alignItems: 'center',
-                              padding: '2px 8px',
-                              borderRadius: 'var(--r-full)',
-                              fontSize: 9, fontWeight: 700,
-                              letterSpacing: '0.12em', textTransform: 'uppercase',
-                              color: itemRarityColor[item.rarity],
-                              border: `1px solid ${itemRarityColor[item.rarity]}55`,
-                              background: `${itemRarityColor[item.rarity]}11`,
-                            }}>
-                              {itemRarityLabel[item.rarity]}
-                            </span>
-                          )}
-                        </div>
-                        <p style={{
-                          fontSize: 11, color: 'var(--muted)',
-                          fontFamily: 'var(--font-body)',
-                          letterSpacing: '0.1em', textTransform: 'uppercase',
-                          margin: '2px 0 0',
-                        }}>
-                          {itemTypeLabel[item.item_type]}
-                          {item.description && ` · ${item.description.slice(0, 40)}${item.description.length > 40 ? '…' : ''}`}
-                        </p>
-                      </div>
-
-                      {/* Quantity + return */}
-                      <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexShrink: 0 }}>
-                        {item.quantity > 1 && (
-                          <span style={{ fontSize: 13, color: 'var(--ink-soft)', fontWeight: 600 }}>×{item.quantity}</span>
-                        )}
-                        <button
-                          type="button"
-                          className="pangu-btn pangu-btn-ghost pangu-btn-sm"
-                          onClick={() => returnItemToDm.mutate(item.id)}
-                          disabled={returnItemToDm.isPending}
-                          aria-label={`${item.name} teruggeven aan DM`}
-                        >
-                          ↩
-                        </button>
-                      </div>
-                    </div>
+                      onUnequip={() => {
+                        unequipItem.mutate(item.id)
+                        toast.success(`${item.name} uitgerust`)
+                      }}
+                      onReturn={() => returnItemToDm.mutate(item.id)}
+                      pickerOpen={pickerItemId === item.id}
+                      onOpenPicker={() => setPickerItemId(item.id)}
+                      onClosePicker={() => setPickerItemId(null)}
+                      isPending={returnItemToDm.isPending}
+                    />
                   ))}
                 </div>
               ) : (
                 <div className="pangu-surface" style={{ padding: 28, textAlign: 'center' }}>
-                  <p style={{ fontSize: 14, color: 'var(--muted)', fontStyle: 'italic', margin: 0 }}>
-                    Geen items in je inventaris.
-                  </p>
-                  <p style={{ fontSize: 12, color: 'var(--subtle)', margin: '8px 0 0' }}>
-                    De DM kan items toewijzen vanuit de kroniek-schatkist.
-                  </p>
+                  <p style={{ fontSize: 14, color: 'var(--muted)', fontStyle: 'italic', margin: 0 }}>Geen items in je inventaris.</p>
+                  <p style={{ fontSize: 12, color: 'var(--subtle)', margin: '8px 0 0' }}>De DM kan items toewijzen vanuit de kroniek-schatkist.</p>
                 </div>
               )}
+            </div>
+
+            {/* ── Right sidebar ── */}
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
 
               {/* Treasury */}
               {(character.gold > 0 || character.silver > 0 || character.copper > 0) && (
-                <div
-                  className="pangu-surface"
-                  style={{ padding: '16px 20px', marginTop: 16 }}
-                >
-                  <p style={{
-                    fontFamily: 'var(--font-body)',
-                    fontSize: 11, fontWeight: 700,
-                    letterSpacing: '0.18em', textTransform: 'uppercase',
-                    color: 'var(--muted)', margin: '0 0 12px',
-                  }}>
-                    Treasury
-                  </p>
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+                <div className="pangu-surface" style={{ padding: '16px 20px', width: 200 }}>
+                  <p style={{ fontFamily: 'var(--font-body)', fontSize: 10, fontWeight: 700, letterSpacing: '0.18em', textTransform: 'uppercase', color: 'var(--muted)', margin: '0 0 12px' }}>Treasury</p>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: 7 }}>
                     {[
-                      { label: 'Gold', value: character.gold, color: 'var(--gold)', suffix: 'gp' },
+                      { label: 'Gold',   value: character.gold,   color: 'var(--gold)',     suffix: 'gp' },
                       { label: 'Silver', value: character.silver, color: 'var(--ink-soft)', suffix: 'sp' },
-                      { label: 'Copper', value: character.copper, color: '#b87333', suffix: 'cp' },
+                      { label: 'Copper', value: character.copper, color: '#b87333',         suffix: 'cp' },
                     ].map(({ label, value, color, suffix }) => (
                       <div key={label} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                        <span style={{ fontSize: 12, color: 'var(--muted)', fontFamily: 'var(--font-body)', letterSpacing: '0.1em', textTransform: 'uppercase' }}>
-                          {label}
-                        </span>
-                        <span style={{ fontSize: 14, fontWeight: 700, color, fontFamily: 'var(--font-body)' }}>
-                          {value} <span style={{ fontSize: 11, opacity: 0.7 }}>{suffix}</span>
+                        <span style={{ fontSize: 11, color: 'var(--muted)', fontFamily: 'var(--font-body)', letterSpacing: '0.12em', textTransform: 'uppercase' }}>{label}</span>
+                        <span style={{ fontSize: 15, fontWeight: 700, color, fontFamily: 'var(--font-body)' }}>
+                          {value} <span style={{ fontSize: 10, opacity: 0.7 }}>{suffix}</span>
                         </span>
                       </div>
                     ))}
                   </div>
                 </div>
               )}
-            </div>
 
-            {/* Dice roller panel */}
-            <DiceRoller />
+              {/* Dice roller */}
+              <DiceRoller />
+            </div>
           </div>
         )}
       </div>
 
-      {/* ── Vaardigheden tab ── */}
+      {/* ════════════════════════════════ VAARDIGHEDEN ════════════════════════ */}
       <div id="tabpanel-vaardigheden" role="tabpanel" aria-labelledby="tab-vaardigheden" hidden={activeTab !== 'vaardigheden'}>
+        {eff.stealthDisadvantage && (
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '10px 16px', borderRadius: 10, background: 'rgba(255,107,107,0.08)', border: '1px solid rgba(255,107,107,0.25)', marginBottom: 16 }}>
+            <span aria-hidden="true">⚠️</span>
+            <p style={{ fontSize: 13, color: 'var(--crimson)', margin: 0, fontWeight: 500 }}>
+              Nadeel op Sluipen door uitgerust zwaar pantser.
+            </p>
+          </div>
+        )}
         <div className="pangu-surface" style={{ padding: 24 }}>
           <p className="pangu-section-title" style={{ marginBottom: 4 }}>Vaardigheden</p>
           <p style={{ fontSize: 12, color: 'var(--muted)', marginTop: 0, marginBottom: 20 }}>
@@ -1019,42 +893,26 @@ export default function CharacterDetailPage() {
             {SKILLS.map((skill) => {
               const isProficient = (character.proficient_skills ?? []).includes(skill.name)
               const baseScore = (character[skill.ability] as number | null) ?? 10
-              const baseMod = Math.floor((baseScore - 10) / 2)
-              const totalMod = isProficient ? baseMod + (character.proficiency_bonus ?? 0) : baseMod
-              const modLabel = totalMod >= 0 ? `+${totalMod}` : `${totalMod}`
+              const baseMod   = Math.floor((baseScore - 10) / 2)
+              const profBonus = isProficient ? (character.proficiency_bonus ?? 0) : 0
+              const itemBonus = eff.skillBonuses[skill.name] ?? 0
+              const totalMod  = baseMod + profBonus + itemBonus
+              const modLabel  = totalMod >= 0 ? `+${totalMod}` : `${totalMod}`
               return (
-                <div
-                  key={skill.name}
-                  style={{
-                    display: 'flex', alignItems: 'center', gap: 10,
-                    padding: '8px 12px', borderRadius: 8,
-                    background: isProficient ? 'rgba(139,92,246,0.08)' : 'var(--surface)',
-                    border: isProficient ? '1px solid rgba(139,92,246,0.3)' : '1px solid var(--hairline)',
-                    transition: 'background var(--t-fast), border-color var(--t-fast)',
-                  }}
-                >
-                  <span
-                    aria-label={isProficient ? `${skill.name}: vaardig` : `${skill.name}: niet vaardig`}
-                    style={{
-                      width: 10, height: 10, borderRadius: '50%', flexShrink: 0,
-                      background: isProficient ? 'var(--violet)' : 'transparent',
-                      border: `2px solid ${isProficient ? 'var(--violet)' : 'var(--hairline-strong)'}`,
-                      transition: 'background var(--t-fast), border-color var(--t-fast)',
-                    }}
-                  />
+                <div key={skill.name} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '8px 12px', borderRadius: 8, background: isProficient ? 'rgba(139,92,246,0.08)' : 'var(--surface)', border: isProficient ? '1px solid rgba(139,92,246,0.3)' : '1px solid var(--hairline)', transition: 'background var(--t-fast), border-color var(--t-fast)' }}>
+                  <span aria-label={isProficient ? `${skill.name}: vaardig` : `${skill.name}: niet vaardig`} style={{ width: 10, height: 10, borderRadius: '50%', flexShrink: 0, background: isProficient ? 'var(--violet)' : 'transparent', border: `2px solid ${isProficient ? 'var(--violet)' : 'var(--hairline-strong)'}` }} />
                   <span style={{ flex: 1, fontSize: 13, color: isProficient ? 'var(--ink)' : 'var(--ink-soft)', fontWeight: isProficient ? 600 : 400 }}>
                     {skill.name}
-                    <span style={{ fontSize: 10, color: 'var(--muted)', marginLeft: 5, fontWeight: 400 }}>
-                      {skill.abbr}
+                    <span style={{ fontSize: 10, color: 'var(--muted)', marginLeft: 5, fontWeight: 400 }}>{skill.abbr}</span>
+                  </span>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+                    {itemBonus !== 0 && (
+                      <span style={{ fontSize: 10, fontWeight: 700, color: 'var(--teal)' }}>{itemBonus > 0 ? `+${itemBonus}` : itemBonus}</span>
+                    )}
+                    <span style={{ fontSize: 14, fontWeight: 700, fontFamily: 'var(--font-display)', color: isProficient ? 'var(--violet)' : 'var(--ink-soft)', minWidth: 28, textAlign: 'right' }}>
+                      {modLabel}
                     </span>
-                  </span>
-                  <span style={{
-                    fontSize: 14, fontWeight: 700, fontFamily: 'var(--font-display)',
-                    color: isProficient ? 'var(--violet)' : 'var(--ink-soft)',
-                    minWidth: 28, textAlign: 'right',
-                  }}>
-                    {modLabel}
-                  </span>
+                  </div>
                 </div>
               )
             })}
@@ -1062,47 +920,22 @@ export default function CharacterDetailPage() {
         </div>
       </div>
 
-      {/* ── Lore tab ── */}
+      {/* ════════════════════════════════ LORE ════════════════════════════════ */}
       <div id="tabpanel-lore" role="tabpanel" aria-labelledby="tab-lore" hidden={activeTab !== 'lore'}>
-        {character.description ? (
-          <div className="pangu-surface" style={{ padding: 28, marginBottom: 16 }}>
-            <p className="pangu-section-title" style={{ marginBottom: 12 }}>Achtergrond</p>
-            <p style={{ fontSize: 14, lineHeight: 1.75, color: 'var(--ink-soft)', margin: 0, whiteSpace: 'pre-wrap' }}>
-              {character.description}
-            </p>
-          </div>
-        ) : (
-          <div className="pangu-surface" style={{ padding: 28, marginBottom: 16 }}>
-            <p className="pangu-section-title" style={{ marginBottom: 12 }}>Achtergrond</p>
-            <p style={{ fontSize: 14, color: 'var(--muted)', fontStyle: 'italic' }}>
-              Nog geen achtergrondverhaal toegevoegd.
-            </p>
-          </div>
-        )}
-
-        <div
-          className="pangu-surface"
-          style={{
-            padding: 28,
-            borderColor: 'rgba(107,167,255,0.18)',
-            background: 'rgba(107,167,255,0.03)',
-          }}
-        >
-          <p className="pangu-section-title" style={{ marginBottom: 4 }}>
-            ✦ Privénotities
-          </p>
-          <p style={{ fontSize: 12, color: 'var(--azure)', marginBottom: 16, marginTop: 0 }}>
-            Alleen zichtbaar voor jou
-          </p>
-          {character.notes ? (
-            <p style={{ fontSize: 14, lineHeight: 1.75, color: 'var(--ink-soft)', margin: 0, whiteSpace: 'pre-wrap' }}>
-              {character.notes}
-            </p>
-          ) : (
-            <p style={{ fontSize: 14, color: 'var(--muted)', fontStyle: 'italic', margin: 0 }}>
-              Geen notities.
-            </p>
-          )}
+        <div className="pangu-surface" style={{ padding: 28, marginBottom: 16 }}>
+          <p className="pangu-section-title" style={{ marginBottom: 12 }}>Achtergrond</p>
+          {character.description
+            ? <p style={{ fontSize: 14, lineHeight: 1.75, color: 'var(--ink-soft)', margin: 0, whiteSpace: 'pre-wrap' }}>{character.description}</p>
+            : <p style={{ fontSize: 14, color: 'var(--muted)', fontStyle: 'italic' }}>Nog geen achtergrondverhaal toegevoegd.</p>
+          }
+        </div>
+        <div className="pangu-surface" style={{ padding: 28, borderColor: 'rgba(107,167,255,0.18)', background: 'rgba(107,167,255,0.03)' }}>
+          <p className="pangu-section-title" style={{ marginBottom: 4 }}>✦ Privénotities</p>
+          <p style={{ fontSize: 12, color: 'var(--azure)', marginBottom: 16, marginTop: 0 }}>Alleen zichtbaar voor jou</p>
+          {character.notes
+            ? <p style={{ fontSize: 14, lineHeight: 1.75, color: 'var(--ink-soft)', margin: 0, whiteSpace: 'pre-wrap' }}>{character.notes}</p>
+            : <p style={{ fontSize: 14, color: 'var(--muted)', fontStyle: 'italic', margin: 0 }}>Geen notities.</p>
+          }
         </div>
       </div>
     </div>
