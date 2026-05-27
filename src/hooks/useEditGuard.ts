@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { useBlocker } from 'react-router-dom'
 
 export interface EditGuard {
@@ -29,10 +29,16 @@ export function useEditGuard({
   dirty: boolean
 }): EditGuard {
   const shouldBlock = !committed || dirty
+  // Track whether the user has already confirmed leaving so a subsequent
+  // navigate() call (after confirmLeave returned false) is not intercepted
+  // again by the blocker — which would show the discard dialog a second time.
+  const leaveConfirmedRef = useRef(false)
 
   const blocker = useBlocker(
     ({ currentLocation, nextLocation }) =>
-      shouldBlock && currentLocation.pathname !== nextLocation.pathname,
+      !leaveConfirmedRef.current &&
+      shouldBlock &&
+      currentLocation.pathname !== nextLocation.pathname,
   )
 
   const [discardOpen, setDiscardOpen] = useState(false)
@@ -60,6 +66,8 @@ export function useEditGuard({
 
   function confirmLeave(): boolean {
     setDiscardOpen(false)
+    // Allow any subsequent navigate() calls to pass through unblocked.
+    leaveConfirmedRef.current = true
     if (blocker.state === 'blocked') {
       blocker.proceed()
       return true
