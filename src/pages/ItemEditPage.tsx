@@ -8,6 +8,7 @@ import { Modal } from '@/components/ui/Modal'
 import { ConfirmDialog } from '@/components/ui/ConfirmDialog'
 import { Spinner } from '@/components/ui/Spinner'
 import { useEntityEdit } from '@/hooks/useEntityEdit'
+import type { Json } from '@/types/database.types'
 import type { Item, ItemType, ItemRarity, ItemStatBonuses } from '@/types/item.types'
 import type { Character } from '@/types/character.types'
 
@@ -143,7 +144,7 @@ export default function ItemEditPage() {
           quantity: form.quantity ?? 1,
           weight: form.weight ?? null,
           character_id: form.character_id ?? null,
-          properties: form.properties ?? {},
+          properties: (form.properties ?? {}) as unknown as Json,
           committed: true,
           updated_at: new Date().toISOString(),
         })
