@@ -130,26 +130,37 @@ Deno.serve(async (req: Request) => {
       );
     }
 
-    // ── 5. Call provider ──────────────────────────────────────────────────────
+    // ── 5. Call provider (Groq → Gemini cascade on error) ────────────────────
 
     let reply: string;
+    let usedProvider = route.provider;
+    let usedModel    = route.model;
+
     if (route.provider === "groq") {
-      reply = await callGroq(messages, route.model);
+      try {
+        reply = await callGroq(messages, route.model);
+      } catch (groqErr) {
+        // Groq failed — cascade to Gemini as documented fallback.
+        console.warn("Groq call failed, falling back to Gemini:", groqErr);
+        usedProvider = "gemini";
+        usedModel    = AI_CONFIG.GEMINI_MODEL;
+        reply        = await callGemini(messages, usedModel);
+      }
     } else {
       reply = await callGemini(messages, route.model);
     }
 
     // ── 6. Increment usage counters (after successful call) ───────────────────
 
-    await incrementUsage(supabaseUser, user.id, windowStart, route.provider);
+    await incrementUsage(supabaseUser, user.id, windowStart, usedProvider);
 
     const newTotal  = usage.groq_count + usage.gemini_count + 1;
     const remaining = AI_CONFIG.FREE_REQUESTS_PER_WINDOW - newTotal;
 
     return jsonResponse<AIResponse>({
       reply,
-      provider: route.provider,
-      model: route.model,
+      provider: usedProvider as Provider,
+      model: usedModel,
       window_remaining: remaining,
     });
 
