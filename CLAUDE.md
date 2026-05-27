@@ -159,6 +159,7 @@ src/
 │   ├── SessionEditPage.tsx
 │   ├── SessionsPage.tsx
 │   ├── SettingsPage.tsx
+│   ├── WorldBuilderPage.tsx
 │   ├── WorldDetailPage.tsx
 │   ├── WorldEditPage.tsx
 │   └── WorldsPage.tsx
@@ -526,6 +527,7 @@ Routes zijn gedefinieerd in `src/routes/index.tsx`. Lazy-loading voor alle pagin
 | `/worlds` | `WorldsPage` | `requireAuth` |
 | `/worlds/:id` | `WorldDetailPage` | `requireAuth` |
 | `/worlds/:id/edit` | `WorldEditPage` | `requireAuth` |
+| `/worlds/:id/world-builder` | `WorldBuilderPage` | `requireAuth` |
 | `/campaigns` | `CampaignsPage` | `requireAuth` |
 | `/campaigns/:id` | `CampaignDetailPage` | `requireAuth` |
 | `/campaigns/:id/edit` | `CampaignEditPage` | `requireAuth` |
@@ -700,6 +702,7 @@ npm run test         # Vitest
 - [x] Wereld bewerken `/worlds/:id/edit` — naam, subtitle, quote, beschrijving, DM-notities, header image + drag-to-reposition, status
 - [x] Wereld verwijderen — met bevestigingsdialoog
 - [x] Wereld detail `/worlds/:id` — breadcrumbs, WorldDetailHeader, WorldDetailDivider, DM-notities, campaigns lijst, bestiarium-link
+- [x] World Builder `/worlds/:id/world-builder` — AI-gestuurde content generatie (locaties, NPCs, quests, plot twists, geruchten, loot) met copy-to-clipboard
 - [x] Navigatie-item "Werelden" in sidebar
 
 ### Campaigns (DM)

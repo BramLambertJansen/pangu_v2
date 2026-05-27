@@ -117,6 +117,10 @@ class LocalQueryBuilder {
     return this
   }
 
+  upsert(_payload: unknown): this {
+    throw new Error('[supabaseLocal] upsert() is not supported in DEV_MODE')
+  }
+
   // ── Terminal methods ─────────────────────────────────────────────────────
 
   single(): Promise<QueryResult> {

@@ -60,7 +60,7 @@ function SettingToggle({
 
 const MAX_AVATAR_BYTES = 5 * 1024 * 1024 // 5 MB
 
-function ProfielTab() {
+function ProfileTab() {
   const profile = useAuthStore(s => s.profile)
   const setProfile = useAuthStore(s => s.setProfile)
 
@@ -269,7 +269,6 @@ function ProfielTab() {
             className="pangu-input"
             value={profile?.email ?? ''}
             disabled
-            aria-readonly="true"
           />
         </div>
         <div className="span-2" style={{ gridColumn: 'span 2' }}>
@@ -695,7 +694,7 @@ export default function SettingsPage() {
         id={`tabpanel-${activeTab}`}
         aria-labelledby={`tab-${activeTab}`}
       >
-        {activeTab === 'profile' && <ProfielTab />}
+        {activeTab === 'profile' && <ProfileTab />}
         {activeTab === 'prefs' && <VoorkeurenTab />}
         {activeTab === 'ai' && <AISleutelsTab />}
         {activeTab === 'about' && <OverTab />}
