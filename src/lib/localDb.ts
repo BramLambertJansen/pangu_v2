@@ -8,8 +8,13 @@ const STORE_PREFIX = 'pangu-dev-db'
 function getUserId(): string {
   try {
     const auth = JSON.parse(localStorage.getItem('auth') ?? '{}')
-    return (auth?.state?.user?.id as string | undefined) ?? 'guest'
+    const id = auth?.state?.user?.id as string | undefined
+    if (!id) {
+      console.error('[localDb] Could not resolve user ID from auth store; using "guest" namespace')
+    }
+    return id ?? 'guest'
   } catch {
+    console.error('[localDb] Failed to parse auth store; using "guest" namespace')
     return 'guest'
   }
 }

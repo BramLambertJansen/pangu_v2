@@ -60,8 +60,10 @@ export function CreateUserModal({ open, onClose }: Props) {
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
     const newErrors: typeof errors = {}
+    const emailRe = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
     if (!form.display_name.trim()) newErrors.display_name = 'Naam is verplicht'
     if (!form.email.trim()) newErrors.email = 'E-mailadres is verplicht'
+    else if (!emailRe.test(form.email.trim())) newErrors.email = 'Voer een geldig e-mailadres in'
     if (!form.password) newErrors.password = 'Wachtwoord is verplicht'
     if (form.password.length > 0 && form.password.length < 8) {
       newErrors.password = 'Wachtwoord moet minimaal 8 tekens bevatten'

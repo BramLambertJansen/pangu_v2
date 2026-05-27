@@ -5,12 +5,12 @@ import type { Encounter } from '@/types/encounter.types'
 
 export function useCampaignEncounters(campaignId: string | undefined) {
   return useQuery<Encounter[]>({
-    queryKey: queryKeys.campaigns.encounters(campaignId!),
+    queryKey: queryKeys.campaigns.encounters(campaignId ?? ''),
     queryFn: async () => {
       const { data, error } = await supabase
         .from('encounters')
         .select('*')
-        .eq('campaign_id', campaignId!)
+        .eq('campaign_id', campaignId ?? '')
         .eq('committed', true)
         .order('created_at', { ascending: false })
       if (error) throw error
