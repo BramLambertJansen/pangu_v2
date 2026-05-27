@@ -6,7 +6,6 @@ import { toast } from 'sonner'
 import { supabase } from '@/lib/supabase'
 import { useAuthStore } from '@/stores/auth.store'
 import { usePreferencesStore, type PreferencesLanguage } from '@/stores/preferences.store'
-import { useSyncStore } from '@/stores/sync.store'
 
 type Tab = 'profile' | 'prefs' | 'ai' | 'about'
 
@@ -320,9 +319,6 @@ function VoorkeurenTab() {
   const loreSuggestions = usePreferencesStore(s => s.loreSuggestions)
   const language = usePreferencesStore(s => s.language)
   const setPreference = usePreferencesStore(s => s.setPreference)
-  const syncEnabled = useSyncStore(s => s.syncEnabled)
-  const setSyncEnabled = useSyncStore(s => s.setSyncEnabled)
-
   const langId = useId()
 
   const languages: { value: PreferencesLanguage; label: string }[] = [
@@ -377,17 +373,6 @@ function VoorkeurenTab() {
               <option key={l.value} value={l.value}>{l.label}</option>
             ))}
           </select>
-        </div>
-      </div>
-      <div className="pangu-surface" style={{ padding: 24 }}>
-        <p className="pangu-section-title" style={{ marginBottom: 4 }}>Synchronisatie</p>
-        <div style={{ borderBottom: 'none' }}>
-          <SettingToggle
-            label="Database sync inschakelen"
-            desc="Schakel uit om wijzigingen lokaal te testen zonder de database te beïnvloeden. Alle schrijfacties worden geblokkeerd zolang sync uit staat."
-            checked={syncEnabled}
-            onChange={(v) => setSyncEnabled(v)}
-          />
         </div>
       </div>
     </div>
