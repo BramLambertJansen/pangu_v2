@@ -53,9 +53,8 @@ function abilityModifier(score: number): string {
   return mod >= 0 ? `+${mod}` : `${mod}`
 }
 
-// Format number with Dutch thousands separator (dot).
-function formatXP(n: number): string {
-  return n.toLocaleString('nl-NL')
+function formatXP(n: number | null | undefined): string {
+  return (n ?? 0).toLocaleString('nl-NL')
 }
 
 const headerGradients = [
@@ -324,10 +323,14 @@ export default function CharacterDetailPage() {
   const dots = starfieldDots(id!)
 
   const eyebrowParts = [character.character_race, character.character_class, character.character_subclass].filter(Boolean)
-  const xpPct = character.xp_next > 0 ? Math.min(100, Math.round((character.xp / character.xp_next) * 100)) : 0
-  const hpPct = character.hp_max > 0 ? Math.min(100, Math.round((character.hp_current / character.hp_max) * 100)) : 0
-  const hpLow = character.hp_current < character.hp_max * 0.3
-  const dexMod = Math.floor(((character.stat_dex as number) - 10) / 2)
+  const xp = character.xp ?? 0
+  const xpNext = character.xp_next ?? 0
+  const hpCurrent = character.hp_current ?? 0
+  const hpMax = character.hp_max ?? 0
+  const xpPct = xpNext > 0 ? Math.min(100, Math.round((xp / xpNext) * 100)) : 0
+  const hpPct = hpMax > 0 ? Math.min(100, Math.round((hpCurrent / hpMax) * 100)) : 0
+  const hpLow = hpCurrent < hpMax * 0.3
+  const dexMod = Math.floor(((character.stat_dex ?? 10) - 10) / 2)
   const dexLabel = dexMod >= 0 ? `+${dexMod}` : `${dexMod}`
 
   return (
@@ -498,15 +501,15 @@ export default function CharacterDetailPage() {
                   Experience
                 </span>
                 <span style={{ fontSize: 12, color: 'var(--ink-soft)', fontFamily: 'var(--font-body)' }}>
-                  {formatXP(character.xp)} / {formatXP(character.xp_next)} XP
+                  {formatXP(xp)} / {formatXP(xpNext)} XP
                 </span>
               </div>
               <div
                 role="progressbar"
-                aria-valuenow={character.xp}
+                aria-valuenow={xp}
                 aria-valuemin={0}
-                aria-valuemax={character.xp_next}
-                aria-label={`${character.xp} van ${character.xp_next} ervaringspunten`}
+                aria-valuemax={xpNext}
+                aria-label={`${xp} van ${xpNext} ervaringspunten`}
                 style={{ height: 6, borderRadius: 3, background: 'var(--hairline)', overflow: 'hidden' }}
               >
                 <div style={{
@@ -577,16 +580,16 @@ export default function CharacterDetailPage() {
               <button
                 type="button"
                 aria-label="HP verlagen"
-                onClick={() => updateHp.mutate(Math.max(0, character.hp_current - 1))}
-                disabled={updateHp.isPending || character.hp_current <= 0}
+                onClick={() => updateHp.mutate(Math.max(0, hpCurrent - 1))}
+                disabled={updateHp.isPending || hpCurrent <= 0}
                 style={{
                   width: 26, height: 26, borderRadius: '50%',
                   border: '1px solid var(--hairline)',
                   background: 'var(--surface)',
-                  color: 'var(--muted)', cursor: character.hp_current <= 0 ? 'not-allowed' : 'pointer',
+                  color: 'var(--muted)', cursor: hpCurrent <= 0 ? 'not-allowed' : 'pointer',
                   display: 'flex', alignItems: 'center', justifyContent: 'center',
                   fontSize: 14, lineHeight: 1,
-                  opacity: character.hp_current <= 0 ? 0.4 : 1,
+                  opacity: hpCurrent <= 0 ? 0.4 : 1,
                   flexShrink: 0,
                 }}
               >
@@ -598,22 +601,22 @@ export default function CharacterDetailPage() {
                 color: hpLow ? 'var(--crimson)' : 'var(--ink)',
                 margin: 0, lineHeight: 1,
               }}>
-                <span>{character.hp_current}</span>
-                <span style={{ fontSize: 18, color: 'var(--muted)', fontWeight: 400 }}>/{character.hp_max}</span>
+                <span>{hpCurrent}</span>
+                <span style={{ fontSize: 18, color: 'var(--muted)', fontWeight: 400 }}>/{hpMax}</span>
               </p>
               <button
                 type="button"
                 aria-label="HP verhogen"
-                onClick={() => updateHp.mutate(Math.min(character.hp_max, character.hp_current + 1))}
-                disabled={updateHp.isPending || character.hp_current >= character.hp_max}
+                onClick={() => updateHp.mutate(Math.min(hpMax, hpCurrent + 1))}
+                disabled={updateHp.isPending || hpCurrent >= hpMax}
                 style={{
                   width: 26, height: 26, borderRadius: '50%',
                   border: '1px solid var(--hairline)',
                   background: 'var(--surface)',
-                  color: 'var(--muted)', cursor: character.hp_current >= character.hp_max ? 'not-allowed' : 'pointer',
+                  color: 'var(--muted)', cursor: hpCurrent >= hpMax ? 'not-allowed' : 'pointer',
                   display: 'flex', alignItems: 'center', justifyContent: 'center',
                   fontSize: 14, lineHeight: 1,
-                  opacity: character.hp_current >= character.hp_max ? 0.4 : 1,
+                  opacity: hpCurrent >= hpMax ? 0.4 : 1,
                   flexShrink: 0,
                 }}
               >
@@ -624,10 +627,10 @@ export default function CharacterDetailPage() {
             {/* HP bar */}
             <div
               role="progressbar"
-              aria-valuenow={character.hp_current}
+              aria-valuenow={hpCurrent}
               aria-valuemin={0}
-              aria-valuemax={character.hp_max}
-              aria-label={`${character.hp_current} van ${character.hp_max} levenspunten`}
+              aria-valuemax={hpMax}
+              aria-label={`${hpCurrent} van ${hpMax} levenspunten`}
               style={{ height: 4, borderRadius: 2, background: 'var(--hairline)', overflow: 'hidden', marginTop: 'auto' }}
             >
               <div style={{
@@ -1010,14 +1013,14 @@ export default function CharacterDetailPage() {
         <div className="pangu-surface" style={{ padding: 24 }}>
           <p className="pangu-section-title" style={{ marginBottom: 4 }}>Vaardigheden</p>
           <p style={{ fontSize: 12, color: 'var(--muted)', marginTop: 0, marginBottom: 20 }}>
-            Gemarkeerde vaardigheden tellen je vaardigheidsbonus (+{character.proficiency_bonus}) mee.
+            Gemarkeerde vaardigheden tellen je vaardigheidsbonus (+{character.proficiency_bonus ?? 0}) mee.
           </p>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))', gap: 8 }}>
             {SKILLS.map((skill) => {
-              const isProficient = character.proficient_skills.includes(skill.name)
-              const baseScore = character[skill.ability] as number
+              const isProficient = (character.proficient_skills ?? []).includes(skill.name)
+              const baseScore = (character[skill.ability] as number | null) ?? 10
               const baseMod = Math.floor((baseScore - 10) / 2)
-              const totalMod = isProficient ? baseMod + character.proficiency_bonus : baseMod
+              const totalMod = isProficient ? baseMod + (character.proficiency_bonus ?? 0) : baseMod
               const modLabel = totalMod >= 0 ? `+${totalMod}` : `${totalMod}`
               return (
                 <div
