@@ -1,6 +1,12 @@
 import { redirect } from 'react-router-dom'
 import { supabase } from '@/lib/supabase'
 import { useAuthStore } from '@/stores/auth.store'
+import { DEV_MODE } from '@/lib/constants'
+
+export function requireRegistrationEnabled() {
+  if (DEV_MODE) return redirect('/login')
+  return null
+}
 
 export async function requireAuth() {
   const { data: { session } } = await supabase.auth.getSession()

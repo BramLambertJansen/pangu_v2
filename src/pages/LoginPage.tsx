@@ -5,6 +5,7 @@ import { supabase } from '@/lib/supabase'
 import { useAuthStore } from '@/stores/auth.store'
 import { Input } from '@/components/ui/Input'
 import { Button } from '@/components/ui/Button'
+import { DEV_MODE } from '@/lib/constants'
 import type { Profile } from '@/types/database.types'
 
 export default function LoginPage() {
@@ -108,16 +109,18 @@ export default function LoginPage() {
         </Button>
       </form>
 
-      <p className="mt-6 text-center text-sm" style={{ color: 'var(--ink-soft)' }}>
-        Nog geen account?{' '}
-        <Link
-          to="/register"
-          className="font-medium underline-offset-4 hover:underline"
-          style={{ color: 'var(--violet)' }}
-        >
-          Account aanmaken
-        </Link>
-      </p>
+      {!DEV_MODE && (
+        <p className="mt-6 text-center text-sm" style={{ color: 'var(--ink-soft)' }}>
+          Nog geen account?{' '}
+          <Link
+            to="/register"
+            className="font-medium underline-offset-4 hover:underline"
+            style={{ color: 'var(--violet)' }}
+          >
+            Account aanmaken
+          </Link>
+        </p>
+      )}
     </section>
   )
 }

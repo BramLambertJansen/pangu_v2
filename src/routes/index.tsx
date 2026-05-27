@@ -2,7 +2,7 @@ import { lazy, Suspense } from 'react'
 import { createBrowserRouter, redirect } from 'react-router-dom'
 import AppLayout from '@/layouts/AppLayout'
 import AuthLayout from '@/layouts/AuthLayout'
-import { requireAuth, requireAdmin } from './loaders'
+import { requireAuth, requireAdmin, requireRegistrationEnabled } from './loaders'
 import { PageLoader } from './PageLoader'
 import { RouteErrorPage } from './RouteErrorPage'
 
@@ -65,7 +65,7 @@ export const router = createBrowserRouter([
     errorElement: <RouteErrorPage />,
     children: [
       { path: '/login', element: wrap(LoginPage) },
-      { path: '/register', element: wrap(RegisterPage) },
+      { path: '/register', loader: requireRegistrationEnabled, element: wrap(RegisterPage) },
     ],
   },
   {
