@@ -19,7 +19,7 @@ interface Shortcut {
 const shortcuts: Shortcut[] = [
   {
     id: 'location',
-    label: 'Location',
+    label: 'Locatie',
     icon: (
       <svg aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
         <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z" />
@@ -58,7 +58,7 @@ const shortcuts: Shortcut[] = [
   },
   {
     id: 'twist',
-    label: 'Twist',
+    label: 'Wending',
     icon: (
       <svg aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
         <path d="M12 2l2.4 7.4H22l-6.2 4.5 2.4 7.4L12 17l-6.2 4.3 2.4-7.4L2 9.4h7.6z" />
@@ -69,7 +69,7 @@ const shortcuts: Shortcut[] = [
   },
   {
     id: 'rumour',
-    label: 'Rumour',
+    label: 'Gerucht',
     icon: (
       <svg aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
         <path d="M12 19l-7-7 7-7" />
@@ -82,7 +82,7 @@ const shortcuts: Shortcut[] = [
   },
   {
     id: 'loot',
-    label: 'Loot',
+    label: 'Buit',
     icon: (
       <svg aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
         <path d="M3 6l9-4 9 4v6c0 5-4 9-9 10C7 21 3 17 3 12V6z" />
@@ -227,13 +227,13 @@ export default function WorldBuilderPage() {
             letterSpacing: '0.04em', textTransform: 'uppercase',
             color: 'var(--ink)', margin: '0 0 16px',
           }}>
-            The World Builder
+            De Wereldbouwer
           </h1>
           <p style={{
             fontSize: 15, lineHeight: 1.65,
             color: 'var(--ink-soft)', margin: 0,
           }}>
-            Consult the kosmos. Ask for what your story needs. Add it to your world with a touch.
+            Raadpleeg de kosmos. Vraag wat je verhaal nodig heeft. Voeg het toe aan je wereld.
           </p>
         </div>
       </div>
@@ -249,7 +249,7 @@ export default function WorldBuilderPage() {
           letterSpacing: '0.2em', textTransform: 'uppercase',
           color: 'var(--violet)', margin: '0 0 10px',
         }}>
-          Forge New Lore
+          Smeed Nieuwe Lore
         </p>
         <h2 style={{
           fontFamily: 'var(--font-display)',
@@ -258,14 +258,14 @@ export default function WorldBuilderPage() {
           letterSpacing: '0.04em', textTransform: 'uppercase',
           color: 'var(--ink)', margin: '0 0 20px',
         }}>
-          Ask, and the stars answer.
+          Vraag, en de sterren antwoorden.
         </h2>
 
         <textarea
           ref={textareaRef}
           value={prompt}
           onChange={(e) => setPrompt(e.target.value)}
-          placeholder="e.g. 'A dungeon built into the ribcage of a dead god'"
+          placeholder="bijv. 'Een kerker gebouwd in de ribbenkas van een dode god'"
           disabled={aiLoading}
           aria-label="Beschrijf wat je wil genereren"
           onKeyDown={(e) => {
@@ -337,7 +337,7 @@ export default function WorldBuilderPage() {
               <svg aria-hidden="true" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                 <path d="M12 2l2.4 7.4H22l-6.2 4.5 2.4 7.4L12 17l-6.2 4.3 2.4-7.4L2 9.4h7.6z" />
               </svg>
-              Generate
+              Genereer
             </>
           )}
         </button>
@@ -349,7 +349,7 @@ export default function WorldBuilderPage() {
         letterSpacing: '0.2em', textTransform: 'uppercase',
         color: 'var(--muted)', margin: '0 0 14px',
       }}>
-        Shortcuts
+        Snelkoppelingen
       </p>
       <div
         role="group"
@@ -367,7 +367,7 @@ export default function WorldBuilderPage() {
             type="button"
             onClick={() => handleShortcut(sc)}
             disabled={aiLoading}
-            aria-label={`Shortcut: ${sc.label}`}
+            aria-label={`Snelkoppeling: ${sc.label}`}
             style={{
               display: 'flex', flexDirection: 'column',
               alignItems: 'center', justifyContent: 'center', gap: 10,
@@ -529,13 +529,13 @@ export default function WorldBuilderPage() {
             letterSpacing: '0.05em', textTransform: 'uppercase',
             color: 'var(--ink-soft)', margin: '0 0 10px',
           }}>
-            Awaiting the Kosmos
+            De Kosmos Wacht
           </h3>
           <p style={{
             fontSize: 14, lineHeight: 1.6,
             color: 'var(--muted)', margin: 0, maxWidth: 280,
           }}>
-            Pick a shortcut, or describe what you need. The stars are patient.
+            Kies een snelkoppeling, of beschrijf wat je nodig hebt. De sterren hebben geduld.
           </p>
         </div>
       )}
