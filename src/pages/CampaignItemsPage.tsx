@@ -118,8 +118,7 @@ export default function CampaignItemsPage() {
         <div
           role="tablist"
           aria-label="Items filteren"
-          data-accent="gold"
-          className="pangu-tab-bar--line"
+          className="pangu-tab-bar"
           style={{ marginBottom: 24 }}
         >
           {(
@@ -138,7 +137,7 @@ export default function CampaignItemsPage() {
               role="tab"
               aria-selected={activeTab === key}
               onClick={() => setActiveTab(key)}
-              className="pangu-tab--line"
+              className="pangu-tab"
             >
               {label}
             </button>

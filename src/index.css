@@ -164,24 +164,24 @@ body {
 
 .pangu-tab-bar {
   display: flex;
-  gap: 2px;
+  gap: 4px;
   padding: 4px;
-  background: var(--void-2);
+  background: var(--surface);
   border: 1px solid var(--hairline);
-  border-radius: var(--r-sm);
+  border-radius: var(--r-xl);
 }
 
 .pangu-tab {
   flex: 1 0 auto;
-  padding: 10px 18px;
-  border-radius: 6px;
+  padding: 10px 14px;
+  border-radius: calc(var(--r-xl) - 2px);
   font-size: 11px;
   font-weight: 700;
-  letter-spacing: 0.18em;
+  letter-spacing: 0.14em;
   text-transform: uppercase;
   color: var(--muted);
   white-space: nowrap;
-  transition: all var(--t-fast);
+  transition: background var(--t-fast), color var(--t-fast);
   background: transparent;
   border: none;
   cursor: pointer;
@@ -193,8 +193,8 @@ body {
 }
 
 .pangu-tab[aria-selected='true'] {
-  background: var(--violet);
-  color: var(--void);
+  background: rgba(139, 92, 246, 0.85);
+  color: white;
 }
 
 .pangu-tab:focus-visible {
