@@ -25,12 +25,17 @@ export default function CharactersPage() {
   useEffect(() => {
     if (!user?.id) return
     const cutoff = new Date(Date.now() - 30 * 60 * 1000).toISOString()
-    void supabase
-      .from('characters')
-      .delete()
-      .eq('user_id', user.id)
-      .eq('committed', false)
-      .lt('created_at', cutoff)
+    void (async () => {
+      const { data } = await supabase
+        .from('characters')
+        .select('id')
+        .eq('user_id', user.id)
+        .eq('committed', false)
+        .lt('created_at', cutoff)
+      if (data?.length) {
+        await supabase.from('characters').delete().in('id', data.map((r) => r.id))
+      }
+    })()
   }, [user?.id])
 
   const createCharacter = useMutation({
