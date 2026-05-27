@@ -7,6 +7,7 @@ import { queryClient } from '@/lib/queryClient'
 import { toast } from 'sonner'
 import { useMemo, useState, useEffect, useRef } from 'react'
 import { Avatar } from '@/components/ui/Avatar'
+import { Badge } from '@/components/ui/Badge'
 import { DEV_MODE } from '@/lib/constants'
 
 interface Star {
@@ -324,22 +325,23 @@ export default function AppLayout() {
                 {DEV_MODE && (
                   <div
                     title="Dev modus actief — data wordt lokaal opgeslagen"
-                    style={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: 6,
-                      fontSize: 11,
-                      fontWeight: 600,
-                      color: 'var(--violet)',
-                      justifyContent: sidebarCollapsed ? 'center' : 'flex-start',
-                    }}
+                    style={{ display: 'flex', justifyContent: sidebarCollapsed ? 'center' : 'flex-start' }}
                   >
-                    {/* Code icon */}
-                    <svg aria-hidden="true" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0 }}>
-                      <polyline points="16 18 22 12 16 6" />
-                      <polyline points="8 6 2 12 8 18" />
-                    </svg>
-                    {!sidebarCollapsed && <span>Dev modus</span>}
+                    {sidebarCollapsed ? (
+                      // Collapsed: icon-only dot to signal dev mode
+                      <svg aria-hidden="true" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--violet)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <polyline points="16 18 22 12 16 6" />
+                        <polyline points="8 6 2 12 8 18" />
+                      </svg>
+                    ) : (
+                      <Badge variant="info" className="gap-1.5">
+                        <svg aria-hidden="true" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                          <polyline points="16 18 22 12 16 6" />
+                          <polyline points="8 6 2 12 8 18" />
+                        </svg>
+                        Dev modus
+                      </Badge>
+                    )}
                   </div>
                 )}
               </div>
