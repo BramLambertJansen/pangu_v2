@@ -38,10 +38,16 @@ export function AuthInitializer() {
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       (event, session) => {
         if (event === 'SIGNED_OUT') {
+          // Capture userId before signOut() clears the auth store,
+          // so we can remove the per-user localStorage keys.
           const userId = useAuthStore.getState().user?.id
           signOut()
           queryClient.clear()
-          if (userId) clearPersistedCache(userId)
+          if (userId) {
+            clearPersistedCache(userId)
+            // Clear preferences so the next user on this device starts fresh.
+            localStorage.removeItem(`preferences:${userId}`)
+          }
           return
         }
 
