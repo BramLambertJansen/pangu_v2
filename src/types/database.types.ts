@@ -427,8 +427,13 @@ export type Database = {
           xp_next: number
           hp_current: number
           hp_max: number
+          temp_hp: number
           armor_class: number
           speed: number
+          fly_speed: number
+          swim_speed: number
+          climb_speed: number
+          burrow_speed: number
           initiative: number
           proficiency_bonus: number
           stat_str: number
@@ -440,10 +445,43 @@ export type Database = {
           gold: number
           silver: number
           copper: number
+          platinum: number
+          electrum: number
           description: string | null
           notes: string | null
           status: string
           proficient_skills: string[]
+          saving_throw_proficiencies: string[]
+          expertise_skills: string[]
+          languages: string[]
+          tool_proficiencies: string[]
+          weapon_proficiencies: string[]
+          armor_proficiencies: string[]
+          inspiration: boolean
+          hit_die: string
+          hit_dice_current: number
+          death_save_successes: number
+          death_save_failures: number
+          exhaustion: number
+          alignment: string | null
+          spellcasting_ability: string | null
+          spell_slots: Json
+          concentrating: boolean
+          concentration_spell: string | null
+          feats: string[]
+          weapon_masteries: string[]
+          active_conditions: string[]
+          class_resources: Json
+          darkvision: number
+          special_senses: string | null
+          age: string | null
+          height: string | null
+          weight: string | null
+          appearance: string | null
+          personality_traits: string | null
+          ideals: string | null
+          bonds: string | null
+          flaws: string | null
           committed: boolean
           created_at: string
           updated_at: string
@@ -462,8 +500,13 @@ export type Database = {
           xp_next?: number
           hp_current?: number
           hp_max?: number
+          temp_hp?: number
           armor_class?: number
           speed?: number
+          fly_speed?: number
+          swim_speed?: number
+          climb_speed?: number
+          burrow_speed?: number
           initiative?: number
           proficiency_bonus?: number
           stat_str?: number
@@ -475,10 +518,43 @@ export type Database = {
           gold?: number
           silver?: number
           copper?: number
+          platinum?: number
+          electrum?: number
           description?: string | null
           notes?: string | null
           status?: string
           proficient_skills?: string[]
+          saving_throw_proficiencies?: string[]
+          expertise_skills?: string[]
+          languages?: string[]
+          tool_proficiencies?: string[]
+          weapon_proficiencies?: string[]
+          armor_proficiencies?: string[]
+          inspiration?: boolean
+          hit_die?: string
+          hit_dice_current?: number
+          death_save_successes?: number
+          death_save_failures?: number
+          exhaustion?: number
+          alignment?: string | null
+          spellcasting_ability?: string | null
+          spell_slots?: Json
+          concentrating?: boolean
+          concentration_spell?: string | null
+          feats?: string[]
+          weapon_masteries?: string[]
+          active_conditions?: string[]
+          class_resources?: Json
+          darkvision?: number
+          special_senses?: string | null
+          age?: string | null
+          height?: string | null
+          weight?: string | null
+          appearance?: string | null
+          personality_traits?: string | null
+          ideals?: string | null
+          bonds?: string | null
+          flaws?: string | null
           committed?: boolean
           created_at?: string
           updated_at?: string
@@ -497,8 +573,13 @@ export type Database = {
           xp_next?: number
           hp_current?: number
           hp_max?: number
+          temp_hp?: number
           armor_class?: number
           speed?: number
+          fly_speed?: number
+          swim_speed?: number
+          climb_speed?: number
+          burrow_speed?: number
           initiative?: number
           proficiency_bonus?: number
           stat_str?: number
@@ -510,10 +591,43 @@ export type Database = {
           gold?: number
           silver?: number
           copper?: number
+          platinum?: number
+          electrum?: number
           description?: string | null
           notes?: string | null
           status?: string
           proficient_skills?: string[]
+          saving_throw_proficiencies?: string[]
+          expertise_skills?: string[]
+          languages?: string[]
+          tool_proficiencies?: string[]
+          weapon_proficiencies?: string[]
+          armor_proficiencies?: string[]
+          inspiration?: boolean
+          hit_die?: string
+          hit_dice_current?: number
+          death_save_successes?: number
+          death_save_failures?: number
+          exhaustion?: number
+          alignment?: string | null
+          spellcasting_ability?: string | null
+          spell_slots?: Json
+          concentrating?: boolean
+          concentration_spell?: string | null
+          feats?: string[]
+          weapon_masteries?: string[]
+          active_conditions?: string[]
+          class_resources?: Json
+          darkvision?: number
+          special_senses?: string | null
+          age?: string | null
+          height?: string | null
+          weight?: string | null
+          appearance?: string | null
+          personality_traits?: string | null
+          ideals?: string | null
+          bonds?: string | null
+          flaws?: string | null
           committed?: boolean
           created_at?: string
           updated_at?: string

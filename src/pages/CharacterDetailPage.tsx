@@ -1080,7 +1080,7 @@ export default function CharacterDetailPage() {
 
         {/* Ability scores */}
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(6, 1fr)', gap: 8, marginBottom: 16 }}>
-          {abilityScores.map(({ key, abbr, label }) => {
+          {abilityScores.map(({ key, label }) => {
             const baseScore = character[key] as number
             const effKey = key.replace('stat_', '') as 'str' | 'dex' | 'con' | 'int' | 'wis' | 'cha'
             const effectiveScore = eff[effKey]
