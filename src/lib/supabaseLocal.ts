@@ -176,13 +176,13 @@ class LocalQueryBuilder {
           case 'in':
             return f.values.includes(row[f.field])
           case 'lt':
-            return (row[f.field] as unknown) < (f.value as unknown)
+            return (row[f.field] as string | number) < (f.value as string | number)
           case 'lte':
-            return (row[f.field] as unknown) <= (f.value as unknown)
+            return (row[f.field] as string | number) <= (f.value as string | number)
           case 'gt':
-            return (row[f.field] as unknown) > (f.value as unknown)
+            return (row[f.field] as string | number) > (f.value as string | number)
           case 'gte':
-            return (row[f.field] as unknown) >= (f.value as unknown)
+            return (row[f.field] as string | number) >= (f.value as string | number)
           case 'not-is-null':
             return row[f.field] !== null && row[f.field] !== undefined
           case 'is-null':

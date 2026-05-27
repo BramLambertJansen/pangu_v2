@@ -185,7 +185,7 @@ export default function CampaignDetailPage() {
       if (!user) throw new Error('Niet ingelogd')
       const { data, error } = await supabase
         .from('items')
-        .insert({ campaign_id: id!, user_id: user.id, name: 'Nieuw item', item_type: 'misc', rarity: 'common', is_magical: false, quantity: 1 })
+        .insert({ campaign_id: id!, name: 'Nieuw item', item_type: 'misc', rarity: 'common', is_magical: false, quantity: 1 })
         .select()
         .single()
       if (error) throw error
