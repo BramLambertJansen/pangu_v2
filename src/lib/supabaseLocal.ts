@@ -284,9 +284,6 @@ export function createLocalSupabaseAdapter(
     rpc: realClient.rpc.bind(realClient),
     schema: realClient.schema.bind(realClient),
     realtime: realClient.realtime,
-    rest: realClient.rest,
-    supabaseKey: realClient.supabaseKey,
-    supabaseUrl: realClient.supabaseUrl,
   }
   // Type-cast: the adapter covers all code paths used in this codebase.
   return adapter as unknown as SupabaseClient<Database>
