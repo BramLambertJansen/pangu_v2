@@ -1,13 +1,13 @@
 import { Outlet, NavLink, Link, useNavigate } from 'react-router-dom'
 import { useUIStore } from '@/stores/ui.store'
 import { useAuthStore } from '@/stores/auth.store'
-import { useSyncStore } from '@/stores/sync.store'
 import { useOnlineStatus } from '@/hooks/useOnlineStatus'
 import { supabase } from '@/lib/supabase'
 import { queryClient } from '@/lib/queryClient'
 import { toast } from 'sonner'
 import { useMemo, useState, useEffect, useRef } from 'react'
 import { Avatar } from '@/components/ui/Avatar'
+import { DEV_MODE } from '@/lib/constants'
 
 interface Star {
   id: number
@@ -133,7 +133,6 @@ export default function AppLayout() {
   const toggleSidebar = useUIStore(s => s.toggleSidebar)
   const profile = useAuthStore(s => s.profile)
   const signOut = useAuthStore(s => s.signOut)
-  const syncEnabled = useSyncStore(s => s.syncEnabled)
   const isOnline = useOnlineStatus()
   const navigate = useNavigate()
   const [mobileOpen, setMobileOpen] = useState(false)
@@ -284,8 +283,8 @@ export default function AppLayout() {
 
           {/* Footer */}
           <div className="flex flex-col shrink-0" style={{ gap: 'var(--sp-2)' }}>
-            {/* ── Online / sync status indicator ── */}
-            {(!isOnline || !syncEnabled) && (
+            {/* ── Status indicators ── */}
+            {(!isOnline || DEV_MODE) && (
               <div
                 role="status"
                 aria-live="polite"
@@ -322,26 +321,25 @@ export default function AppLayout() {
                     {!sidebarCollapsed && <span>Offline</span>}
                   </div>
                 )}
-                {!syncEnabled && (
+                {DEV_MODE && (
                   <div
-                    title="Synchronisatie uitgeschakeld"
+                    title="Dev modus actief — data wordt lokaal opgeslagen"
                     style={{
                       display: 'flex',
                       alignItems: 'center',
                       gap: 6,
                       fontSize: 11,
                       fontWeight: 600,
-                      color: 'var(--muted)',
+                      color: 'var(--violet)',
                       justifyContent: sidebarCollapsed ? 'center' : 'flex-start',
                     }}
                   >
-                    {/* Link-off icon */}
+                    {/* Code icon */}
                     <svg aria-hidden="true" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0 }}>
-                      <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" />
-                      <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" />
-                      <line x1="1" y1="1" x2="23" y2="23" />
+                      <polyline points="16 18 22 12 16 6" />
+                      <polyline points="8 6 2 12 8 18" />
                     </svg>
-                    {!sidebarCollapsed && <span>Sync uit</span>}
+                    {!sidebarCollapsed && <span>Dev modus</span>}
                   </div>
                 )}
               </div>
