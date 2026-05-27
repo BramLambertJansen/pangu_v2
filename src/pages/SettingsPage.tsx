@@ -6,6 +6,7 @@ import { toast } from 'sonner'
 import { supabase } from '@/lib/supabase'
 import { useAuthStore } from '@/stores/auth.store'
 import { usePreferencesStore, type PreferencesLanguage } from '@/stores/preferences.store'
+import { useUserAISettings, useSetByokKey } from '@/hooks/queries/useUserAISettings'
 
 type Tab = 'profile' | 'prefs' | 'ai' | 'about'
 
@@ -510,45 +511,10 @@ function ProviderKeyCard({
 
 function AISleutelsTab() {
   const profile = useAuthStore(s => s.profile)
-  const setProfile = useAuthStore(s => s.setProfile)
+  const { data: aiSettings } = useUserAISettings(profile?.id)
+  const setByokKey = useSetByokKey(profile?.id)
 
-  const openaiMutation = useMutation({
-    mutationFn: async (key: string | null) => {
-      if (!profile) throw new Error('no_profile')
-      const { data, error } = await supabase
-        .from('profiles')
-        .update({ openai_api_key: key })
-        .eq('id', profile.id)
-        .select()
-        .single()
-      if (error) throw error
-      return data
-    },
-    onSuccess: (data) => {
-      setProfile({ ...profile!, ...data })
-      toast.success(data.openai_api_key ? 'OpenAI-sleutel opgeslagen' : 'OpenAI-sleutel gewist')
-    },
-    onError: () => toast.error('Opslaan mislukt'),
-  })
-
-  const anthropicMutation = useMutation({
-    mutationFn: async (key: string | null) => {
-      if (!profile) throw new Error('no_profile')
-      const { data, error } = await supabase
-        .from('profiles')
-        .update({ anthropic_api_key: key })
-        .eq('id', profile.id)
-        .select()
-        .single()
-      if (error) throw error
-      return data
-    },
-    onSuccess: (data) => {
-      setProfile({ ...profile!, ...data })
-      toast.success(data.anthropic_api_key ? 'Anthropic-sleutel opgeslagen' : 'Anthropic-sleutel gewist')
-    },
-    onError: () => toast.error('Opslaan mislukt'),
-  })
+  const byokKeys: Record<string, string> = (aiSettings?.byok_keys as Record<string, string>) ?? {}
 
   return (
     <div className="flex flex-col gap-4">
@@ -571,23 +537,73 @@ function AISleutelsTab() {
       <ProviderKeyCard
         title="OpenAI"
         description="GPT-4o en andere OpenAI-modellen voor lore-generatie."
-        isSet={profile?.openai_api_key != null}
+        isSet={'openai' in byokKeys}
         fieldId="ai-openai-key"
-        onSave={(key) => openaiMutation.mutate(key)}
-        onClear={() => openaiMutation.mutate(null)}
-        isSavePending={openaiMutation.isPending && openaiMutation.variables !== null}
-        isClearPending={openaiMutation.isPending && openaiMutation.variables === null}
+        onSave={(key) => {
+          setByokKey.mutate(
+            { provider: 'openai', key, currentKeys: byokKeys },
+            {
+              onSuccess: ({ key: saved }) =>
+                toast.success(saved ? 'OpenAI-sleutel opgeslagen' : 'OpenAI-sleutel gewist'),
+              onError: () => toast.error('Opslaan mislukt'),
+            },
+          )
+        }}
+        onClear={() => {
+          setByokKey.mutate(
+            { provider: 'openai', key: null, currentKeys: byokKeys },
+            {
+              onSuccess: () => toast.success('OpenAI-sleutel gewist'),
+              onError: () => toast.error('Wissen mislukt'),
+            },
+          )
+        }}
+        isSavePending={
+          setByokKey.isPending &&
+          setByokKey.variables?.provider === 'openai' &&
+          setByokKey.variables?.key !== null
+        }
+        isClearPending={
+          setByokKey.isPending &&
+          setByokKey.variables?.provider === 'openai' &&
+          setByokKey.variables?.key === null
+        }
       />
 
       <ProviderKeyCard
         title="Anthropic (Claude)"
         description="Claude Sonnet en Opus voor consistente verhaalintelligentie."
-        isSet={profile?.anthropic_api_key != null}
+        isSet={'anthropic' in byokKeys}
         fieldId="ai-anthropic-key"
-        onSave={(key) => anthropicMutation.mutate(key)}
-        onClear={() => anthropicMutation.mutate(null)}
-        isSavePending={anthropicMutation.isPending && anthropicMutation.variables !== null}
-        isClearPending={anthropicMutation.isPending && anthropicMutation.variables === null}
+        onSave={(key) => {
+          setByokKey.mutate(
+            { provider: 'anthropic', key, currentKeys: byokKeys },
+            {
+              onSuccess: ({ key: saved }) =>
+                toast.success(saved ? 'Anthropic-sleutel opgeslagen' : 'Anthropic-sleutel gewist'),
+              onError: () => toast.error('Opslaan mislukt'),
+            },
+          )
+        }}
+        onClear={() => {
+          setByokKey.mutate(
+            { provider: 'anthropic', key: null, currentKeys: byokKeys },
+            {
+              onSuccess: () => toast.success('Anthropic-sleutel gewist'),
+              onError: () => toast.error('Wissen mislukt'),
+            },
+          )
+        }}
+        isSavePending={
+          setByokKey.isPending &&
+          setByokKey.variables?.provider === 'anthropic' &&
+          setByokKey.variables?.key !== null
+        }
+        isClearPending={
+          setByokKey.isPending &&
+          setByokKey.variables?.provider === 'anthropic' &&
+          setByokKey.variables?.key === null
+        }
       />
     </div>
   )
