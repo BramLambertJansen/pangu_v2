@@ -33,6 +33,14 @@ export const useSyncStore = create<SyncState>()(
 )
 
 /**
+ * Returns the localStorage key used for the per-user TanStack Query cache.
+ * Matches the key produced in App.tsx so callers can clear it consistently.
+ */
+export function getQueryCacheKey(): string {
+  return `rq-cache:${getUserId()}`
+}
+
+/**
  * Non-reactive helper: reads sync state directly from localStorage.
  * Use outside React (e.g. in queryClient.ts).
  */

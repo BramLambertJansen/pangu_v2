@@ -4,6 +4,8 @@ import { Button } from '@/components/ui/Button'
 import { UserTable } from '@/components/admin/UserTable'
 import { CreateUserModal } from '@/components/admin/CreateUserModal'
 import { useAI } from '@/hooks/useAI'
+import { useSyncStore, getQueryCacheKey } from '@/stores/sync.store'
+import { queryClient } from '@/lib/queryClient'
 import type { Provider } from '@/types/ai'
 
 const PROVIDER_LABELS: Record<Provider, string> = {
@@ -32,6 +34,21 @@ export default function AdminPage() {
   const [testResult, setTestResult] = useState<AITestResult | null>(null)
 
   const { ask, loading, lastProvider, lastModel, windowRemaining } = useAI()
+  const syncEnabled = useSyncStore(s => s.syncEnabled)
+  const setSyncEnabled = useSyncStore(s => s.setSyncEnabled)
+  const devModeActive = !syncEnabled
+
+  function handleEnableDevMode() {
+    setSyncEnabled(false)
+    toast.success('Dev modus ingeschakeld — schrijfacties worden geblokkeerd')
+  }
+
+  function handleDisableDevMode() {
+    setSyncEnabled(true)
+    localStorage.removeItem(getQueryCacheKey())
+    queryClient.clear()
+    toast.success('Dev modus uitgeschakeld — cache gewist, data wordt opgehaald uit de database')
+  }
 
   async function handleTestAI() {
     setTestResult(null)
@@ -157,6 +174,66 @@ export default function AdminPage() {
             </p>
           </div>
         )}
+      </div>
+
+      {/* Dev mode */}
+      <div
+        className="mt-10 rounded-xl p-6"
+        style={{
+          background: 'var(--surface)',
+          border: `1px solid ${devModeActive ? 'color-mix(in srgb, var(--gold) 40%, transparent)' : 'var(--hairline)'}`,
+        }}
+      >
+        <div className="flex flex-wrap items-start justify-between gap-3">
+          <div>
+            <div className="flex items-center gap-2 mb-1">
+              <h2
+                style={{
+                  fontFamily: 'var(--font-display)',
+                  fontSize: '14px',
+                  fontWeight: 600,
+                  letterSpacing: '0.08em',
+                  color: 'var(--ink-soft)',
+                  margin: 0,
+                }}
+              >
+                DEV MODUS
+              </h2>
+              <span
+                className="rounded-full px-2 py-0.5 text-xs font-semibold"
+                style={
+                  devModeActive
+                    ? {
+                        background: 'color-mix(in srgb, var(--gold) 15%, transparent)',
+                        color: 'var(--gold)',
+                        border: '1px solid color-mix(in srgb, var(--gold) 35%, transparent)',
+                      }
+                    : {
+                        background: 'color-mix(in srgb, var(--muted) 12%, transparent)',
+                        color: 'var(--muted)',
+                        border: '1px solid var(--hairline)',
+                      }
+                }
+                aria-live="polite"
+              >
+                {devModeActive ? 'Actief' : 'Inactief'}
+              </span>
+            </div>
+            <p className="text-xs max-w-sm" style={{ color: 'var(--muted)' }}>
+              {devModeActive
+                ? 'Alle schrijfacties zijn geblokkeerd. Data wordt gelezen uit de lokale cache.'
+                : 'Schakel in om lokaal te testen zonder de database te wijzigen. Bij uitschakelen wordt de cache gewist en herlaadt de app.'}
+            </p>
+          </div>
+          <Button
+            variant={devModeActive ? 'danger' : 'secondary'}
+            size="sm"
+            onClick={devModeActive ? handleDisableDevMode : handleEnableDevMode}
+            aria-pressed={devModeActive}
+          >
+            {devModeActive ? 'Uitschakelen' : 'Inschakelen'}
+          </Button>
+        </div>
       </div>
 
       <CreateUserModal open={createOpen} onClose={() => setCreateOpen(false)} />
