@@ -98,6 +98,7 @@ export interface Character {
   bonds: string | null
   flaws: string | null
 
+  committed: boolean
   created_at: string
   updated_at: string
 }

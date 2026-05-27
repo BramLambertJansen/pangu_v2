@@ -538,6 +538,11 @@ Alle tabellen hebben `committed boolean DEFAULT false` — bestaande rijen zijn 
 | 021 | `021_worlds_campaigns_notes.sql` | `notes text` kolom op worlds en campaigns |
 | 022 | `022_committed_column.sql` | `committed boolean` op alle entity-tabellen |
 | 023 | `023_item_equipped_slot.sql` | `equipped_slot text` op items + unique index per (character_id, slot) |
+| 024 | `024_atomic_ai_claim.sql` | `claim_ai_request()` PostgreSQL functie — atomische rate-limit claim (check + increment in één statement) |
+| 025 | `025_encounter_monsters_rls.sql` | Fix `encounter_monsters` RLS: encounter ownership verificatie toegevoegd aan policy |
+| 026 | `026_org_usage_upsert.sql` | Fix `increment_org_groq_usage()`: UPSERT i.p.v. bare UPDATE om stille nul-rijen te voorkomen |
+| 027 | `027_character_proficiencies.sql` | D&D 5.5e: 15 kolommen op characters — saving throws, expertise, talen, bekwaamheden, inspiration, hit die, death saves, exhaustion, uitlijning, roleplay traits |
+| 028 | `028_character_extended.sql` | D&D 5.5e uitbreiding: temp HP, spreuken (spell_slots jsonb), concentratie, feats, weapon masteries, condities, klasseresources, platina/elektrum, alternatieve snelheden, zintuigen, uiterlijk |
 
 ---
 
@@ -814,12 +819,17 @@ npm run test         # Vitest
 - [x] Karakters overzicht `/characters` — grid met CharacterCard + ForgeCharacterCard, zoekfilter
 - [x] Karakter aanmaken — direct aanmaken + redirect naar bewerken
 - [x] Karakter bewerken `/characters/:id/edit` — naam, klasse, subklasse, ras, level, XP, HP, AC, snelheid, initiatief, vaardigheidsbonus, 6 eigenschappen, vaardigheden (18 skills), schatkist, achtergrond, privénotities, kroniek-koppeling
-- [x] Karakter-detailpagina `/characters/:id` — Stats/Vaardigheden/Lore/Inventaris tabs, inline HP ±1, XP-balk, eigenschappen-grid met modifiers, vaardigheidstab met proficiency-indicator + berekende modifiers, schatkist, inventaris met "Teruggeven aan DM"
+- [x] Karakter-detailpagina `/characters/:id` — Stats/Vaardigheden/Lore/Inventaris/Spreuken tabs, inline HP ±1, XP-balk, eigenschappen-grid met modifiers, vaardigheidstab met proficiency-indicator + berekende modifiers, schatkist, inventaris met "Teruggeven aan DM"
 - [x] Karakter verwijderen — met bevestigingsdialoog
 - [x] Navigatie-item "Karakters" in sidebar
 - [x] Karakters zichtbaar in kroniek-detailpagina (via campaign_id)
 - [x] Vaardigheden (skill proficiencies) — `proficient_skills text[]` op characters (`020_characters_proficient_skills.sql`); 18 D&D 5e vaardigheden, klikbare toggle in edit, berekende modifiers in detail
-- [ ] Spreuken (v2 — vereist JSONB-tabel)
+- [x] D&D 5.5e — reddingsgooien, expertise, talen & bekwaamheden (`027_character_proficiencies.sql`); 3-state vaardigheids-cycle (geen → proficient → expertise); saving throw toggles; TagInput voor talen/wapens/uitrustingen/tools
+- [x] D&D 5.5e — uitgebreide gevechtsstate (`027`/`028`): temp HP, inspiratie, hit dice, death saves (klikbare pips), exhaustion badge
+- [x] D&D 5.5e — spreuken (`028_character_extended.sql`): spreuk-DC + aanvalsbonus, spreukslots 1-9 als klikbare pips, concentratie toggle; volledig Spreuken-tab in detailpagina
+- [x] D&D 5.5e — klasseresources (`028`): vrij configureerbare resources (Ki-punten, Woede, etc.) met ±1 widget in detailpagina
+- [x] D&D 5.5e — feats & weapon masteries als TagInput; uiterlijk (leeftijd/lengte/gewicht); alternatieve snelheden + duisterzicht; platina + elektrum valuta
+- [x] D&D 5.5e — condities picker (17 condities) in Stats-tab van detailpagina
 
 ### Items / Schatkist
 - [x] Items tabel + RLS (`019_items.sql`) — campaign-scoped, character_id nullable (DM-pool vs toegewezen)
@@ -858,10 +868,12 @@ npm run test         # Vitest
   - [x] Cascaderende free-tier providers: Groq (llama-3.3-70b) → Gemini 2.5 Flash-Lite
   - [x] Per-user rate limiting via `ai_usage` tabel (configureerbaar via `config.ts`)
   - [x] Org-level Groq soft cap via `ai_org_usage` tabel
-  - [x] BYOK: `byok_keys jsonb` op profiles (Anthropic + OpenAI)
+  - [x] BYOK: keys opgeslagen in `user_ai_settings.byok_keys` (gelezen + geschreven via `useUserAISettings` / `useSetByokKey` hooks)
   - [x] `useAI()` hook (`src/hooks/useAI.ts`) + types (`src/types/ai.ts`)
-  - [x] Migratie `021_ai_usage.sql` uitgerold (tabellen + RLS + atomische RPC-functies)
-  - [x] `020_profile_ai_keys.sql` — BYOK keys opslag op profiel
+  - [x] Migraties `021_ai_usage.sql` + `024_atomic_ai_claim.sql` — atomische rate-limit claim via `claim_ai_request()` RPC
+  - [x] `025_encounter_monsters_rls.sql` — fix: encounter ownership verificatie in `encounter_monsters` policy
+  - [x] `026_org_usage_upsert.sql` — fix: `increment_org_groq_usage()` gebruikt UPSERT
+  - [x] Groq→Gemini cascade fallback bij provider errors (inner try-catch in `index.ts`)
 - [x] Admin AI-testpaneel (`/admin`) — provider-badge, model-naam, resterend-verzoeken-teller
 - [x] Content genereren voor locaties (UI integratie)
 - [x] Content genereren voor NPCs (UI integratie)
