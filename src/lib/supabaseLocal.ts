@@ -8,7 +8,8 @@
  * Supported query patterns (all variants found in this codebase):
  *   .select('*').eq().order().limit()
  *   .select('*').eq().single() / .maybeSingle()
- *   .select('*, alias:table(cols)').eq().single()   — join resolution
+ *   .select('*, table(cols)').eq().single()          — join resolution (shorthand)
+ *   .select('*, alias:table(cols)').eq().single()   — join resolution (explicit alias)
  *   .select('*').eq().eq()                          — multiple eq filters
  *   .select('*').in(field, vals)                    — IN filter
  *   .not(field, 'is', null)                         — NOT NULL filter
@@ -180,30 +181,38 @@ class LocalQueryBuilder {
 
   /**
    * Resolves join specs in the select column string.
-   * Format: `alias:table(col1, col2)` or `alias:table(*)`.
-   * Looks up the related row from localDb using the `${alias}_id` FK field.
+   * Supports two formats:
+   *   `alias:table(col1, col2)` — explicit alias; FK field = `${alias}_id`
+   *   `table(col1, col2)`       — shorthand (PostgREST default); FK field =
+   *                               `${singularized-table}_id` (e.g. worlds → world_id)
    */
   private _resolveJoins(row: Row): Row {
     const result: Row = { ...row }
-    const joinRe = /(\w+):(\w+)\(([^)]+)\)/g
+    // Match optional `alias:` prefix followed by `table(colSpec)`
+    const joinRe = /(?:(\w+):)?(\w+)\(([^)]+)\)/g
     let m: RegExpExecArray | null
     while ((m = joinRe.exec(this._selectCols)) !== null) {
       const [, alias, joinTable, colSpec] = m
-      const fkValue = row[`${alias}_id`] as string | undefined
+      // When no alias: key in result = table name; FK = singular table name + '_id'
+      const resultKey = alias ?? joinTable
+      const fkField = alias
+        ? `${alias}_id`
+        : `${joinTable.replace(/s$/, '')}_id`
+      const fkValue = row[fkField] as string | undefined
       if (fkValue) {
         const joinedRow = localDb.getById(joinTable, fkValue) as Row | undefined
         if (joinedRow) {
           if (colSpec.trim() === '*') {
-            result[alias] = joinedRow
+            result[resultKey] = joinedRow
           } else {
             const cols = colSpec.split(',').map((c) => c.trim())
-            result[alias] = Object.fromEntries(cols.map((c) => [c, joinedRow[c]]))
+            result[resultKey] = Object.fromEntries(cols.map((c) => [c, joinedRow[c]]))
           }
         } else {
-          result[alias] = null
+          result[resultKey] = null
         }
       } else {
-        result[alias] = null
+        result[resultKey] = null
       }
     }
     return result
@@ -217,7 +226,8 @@ class LocalQueryBuilder {
         rows = this._applyOrder(rows)
         if (this._limitN !== undefined) rows = rows.slice(0, this._limitN)
 
-        const hasJoins = this._selectCols.includes(':')
+        // Detect both `alias:table(cols)` and plain `table(cols)` join patterns
+        const hasJoins = /\w+\(/.test(this._selectCols)
         const result = hasJoins ? rows.map((r) => this._resolveJoins(r)) : rows
 
         if (this._singleMode === 'single') {
