@@ -219,6 +219,18 @@ export default function ItemEditPage() {
   }
 
   function handleSave() {
+    if (!form.name?.trim()) {
+      toast.error('Naam is verplicht')
+      return
+    }
+    if (!form.item_type) {
+      toast.error('Type is verplicht')
+      return
+    }
+    if (!form.rarity) {
+      toast.error('Zeldzaamheid is verplicht')
+      return
+    }
     toast.promise(saveItem.mutateAsync(), {
       loading: 'Opslaan...',
       success: 'Item opgeslagen',
