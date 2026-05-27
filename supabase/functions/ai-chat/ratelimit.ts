@@ -113,7 +113,47 @@ export function routeRequest(
   return null;
 }
 
-/** Atomically increment the right counter after a successful provider call. */
+/**
+ * Atomically claim one AI request slot for the user.
+ *
+ * The check (total < limit) and increment happen in a single conditional
+ * UPDATE, preventing concurrent requests from bypassing the limit.
+ *
+ * Returns true  → slot claimed; caller may proceed.
+ * Returns false → limit already reached at the DB level; return 429.
+ *
+ * Call this BEFORE the provider API call so the slot is reserved up front.
+ * If the provider call fails, the slot is still consumed — this prevents
+ * users from gaming the limit by repeatedly triggering failures.
+ */
+export async function claimAiRequest(
+  supabase: SupabaseClient,
+  userId: string,
+  windowStart: Date,
+  provider: "groq" | "gemini",
+  maxTotal: number,
+): Promise<boolean> {
+  const { data, error } = await supabase.rpc("claim_ai_request", {
+    p_user_id: userId,
+    p_window_start: windowStart.toISOString(),
+    p_provider: provider,
+    p_max_total: maxTotal,
+  });
+
+  if (error) throw new Error(`claim_ai_request failed: ${error.message}`);
+  return data === true;
+}
+
+/** Increment the org-level Groq soft-cap counter after a successful Groq call. */
+export async function incrementOrgGroqUsage(supabase: SupabaseClient): Promise<void> {
+  const today = new Date().toISOString().slice(0, 10);
+  await supabase.rpc("increment_org_groq_usage", { p_date: today });
+}
+
+/**
+ * @deprecated Use claimAiRequest instead — this function is non-atomic.
+ * Kept for reference; no longer called from index.ts.
+ */
 export async function incrementUsage(
   supabase: SupabaseClient,
   userId: string,
