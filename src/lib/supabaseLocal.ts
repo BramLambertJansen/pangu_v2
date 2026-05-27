@@ -12,6 +12,7 @@
  *   .select('*, alias:table(cols)').eq().single()   — join resolution (explicit alias)
  *   .select('*').eq().eq()                          — multiple eq filters
  *   .select('*').in(field, vals)                    — IN filter
+ *   .select('*').lt(field, val)                     — less-than filter (used by draft GC)
  *   .not(field, 'is', null)                         — NOT NULL filter
  *   .insert({}).select().single()                   — insert + return
  *   .insert([])                                     — bulk insert
@@ -31,6 +32,10 @@ type Filter =
   | { type: 'eq'; field: string; value: unknown }
   | { type: 'neq'; field: string; value: unknown }
   | { type: 'in'; field: string; values: unknown[] }
+  | { type: 'lt'; field: string; value: unknown }
+  | { type: 'lte'; field: string; value: unknown }
+  | { type: 'gt'; field: string; value: unknown }
+  | { type: 'gte'; field: string; value: unknown }
   | { type: 'not-is-null'; field: string }
   | { type: 'is-null'; field: string }
 
@@ -76,6 +81,26 @@ class LocalQueryBuilder {
 
   in(field: string, values: unknown[]): this {
     this._filters.push({ type: 'in', field, values })
+    return this
+  }
+
+  lt(field: string, value: unknown): this {
+    this._filters.push({ type: 'lt', field, value })
+    return this
+  }
+
+  lte(field: string, value: unknown): this {
+    this._filters.push({ type: 'lte', field, value })
+    return this
+  }
+
+  gt(field: string, value: unknown): this {
+    this._filters.push({ type: 'gt', field, value })
+    return this
+  }
+
+  gte(field: string, value: unknown): this {
+    this._filters.push({ type: 'gte', field, value })
     return this
   }
 
@@ -150,6 +175,14 @@ class LocalQueryBuilder {
             return row[f.field] !== f.value
           case 'in':
             return f.values.includes(row[f.field])
+          case 'lt':
+            return (row[f.field] as unknown) < (f.value as unknown)
+          case 'lte':
+            return (row[f.field] as unknown) <= (f.value as unknown)
+          case 'gt':
+            return (row[f.field] as unknown) > (f.value as unknown)
+          case 'gte':
+            return (row[f.field] as unknown) >= (f.value as unknown)
           case 'not-is-null':
             return row[f.field] !== null && row[f.field] !== undefined
           case 'is-null':
