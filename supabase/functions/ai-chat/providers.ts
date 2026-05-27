@@ -46,11 +46,15 @@ export async function callGemini(messages: Message[], model: string): Promise<st
     })),
   ];
 
-  const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${geminiKey}`;
+  // Key passed as header to avoid exposure in server logs and proxy caches.
+  const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`;
 
   const res = await fetch(url, {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
+    headers: {
+      "Content-Type": "application/json",
+      "x-goog-api-key": geminiKey,
+    },
     body: JSON.stringify({ contents, generationConfig: { maxOutputTokens: 1024 } }),
   });
 
