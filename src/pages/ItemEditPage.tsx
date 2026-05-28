@@ -133,6 +133,7 @@ export default function ItemEditPage() {
 
   const saveItem = useMutation({
     mutationFn: async () => {
+      const characterChanged = (form.character_id ?? null) !== (itemData?.character_id ?? null)
       const { error } = await supabase
         .from('items')
         .update({
@@ -147,6 +148,9 @@ export default function ItemEditPage() {
           properties: (form.properties ?? {}) as unknown as Json,
           committed: true,
           updated_at: new Date().toISOString(),
+          // When character_id changes (reassign or return to DM pool), clear the equipped
+          // slot so the item does not arrive pre-equipped on its new owner.
+          ...(characterChanged ? { equipped_slot: null } : {}),
         })
         .eq('id', id!)
       if (error) throw error

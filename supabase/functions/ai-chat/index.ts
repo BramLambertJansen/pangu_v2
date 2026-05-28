@@ -176,10 +176,18 @@ Deno.serve(async (req: Request) => {
       reply = await callGemini(messages, route.model);
     }
 
-    // ── 7. Increment org Groq counter after successful call ───────────────────
+    // ── 7. Increment org Groq counter (fire-and-forget — advisory soft cap only) ─
+    // Not awaited before the response: a transient DB failure here must not cause
+    // the user to lose their already-claimed request slot.
+    // Note: on Groq→Gemini cascade, usedProvider is "gemini" so this is skipped
+    // (correct: Groq was not successfully called). The user's groq_count in ai_usage
+    // was incremented by claimAiRequest, but gemini_count was not — a known per-provider
+    // attribution drift that does not affect the total quota enforcement.
 
     if (usedProvider === "groq") {
-      await incrementOrgGroqUsage(supabaseService);
+      incrementOrgGroqUsage(supabaseService).catch((err) =>
+        console.warn("incrementOrgGroqUsage failed (non-fatal):", err)
+      );
     }
 
     const newTotal  = usage.groq_count + usage.gemini_count + 1;

@@ -1349,18 +1349,20 @@ export default function CharacterDetailPage() {
                       index={idx}
                       total={items.length}
                       onEquip={(slot) => {
-                        equipItem.mutate({ itemId: item.id, slot })
-                        toast.success(`${item.name} uitgerust in ${EQUIPMENT_SLOT_LABELS[slot]}`)
+                        equipItem.mutate({ itemId: item.id, slot }, {
+                          onSuccess: () => toast.success(`${item.name} uitgerust in ${EQUIPMENT_SLOT_LABELS[slot]}`),
+                        })
                       }}
                       onUnequip={() => {
-                        unequipItem.mutate(item.id)
-                        toast.success(`${item.name} uitgerust`)
+                        unequipItem.mutate(item.id, {
+                          onSuccess: () => toast.success(`${item.name} afgelegd`),
+                        })
                       }}
                       onReturn={() => returnItemToDm.mutate(item.id)}
                       pickerOpen={pickerItemId === item.id}
                       onOpenPicker={() => setPickerItemId(item.id)}
                       onClosePicker={() => setPickerItemId(null)}
-                      isPending={returnItemToDm.isPending}
+                      isPending={returnItemToDm.isPending && returnItemToDm.variables === item.id}
                     />
                   ))}
                 </div>
@@ -1378,14 +1380,14 @@ export default function CharacterDetailPage() {
               {/* Treasury */}
               {(character.platinum > 0 || character.gold > 0 || character.electrum > 0 || character.silver > 0 || character.copper > 0) && (
                 <div className="pangu-surface" style={{ padding: '16px 20px', width: 200 }}>
-                  <p style={{ fontFamily: 'var(--font-body)', fontSize: 10, fontWeight: 700, letterSpacing: '0.18em', textTransform: 'uppercase', color: 'var(--muted)', margin: '0 0 12px' }}>Treasury</p>
+                  <p style={{ fontFamily: 'var(--font-body)', fontSize: 10, fontWeight: 700, letterSpacing: '0.18em', textTransform: 'uppercase', color: 'var(--muted)', margin: '0 0 12px' }}>Schatkist</p>
                   <div style={{ display: 'flex', flexDirection: 'column', gap: 7 }}>
                     {[
                       { label: 'Platina',  value: character.platinum ?? 0, color: '#e5e7eb',          suffix: 'pp' },
-                      { label: 'Gold',     value: character.gold,          color: 'var(--gold)',       suffix: 'gp' },
+                      { label: 'Goud',     value: character.gold,          color: 'var(--gold)',       suffix: 'gp' },
                       { label: 'Elektrum', value: character.electrum ?? 0, color: '#c0a060',           suffix: 'ep' },
-                      { label: 'Silver',   value: character.silver,        color: 'var(--ink-soft)',   suffix: 'sp' },
-                      { label: 'Copper',   value: character.copper,        color: '#b87333',           suffix: 'cp' },
+                      { label: 'Zilver',   value: character.silver,        color: 'var(--ink-soft)',   suffix: 'sp' },
+                      { label: 'Koper',    value: character.copper,        color: '#b87333',           suffix: 'cp' },
                     ].filter(c => c.value > 0).map(({ label, value, color, suffix }) => (
                       <div key={label} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                         <span style={{ fontSize: 11, color: 'var(--muted)', fontFamily: 'var(--font-body)', letterSpacing: '0.12em', textTransform: 'uppercase' }}>{label}</span>
