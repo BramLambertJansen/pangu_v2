@@ -714,8 +714,30 @@ export default function CharacterDetailPage() {
   const classResources   = (character.class_resources ?? {}) as ClassResources
   const spellSlots       = (character.spell_slots ?? {}) as SpellSlots
 
+  const altSpeeds = [
+    { label: '🦅', key: 'fly_speed',    title: 'Vliegen'  },
+    { label: '🌊', key: 'swim_speed',   title: 'Zwemmen'  },
+    { label: '🧗', key: 'climb_speed',  title: 'Klimmen'  },
+    { label: '⛏️', key: 'burrow_speed', title: 'Graven'   },
+  ].filter(s => (character[s.key as keyof Character] as number ?? 0) > 0)
+
   return (
     <div>
+      <style>{`
+        .char-hero { display: grid; grid-template-columns: 260px 1fr; gap: 28px; align-items: start; margin-bottom: 28px; }
+        .char-portrait { border-radius: 20px; border: 1px solid var(--hairline); overflow: hidden; aspect-ratio: 3 / 4; position: relative; }
+        .char-combat-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
+        .char-ability-grid { display: grid; grid-template-columns: repeat(6, 1fr); gap: 10px; margin-bottom: 16px; }
+        @media (max-width: 860px) {
+          .char-hero { grid-template-columns: 1fr; }
+          .char-portrait { aspect-ratio: 16 / 9; max-height: 220px; border-radius: 16px; }
+          .char-combat-grid { grid-template-columns: repeat(2, 1fr); }
+          .char-ability-grid { grid-template-columns: repeat(3, 1fr); }
+        }
+        @media (max-width: 480px) {
+          .char-ability-grid { grid-template-columns: repeat(2, 1fr); }
+        }
+      `}</style>
       <Breadcrumb
         items={[
           { label: 'Karakters', onClick: () => navigate('/characters') },
@@ -738,52 +760,60 @@ export default function CharacterDetailPage() {
       />
 
       {/* ── Hero header ── */}
-      <div style={{ marginBottom: 24 }}>
-        <div style={{ position: 'relative', borderRadius: 'var(--r-xl)', border: '1px solid var(--hairline)', overflow: 'hidden', height: 200, background: `${headerGradient}, var(--void)` }}>
+      <div className="char-hero">
+        {/* Portrait card */}
+        <div className="char-portrait" style={{ background: `${headerGradient}, var(--void)` }}>
           {sanitizeImageUrl(character.portrait_url) ? (
-            <img
-              src={sanitizeImageUrl(character.portrait_url)}
-              alt={character.name}
-              style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', objectPosition: character.portrait_position ?? 'center' }}
-            />
+            <>
+              <img
+                src={sanitizeImageUrl(character.portrait_url)!}
+                alt={character.name}
+                style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', objectPosition: character.portrait_position ?? 'center' }}
+              />
+              <div aria-hidden="true" style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to bottom, rgba(0,0,0,0.35) 0%, transparent 50%)', pointerEvents: 'none' }} />
+            </>
           ) : (
             <>
               {dots.map((dot, i) => (
                 <div key={i} aria-hidden="true" style={{ position: 'absolute', left: `${dot.x}%`, top: `${dot.y}%`, width: dot.size, height: dot.size, borderRadius: '50%', background: 'var(--ink)', opacity: dot.opacity, pointerEvents: 'none' }} />
               ))}
-              <div aria-hidden="true" style={{ position: 'absolute', left: '50%', top: '50%', transform: 'translate(-50%,-50%)', fontFamily: 'var(--font-display)', fontSize: 'clamp(100px,18vw,160px)', fontWeight: 700, color: 'rgba(107,167,255,0.07)', lineHeight: 1, userSelect: 'none', pointerEvents: 'none' }}>
+              <div aria-hidden="true" style={{ position: 'absolute', left: '50%', top: '42%', transform: 'translate(-50%, -50%)', display: 'flex', alignItems: 'center', justifyContent: 'center', pointerEvents: 'none' }}>
+                <svg width="110" height="110" viewBox="0 0 100 100" fill="none" aria-hidden="true">
+                  <circle cx="50" cy="50" r="42" stroke="rgba(107,167,255,0.18)" strokeWidth="1" fill="none" />
+                  <circle cx="50" cy="50" r="30" stroke="rgba(107,167,255,0.10)" strokeWidth="1" fill="rgba(56,152,255,0.05)" />
+                  <path d="M 36 26 Q 24 50 36 74 Q 54 60 54 50 Q 54 40 36 26 Z" fill="rgba(107,167,255,0.45)" />
+                </svg>
+              </div>
+              <div aria-hidden="true" style={{ position: 'absolute', bottom: '10%', left: '50%', transform: 'translateX(-50%)', fontFamily: 'var(--font-display)', fontSize: 80, fontWeight: 700, color: 'rgba(107,167,255,0.06)', lineHeight: 1, userSelect: 'none', pointerEvents: 'none' }}>
                 {character.name.charAt(0).toUpperCase()}
               </div>
             </>
           )}
-          {/* Gradient scrim when portrait is shown, for legibility of the badge */}
-          {sanitizeImageUrl(character.portrait_url) && (
-            <div aria-hidden="true" style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to bottom, rgba(0,0,0,0.35) 0%, transparent 50%)', pointerEvents: 'none' }} />
-          )}
-          <div style={{ position: 'absolute', top: 16, right: 16 }}>
-            <span style={{ display: 'inline-flex', alignItems: 'center', padding: '3px 10px', borderRadius: 'var(--r-full)', fontSize: 10, fontWeight: 700, letterSpacing: '0.14em', textTransform: 'uppercase', color: characterStatusColor[character.status], border: `1px solid ${characterStatusColor[character.status]}55`, background: `${characterStatusColor[character.status]}11` }}>
+          <div style={{ position: 'absolute', top: 14, right: 14 }}>
+            <span style={{ display: 'inline-flex', alignItems: 'center', padding: '3px 10px', borderRadius: 'var(--r-full)', fontSize: 10, fontWeight: 700, letterSpacing: '0.14em', textTransform: 'uppercase', color: characterStatusColor[character.status], border: `1px solid ${characterStatusColor[character.status]}55`, background: `${characterStatusColor[character.status]}11`, backdropFilter: 'blur(4px)' }}>
               {characterStatusLabel[character.status]}
             </span>
           </div>
         </div>
 
-        <div style={{ padding: '20px 4px 0' }}>
+        {/* Info + stats column */}
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 16, minWidth: 0 }}>
           {eyebrowParts.length > 0 && (
-            <p style={{ fontFamily: 'var(--font-body)', fontSize: 11, fontWeight: 700, letterSpacing: '0.18em', textTransform: 'uppercase', color: 'var(--teal)', margin: '0 0 6px' }}>
+            <p style={{ fontFamily: 'var(--font-body)', fontSize: 11, fontWeight: 700, letterSpacing: '0.18em', textTransform: 'uppercase', color: 'var(--teal)', margin: 0 }}>
               {eyebrowParts.join(' · ')}
             </p>
           )}
-          <h1 style={{ fontFamily: 'var(--font-display)', fontSize: 'clamp(36px,8vw,56px)', fontWeight: 600, lineHeight: 0.92, letterSpacing: '0.04em', textTransform: 'uppercase', color: 'var(--ink)', margin: '0 0 16px' }}>
+          <h1 style={{ fontFamily: 'var(--font-display)', fontSize: 'clamp(32px,5vw,52px)', fontWeight: 600, lineHeight: 0.92, letterSpacing: '0.04em', textTransform: 'uppercase', color: 'var(--ink)', margin: 0 }}>
             {character.name}
           </h1>
 
           {/* Level + XP */}
-          <div className="pangu-surface" style={{ padding: '16px 20px', display: 'flex', alignItems: 'center', gap: 24, flexWrap: 'wrap' }}>
+          <div className="pangu-surface" style={{ padding: '16px 20px', display: 'flex', alignItems: 'center', gap: 20, flexWrap: 'wrap' }}>
             <div style={{ display: 'flex', alignItems: 'baseline', gap: 6 }}>
               <span style={{ fontFamily: 'var(--font-body)', fontSize: 11, fontWeight: 700, letterSpacing: '0.2em', textTransform: 'uppercase', color: 'var(--gold)' }}>Level</span>
               <span style={{ fontFamily: 'var(--font-display)', fontSize: 42, fontWeight: 700, color: 'var(--gold)', lineHeight: 1 }}>{character.level}</span>
             </div>
-            <div style={{ flex: 1, minWidth: 160 }}>
+            <div style={{ flex: 1, minWidth: 120 }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 6 }}>
                 <span style={{ fontFamily: 'var(--font-body)', fontSize: 10, fontWeight: 700, letterSpacing: '0.16em', textTransform: 'uppercase', color: 'var(--muted)' }}>Experience</span>
                 <span style={{ fontSize: 12, color: 'var(--ink-soft)', fontFamily: 'var(--font-body)' }}>{formatXP(xp)} / {formatXP(xpNext)} XP</span>
@@ -791,6 +821,75 @@ export default function CharacterDetailPage() {
               <div role="progressbar" aria-valuenow={xp} aria-valuemin={0} aria-valuemax={xpNext} aria-label={`${xp} van ${xpNext} ervaringspunten`} style={{ height: 6, borderRadius: 3, background: 'var(--hairline)', overflow: 'hidden' }}>
                 <div style={{ height: '100%', width: `${xpPct}%`, background: 'var(--violet)', borderRadius: 3, transition: 'width 0.4s var(--ease-out)' }} />
               </div>
+            </div>
+          </div>
+
+          {/* Combat stats: HP · AC · Initiative · Speed */}
+          <div className="char-combat-grid">
+            {/* HP */}
+            <div className="pangu-surface" style={{ padding: '14px', display: 'flex', flexDirection: 'column', gap: 6 }}>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                <p style={{ fontSize: 10, fontWeight: 700, letterSpacing: '0.16em', textTransform: 'uppercase', color: hpLow ? 'var(--crimson)' : 'var(--muted)', margin: 0 }}>HP</p>
+                {tempHp > 0 && (
+                  <span style={{ fontSize: 9, fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', color: 'var(--azure)', border: '1px solid rgba(107,167,255,0.35)', borderRadius: 999, padding: '1px 6px' }}>+{tempHp}</span>
+                )}
+              </div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+                <button type="button" aria-label="HP verlagen" onClick={() => updateHp.mutate(Math.max(0, hpCurrent - 1))} disabled={updateHp.isPending || hpCurrent <= 0} style={{ width: 22, height: 22, borderRadius: '50%', border: '1px solid var(--hairline)', background: 'var(--surface)', color: 'var(--muted)', cursor: hpCurrent <= 0 ? 'not-allowed' : 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 14, opacity: hpCurrent <= 0 ? 0.4 : 1, flexShrink: 0 }}>−</button>
+                <p style={{ fontFamily: 'var(--font-display)', fontSize: 22, fontWeight: 700, color: hpLow ? 'var(--crimson)' : 'var(--ink)', margin: 0, lineHeight: 1, flex: 1, textAlign: 'center' }}>
+                  {hpCurrent}<span style={{ fontSize: 13, color: 'var(--muted)', fontWeight: 400 }}>/{hpMax}</span>
+                </p>
+                <button type="button" aria-label="HP verhogen" onClick={() => updateHp.mutate(Math.min(hpMax, hpCurrent + 1))} disabled={updateHp.isPending || hpCurrent >= hpMax} style={{ width: 22, height: 22, borderRadius: '50%', border: '1px solid var(--hairline)', background: 'var(--surface)', color: 'var(--muted)', cursor: hpCurrent >= hpMax ? 'not-allowed' : 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 14, opacity: hpCurrent >= hpMax ? 0.4 : 1, flexShrink: 0 }}>+</button>
+              </div>
+              <div role="progressbar" aria-valuenow={hpCurrent} aria-valuemin={0} aria-valuemax={hpMax} aria-label={`${hpCurrent} van ${hpMax} HP`} style={{ height: 4, borderRadius: 2, background: 'var(--hairline)', overflow: 'hidden' }}>
+                <div style={{ height: '100%', width: `${hpPct}%`, background: hpLow ? 'var(--crimson)' : 'var(--teal)', borderRadius: 2, transition: 'width 0.3s var(--ease-out)' }} />
+              </div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 3 }}>
+                <span style={{ fontSize: 9, color: 'var(--muted)' }}>Temp:</span>
+                <button type="button" aria-label="Tijdelijke HP verlagen" onClick={() => updateTempHp.mutate(tempHp - 1)} disabled={updateTempHp.isPending || tempHp <= 0} style={{ width: 15, height: 15, borderRadius: '50%', border: '1px solid var(--hairline)', background: 'none', color: 'var(--muted)', cursor: tempHp <= 0 ? 'not-allowed' : 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 11, opacity: tempHp <= 0 ? 0.4 : 1 }}>−</button>
+                <span style={{ fontSize: 11, fontWeight: 700, color: 'var(--azure)', minWidth: 18, textAlign: 'center' }}>{tempHp}</span>
+                <button type="button" aria-label="Tijdelijke HP verhogen" onClick={() => updateTempHp.mutate(tempHp + 1)} disabled={updateTempHp.isPending} style={{ width: 15, height: 15, borderRadius: '50%', border: '1px solid var(--hairline)', background: 'none', color: 'var(--muted)', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 11 }}>+</button>
+              </div>
+            </div>
+
+            {/* AC */}
+            <div className="pangu-surface" style={{ padding: '14px', display: 'flex', flexDirection: 'column', gap: 6 }}>
+              <p style={{ fontSize: 10, fontWeight: 700, letterSpacing: '0.16em', textTransform: 'uppercase', color: 'var(--muted)', margin: 0 }}>Armor Class</p>
+              <p style={{ fontFamily: 'var(--font-display)', fontSize: 32, fontWeight: 700, color: 'var(--ink)', margin: 0, lineHeight: 1 }}>
+                {eff.ac}{acBonus > 0 && <span style={{ fontSize: 13, fontWeight: 400, color: 'var(--teal)', marginLeft: 4 }}>+{acBonus}</span>}
+              </p>
+              <p style={{ fontSize: 11, color: 'var(--ink-soft)', margin: 'auto 0 0', fontStyle: 'italic', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                {acSubtitle || character.subtitle || ''}
+              </p>
+            </div>
+
+            {/* Initiative */}
+            <div className="pangu-surface" style={{ padding: '14px', display: 'flex', flexDirection: 'column', gap: 6 }}>
+              <p style={{ fontSize: 10, fontWeight: 700, letterSpacing: '0.16em', textTransform: 'uppercase', color: 'var(--muted)', margin: 0 }}>Initiative</p>
+              <p style={{ fontFamily: 'var(--font-display)', fontSize: 32, fontWeight: 700, color: 'var(--gold)', margin: 0, lineHeight: 1 }}>
+                {eff.initiative >= 0 ? `+${eff.initiative}` : `${eff.initiative}`}
+              </p>
+              <p style={{ fontSize: 11, color: 'var(--muted)', margin: 'auto 0 0' }}>DEX modifier</p>
+            </div>
+
+            {/* Speed */}
+            <div className="pangu-surface" style={{ padding: '14px', display: 'flex', flexDirection: 'column', gap: 6 }}>
+              <p style={{ fontSize: 10, fontWeight: 700, letterSpacing: '0.16em', textTransform: 'uppercase', color: 'var(--muted)', margin: 0 }}>Speed</p>
+              <p style={{ fontFamily: 'var(--font-display)', fontSize: 32, fontWeight: 700, color: 'var(--ink)', margin: 0, lineHeight: 1 }}>
+                {eff.speed}<span style={{ fontSize: 16, fontWeight: 400, color: 'var(--muted)', marginLeft: 3 }}>ft</span>
+              </p>
+              {altSpeeds.length > 0 ? (
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: 4, marginTop: 'auto' }}>
+                  {altSpeeds.map(s => (
+                    <span key={s.key} title={s.title} style={{ fontSize: 10, color: 'var(--ink-soft)', display: 'flex', alignItems: 'center', gap: 2 }}>
+                      <span aria-hidden="true">{s.label}</span>
+                      {character[s.key as keyof Character] as number}ft
+                    </span>
+                  ))}
+                </div>
+              ) : (
+                <p style={{ fontSize: 11, color: 'var(--muted)', margin: 'auto 0 0' }}>Proficiency +{profBonus}</p>
+              )}
             </div>
           </div>
         </div>
@@ -813,90 +912,6 @@ export default function CharacterDetailPage() {
 
       {/* ════════════════════════════════ STATS ════════════════════════════════ */}
       <div id="tabpanel-stats" role="tabpanel" aria-labelledby="tab-stats" hidden={activeTab !== 'stats'}>
-
-        {/* 2×2 combat cards */}
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 12, marginBottom: 16 }}>
-
-          {/* HP + Temp HP */}
-          <div className="pangu-surface" style={{ padding: '18px 20px', minHeight: 110, display: 'flex', flexDirection: 'column', gap: 8 }}>
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-              <p style={{ fontSize: 10, fontWeight: 700, letterSpacing: '0.16em', textTransform: 'uppercase', color: hpLow ? 'var(--crimson)' : 'var(--muted)', margin: 0 }}>HP</p>
-              {tempHp > 0 && (
-                <span style={{ fontSize: 9, fontWeight: 700, letterSpacing: '0.12em', textTransform: 'uppercase', color: 'var(--azure)', border: '1px solid rgba(107,167,255,0.35)', borderRadius: 999, padding: '1px 7px' }}>
-                  +{tempHp} TEMP
-                </span>
-              )}
-            </div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-              <button type="button" aria-label="HP verlagen" onClick={() => updateHp.mutate(Math.max(0, hpCurrent - 1))} disabled={updateHp.isPending || hpCurrent <= 0} style={{ width: 26, height: 26, borderRadius: '50%', border: '1px solid var(--hairline)', background: 'var(--surface)', color: 'var(--muted)', cursor: hpCurrent <= 0 ? 'not-allowed' : 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 14, opacity: hpCurrent <= 0 ? 0.4 : 1, flexShrink: 0 }}>−</button>
-              <p style={{ fontFamily: 'var(--font-display)', fontSize: 28, fontWeight: 700, color: hpLow ? 'var(--crimson)' : 'var(--ink)', margin: 0, lineHeight: 1 }}>
-                {hpCurrent}<span style={{ fontSize: 18, color: 'var(--muted)', fontWeight: 400 }}>/{hpMax}</span>
-              </p>
-              <button type="button" aria-label="HP verhogen" onClick={() => updateHp.mutate(Math.min(hpMax, hpCurrent + 1))} disabled={updateHp.isPending || hpCurrent >= hpMax} style={{ width: 26, height: 26, borderRadius: '50%', border: '1px solid var(--hairline)', background: 'var(--surface)', color: 'var(--muted)', cursor: hpCurrent >= hpMax ? 'not-allowed' : 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 14, opacity: hpCurrent >= hpMax ? 0.4 : 1, flexShrink: 0 }}>+</button>
-            </div>
-            {/* Temp HP inline editor */}
-            <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginTop: 2 }}>
-              <span style={{ fontSize: 10, color: 'var(--muted)' }}>Temp HP:</span>
-              <button type="button" aria-label="Tijdelijke HP verlagen" onClick={() => updateTempHp.mutate(tempHp - 1)} disabled={updateTempHp.isPending || tempHp <= 0} style={{ width: 18, height: 18, borderRadius: '50%', border: '1px solid var(--hairline)', background: 'none', color: 'var(--muted)', cursor: tempHp <= 0 ? 'not-allowed' : 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 12, opacity: tempHp <= 0 ? 0.4 : 1 }}>−</button>
-              <span style={{ fontSize: 13, fontWeight: 700, color: 'var(--azure)', minWidth: 24, textAlign: 'center' }}>{tempHp}</span>
-              <button type="button" aria-label="Tijdelijke HP verhogen" onClick={() => updateTempHp.mutate(tempHp + 1)} disabled={updateTempHp.isPending} style={{ width: 18, height: 18, borderRadius: '50%', border: '1px solid var(--hairline)', background: 'none', color: 'var(--muted)', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 12 }}>+</button>
-            </div>
-            <div role="progressbar" aria-valuenow={hpCurrent} aria-valuemin={0} aria-valuemax={hpMax} aria-label={`${hpCurrent} van ${hpMax} HP`} style={{ height: 4, borderRadius: 2, background: 'var(--hairline)', overflow: 'hidden', marginTop: 'auto' }}>
-              <div style={{ height: '100%', width: `${hpPct}%`, background: hpLow ? 'var(--crimson)' : 'var(--teal)', borderRadius: 2, transition: 'width 0.3s var(--ease-out)' }} />
-            </div>
-          </div>
-
-          {/* AC — shows contributing items as subtitle */}
-          <div className="pangu-surface" style={{ padding: '18px 20px', minHeight: 110, display: 'flex', flexDirection: 'column', gap: 8 }}>
-            <p style={{ fontSize: 10, fontWeight: 700, letterSpacing: '0.16em', textTransform: 'uppercase', color: 'var(--muted)', margin: 0 }}>
-              Armor Class
-            </p>
-            <p style={{ fontFamily: 'var(--font-display)', fontSize: 36, fontWeight: 700, color: 'var(--ink)', margin: 0, lineHeight: 1 }}>
-              {eff.ac}
-              {acBonus > 0 && (
-                <span style={{ fontSize: 14, fontWeight: 400, color: 'var(--teal)', marginLeft: 8 }}>+{acBonus}</span>
-              )}
-            </p>
-            {acSubtitle ? (
-              <p style={{ fontSize: 12, color: 'var(--ink-soft)', margin: 'auto 0 0', fontStyle: 'italic' }}>{acSubtitle}</p>
-            ) : character.subtitle ? (
-              <p style={{ fontSize: 12, color: 'var(--ink-soft)', margin: 'auto 0 0', fontStyle: 'italic' }}>{character.subtitle}</p>
-            ) : null}
-          </div>
-
-          {/* Initiative */}
-          <div className="pangu-surface" style={{ padding: '18px 20px', minHeight: 110, display: 'flex', flexDirection: 'column', gap: 8 }}>
-            <p style={{ fontSize: 10, fontWeight: 700, letterSpacing: '0.16em', textTransform: 'uppercase', color: 'var(--muted)', margin: 0 }}>Initiative</p>
-            <p style={{ fontFamily: 'var(--font-display)', fontSize: 36, fontWeight: 700, color: 'var(--gold)', margin: 0, lineHeight: 1 }}>
-              {eff.initiative >= 0 ? `+${eff.initiative}` : `${eff.initiative}`}
-            </p>
-            <p style={{ fontSize: 12, color: 'var(--muted)', margin: 'auto 0 0', fontFamily: 'var(--font-body)' }}>
-              DEX modifier ({dexLabel})
-            </p>
-          </div>
-
-          {/* Speed */}
-          <div className="pangu-surface" style={{ padding: '18px 20px', minHeight: 110, display: 'flex', flexDirection: 'column', gap: 8 }}>
-            <p style={{ fontSize: 10, fontWeight: 700, letterSpacing: '0.16em', textTransform: 'uppercase', color: 'var(--muted)', margin: 0 }}>Speed</p>
-            <p style={{ fontFamily: 'var(--font-display)', fontSize: 36, fontWeight: 700, color: 'var(--ink)', margin: 0, lineHeight: 1 }}>
-              {eff.speed}<span style={{ fontSize: 18, fontWeight: 400, color: 'var(--muted)', marginLeft: 4 }}>ft</span>
-            </p>
-            {/* Alternative speeds */}
-            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginTop: 'auto' }}>
-              {[
-                { label: '🦅', key: 'fly_speed',    title: 'Vliegen'  },
-                { label: '🌊', key: 'swim_speed',   title: 'Zwemmen'  },
-                { label: '🧗', key: 'climb_speed',  title: 'Klimmen'  },
-                { label: '⛏️', key: 'burrow_speed', title: 'Graven'   },
-              ].filter(s => (character[s.key as keyof Character] as number ?? 0) > 0).map(s => (
-                <span key={s.key} title={s.title} style={{ fontSize: 11, color: 'var(--ink-soft)', display: 'flex', alignItems: 'center', gap: 3 }}>
-                  <span aria-hidden="true">{s.label}</span>
-                  {character[s.key as keyof Character] as number}ft
-                </span>
-              ))}
-            </div>
-          </div>
-        </div>
 
         {/* ── Inspiratie / Trefferdobbelstenen / Uitputting ── */}
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(180px, 1fr))', gap: 12, marginBottom: 16 }}>
@@ -1113,8 +1128,8 @@ export default function CharacterDetailPage() {
         )}
 
         {/* Ability scores */}
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 12, marginBottom: 16 }}>
-          {abilityScores.map(({ key, label, englishLabel, savingThrowLabel }) => {
+        <div className="char-ability-grid">
+          {abilityScores.map(({ key, abbr, label, englishLabel, savingThrowLabel }) => {
             const baseScore = character[key] as number
             const effKey = key.replace('stat_', '') as 'str' | 'dex' | 'con' | 'int' | 'wis' | 'cha'
             const effectiveScore = eff[effKey]
@@ -1127,31 +1142,31 @@ export default function CharacterDetailPage() {
                 title={label}
                 style={{
                   background: 'var(--surface)',
-                  borderRadius: 16,
+                  borderRadius: 14,
                   border: `1px solid ${isSaveProficient ? 'rgba(212,175,55,0.35)' : 'var(--hairline)'}`,
                   display: 'flex', flexDirection: 'column', alignItems: 'center',
-                  paddingTop: 28, paddingBottom: 24,
+                  paddingTop: 16, paddingBottom: 14,
                   position: 'relative', overflow: 'hidden',
                   textAlign: 'center',
                 }}
               >
                 <div aria-hidden="true" style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 3, background: isSaveProficient ? 'var(--gold)' : 'var(--violet)' }} />
-                <p style={{ margin: '0 0 14px', fontSize: 11, fontWeight: 700, letterSpacing: '0.2em', textTransform: 'uppercase', color: 'var(--muted)' }}>
-                  {englishLabel}
+                <p style={{ margin: '0 0 8px', fontSize: 10, fontWeight: 700, letterSpacing: '0.2em', textTransform: 'uppercase', color: 'var(--muted)' }}>
+                  {abbr}
                 </p>
-                <p style={{ fontFamily: 'var(--font-display)', fontSize: 56, fontWeight: 700, color: 'var(--gold)', margin: '0 0 16px', lineHeight: 1 }}>
+                <p style={{ fontFamily: 'var(--font-display)', fontSize: 'clamp(28px, 3.5vw, 40px)', fontWeight: 700, color: 'var(--gold)', margin: '0 0 8px', lineHeight: 1 }}>
                   {mod}
                 </p>
-                <div style={{ width: 40, height: 40, borderRadius: '50%', background: 'rgba(0,0,0,0.4)', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: isSaveProficient || bonus !== 0 ? 10 : 0 }}>
-                  <span style={{ fontFamily: 'var(--font-body)', fontSize: 14, fontWeight: 700, color: 'var(--ink-soft)' }}>{effectiveScore}</span>
+                <div style={{ width: 32, height: 32, borderRadius: '50%', background: 'rgba(0,0,0,0.4)', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: isSaveProficient || bonus !== 0 ? 6 : 0 }}>
+                  <span style={{ fontFamily: 'var(--font-body)', fontSize: 12, fontWeight: 700, color: 'var(--ink-soft)' }}>{effectiveScore}</span>
                 </div>
                 {bonus !== 0 && (
-                  <span style={{ fontSize: 9, fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', color: 'var(--teal)', marginBottom: isSaveProficient ? 6 : 0 }}>
-                    {bonus > 0 ? `+${bonus}` : bonus} uitrusting
+                  <span style={{ fontSize: 9, fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--teal)', marginBottom: isSaveProficient ? 4 : 0 }}>
+                    {bonus > 0 ? `+${bonus}` : bonus}
                   </span>
                 )}
                 {isSaveProficient && (
-                  <p style={{ margin: 0, fontSize: 10, fontWeight: 700, letterSpacing: '0.18em', textTransform: 'uppercase', color: 'var(--gold)' }}>
+                  <p style={{ margin: 0, fontSize: 9, fontWeight: 700, letterSpacing: '0.14em', textTransform: 'uppercase', color: 'var(--gold)' }}>
                     SAVE PROF
                   </p>
                 )}
