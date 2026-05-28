@@ -129,18 +129,41 @@ export default function CharactersPage() {
           </ul>
         ) : (
           <>
-            {(!characters || characters.length === 0) && (
-              <EmptyState
-                title="Nog geen karakters"
-                description="Maak je eerste personage aan en begin je avontuur."
-              />
+            {(!characters || characters.length === 0) ? (
+              <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 24 }}>
+                <EmptyState
+                  title="Nog geen karakters"
+                  description="Maak je eerste personage aan en begin je avontuur."
+                />
+                <div style={{ width: '100%', maxWidth: 320 }}>
+                  <ForgeCharacterCard onClick={handleCreateCharacter} loading={creatingCharacter} />
+                </div>
+              </div>
+            ) : (
+              <>
+                {filtered.length === 0 && search && (
+                  <div style={{ textAlign: 'center', padding: '40px 0' }}>
+                    <p style={{ color: 'var(--muted)', fontSize: 14 }}>
+                      Geen resultaten voor <strong style={{ color: 'var(--ink-soft)' }}>"{search}"</strong>.
+                    </p>
+                    <button
+                      type="button"
+                      className="pangu-btn pangu-btn-ghost pangu-btn-sm"
+                      onClick={() => setSearch('')}
+                      style={{ marginTop: 12 }}
+                    >
+                      Wis zoekopdracht
+                    </button>
+                  </div>
+                )}
+                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                  {filtered.map((character) => (
+                    <CharacterCard key={character.id} character={character} />
+                  ))}
+                  <ForgeCharacterCard onClick={handleCreateCharacter} loading={creatingCharacter} />
+                </div>
+              </>
             )}
-            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-              {filtered.map((character) => (
-                <CharacterCard key={character.id} character={character} />
-              ))}
-              <ForgeCharacterCard onClick={handleCreateCharacter} loading={creatingCharacter} />
-            </div>
           </>
         )}
       </div>
