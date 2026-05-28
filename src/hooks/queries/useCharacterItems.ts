@@ -1,4 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
+import { toast } from 'sonner'
 import { supabase } from '@/lib/supabase'
 import { queryKeys } from '@/lib/queryKeys'
 import type { Item, EquipmentSlot } from '@/types/item.types'
@@ -41,6 +42,7 @@ export function useCharacterItems(characterId: string | undefined) {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: queryKeys.characters.items(characterId ?? '') })
     },
+    onError: () => toast.error('Uitrusten mislukt'),
   })
 
   const unequipItem = useMutation({
@@ -54,6 +56,7 @@ export function useCharacterItems(characterId: string | undefined) {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: queryKeys.characters.items(characterId ?? '') })
     },
+    onError: () => toast.error('Uitrusten verwijderen mislukt'),
   })
 
   return { ...query, equipItem, unequipItem }

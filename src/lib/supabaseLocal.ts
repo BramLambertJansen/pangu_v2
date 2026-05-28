@@ -287,11 +287,23 @@ class LocalQueryBuilder {
 
       if (this._op === 'update') {
         const idFilter = this._filters.find((f) => f.type === 'eq' && f.field === 'id')
-        if (!idFilter || idFilter.type !== 'eq') {
-          throw new Error('[localDb] update() requires .eq("id", value)')
+        if (idFilter && idFilter.type === 'eq') {
+          // Fast path: single-row update by primary key.
+          const updated = localDb.update(this._table, idFilter.value as string, this._payload as Row)
+          if (this._returnData) return { data: updated, error: null }
+        } else {
+          // Multi-filter bulk update: apply all filters to find matching rows, then
+          // update each by id. Supports patterns like .update().eq('character_id', x).eq('slot', y).
+          const allRows = localDb.getAll(this._table) as Row[]
+          const matching = this._applyFilters(allRows)
+          for (const row of matching) {
+            localDb.update(this._table, row.id as string, this._payload as Row)
+          }
+          if (this._returnData) {
+            const refreshed = this._applyFilters(localDb.getAll(this._table) as Row[])
+            return { data: refreshed, error: null }
+          }
         }
-        const updated = localDb.update(this._table, idFilter.value as string, this._payload as Row)
-        if (this._returnData) return { data: updated, error: null }
         return { data: null, error: null }
       }
 

@@ -447,6 +447,44 @@ export type Database = {
           committed: boolean
           created_at: string
           updated_at: string
+          saving_throw_proficiencies: string[]
+          expertise_skills: string[]
+          languages: string[]
+          tool_proficiencies: string[]
+          weapon_proficiencies: string[]
+          armor_proficiencies: string[]
+          inspiration: boolean
+          hit_die: string
+          hit_dice_current: number
+          death_save_successes: number
+          death_save_failures: number
+          exhaustion: number
+          alignment: string | null
+          personality_traits: string | null
+          ideals: string | null
+          bonds: string | null
+          flaws: string | null
+          temp_hp: number
+          spellcasting_ability: string | null
+          spell_slots: Record<string, unknown>
+          concentrating: boolean
+          concentration_spell: string | null
+          feats: string[]
+          weapon_masteries: string[]
+          active_conditions: string[]
+          class_resources: Record<string, unknown>
+          platinum: number
+          electrum: number
+          fly_speed: number
+          swim_speed: number
+          climb_speed: number
+          burrow_speed: number
+          darkvision: number
+          special_senses: string | null
+          age: string | null
+          height: string | null
+          weight: string | null
+          appearance: string | null
         }
         Insert: {
           id?: string
@@ -482,6 +520,44 @@ export type Database = {
           committed?: boolean
           created_at?: string
           updated_at?: string
+          saving_throw_proficiencies?: string[]
+          expertise_skills?: string[]
+          languages?: string[]
+          tool_proficiencies?: string[]
+          weapon_proficiencies?: string[]
+          armor_proficiencies?: string[]
+          inspiration?: boolean
+          hit_die?: string
+          hit_dice_current?: number
+          death_save_successes?: number
+          death_save_failures?: number
+          exhaustion?: number
+          alignment?: string | null
+          personality_traits?: string | null
+          ideals?: string | null
+          bonds?: string | null
+          flaws?: string | null
+          temp_hp?: number
+          spellcasting_ability?: string | null
+          spell_slots?: Record<string, unknown>
+          concentrating?: boolean
+          concentration_spell?: string | null
+          feats?: string[]
+          weapon_masteries?: string[]
+          active_conditions?: string[]
+          class_resources?: Record<string, unknown>
+          platinum?: number
+          electrum?: number
+          fly_speed?: number
+          swim_speed?: number
+          climb_speed?: number
+          burrow_speed?: number
+          darkvision?: number
+          special_senses?: string | null
+          age?: string | null
+          height?: string | null
+          weight?: string | null
+          appearance?: string | null
         }
         Update: {
           id?: string
@@ -517,6 +593,44 @@ export type Database = {
           committed?: boolean
           created_at?: string
           updated_at?: string
+          saving_throw_proficiencies?: string[]
+          expertise_skills?: string[]
+          languages?: string[]
+          tool_proficiencies?: string[]
+          weapon_proficiencies?: string[]
+          armor_proficiencies?: string[]
+          inspiration?: boolean
+          hit_die?: string
+          hit_dice_current?: number
+          death_save_successes?: number
+          death_save_failures?: number
+          exhaustion?: number
+          alignment?: string | null
+          personality_traits?: string | null
+          ideals?: string | null
+          bonds?: string | null
+          flaws?: string | null
+          temp_hp?: number
+          spellcasting_ability?: string | null
+          spell_slots?: Record<string, unknown>
+          concentrating?: boolean
+          concentration_spell?: string | null
+          feats?: string[]
+          weapon_masteries?: string[]
+          active_conditions?: string[]
+          class_resources?: Record<string, unknown>
+          platinum?: number
+          electrum?: number
+          fly_speed?: number
+          swim_speed?: number
+          climb_speed?: number
+          burrow_speed?: number
+          darkvision?: number
+          special_senses?: string | null
+          age?: string | null
+          height?: string | null
+          weight?: string | null
+          appearance?: string | null
         }
         Relationships: [
           {
