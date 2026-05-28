@@ -29,6 +29,7 @@ export const queryKeys = {
     encounterDetail: (encounterId: string) => ['encounters', encounterId] as const,
     encounterDetailFull: (encounterId: string) => ['encounters', encounterId, 'full'] as const,
     encounterMonsters: (encounterId: string) => ['encounters', encounterId, 'monsters'] as const,
+    encounterMonstersFull: (encounterId: string) => ['encounters', encounterId, 'monsters-full'] as const,
   },
   characters: {
     all: ['characters'] as const,
