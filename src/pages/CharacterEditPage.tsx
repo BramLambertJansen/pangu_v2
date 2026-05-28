@@ -4,6 +4,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { toast } from 'sonner'
 import { supabase } from '@/lib/supabase'
 import { queryKeys } from '@/lib/queryKeys'
+import type { Json } from '@/types/database.types'
 import { Modal } from '@/components/ui/Modal'
 import { ConfirmDialog } from '@/components/ui/ConfirmDialog'
 import { Spinner } from '@/components/ui/Spinner'
@@ -407,14 +408,14 @@ export default function CharacterEditPage() {
           // D&D 5.5e fields — spellcasting
           temp_hp:                    form.temp_hp ?? 0,
           spellcasting_ability:       form.spellcasting_ability ?? null,
-          spell_slots:                (form.spell_slots ?? {}) as unknown,
+          spell_slots:                (form.spell_slots ?? {}) as unknown as Json,
           concentrating:              form.concentrating ?? false,
           concentration_spell:        form.concentration_spell ?? null,
           // D&D 5.5e fields — feats & resources
           feats:                      form.feats ?? [],
           weapon_masteries:           form.weapon_masteries ?? [],
           active_conditions:          form.active_conditions ?? [],
-          class_resources:            (form.class_resources ?? {}) as unknown,
+          class_resources:            (form.class_resources ?? {}) as unknown as Json,
           // D&D 5.5e fields — currency
           platinum:                   form.platinum ?? 0,
           electrum:                   form.electrum ?? 0,

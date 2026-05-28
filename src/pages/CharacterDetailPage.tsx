@@ -4,6 +4,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { toast } from 'sonner'
 import { supabase } from '@/lib/supabase'
 import { queryKeys } from '@/lib/queryKeys'
+import type { Json } from '@/types/database.types'
 import { Spinner } from '@/components/ui/Spinner'
 import { Breadcrumb } from '@/components/ui/Breadcrumb'
 import {
@@ -579,7 +580,7 @@ export default function CharacterDetailPage() {
       }
       const { error } = await supabase
         .from('characters')
-        .update({ spell_slots: slots as unknown, updated_at: new Date().toISOString() })
+        .update({ spell_slots: slots as unknown as Json, updated_at: new Date().toISOString() })
         .eq('id', id!)
       if (error) throw error
     },
@@ -615,7 +616,7 @@ export default function CharacterDetailPage() {
       }
       const { error } = await supabase
         .from('characters')
-        .update({ class_resources: resources as unknown, updated_at: new Date().toISOString() })
+        .update({ class_resources: resources as unknown as Json, updated_at: new Date().toISOString() })
         .eq('id', id!)
       if (error) throw error
     },
