@@ -466,13 +466,13 @@ export type Database = {
           flaws: string | null
           temp_hp: number
           spellcasting_ability: string | null
-          spell_slots: Json
+          spell_slots: Record<string, unknown>
           concentrating: boolean
           concentration_spell: string | null
           feats: string[]
           weapon_masteries: string[]
           active_conditions: string[]
-          class_resources: Json
+          class_resources: Record<string, unknown>
           platinum: number
           electrum: number
           fly_speed: number
@@ -539,13 +539,13 @@ export type Database = {
           flaws?: string | null
           temp_hp?: number
           spellcasting_ability?: string | null
-          spell_slots?: Json
+          spell_slots?: Record<string, unknown>
           concentrating?: boolean
           concentration_spell?: string | null
           feats?: string[]
           weapon_masteries?: string[]
           active_conditions?: string[]
-          class_resources?: Json
+          class_resources?: Record<string, unknown>
           platinum?: number
           electrum?: number
           fly_speed?: number
@@ -612,13 +612,13 @@ export type Database = {
           flaws?: string | null
           temp_hp?: number
           spellcasting_ability?: string | null
-          spell_slots?: Json
+          spell_slots?: Record<string, unknown>
           concentrating?: boolean
           concentration_spell?: string | null
           feats?: string[]
           weapon_masteries?: string[]
           active_conditions?: string[]
-          class_resources?: Json
+          class_resources?: Record<string, unknown>
           platinum?: number
           electrum?: number
           fly_speed?: number
