@@ -1,5 +1,6 @@
 import { useId, useCallback, useRef, KeyboardEvent } from 'react'
 import { sanitizeImageUrl } from '@/utils/sanitizeUrl'
+import { useImagePositioning } from '@/hooks/useImagePositioning'
 import { useParams, useNavigate, useLocation } from 'react-router-dom'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { toast } from 'sonner'
@@ -317,6 +318,18 @@ export default function CharacterEditPage() {
     resetForm, guard,
   } = useEntityEdit({ entity: characterData, isNew })
 
+  const handlePortraitPositionChange = useCallback((posString: string) => {
+    set('portrait_position', posString)
+  }, [set])
+
+  const {
+    containerRef: portraitContainerRef,
+    posString: portraitPosString,
+    isDragging: portraitIsDragging,
+    resetPosition: resetPortraitPosition,
+    handlers: portraitPosHandlers,
+  } = useImagePositioning(characterData?.portrait_position, handlePortraitPositionChange)
+
   // Three-state skill toggle: none → proficient → expertise → none
   const cycleSkill = useCallback((skillName: string) => {
     const proficients: string[] = form.proficient_skills ?? []
@@ -438,6 +451,7 @@ export default function CharacterEditPage() {
           bonds:                      form.bonds ?? null,
           flaws:                      form.flaws ?? null,
           portrait_url:               form.portrait_url ?? null,
+          portrait_position:          form.portrait_position ?? 'center',
           committed: true,
           updated_at: new Date().toISOString(),
         })
@@ -496,6 +510,7 @@ export default function CharacterEditPage() {
       guard.requestDiscard()
     } else {
       resetForm()
+      resetPortraitPosition(characterData!.portrait_position)
       navigate(`/characters/${id}`)
     }
   }
@@ -676,7 +691,7 @@ export default function CharacterEditPage() {
             </div>
           </div>
 
-          {/* Portrait URL */}
+          {/* Portrait URL + draggable reposition preview */}
           <div style={{ marginTop: 16 }}>
             <label className="pangu-label" htmlFor={portraitUrlId}>Portret (URL)</label>
             <input
@@ -688,19 +703,47 @@ export default function CharacterEditPage() {
               placeholder="https://..."
             />
             {sanitizeImageUrl(form.portrait_url) && (
-              <div style={{ marginTop: 12, display: 'flex', justifyContent: 'center' }}>
-                <img
-                  src={sanitizeImageUrl(form.portrait_url)}
-                  alt="Portret preview"
+              <div style={{ marginTop: 12 }}>
+                <p style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.14em', textTransform: 'uppercase', color: 'var(--muted)', marginBottom: 8, userSelect: 'none' }}>
+                  Sleep om uitsnede aan te passen
+                </p>
+                <div
+                  ref={portraitContainerRef}
+                  role="img"
+                  aria-label={`Portretuitsnede: positie ${portraitPosString}. Gebruik pijltjestoetsen om bij te stellen.`}
+                  tabIndex={0}
+                  onMouseDown={portraitPosHandlers.onMouseDown}
+                  onTouchStart={portraitPosHandlers.onTouchStart}
+                  onKeyDown={portraitPosHandlers.onKeyDown}
                   style={{
-                    width: 120,
-                    height: 160,
-                    objectFit: 'cover',
-                    objectPosition: 'center top',
+                    position: 'relative',
+                    cursor: portraitIsDragging ? 'grabbing' : 'grab',
                     borderRadius: 8,
+                    overflow: 'hidden',
+                    width: 160,
+                    height: 220,
                     border: '1px solid var(--hairline)',
+                    userSelect: 'none',
+                    touchAction: 'none',
+                    outline: 'none',
                   }}
-                />
+                  onFocus={(e) => { e.currentTarget.style.boxShadow = '0 0 0 2px var(--violet)' }}
+                  onBlur={(e) => { e.currentTarget.style.boxShadow = 'none' }}
+                >
+                  <img
+                    src={sanitizeImageUrl(form.portrait_url)!}
+                    alt=""
+                    draggable={false}
+                    style={{
+                      width: '100%',
+                      height: '100%',
+                      objectFit: 'cover',
+                      objectPosition: portraitPosString,
+                      pointerEvents: 'none',
+                      display: 'block',
+                    }}
+                  />
+                </div>
               </div>
             )}
           </div>

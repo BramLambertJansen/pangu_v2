@@ -196,7 +196,7 @@ export const CharacterCard = memo(function CharacterCard({ character }: Props) {
               width: '100%',
               height: '100%',
               objectFit: 'cover',
-              objectPosition: 'center top',
+              objectPosition: character.portrait_position ?? 'center',
             }}
           />
         )}
