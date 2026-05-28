@@ -17,7 +17,7 @@ export function useCharacters() {
         .eq('committed', true)
         .order('created_at', { ascending: false })
       if (error) throw error
-      return data as Character[]
+      return data as unknown as Character[]
     },
     enabled: !!user,
     staleTime: 30_000,

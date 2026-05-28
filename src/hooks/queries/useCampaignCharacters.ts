@@ -14,7 +14,7 @@ export function useCampaignCharacters(campaignId: string | undefined) {
         .eq('committed', true)
         .order('created_at', { ascending: false })
       if (error) throw error
-      return data as Character[]
+      return data as unknown as Character[]
     },
     enabled: !!campaignId,
     staleTime: 1000 * 30,

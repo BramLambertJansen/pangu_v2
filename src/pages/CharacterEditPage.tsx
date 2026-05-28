@@ -302,7 +302,7 @@ export default function CharacterEditPage() {
         .eq('id', id!)
         .single()
       if (error) throw error
-      return data as Character
+      return data as unknown as Character
     },
     enabled: !!id,
     staleTime: 1000 * 60,
@@ -407,14 +407,14 @@ export default function CharacterEditPage() {
           // D&D 5.5e fields — spellcasting
           temp_hp:                    form.temp_hp ?? 0,
           spellcasting_ability:       form.spellcasting_ability ?? null,
-          spell_slots:                form.spell_slots ?? {},
+          spell_slots:                (form.spell_slots ?? {}) as unknown,
           concentrating:              form.concentrating ?? false,
           concentration_spell:        form.concentration_spell ?? null,
           // D&D 5.5e fields — feats & resources
           feats:                      form.feats ?? [],
           weapon_masteries:           form.weapon_masteries ?? [],
           active_conditions:          form.active_conditions ?? [],
-          class_resources:            form.class_resources ?? {},
+          class_resources:            (form.class_resources ?? {}) as unknown,
           // D&D 5.5e fields — currency
           platinum:                   form.platinum ?? 0,
           electrum:                   form.electrum ?? 0,

@@ -520,7 +520,7 @@ export default function CharacterDetailPage() {
     queryFn: async () => {
       const { data, error } = await supabase.from('characters').select('*').eq('id', id!).single()
       if (error) throw error
-      return data as Character
+      return data as unknown as Character
     },
     enabled: !!id,
     staleTime: 1000 * 60,
@@ -579,7 +579,7 @@ export default function CharacterDetailPage() {
       }
       const { error } = await supabase
         .from('characters')
-        .update({ spell_slots: slots, updated_at: new Date().toISOString() })
+        .update({ spell_slots: slots as unknown, updated_at: new Date().toISOString() })
         .eq('id', id!)
       if (error) throw error
     },
@@ -615,7 +615,7 @@ export default function CharacterDetailPage() {
       }
       const { error } = await supabase
         .from('characters')
-        .update({ class_resources: resources, updated_at: new Date().toISOString() })
+        .update({ class_resources: resources as unknown, updated_at: new Date().toISOString() })
         .eq('id', id!)
       if (error) throw error
     },
