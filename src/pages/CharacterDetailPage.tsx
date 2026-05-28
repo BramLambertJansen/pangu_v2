@@ -774,10 +774,9 @@ export default function CharacterDetailPage() {
           .char-hero { grid-template-columns: 1fr; }
           .char-portrait { aspect-ratio: 16 / 9; max-height: 220px; border-radius: 16px; }
           .char-combat-grid { grid-template-columns: repeat(2, 1fr); }
-          .char-ability-grid { grid-template-columns: repeat(3, 1fr); }
         }
-        @media (max-width: 480px) {
-          .char-ability-grid { grid-template-columns: repeat(2, 1fr); }
+        @media (max-width: 640px) {
+          .char-ability-grid { grid-template-columns: repeat(3, 1fr); }
         }
       `}</style>
       <Breadcrumb
@@ -985,6 +984,54 @@ export default function CharacterDetailPage() {
 
       {/* ════════════════════════════════ STATS ════════════════════════════════ */}
       <div id="tabpanel-stats" role="tabpanel" aria-labelledby="tab-stats" hidden={activeTab !== 'stats'}>
+
+        {/* Ability scores */}
+        <div className="char-ability-grid">
+          {abilityScores.map(({ key, abbr, label, savingThrowLabel }) => {
+            const baseScore = character[key] as number
+            const effKey = key.replace('stat_', '') as 'str' | 'dex' | 'con' | 'int' | 'wis' | 'cha'
+            const effectiveScore = eff[effKey]
+            const bonus = effectiveScore - baseScore
+            const mod = abilityModifier(effectiveScore)
+            const isSaveProficient = (character.saving_throw_proficiencies ?? []).includes(savingThrowLabel)
+            return (
+              <div
+                key={key}
+                title={label}
+                style={{
+                  background: 'var(--surface)',
+                  borderRadius: 14,
+                  border: `1px solid ${isSaveProficient ? 'rgba(212,175,55,0.35)' : 'var(--hairline)'}`,
+                  display: 'flex', flexDirection: 'column', alignItems: 'center',
+                  paddingTop: 16, paddingBottom: 14,
+                  position: 'relative', overflow: 'hidden',
+                  textAlign: 'center',
+                }}
+              >
+                <div aria-hidden="true" style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 3, background: isSaveProficient ? 'var(--gold)' : 'var(--violet)' }} />
+                <p style={{ margin: '0 0 8px', fontSize: 10, fontWeight: 700, letterSpacing: '0.2em', textTransform: 'uppercase', color: 'var(--muted)' }}>
+                  {abbr}
+                </p>
+                <p style={{ fontFamily: 'var(--font-display)', fontSize: 'clamp(28px, 3.5vw, 40px)', fontWeight: 700, color: 'var(--gold)', margin: '0 0 8px', lineHeight: 1 }}>
+                  {mod}
+                </p>
+                <div style={{ width: 32, height: 32, borderRadius: '50%', background: 'rgba(0,0,0,0.4)', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: isSaveProficient || bonus !== 0 ? 6 : 0 }}>
+                  <span style={{ fontFamily: 'var(--font-body)', fontSize: 12, fontWeight: 700, color: 'var(--ink-soft)' }}>{effectiveScore}</span>
+                </div>
+                {bonus !== 0 && (
+                  <span style={{ fontSize: 9, fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--teal)', marginBottom: isSaveProficient ? 4 : 0 }}>
+                    {bonus > 0 ? `+${bonus}` : bonus}
+                  </span>
+                )}
+                {isSaveProficient && (
+                  <p style={{ margin: 0, fontSize: 9, fontWeight: 700, letterSpacing: '0.14em', textTransform: 'uppercase', color: 'var(--gold)' }}>
+                    SAVE PROF
+                  </p>
+                )}
+              </div>
+            )
+          })}
+        </div>
 
         {/* ── Inspiratie / Trefferdobbelstenen / Uitputting ── */}
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(180px, 1fr))', gap: 12, marginBottom: 16 }}>
@@ -1199,54 +1246,6 @@ export default function CharacterDetailPage() {
             </div>
           </div>
         )}
-
-        {/* Ability scores */}
-        <div className="char-ability-grid">
-          {abilityScores.map(({ key, abbr, label, savingThrowLabel }) => {
-            const baseScore = character[key] as number
-            const effKey = key.replace('stat_', '') as 'str' | 'dex' | 'con' | 'int' | 'wis' | 'cha'
-            const effectiveScore = eff[effKey]
-            const bonus = effectiveScore - baseScore
-            const mod = abilityModifier(effectiveScore)
-            const isSaveProficient = (character.saving_throw_proficiencies ?? []).includes(savingThrowLabel)
-            return (
-              <div
-                key={key}
-                title={label}
-                style={{
-                  background: 'var(--surface)',
-                  borderRadius: 14,
-                  border: `1px solid ${isSaveProficient ? 'rgba(212,175,55,0.35)' : 'var(--hairline)'}`,
-                  display: 'flex', flexDirection: 'column', alignItems: 'center',
-                  paddingTop: 16, paddingBottom: 14,
-                  position: 'relative', overflow: 'hidden',
-                  textAlign: 'center',
-                }}
-              >
-                <div aria-hidden="true" style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 3, background: isSaveProficient ? 'var(--gold)' : 'var(--violet)' }} />
-                <p style={{ margin: '0 0 8px', fontSize: 10, fontWeight: 700, letterSpacing: '0.2em', textTransform: 'uppercase', color: 'var(--muted)' }}>
-                  {abbr}
-                </p>
-                <p style={{ fontFamily: 'var(--font-display)', fontSize: 'clamp(28px, 3.5vw, 40px)', fontWeight: 700, color: 'var(--gold)', margin: '0 0 8px', lineHeight: 1 }}>
-                  {mod}
-                </p>
-                <div style={{ width: 32, height: 32, borderRadius: '50%', background: 'rgba(0,0,0,0.4)', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: isSaveProficient || bonus !== 0 ? 6 : 0 }}>
-                  <span style={{ fontFamily: 'var(--font-body)', fontSize: 12, fontWeight: 700, color: 'var(--ink-soft)' }}>{effectiveScore}</span>
-                </div>
-                {bonus !== 0 && (
-                  <span style={{ fontSize: 9, fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--teal)', marginBottom: isSaveProficient ? 4 : 0 }}>
-                    {bonus > 0 ? `+${bonus}` : bonus}
-                  </span>
-                )}
-                {isSaveProficient && (
-                  <p style={{ margin: 0, fontSize: 9, fontWeight: 700, letterSpacing: '0.14em', textTransform: 'uppercase', color: 'var(--gold)' }}>
-                    SAVE PROF
-                  </p>
-                )}
-              </div>
-            )
-          })}
-        </div>
 
         {/* Reddingsgooien */}
         <div className="pangu-surface" style={{ padding: 24, marginBottom: 16 }}>
