@@ -59,7 +59,7 @@ export default function CharactersPage() {
         .select()
         .single()
       if (error) throw error
-      return data as Character
+      return data as unknown as Character
     },
     onSuccess: (newCharacter) => {
       queryClient.invalidateQueries({ queryKey: queryKeys.characters.all })

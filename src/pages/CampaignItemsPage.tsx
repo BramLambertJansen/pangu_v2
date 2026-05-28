@@ -105,12 +105,46 @@ export default function CampaignItemsPage() {
       ]} />
 
       {/* Page header */}
-      <div style={{ marginBottom: 32 }}>
-        <p className="pangu-eyebrow">Kroniek schatkist</p>
-        <h1 className="pangu-display-xl">{campaign.name} — Items</h1>
-        <p style={{ marginTop: 8, fontSize: 14, color: 'var(--ink-soft)' }}>
-          Beheer alle magische items in deze kroniek. Maak items aan en wijs ze toe aan karakters.
-        </p>
+      <div style={{ marginBottom: 32, display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 16, flexWrap: 'wrap' }}>
+        <div>
+          <p className="pangu-eyebrow">Kroniek schatkist</p>
+          <h1 className="pangu-display-xl">{campaign.name} — Items</h1>
+          <p style={{ marginTop: 8, fontSize: 14, color: 'var(--ink-soft)' }}>
+            Beheer alle magische items in deze kroniek. Maak items aan en wijs ze toe aan karakters.
+          </p>
+        </div>
+        <button
+          type="button"
+          onClick={() => navigate(`/campaigns/${id}/loot-generator`)}
+          style={{
+            flexShrink: 0,
+            display: 'inline-flex', alignItems: 'center', gap: 6,
+            padding: '8px 16px',
+            background: 'rgba(212,170,87,0.1)',
+            border: '1px solid rgba(212,170,87,0.3)',
+            borderRadius: 'var(--r-full)',
+            color: 'var(--gold)',
+            fontFamily: 'var(--font-body)', fontSize: 11, fontWeight: 700,
+            letterSpacing: '0.14em', textTransform: 'uppercase',
+            cursor: 'pointer',
+            transition: 'all var(--t-fast)',
+            whiteSpace: 'nowrap',
+          }}
+          onMouseEnter={e => {
+            e.currentTarget.style.background = 'rgba(212,170,87,0.18)'
+            e.currentTarget.style.borderColor = 'rgba(212,170,87,0.5)'
+          }}
+          onMouseLeave={e => {
+            e.currentTarget.style.background = 'rgba(212,170,87,0.1)'
+            e.currentTarget.style.borderColor = 'rgba(212,170,87,0.3)'
+          }}
+          aria-label="Open AI Buitgenerator"
+        >
+          <svg aria-hidden="true" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M12 2l2.4 7.4H22l-6.2 4.5 2.4 7.4L12 17l-6.2 4.3 2.4-7.4L2 9.4h7.6z" />
+          </svg>
+          AI Buitgenerator
+        </button>
       </div>
 
       {/* Filter tabs */}
