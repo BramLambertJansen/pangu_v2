@@ -673,7 +673,6 @@ export default function CharacterDetailPage() {
   const hpPct = hpMax  > 0 ? Math.min(100, Math.round((hpCurrent / hpMax) * 100)) : 0
   const hpLow = hpCurrent < hpMax * 0.3
   const dexMod  = Math.floor(((character.stat_dex ?? 10) - 10) / 2)
-  const dexLabel = dexMod >= 0 ? `+${dexMod}` : `${dexMod}`
 
   // Equipment-adjusted stats
   const equippedItems = (items ?? []).filter((i) => i.equipped_slot !== null)
@@ -1129,7 +1128,7 @@ export default function CharacterDetailPage() {
 
         {/* Ability scores */}
         <div className="char-ability-grid">
-          {abilityScores.map(({ key, abbr, label, englishLabel, savingThrowLabel }) => {
+          {abilityScores.map(({ key, abbr, label, savingThrowLabel }) => {
             const baseScore = character[key] as number
             const effKey = key.replace('stat_', '') as 'str' | 'dex' | 'con' | 'int' | 'wis' | 'cha'
             const effectiveScore = eff[effKey]
