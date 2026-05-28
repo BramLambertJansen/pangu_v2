@@ -879,4 +879,4 @@ npm run test         # Vitest
 - [x] Content genereren voor NPCs (UI integratie)
 - [x] Content genereren voor lore (UI integratie)
 - [x] Wereldbouwer pagina `/worlds/:id/world-builder` — vrije prompt + 6 snelkoppelingen (Locatie, NPC, Quest, Wending, Gerucht, Buit); world-context wordt automatisch prepended; kopieer-knop + "Opnieuw genereren"; provider/model badge in response; Ctrl/Cmd+Enter om te genereren
-- [ ] Consistentiecheck op gegenereerde content
+- [x] Consistentiecheck op gegenereerde content — "Consistentiecheck" knop in Wereldbouwer na generatie; tweede AI-call toetst de gegenereerde tekst op consistentie met de wereld-context; resultaat getoond in teal-sectie onder het antwoord
