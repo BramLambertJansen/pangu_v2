@@ -876,6 +876,52 @@ export type Database = {
           }
         ]
       }
+      player_notes: {
+        Row: {
+          id: string
+          session_id: string
+          user_id: string
+          character_id: string | null
+          content: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          session_id: string
+          user_id: string
+          character_id?: string | null
+          content?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          session_id?: string
+          user_id?: string
+          character_id?: string | null
+          content?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: 'player_notes_session_id_fkey'
+            columns: ['session_id']
+            referencedRelation: 'sessions'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'player_notes_user_id_fkey'
+            columns: ['user_id']
+            referencedRelation: 'users'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'player_notes_character_id_fkey'
+            columns: ['character_id']
+            referencedRelation: 'characters'
+            referencedColumns: ['id']
+          }
+        ]
+      }
       profiles: {
         Row: {
           id: string

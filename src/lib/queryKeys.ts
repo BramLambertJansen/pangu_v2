@@ -51,6 +51,8 @@ export const queryKeys = {
   },
   sessions: {
     planned: ['sessions', 'planned'] as const,
+    myNote: (sessionId: string) => ['sessions', sessionId, 'my-note'] as const,
+    playerNotes: (sessionId: string) => ['sessions', sessionId, 'player-notes'] as const,
   },
   admin: {
     users: ['admin', 'users'] as const,
