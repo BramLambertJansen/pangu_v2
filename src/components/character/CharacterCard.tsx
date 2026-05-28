@@ -2,6 +2,7 @@ import { memo, useMemo, type KeyboardEvent } from 'react'
 import { useNavigate } from 'react-router-dom'
 import type { Character } from '@/types/character.types'
 import { pickGradient, pickCharacterAccent, characterGradients } from '@/utils/pickGradient'
+import { sanitizeImageUrl } from '@/utils/sanitizeUrl'
 
 // Returns a class-themed SVG icon path for PartyMemberRow avatars.
 function ClassIcon({ cls, accent }: { cls: string; accent: string }) {
@@ -183,6 +184,23 @@ export const CharacterCard = memo(function CharacterCard({ character }: Props) {
         background: 'linear-gradient(175deg, #141b3a 0%, #0d1228 60%, #0a0e20 100%)',
         overflow: 'hidden',
       }}>
+        {/* Portrait image when available */}
+        {sanitizeImageUrl(character.portrait_url) && (
+          <img
+            src={sanitizeImageUrl(character.portrait_url)}
+            alt=""
+            aria-hidden="true"
+            style={{
+              position: 'absolute',
+              inset: 0,
+              width: '100%',
+              height: '100%',
+              objectFit: 'cover',
+              objectPosition: character.portrait_position ?? 'center',
+            }}
+          />
+        )}
+
         {/* Atmospheric glow — deterministic per character */}
         <div
           aria-hidden="true"
@@ -190,7 +208,7 @@ export const CharacterCard = memo(function CharacterCard({ character }: Props) {
             position: 'absolute',
             inset: 0,
             background: gradient,
-            opacity: 0.65,
+            opacity: sanitizeImageUrl(character.portrait_url) ? 0.35 : 0.65,
             pointerEvents: 'none',
           }}
         />

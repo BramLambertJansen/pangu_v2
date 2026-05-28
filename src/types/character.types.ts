@@ -98,6 +98,8 @@ export interface Character {
   bonds: string | null
   flaws: string | null
 
+  portrait_url: string | null
+  portrait_position: string
   committed: boolean
   created_at: string
   updated_at: string

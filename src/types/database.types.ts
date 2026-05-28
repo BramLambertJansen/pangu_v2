@@ -485,6 +485,8 @@ export type Database = {
           height: string | null
           weight: string | null
           appearance: string | null
+          portrait_url: string | null
+          portrait_position: string
         }
         Insert: {
           id?: string
@@ -558,6 +560,8 @@ export type Database = {
           height?: string | null
           weight?: string | null
           appearance?: string | null
+          portrait_url?: string | null
+          portrait_position?: string
         }
         Update: {
           id?: string
@@ -631,6 +635,8 @@ export type Database = {
           height?: string | null
           weight?: string | null
           appearance?: string | null
+          portrait_url?: string | null
+          portrait_position?: string
         }
         Relationships: [
           {
