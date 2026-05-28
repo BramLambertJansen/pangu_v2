@@ -672,8 +672,6 @@ export default function CharacterDetailPage() {
   const xpPct = xpNext > 0 ? Math.min(100, Math.round((xp / xpNext) * 100)) : 0
   const hpPct = hpMax  > 0 ? Math.min(100, Math.round((hpCurrent / hpMax) * 100)) : 0
   const hpLow = hpCurrent < hpMax * 0.3
-  const dexMod  = Math.floor(((character.stat_dex ?? 10) - 10) / 2)
-
   // Equipment-adjusted stats
   const equippedItems = (items ?? []).filter((i) => i.equipped_slot !== null)
   const eff = calculateEffectiveStats(character, equippedItems)
