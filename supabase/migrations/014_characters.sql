@@ -1,3 +1,14 @@
+-- Ensure the trigger function exists before the trigger below references it.
+-- This is idempotent; 016_fix_characters_updated_at.sql also defines it for databases
+-- that were created before this migration was corrected.
+CREATE OR REPLACE FUNCTION update_updated_at_column()
+  RETURNS trigger LANGUAGE plpgsql AS $$
+BEGIN
+  NEW.updated_at = now();
+  RETURN NEW;
+END;
+$$;
+
 -- Characters table for player character sheets (global per user, not campaign-scoped)
 CREATE TABLE characters (
   id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
