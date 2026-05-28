@@ -4,7 +4,6 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { toast } from 'sonner'
 import { supabase } from '@/lib/supabase'
 import { queryKeys } from '@/lib/queryKeys'
-import type { Json } from '@/types/database.types'
 import { Spinner } from '@/components/ui/Spinner'
 import { Breadcrumb } from '@/components/ui/Breadcrumb'
 import {
