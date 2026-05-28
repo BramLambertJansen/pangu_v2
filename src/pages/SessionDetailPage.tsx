@@ -2,12 +2,15 @@ import { useParams, useNavigate, Link } from 'react-router-dom'
 import { useQuery } from '@tanstack/react-query'
 import { supabase } from '@/lib/supabase'
 import { queryKeys } from '@/lib/queryKeys'
+import { useAuthStore } from '@/stores/auth.store'
 import { Spinner } from '@/components/ui/Spinner'
 import { Breadcrumb } from '@/components/ui/Breadcrumb'
 import { WorldDetailDivider } from '@/components/world/WorldDetailDivider'
 import { PartyMemberRow } from '@/components/character/CharacterCard'
 import { useCampaignCharacters } from '@/hooks/queries/useCampaignCharacters'
 import { sessionStatusLabel, sessionStatusColor } from '@/lib/statusMaps'
+import { PlayerNotepad } from '@/components/session/PlayerNotepad'
+import { DmPlayerNotesPanel } from '@/components/session/DmPlayerNotesPanel'
 import type { Session, SessionStatus } from '@/types/session.types'
 
 type SessionWithCampaign = Session & {
@@ -40,6 +43,7 @@ function formatDate(dateStr: string | null): string | null {
 export default function SessionDetailPage() {
   const { id } = useParams<{ id: string }>()
   const navigate = useNavigate()
+  const { user } = useAuthStore()
 
   const { data: session, isLoading } = useQuery<SessionWithCampaign>({
     queryKey: queryKeys.campaigns.sessionDetailFull(id!),
@@ -81,6 +85,7 @@ export default function SessionDetailPage() {
   const campaign = session.campaigns
   const world = campaign?.worlds ?? null
   const gradient = pickGradient(session.id)
+  const isDM = !!user && user.id === session.user_id
   const initial = session.name.trim()[0]?.toUpperCase() ?? '?'
   const formattedDate = formatDate(session.session_date)
 
@@ -294,6 +299,13 @@ export default function SessionDetailPage() {
           </ul>
         </>
       )}
+
+      {/* Player notes — players write, DM reads for consolidation */}
+      <WorldDetailDivider label="Spelernotities" />
+      {isDM
+        ? <DmPlayerNotesPanel sessionId={id!} />
+        : <PlayerNotepad sessionId={id!} campaignId={session.campaign_id} />
+      }
     </div>
   )
 }
