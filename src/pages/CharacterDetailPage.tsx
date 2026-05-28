@@ -769,14 +769,14 @@ export default function CharacterDetailPage() {
         .char-hero { display: grid; grid-template-columns: 260px 1fr; gap: 28px; align-items: start; margin-bottom: 28px; }
         .char-portrait { border-radius: 20px; border: 1px solid var(--hairline); overflow: hidden; aspect-ratio: 3 / 4; position: relative; }
         .char-combat-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
-        .char-ability-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 16px; }
+        .char-ability-grid { display: grid; grid-template-columns: repeat(6, 1fr); gap: 10px; margin-bottom: 16px; }
         @media (max-width: 860px) {
           .char-hero { grid-template-columns: 1fr; }
           .char-portrait { aspect-ratio: 16 / 9; max-height: 220px; border-radius: 16px; }
           .char-combat-grid { grid-template-columns: repeat(2, 1fr); }
         }
-        @media (max-width: 480px) {
-          .char-ability-grid { grid-template-columns: repeat(2, 1fr); }
+        @media (max-width: 640px) {
+          .char-ability-grid { grid-template-columns: repeat(3, 1fr); }
         }
       `}</style>
       <Breadcrumb
