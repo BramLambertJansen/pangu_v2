@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import type { Character } from '@/types/character.types'
 import { pickGradient, pickCharacterAccent, characterGradients } from '@/utils/pickGradient'
 import { sanitizeImageUrl } from '@/utils/sanitizeUrl'
+import { characterStatusLabel, characterStatusColor } from '@/lib/statusMaps'
 
 // Returns a class-themed SVG icon path for PartyMemberRow avatars.
 function ClassIcon({ cls, accent }: { cls: string; accent: string }) {
@@ -94,6 +95,7 @@ export const CharacterCard = memo(function CharacterCard({ character }: Props) {
   ].filter(Boolean)
 
   const hpLow = character.hp_current < character.hp_max * 0.3
+  const hpPct = character.hp_max > 0 ? Math.min(100, Math.round((character.hp_current / character.hp_max) * 100)) : 0
 
   function handleKeyDown(e: KeyboardEvent<HTMLElement>) {
     if (e.key === 'Enter' || e.key === ' ') {
@@ -269,6 +271,24 @@ export const CharacterCard = memo(function CharacterCard({ character }: Props) {
             pointerEvents: 'none',
           }}
         />
+
+        {/* Status badge for non-active characters */}
+        {character.status !== 'active' && (
+          <div style={{ position: 'absolute', bottom: 10, left: 12, zIndex: 2 }}>
+            <span style={{
+              display: 'inline-flex', alignItems: 'center',
+              padding: '3px 9px', borderRadius: 'var(--r-full)',
+              fontSize: 9, fontWeight: 700,
+              letterSpacing: '0.14em', textTransform: 'uppercase',
+              color: characterStatusColor[character.status],
+              border: `1px solid ${characterStatusColor[character.status]}55`,
+              background: `${characterStatusColor[character.status]}11`,
+              backdropFilter: 'blur(4px)',
+            }}>
+              {characterStatusLabel[character.status]}
+            </span>
+          </div>
+        )}
       </div>
 
       {/* ── Character info section ── */}
@@ -413,6 +433,26 @@ export const CharacterCard = memo(function CharacterCard({ character }: Props) {
             </p>
           </div>
         </div>
+      </div>
+
+      {/* HP progress bar — absolute bottom strip */}
+      <div
+        role="progressbar"
+        aria-valuenow={character.hp_current}
+        aria-valuemin={0}
+        aria-valuemax={character.hp_max}
+        aria-label={`${character.hp_current} van ${character.hp_max} HP`}
+        style={{
+          position: 'absolute', bottom: 0, left: 0, right: 0,
+          height: 3, background: 'var(--hairline)', overflow: 'hidden',
+        }}
+      >
+        <div style={{
+          height: '100%',
+          width: `${hpPct}%`,
+          background: hpLow ? 'var(--crimson)' : 'var(--teal)',
+          transition: 'width 0.3s var(--ease-out)',
+        }} />
       </div>
     </article>
   )

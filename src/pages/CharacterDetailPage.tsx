@@ -472,18 +472,31 @@ function ItemRow({
         <button
           type="button"
           aria-label={`${item.name} teruggeven aan DM`}
+          title="Teruggeven aan DM"
           onClick={onReturn}
           disabled={isPending}
           style={{
-            background: 'none', border: 'none', cursor: 'pointer',
-            color: 'var(--muted)', fontSize: 14, padding: '4px 6px',
-            lineHeight: 1, transition: 'color var(--t-fast)',
-            opacity: isPending ? 0.4 : 1,
+            background: 'none', border: '1px solid var(--hairline)', borderRadius: 6,
+            cursor: 'pointer', color: 'var(--muted)', fontSize: 10,
+            padding: '4px 8px', lineHeight: 1, transition: 'all var(--t-fast)',
+            opacity: isPending ? 0.4 : 1, fontWeight: 700,
+            letterSpacing: '0.08em', textTransform: 'uppercase',
+            fontFamily: 'var(--font-body)',
+            display: 'flex', alignItems: 'center', gap: 4,
           }}
-          onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.color = 'var(--ink-soft)' }}
-          onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.color = 'var(--muted)' }}
+          onMouseEnter={(e) => {
+            const el = e.currentTarget as HTMLElement
+            el.style.borderColor = 'rgba(220,38,38,0.4)'
+            el.style.color = 'var(--crimson)'
+          }}
+          onMouseLeave={(e) => {
+            const el = e.currentTarget as HTMLElement
+            el.style.borderColor = 'var(--hairline)'
+            el.style.color = 'var(--muted)'
+          }}
         >
-          ↩
+          <span aria-hidden="true">↩</span>
+          <span>DM</span>
         </button>
       </div>
     </div>
@@ -639,6 +652,38 @@ export default function CharacterDetailPage() {
       queryClient.invalidateQueries({ queryKey: queryKeys.characters.all })
     },
     onError: () => toast.error('Tijdelijke HP bijwerken mislukt'),
+  })
+
+  const longRest = useMutation({
+    mutationFn: async () => {
+      if (!character) throw new Error('Karakter niet geladen')
+      const restoredSlots = { ...(character.spell_slots ?? {}) } as SpellSlots
+      for (const level of Object.keys(restoredSlots)) {
+        const key = level as keyof SpellSlots
+        if (restoredSlots[key]) {
+          restoredSlots[key] = { ...restoredSlots[key]!, current: restoredSlots[key]!.max }
+        }
+      }
+      const { error } = await supabase
+        .from('characters')
+        .update({
+          hp_current: character.hp_max ?? 0,
+          temp_hp: 0,
+          spell_slots: restoredSlots as Record<string, unknown>,
+          death_save_successes: 0,
+          death_save_failures: 0,
+          hit_dice_current: character.level,
+          updated_at: new Date().toISOString(),
+        })
+        .eq('id', id!)
+      if (error) throw error
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: queryKeys.characters.detail(id!) })
+      queryClient.invalidateQueries({ queryKey: queryKeys.characters.all })
+      toast.success('Lange rust genomen — HP en spreukslots hersteld')
+    },
+    onError: () => toast.error('Lange rust mislukt'),
   })
 
   if (isLoading) {
@@ -832,20 +877,20 @@ export default function CharacterDetailPage() {
                 )}
               </div>
               <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
-                <button type="button" aria-label="HP verlagen" onClick={() => updateHp.mutate(Math.max(0, hpCurrent - 1))} disabled={updateHp.isPending || hpCurrent <= 0} style={{ width: 22, height: 22, borderRadius: '50%', border: '1px solid var(--hairline)', background: 'var(--surface)', color: 'var(--muted)', cursor: hpCurrent <= 0 ? 'not-allowed' : 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 14, opacity: hpCurrent <= 0 ? 0.4 : 1, flexShrink: 0 }}>−</button>
+                <button type="button" aria-label="HP verlagen" onClick={() => updateHp.mutate(Math.max(0, hpCurrent - 1))} disabled={updateHp.isPending || hpCurrent <= 0} style={{ width: 32, height: 32, borderRadius: '50%', border: '1px solid var(--hairline)', background: 'var(--surface)', color: 'var(--muted)', cursor: hpCurrent <= 0 ? 'not-allowed' : 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 14, opacity: hpCurrent <= 0 ? 0.4 : 1, flexShrink: 0 }}>−</button>
                 <p style={{ fontFamily: 'var(--font-display)', fontSize: 22, fontWeight: 700, color: hpLow ? 'var(--crimson)' : 'var(--ink)', margin: 0, lineHeight: 1, flex: 1, textAlign: 'center' }}>
                   {hpCurrent}<span style={{ fontSize: 13, color: 'var(--muted)', fontWeight: 400 }}>/{hpMax}</span>
                 </p>
-                <button type="button" aria-label="HP verhogen" onClick={() => updateHp.mutate(Math.min(hpMax, hpCurrent + 1))} disabled={updateHp.isPending || hpCurrent >= hpMax} style={{ width: 22, height: 22, borderRadius: '50%', border: '1px solid var(--hairline)', background: 'var(--surface)', color: 'var(--muted)', cursor: hpCurrent >= hpMax ? 'not-allowed' : 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 14, opacity: hpCurrent >= hpMax ? 0.4 : 1, flexShrink: 0 }}>+</button>
+                <button type="button" aria-label="HP verhogen" onClick={() => updateHp.mutate(Math.min(hpMax, hpCurrent + 1))} disabled={updateHp.isPending || hpCurrent >= hpMax} style={{ width: 32, height: 32, borderRadius: '50%', border: '1px solid var(--hairline)', background: 'var(--surface)', color: 'var(--muted)', cursor: hpCurrent >= hpMax ? 'not-allowed' : 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 14, opacity: hpCurrent >= hpMax ? 0.4 : 1, flexShrink: 0 }}>+</button>
               </div>
               <div role="progressbar" aria-valuenow={hpCurrent} aria-valuemin={0} aria-valuemax={hpMax} aria-label={`${hpCurrent} van ${hpMax} HP`} style={{ height: 4, borderRadius: 2, background: 'var(--hairline)', overflow: 'hidden' }}>
                 <div style={{ height: '100%', width: `${hpPct}%`, background: hpLow ? 'var(--crimson)' : 'var(--teal)', borderRadius: 2, transition: 'width 0.3s var(--ease-out)' }} />
               </div>
               <div style={{ display: 'flex', alignItems: 'center', gap: 3 }}>
                 <span style={{ fontSize: 9, color: 'var(--muted)' }}>Temp:</span>
-                <button type="button" aria-label="Tijdelijke HP verlagen" onClick={() => updateTempHp.mutate(tempHp - 1)} disabled={updateTempHp.isPending || tempHp <= 0} style={{ width: 15, height: 15, borderRadius: '50%', border: '1px solid var(--hairline)', background: 'none', color: 'var(--muted)', cursor: tempHp <= 0 ? 'not-allowed' : 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 11, opacity: tempHp <= 0 ? 0.4 : 1 }}>−</button>
+                <button type="button" aria-label="Tijdelijke HP verlagen" onClick={() => updateTempHp.mutate(tempHp - 1)} disabled={updateTempHp.isPending || tempHp <= 0} style={{ width: 22, height: 22, borderRadius: '50%', border: '1px solid var(--hairline)', background: 'none', color: 'var(--muted)', cursor: tempHp <= 0 ? 'not-allowed' : 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 13, opacity: tempHp <= 0 ? 0.4 : 1 }}>−</button>
                 <span style={{ fontSize: 11, fontWeight: 700, color: 'var(--azure)', minWidth: 18, textAlign: 'center' }}>{tempHp}</span>
-                <button type="button" aria-label="Tijdelijke HP verhogen" onClick={() => updateTempHp.mutate(tempHp + 1)} disabled={updateTempHp.isPending} style={{ width: 15, height: 15, borderRadius: '50%', border: '1px solid var(--hairline)', background: 'none', color: 'var(--muted)', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 11 }}>+</button>
+                <button type="button" aria-label="Tijdelijke HP verhogen" onClick={() => updateTempHp.mutate(tempHp + 1)} disabled={updateTempHp.isPending} style={{ width: 22, height: 22, borderRadius: '50%', border: '1px solid var(--hairline)', background: 'none', color: 'var(--muted)', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 13 }}>+</button>
               </div>
             </div>
 
@@ -889,11 +934,42 @@ export default function CharacterDetailPage() {
               )}
             </div>
           </div>
+
+          {/* Quick rest action */}
+          <div>
+            <button
+              type="button"
+              onClick={() => longRest.mutate()}
+              disabled={longRest.isPending}
+              style={{
+                fontSize: 11, padding: '7px 14px', borderRadius: 8,
+                border: '1px solid var(--hairline)', background: 'var(--surface)',
+                color: 'var(--muted)', cursor: longRest.isPending ? 'wait' : 'pointer',
+                fontFamily: 'var(--font-body)', fontWeight: 700,
+                letterSpacing: '0.12em', textTransform: 'uppercase',
+                transition: 'all var(--t-fast)',
+                display: 'inline-flex', alignItems: 'center', gap: 6,
+              }}
+              onMouseEnter={(e) => {
+                const el = e.currentTarget as HTMLElement
+                el.style.borderColor = 'rgba(107,167,255,0.5)'
+                el.style.color = 'var(--azure)'
+              }}
+              onMouseLeave={(e) => {
+                const el = e.currentTarget as HTMLElement
+                el.style.borderColor = 'var(--hairline)'
+                el.style.color = 'var(--muted)'
+              }}
+            >
+              <span aria-hidden="true">☽</span>
+              {longRest.isPending ? 'Rusten...' : 'Lange Rust'}
+            </button>
+          </div>
         </div>
       </div>
 
       {/* ── Tabs ── */}
-      <div role="tablist" aria-label="Karakter tabs" className="pangu-tab-bar--line" style={{ marginBottom: 20 }}>
+      <div role="tablist" aria-label="Karakter tabs" className="pangu-tab-bar--line" style={{ marginBottom: 20, position: 'sticky', top: 0, zIndex: 20, background: 'var(--void)', paddingTop: 8, paddingBottom: 2, marginTop: -8 }}>
         {([
           { key: 'stats',        label: 'Stats' },
           { key: 'spreuken',     label: 'Spreuken' },
