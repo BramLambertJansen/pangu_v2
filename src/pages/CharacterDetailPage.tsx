@@ -21,6 +21,7 @@ import {
 } from '@/utils/equipmentUtils'
 import type { Character, SpellSlots, ClassResources } from '@/types/character.types'
 import type { EquipmentSlot, Item } from '@/types/item.types'
+import { sanitizeImageUrl } from '@/utils/sanitizeUrl'
 
 type Tab = 'stats' | 'spreuken' | 'inventaris' | 'vaardigheden' | 'lore'
 
@@ -739,12 +740,26 @@ export default function CharacterDetailPage() {
       {/* ── Hero header ── */}
       <div style={{ marginBottom: 24 }}>
         <div style={{ position: 'relative', borderRadius: 'var(--r-xl)', border: '1px solid var(--hairline)', overflow: 'hidden', height: 200, background: `${headerGradient}, var(--void)` }}>
-          {dots.map((dot, i) => (
-            <div key={i} aria-hidden="true" style={{ position: 'absolute', left: `${dot.x}%`, top: `${dot.y}%`, width: dot.size, height: dot.size, borderRadius: '50%', background: 'var(--ink)', opacity: dot.opacity, pointerEvents: 'none' }} />
-          ))}
-          <div aria-hidden="true" style={{ position: 'absolute', left: '50%', top: '50%', transform: 'translate(-50%,-50%)', fontFamily: 'var(--font-display)', fontSize: 'clamp(100px,18vw,160px)', fontWeight: 700, color: 'rgba(107,167,255,0.07)', lineHeight: 1, userSelect: 'none', pointerEvents: 'none' }}>
-            {character.name.charAt(0).toUpperCase()}
-          </div>
+          {sanitizeImageUrl(character.portrait_url) ? (
+            <img
+              src={sanitizeImageUrl(character.portrait_url)}
+              alt={character.name}
+              style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'center top' }}
+            />
+          ) : (
+            <>
+              {dots.map((dot, i) => (
+                <div key={i} aria-hidden="true" style={{ position: 'absolute', left: `${dot.x}%`, top: `${dot.y}%`, width: dot.size, height: dot.size, borderRadius: '50%', background: 'var(--ink)', opacity: dot.opacity, pointerEvents: 'none' }} />
+              ))}
+              <div aria-hidden="true" style={{ position: 'absolute', left: '50%', top: '50%', transform: 'translate(-50%,-50%)', fontFamily: 'var(--font-display)', fontSize: 'clamp(100px,18vw,160px)', fontWeight: 700, color: 'rgba(107,167,255,0.07)', lineHeight: 1, userSelect: 'none', pointerEvents: 'none' }}>
+                {character.name.charAt(0).toUpperCase()}
+              </div>
+            </>
+          )}
+          {/* Gradient scrim when portrait is shown, for legibility of the badge */}
+          {sanitizeImageUrl(character.portrait_url) && (
+            <div aria-hidden="true" style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to bottom, rgba(0,0,0,0.35) 0%, transparent 50%)', pointerEvents: 'none' }} />
+          )}
           <div style={{ position: 'absolute', top: 16, right: 16 }}>
             <span style={{ display: 'inline-flex', alignItems: 'center', padding: '3px 10px', borderRadius: 'var(--r-full)', fontSize: 10, fontWeight: 700, letterSpacing: '0.14em', textTransform: 'uppercase', color: characterStatusColor[character.status], border: `1px solid ${characterStatusColor[character.status]}55`, background: `${characterStatusColor[character.status]}11` }}>
               {characterStatusLabel[character.status]}

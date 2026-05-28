@@ -1,4 +1,5 @@
 import { useId, useCallback, useRef, KeyboardEvent } from 'react'
+import { sanitizeImageUrl } from '@/utils/sanitizeUrl'
 import { useParams, useNavigate, useLocation } from 'react-router-dom'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { toast } from 'sonner'
@@ -289,6 +290,7 @@ export default function CharacterEditPage() {
   const appearanceId = useId()
   const specialSensesId = useId()
   const concentrationSpellId = useId()
+  const portraitUrlId = useId()
 
   const locationState = location.state as { isNew?: boolean } | null
   const isNew = locationState?.isNew ?? false
@@ -435,6 +437,7 @@ export default function CharacterEditPage() {
           ideals:                     form.ideals ?? null,
           bonds:                      form.bonds ?? null,
           flaws:                      form.flaws ?? null,
+          portrait_url:               form.portrait_url ?? null,
           committed: true,
           updated_at: new Date().toISOString(),
         })
@@ -671,6 +674,35 @@ export default function CharacterEditPage() {
                 ))}
               </select>
             </div>
+          </div>
+
+          {/* Portrait URL */}
+          <div style={{ marginTop: 16 }}>
+            <label className="pangu-label" htmlFor={portraitUrlId}>Portret (URL)</label>
+            <input
+              id={portraitUrlId}
+              className="pangu-input"
+              type="url"
+              value={form.portrait_url ?? ''}
+              onChange={(e) => set('portrait_url', e.target.value || null)}
+              placeholder="https://..."
+            />
+            {sanitizeImageUrl(form.portrait_url) && (
+              <div style={{ marginTop: 12, display: 'flex', justifyContent: 'center' }}>
+                <img
+                  src={sanitizeImageUrl(form.portrait_url)}
+                  alt="Portret preview"
+                  style={{
+                    width: 120,
+                    height: 160,
+                    objectFit: 'cover',
+                    objectPosition: 'center top',
+                    borderRadius: 8,
+                    border: '1px solid var(--hairline)',
+                  }}
+                />
+              </div>
+            )}
           </div>
         </div>
 
