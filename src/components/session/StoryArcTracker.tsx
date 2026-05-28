@@ -4,6 +4,7 @@ import type { Session } from '@/types/session.types'
 import { Spinner } from '@/components/ui/Spinner'
 
 function toRoman(num: number): string {
+  if (num < 1 || num > 3999) return String(num)
   const val = [1000, 900, 500, 400, 100, 90, 50, 40, 10, 9, 5, 4, 1]
   const syms = ['M', 'CM', 'D', 'CD', 'C', 'XC', 'L', 'XL', 'X', 'IX', 'V', 'IV', 'I']
   let result = ''
@@ -32,7 +33,14 @@ interface Props {
 
 export const StoryArcTracker = memo(function StoryArcTracker({ sessions, onForge, forgeLoading }: Props) {
   const navigate = useNavigate()
-  const sorted = [...sessions].sort((a, b) => (a.session_number ?? 0) - (b.session_number ?? 0))
+  const sorted = [...sessions].sort((a, b) => {
+    const an = a.session_number
+    const bn = b.session_number
+    if (an == null && bn == null) return 0
+    if (an == null) return 1
+    if (bn == null) return -1
+    return an - bn
+  })
 
   return (
     <div>
