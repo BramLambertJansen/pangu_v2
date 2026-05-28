@@ -162,19 +162,29 @@ body {
 
 /* ── Tab bar ────────────────────────────────────────────── */
 
-.pangu-tab-bar {
+.pangu-tab-bar,
+.pangu-tab-bar--line {
   display: flex;
-  gap: 2px;
+  gap: 4px;
   padding: 4px;
   background: var(--void-2);
   border: 1px solid var(--hairline);
-  border-radius: var(--r-sm);
+  border-radius: var(--r-full);
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
 }
 
-.pangu-tab {
+.pangu-tab-bar::-webkit-scrollbar,
+.pangu-tab-bar--line::-webkit-scrollbar {
+  display: none;
+}
+
+.pangu-tab,
+.pangu-tab--line {
   flex: 1 0 auto;
-  padding: 10px 18px;
-  border-radius: 6px;
+  padding: 8px 20px;
+  border-radius: var(--r-full);
   font-size: 11px;
   font-weight: 700;
   letter-spacing: 0.18em;
@@ -186,69 +196,24 @@ body {
   border: none;
   cursor: pointer;
   font-family: var(--font-body);
-}
-
-.pangu-tab:hover {
-  color: var(--ink-soft);
-}
-
-.pangu-tab[aria-selected='true'] {
-  background: var(--violet);
-  color: var(--void);
-}
-
-.pangu-tab:focus-visible {
-  outline: 2px solid var(--violet);
-  outline-offset: 2px;
-}
-
-/* ── Tab bar underline variant ──────────────────────────── */
-
-.pangu-tab-bar--line {
-  display: flex;
-  gap: 0;
-  border-bottom: 1px solid var(--hairline);
-  overflow-x: auto;
-  -webkit-overflow-scrolling: touch;
-  scrollbar-width: none;
-}
-
-.pangu-tab-bar--line::-webkit-scrollbar {
-  display: none;
-}
-
-.pangu-tab--line {
-  flex: 0 0 auto;
-  background: none;
-  border: none;
-  border-bottom: 2px solid transparent;
-  color: var(--muted);
-  cursor: pointer;
-  font-size: 12px;
-  font-weight: 700;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-  font-family: var(--font-body);
-  padding: 10px 16px;
-  margin-bottom: -1px;
-  white-space: nowrap;
   min-height: 44px;
-  transition: color var(--t-fast), border-color var(--t-fast);
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
+.pangu-tab:hover,
 .pangu-tab--line:hover {
   color: var(--ink-soft);
 }
 
+.pangu-tab[aria-selected='true'],
 .pangu-tab--line[aria-selected='true'] {
-  border-bottom-color: var(--azure);
-  color: var(--ink);
+  background: var(--violet);
+  color: #fff;
 }
 
-[data-accent='gold'] .pangu-tab--line[aria-selected='true'] {
-  border-bottom-color: var(--gold);
-}
-
+.pangu-tab:focus-visible,
 .pangu-tab--line:focus-visible {
   outline: 2px solid var(--violet);
   outline-offset: 2px;
@@ -257,26 +222,11 @@ body {
 /* ── Tab bar — mobile responsive ────────────────────────── */
 
 @media (max-width: 767px) {
-  .pangu-tab-bar {
-    overflow-x: auto;
-    -webkit-overflow-scrolling: touch;
-    scrollbar-width: none;
-  }
-
-  .pangu-tab-bar::-webkit-scrollbar {
-    display: none;
-  }
-
-  .pangu-tab {
-    flex: 1 1 auto;
-    padding: 9px 11px;
-    letter-spacing: 0.1em;
-  }
-
+  .pangu-tab,
   .pangu-tab--line {
-    padding: 9px 12px;
-    font-size: 11px;
-    letter-spacing: 0.08em;
+    flex: 1 1 auto;
+    padding: 8px 12px;
+    letter-spacing: 0.1em;
   }
 }
 

@@ -152,7 +152,6 @@ export default function CampaignItemsPage() {
         <div
           role="tablist"
           aria-label="Items filteren"
-          data-accent="gold"
           className="pangu-tab-bar--line"
           style={{ marginBottom: 24 }}
         >
