@@ -43,6 +43,7 @@ const EncountersPage = lazy(() => import('@/pages/EncountersPage'))
 const EncounterDetailPage = lazy(() => import('@/pages/EncounterDetailPage'))
 const EncounterEditPage = lazy(() => import('@/pages/EncounterEditPage'))
 const CampaignItemsPage = lazy(() => import('@/pages/CampaignItemsPage'))
+const LootGeneratorPage = lazy(() => import('@/pages/LootGeneratorPage'))
 const ItemEditPage = lazy(() => import('@/pages/ItemEditPage'))
 
 function wrap(Page: React.ComponentType) {
@@ -246,6 +247,11 @@ export const router = createBrowserRouter([
         path: '/campaigns/:id/items',
         loader: requireAuth,
         element: wrap(CampaignItemsPage),
+      },
+      {
+        path: '/campaigns/:id/loot-generator',
+        loader: requireAuth,
+        element: wrap(LootGeneratorPage),
       },
       {
         path: '/items/:id/edit',
