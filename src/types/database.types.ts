@@ -444,6 +444,44 @@ export type Database = {
           notes: string | null
           status: string
           proficient_skills: string[]
+          saving_throw_proficiencies: string[] | null
+          expertise_skills: string[] | null
+          languages: string[] | null
+          tool_proficiencies: string[] | null
+          weapon_proficiencies: string[] | null
+          armor_proficiencies: string[] | null
+          inspiration: boolean | null
+          hit_die: string | null
+          hit_dice_current: number | null
+          death_save_successes: number | null
+          death_save_failures: number | null
+          exhaustion: number | null
+          alignment: string | null
+          personality_traits: string | null
+          ideals: string | null
+          bonds: string | null
+          flaws: string | null
+          temp_hp: number | null
+          spellcasting_ability: string | null
+          spell_slots: Json | null
+          concentrating: boolean | null
+          concentration_spell: string | null
+          feats: string[] | null
+          weapon_masteries: string[] | null
+          active_conditions: string[] | null
+          class_resources: Json | null
+          platinum: number | null
+          electrum: number | null
+          fly_speed: number | null
+          swim_speed: number | null
+          climb_speed: number | null
+          burrow_speed: number | null
+          darkvision: number | null
+          special_senses: string | null
+          age: string | null
+          height: string | null
+          weight: string | null
+          appearance: string | null
           committed: boolean
           created_at: string
           updated_at: string
@@ -479,6 +517,44 @@ export type Database = {
           notes?: string | null
           status?: string
           proficient_skills?: string[]
+          saving_throw_proficiencies?: string[] | null
+          expertise_skills?: string[] | null
+          languages?: string[] | null
+          tool_proficiencies?: string[] | null
+          weapon_proficiencies?: string[] | null
+          armor_proficiencies?: string[] | null
+          inspiration?: boolean | null
+          hit_die?: string | null
+          hit_dice_current?: number | null
+          death_save_successes?: number | null
+          death_save_failures?: number | null
+          exhaustion?: number | null
+          alignment?: string | null
+          personality_traits?: string | null
+          ideals?: string | null
+          bonds?: string | null
+          flaws?: string | null
+          temp_hp?: number | null
+          spellcasting_ability?: string | null
+          spell_slots?: Json | null
+          concentrating?: boolean | null
+          concentration_spell?: string | null
+          feats?: string[] | null
+          weapon_masteries?: string[] | null
+          active_conditions?: string[] | null
+          class_resources?: Json | null
+          platinum?: number | null
+          electrum?: number | null
+          fly_speed?: number | null
+          swim_speed?: number | null
+          climb_speed?: number | null
+          burrow_speed?: number | null
+          darkvision?: number | null
+          special_senses?: string | null
+          age?: string | null
+          height?: string | null
+          weight?: string | null
+          appearance?: string | null
           committed?: boolean
           created_at?: string
           updated_at?: string
@@ -514,6 +590,44 @@ export type Database = {
           notes?: string | null
           status?: string
           proficient_skills?: string[]
+          saving_throw_proficiencies?: string[] | null
+          expertise_skills?: string[] | null
+          languages?: string[] | null
+          tool_proficiencies?: string[] | null
+          weapon_proficiencies?: string[] | null
+          armor_proficiencies?: string[] | null
+          inspiration?: boolean | null
+          hit_die?: string | null
+          hit_dice_current?: number | null
+          death_save_successes?: number | null
+          death_save_failures?: number | null
+          exhaustion?: number | null
+          alignment?: string | null
+          personality_traits?: string | null
+          ideals?: string | null
+          bonds?: string | null
+          flaws?: string | null
+          temp_hp?: number | null
+          spellcasting_ability?: string | null
+          spell_slots?: Json | null
+          concentrating?: boolean | null
+          concentration_spell?: string | null
+          feats?: string[] | null
+          weapon_masteries?: string[] | null
+          active_conditions?: string[] | null
+          class_resources?: Json | null
+          platinum?: number | null
+          electrum?: number | null
+          fly_speed?: number | null
+          swim_speed?: number | null
+          climb_speed?: number | null
+          burrow_speed?: number | null
+          darkvision?: number | null
+          special_senses?: string | null
+          age?: string | null
+          height?: string | null
+          weight?: string | null
+          appearance?: string | null
           committed?: boolean
           created_at?: string
           updated_at?: string
