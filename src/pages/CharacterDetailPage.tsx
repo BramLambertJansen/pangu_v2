@@ -4,7 +4,6 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { toast } from 'sonner'
 import { supabase } from '@/lib/supabase'
 import { queryKeys } from '@/lib/queryKeys'
-import type { Json } from '@/types/database.types'
 import { Spinner } from '@/components/ui/Spinner'
 import { Breadcrumb } from '@/components/ui/Breadcrumb'
 import {
@@ -76,13 +75,13 @@ const SKILLS: Skill[] = [
   { name: 'Overtuigen',       ability: 'stat_cha', abbr: 'CHA' },
 ]
 
-const abilityScores: { key: keyof Character; abbr: string; label: string }[] = [
-  { key: 'stat_str', abbr: 'STR', label: 'Sterkte'      },
-  { key: 'stat_dex', abbr: 'DEX', label: 'Behendigheid' },
-  { key: 'stat_con', abbr: 'CON', label: 'Constitutie'  },
-  { key: 'stat_int', abbr: 'INT', label: 'Intelligentie'},
-  { key: 'stat_wis', abbr: 'WIS', label: 'Wijsheid'     },
-  { key: 'stat_cha', abbr: 'CHA', label: 'Charisma'     },
+const abilityScores: { key: keyof Character; abbr: string; label: string; englishLabel: string; savingThrowLabel: string }[] = [
+  { key: 'stat_str', abbr: 'STR', label: 'Sterkte',       englishLabel: 'Strength',     savingThrowLabel: 'Sterkte'       },
+  { key: 'stat_dex', abbr: 'DEX', label: 'Behendigheid',  englishLabel: 'Dexterity',    savingThrowLabel: 'Behendigheid'  },
+  { key: 'stat_con', abbr: 'CON', label: 'Constitutie',   englishLabel: 'Constitution', savingThrowLabel: 'Constitutie'   },
+  { key: 'stat_int', abbr: 'INT', label: 'Intelligentie', englishLabel: 'Intelligence', savingThrowLabel: 'Intelligentie' },
+  { key: 'stat_wis', abbr: 'WIS', label: 'Wijsheid',      englishLabel: 'Wisdom',       savingThrowLabel: 'Wijsheid'      },
+  { key: 'stat_cha', abbr: 'CHA', label: 'Charisma',      englishLabel: 'Charisma',     savingThrowLabel: 'Charisma'      },
 ]
 
 function abilityModifier(score: number): string {
@@ -580,7 +579,7 @@ export default function CharacterDetailPage() {
       }
       const { error } = await supabase
         .from('characters')
-        .update({ spell_slots: slots as unknown as Json, updated_at: new Date().toISOString() })
+        .update({ spell_slots: slots as Record<string, unknown>, updated_at: new Date().toISOString() })
         .eq('id', id!)
       if (error) throw error
     },
@@ -616,7 +615,7 @@ export default function CharacterDetailPage() {
       }
       const { error } = await supabase
         .from('characters')
-        .update({ class_resources: resources as unknown as Json, updated_at: new Date().toISOString() })
+        .update({ class_resources: resources as Record<string, unknown>, updated_at: new Date().toISOString() })
         .eq('id', id!)
       if (error) throw error
     },
@@ -1099,31 +1098,51 @@ export default function CharacterDetailPage() {
         )}
 
         {/* Ability scores */}
-        <div className="pangu-surface" style={{ padding: 24, marginBottom: 16 }}>
-          <p className="pangu-section-title" style={{ marginBottom: 16 }}>Eigenschappen</p>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 12 }}>
-            {abilityScores.map(({ key, abbr, label }) => {
-              const baseScore = character[key] as number
-              const effKey = key.replace('stat_', '') as 'str' | 'dex' | 'con' | 'int' | 'wis' | 'cha'
-              const effectiveScore = eff[effKey]
-              const bonus = effectiveScore - baseScore
-              const mod = abilityModifier(effectiveScore)
-              return (
-                <div key={key} title={label} style={{ background: 'var(--surface)', border: `1px solid ${bonus !== 0 ? 'rgba(62,207,178,0.35)' : 'var(--hairline)'}`, borderRadius: 10, padding: '14px 8px 12px', textAlign: 'center', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6 }}>
-                  <p style={{ fontSize: 10, fontWeight: 700, letterSpacing: '0.14em', textTransform: 'uppercase', color: 'var(--muted)', margin: 0 }}>{abbr}</p>
-                  <p style={{ fontFamily: 'var(--font-display)', fontSize: 28, fontWeight: 700, color: 'var(--gold)', margin: 0, lineHeight: 1 }}>{mod}</p>
-                  <div style={{ width: 28, height: 28, borderRadius: '50%', background: 'rgba(0,0,0,0.35)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                    <span style={{ fontFamily: 'var(--font-body)', fontSize: 11, fontWeight: 700, color: 'var(--ink-soft)' }}>{effectiveScore}</span>
-                  </div>
-                  {bonus !== 0 && (
-                    <span style={{ fontSize: 9, fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', color: 'var(--teal)' }}>
-                      {bonus > 0 ? `+${bonus}` : bonus} uitrusting
-                    </span>
-                  )}
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 12, marginBottom: 16 }}>
+          {abilityScores.map(({ key, label, englishLabel, savingThrowLabel }) => {
+            const baseScore = character[key] as number
+            const effKey = key.replace('stat_', '') as 'str' | 'dex' | 'con' | 'int' | 'wis' | 'cha'
+            const effectiveScore = eff[effKey]
+            const bonus = effectiveScore - baseScore
+            const mod = abilityModifier(effectiveScore)
+            const isSaveProficient = (character.saving_throw_proficiencies ?? []).includes(savingThrowLabel)
+            return (
+              <div
+                key={key}
+                title={label}
+                style={{
+                  background: 'var(--surface)',
+                  borderRadius: 16,
+                  border: `1px solid ${isSaveProficient ? 'rgba(212,175,55,0.35)' : 'var(--hairline)'}`,
+                  display: 'flex', flexDirection: 'column', alignItems: 'center',
+                  paddingTop: 28, paddingBottom: 24,
+                  position: 'relative', overflow: 'hidden',
+                  textAlign: 'center',
+                }}
+              >
+                <div aria-hidden="true" style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 3, background: isSaveProficient ? 'var(--gold)' : 'var(--violet)' }} />
+                <p style={{ margin: '0 0 14px', fontSize: 11, fontWeight: 700, letterSpacing: '0.2em', textTransform: 'uppercase', color: 'var(--muted)' }}>
+                  {englishLabel}
+                </p>
+                <p style={{ fontFamily: 'var(--font-display)', fontSize: 56, fontWeight: 700, color: 'var(--gold)', margin: '0 0 16px', lineHeight: 1 }}>
+                  {mod}
+                </p>
+                <div style={{ width: 40, height: 40, borderRadius: '50%', background: 'rgba(0,0,0,0.4)', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: isSaveProficient || bonus !== 0 ? 10 : 0 }}>
+                  <span style={{ fontFamily: 'var(--font-body)', fontSize: 14, fontWeight: 700, color: 'var(--ink-soft)' }}>{effectiveScore}</span>
                 </div>
-              )
-            })}
-          </div>
+                {bonus !== 0 && (
+                  <span style={{ fontSize: 9, fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', color: 'var(--teal)', marginBottom: isSaveProficient ? 6 : 0 }}>
+                    {bonus > 0 ? `+${bonus}` : bonus} uitrusting
+                  </span>
+                )}
+                {isSaveProficient && (
+                  <p style={{ margin: 0, fontSize: 10, fontWeight: 700, letterSpacing: '0.18em', textTransform: 'uppercase', color: 'var(--gold)' }}>
+                    SAVE PROF
+                  </p>
+                )}
+              </div>
+            )
+          })}
         </div>
 
         {/* Reddingsgooien */}
