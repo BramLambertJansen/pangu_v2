@@ -580,7 +580,7 @@ export default function CharacterDetailPage() {
       }
       const { error } = await supabase
         .from('characters')
-        .update({ spell_slots: slots as unknown as Json, updated_at: new Date().toISOString() })
+        .update({ spell_slots: slots as Record<string, unknown>, updated_at: new Date().toISOString() })
         .eq('id', id!)
       if (error) throw error
     },
@@ -616,7 +616,7 @@ export default function CharacterDetailPage() {
       }
       const { error } = await supabase
         .from('characters')
-        .update({ class_resources: resources as unknown as Json, updated_at: new Date().toISOString() })
+        .update({ class_resources: resources as Record<string, unknown>, updated_at: new Date().toISOString() })
         .eq('id', id!)
       if (error) throw error
     },
