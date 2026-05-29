@@ -11,6 +11,7 @@ export interface Campaign {
   header_image_position: string
   status: CampaignStatus
   notes: string | null
+  invite_code: string | null
   created_at: string
   updated_at: string
 }

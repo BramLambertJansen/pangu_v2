@@ -30,6 +30,11 @@ export const queryKeys = {
     encounterDetailFull: (encounterId: string) => ['encounters', encounterId, 'full'] as const,
     encounterMonsters: (encounterId: string) => ['encounters', encounterId, 'monsters'] as const,
     encounterMonstersFull: (encounterId: string) => ['encounters', encounterId, 'monsters-full'] as const,
+    invite: (id: string) => ['campaigns', id, 'invite'] as const,
+    members: (id: string) => ['campaigns', id, 'members'] as const,
+  },
+  invites: {
+    byCode: (code: string) => ['invites', 'code', code] as const,
   },
   characters: {
     all: ['characters'] as const,

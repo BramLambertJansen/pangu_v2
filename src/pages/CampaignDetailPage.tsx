@@ -25,6 +25,7 @@ import { useCampaignQuests } from '@/hooks/queries/useCampaignQuests'
 import { useCampaignEncounters } from '@/hooks/queries/useCampaignEncounters'
 import { useCampaignCharacters } from '@/hooks/queries/useCampaignCharacters'
 import { useCampaignItems } from '@/hooks/queries/useCampaignItems'
+import { InvitePanel } from '@/components/campaign/InvitePanel'
 import { pickGradient, coverGradients } from '@/utils/pickGradient'
 import { sanitizeImageUrl } from '@/utils/sanitizeUrl'
 import { campaignStatusLabel } from '@/lib/statusMaps'
@@ -136,9 +137,9 @@ function PartySection({
 const scrimGradient =
   'linear-gradient(to top, var(--void) 0%, rgba(10,10,22,0.97) 20%, rgba(10,10,22,0.72) 40%, rgba(10,10,22,0.18) 62%, transparent 82%)'
 
-type TabId = 'party' | 'sessions' | 'locations' | 'lore' | 'npcs' | 'quests' | 'encounters' | 'treasury' | 'notes'
+type TabId = 'party' | 'sessions' | 'locations' | 'lore' | 'npcs' | 'quests' | 'encounters' | 'treasury' | 'notes' | 'invite'
 
-const TABS: { id: TabId; label: string }[] = [
+const TABS: { id: TabId; label: string; dmOnly?: boolean }[] = [
   { id: 'party', label: 'The Party' },
   { id: 'sessions', label: 'Sessies' },
   { id: 'locations', label: 'Locaties' },
@@ -148,6 +149,7 @@ const TABS: { id: TabId; label: string }[] = [
   { id: 'encounters', label: 'Gevechten' },
   { id: 'treasury', label: 'Schatkist' },
   { id: 'notes', label: 'DM-notities' },
+  { id: 'invite', label: 'Uitnodigingen', dmOnly: true },
 ]
 
 export default function CampaignDetailPage() {
@@ -538,7 +540,7 @@ export default function CampaignDetailPage() {
           borderBottom: '1px solid var(--hairline)',
         }}
       >
-        {TABS.map(tab => (
+        {TABS.filter(tab => !tab.dmOnly || campaign.user_id === user?.id).map(tab => (
           <button
             key={tab.id}
             type="button"
@@ -952,6 +954,11 @@ export default function CampaignDetailPage() {
               </>
             )}
           </section>
+        )}
+
+        {/* Uitnodigingen */}
+        {activeTab === 'invite' && campaign.user_id === user?.id && (
+          <InvitePanel campaignId={id!} campaignName={campaign.name} />
         )}
 
         {/* DM-notities */}
