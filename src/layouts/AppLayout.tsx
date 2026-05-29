@@ -1,4 +1,4 @@
-import { Outlet, NavLink, Link, useNavigate } from 'react-router-dom'
+import { Outlet, NavLink, Link, useNavigate, useLocation } from 'react-router-dom'
 import { useUIStore } from '@/stores/ui.store'
 import { useAuthStore } from '@/stores/auth.store'
 import { useOnlineStatus } from '@/hooks/useOnlineStatus'
@@ -130,6 +130,7 @@ const settingsNavItem = {
 }
 
 export default function AppLayout() {
+  const location = useLocation()
   const sidebarCollapsed = useUIStore(s => s.sidebarCollapsed)
   const toggleSidebar = useUIStore(s => s.toggleSidebar)
   const profile = useAuthStore(s => s.profile)
@@ -440,7 +441,9 @@ export default function AppLayout() {
             />
           </button>
         </header>
-        <Outlet />
+        <div key={location.pathname} className="page-transition">
+          <Outlet />
+        </div>
       </main>
     </div>
   )
