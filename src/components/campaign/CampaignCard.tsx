@@ -49,13 +49,11 @@ export const CampaignCard = memo(function CampaignCard({ campaign }: Props) {
       style={{
         background: 'var(--surface)',
         borderRadius: 'var(--r-xl)',
-        border: '1px solid rgba(245,180,50,0.28)',
         overflow: 'hidden',
         cursor: 'pointer',
         display: 'flex',
         flexDirection: 'column',
         outline: 'none',
-        transition: 'border-color 0.22s var(--ease-out), box-shadow 0.22s var(--ease-out), transform 0.22s var(--ease-out)',
       }}
       className="campaign-card"
     >

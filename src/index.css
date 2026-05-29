@@ -959,10 +959,23 @@ body {
 
 /* ── Campaign card (custom hero variant) ────────────────── */
 
+.campaign-card {
+  border-top: 1px solid rgba(245,180,50,0.28);
+  border-right: 1px solid rgba(245,180,50,0.28);
+  border-bottom: 1px solid rgba(245,180,50,0.28);
+  border-left: 3px solid rgba(245,180,50,0.55);
+  transition:
+    border-color 0.22s var(--ease-out),
+    border-left-color 0.22s var(--ease-out),
+    box-shadow 0.22s var(--ease-out),
+    transform 0.22s var(--ease-out);
+}
+
 .campaign-card:hover {
   border-color: rgba(245,180,50,0.85);
+  border-left-color: rgba(245,180,50,1);
   box-shadow:
-    0 0 0 1px rgba(245,180,50,0.55),
+    0 0 0 2px rgba(245,180,50,0.45),
     0 8px 32px rgba(0,0,0,0.45),
     0 0 28px rgba(245,180,50,0.12);
   transform: translateY(-2px);
