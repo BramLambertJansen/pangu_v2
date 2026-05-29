@@ -89,7 +89,10 @@ src/
 │   ├── quest/
 │   │   └── QuestCard.tsx
 │   ├── session/
-│   │   └── SessionCard.tsx   # SessionCard + ForgeSessionCard
+│   │   ├── DmPlayerNotesPanel.tsx # DM-overzicht van alle spelernotities per sessie
+│   │   ├── PlayerNotepad.tsx      # Speler-notitieblok met autosave + karakter-koppeling
+│   │   ├── SessionCard.tsx        # SessionCard + ForgeSessionCard
+│   │   └── StoryArcTracker.tsx    # Tijdlijn-visualisatie van sessies (Romeinse nummers)
 │   └── world/
 │       ├── CompassRose.tsx
 │       ├── WorldCard.tsx      # WorldCard + ForgeWorldCard
@@ -103,10 +106,10 @@ src/
 │   ├── useOnlineStatus.ts   # Browser online/offline status via navigator.onLine + events
 │   ├── useUnsavedChangesPrompt.ts # Browser beforeunload dialog
 │   └── queries/             # TanStack Query custom hooks (1 per entity)
-│       ├── useCampaign.ts
+│       ├── useCampaign.ts           # + useCampaignWithWorld export
 │       ├── useCampaignCharacters.ts
 │       ├── useCampaignEncounters.ts
-│       ├── useCampaignItems.ts
+│       ├── useCampaignItems.ts      # + useCreateCampaignItem export
 │       ├── useCampaignLocations.ts
 │       ├── useCampaignLore.ts
 │       ├── useCampaignNpcs.ts
@@ -114,7 +117,10 @@ src/
 │       ├── useCampaignSessions.ts
 │       ├── useCharacterItems.ts
 │       ├── useCharacters.ts
+│       ├── useEncounterMonsters.ts  # Encounter monsters + bestiary join; EncounterMonsterFull type
+│       ├── usePlayerNotes.ts        # useMySessionNote, useSessionPlayerNotes, useSavePlayerNote
 │       ├── useSession.ts
+│       ├── useUserAISettings.ts     # Fetch + mutate user_ai_settings; useSetByokKey
 │       ├── useWorld.ts
 │       └── useWorldBestiaries.ts
 ├── layouts/
@@ -128,7 +134,7 @@ src/
 │   ├── statusMaps.ts         # Status label + kleurkaarten (alle entiteiten)
 │   ├── supabase.ts           # Supabase client (getypeerd via Database); in DEV_MODE gewrapped via adapter
 │   └── supabaseLocal.ts      # Supabase-compatible localStorage adapter voor DEV_MODE (LocalQueryBuilder)
-├── pages/                   # 38 pagina-componenten (lazy-loaded via routes)
+├── pages/                   # 40 pagina-componenten (lazy-loaded via routes)
 │   ├── AdminPage.tsx
 │   ├── BestiariesPage.tsx
 │   ├── BestiaryDetailPage.tsx
@@ -143,12 +149,14 @@ src/
 │   ├── DashboardPage.tsx
 │   ├── EncounterDetailPage.tsx
 │   ├── EncounterEditPage.tsx
+│   ├── EncounterRunPage.tsx  # Live gevechtsrunner: initiatiefvolgorde, HP tracking, d20 rolls
 │   ├── EncountersPage.tsx
 │   ├── ItemEditPage.tsx
 │   ├── LocationDetailPage.tsx
 │   ├── LocationEditPage.tsx
 │   ├── LocationsPage.tsx
 │   ├── LoginPage.tsx
+│   ├── LootGeneratorPage.tsx # AI-aangedreven itemgenerator met bulk-aanmaken
 │   ├── LoreDetailPage.tsx
 │   ├── LoreEditPage.tsx
 │   ├── LoresPage.tsx
@@ -194,6 +202,7 @@ src/
 │   ├── location.types.ts
 │   ├── lore.types.ts
 │   ├── npc.types.ts
+│   ├── player_note.types.ts  # PlayerNote + PlayerNoteWithCharacter
 │   ├── quest.types.ts
 │   ├── session.types.ts
 │   └── world.types.ts
@@ -265,6 +274,11 @@ Elk feature-domein heeft een map: `campaign/`, `session/`, `world/`, `admin/`, `
 
 **Forge-patroon:** elke lijst heeft een `Forge[Entity]Card` naast `[Entity]Card`. De ForgeCard is een placeholder-kaart waarmee een nieuwe entiteit direct aangemaakt wordt (click → mutation → redirect naar edit). De generieke `ForgeCard` UI-component is de basis; feature-specifieke ForgeCards wikkelen hier een mutation omheen.
 
+**Sessie-specifieke componenten (`src/components/session/`):**
+- `DmPlayerNotesPanel` — DM-overzicht van alle spelernotities voor een sessie; collapsibele notitiekaarten met karakter-koppeling
+- `PlayerNotepad` — speler-notitieblok met debounced autosave, karakter-associatie en tijdstempel van laatste opslag
+- `StoryArcTracker` — tijdlijn-visualisatie van alle sessies in een kroniek; sessienummers als Romeinse cijfers; `onForge` callback voor nieuwe sessie
+
 ### Generieke hooks (`src/hooks/`)
 
 - **`useEntityEdit<T>`** — standaard edit-form state: `form`, `set(key, value)`, `dirty`, `committed`, `deleteOpen`, `resetForm`, `guard`. Gebruik voor alle edit-pagina's.
@@ -279,8 +293,11 @@ Elk feature-domein heeft een map: `campaign/`, `session/`, `world/`, `admin/`, `
 Eén hook per entity type. Elke query hook bevat typisch `useQuery` voor fetching en `useMutation` met cache-invalidatie. Importeer via:
 
 ```ts
-import { useCampaign } from '@/hooks/queries/useCampaign'
+import { useCampaign, useCampaignWithWorld } from '@/hooks/queries/useCampaign'
 import { useWorldBestiaries } from '@/hooks/queries/useWorldBestiaries'
+import { useEncounterMonsters } from '@/hooks/queries/useEncounterMonsters'
+import { useMySessionNote, useSessionPlayerNotes, useSavePlayerNote } from '@/hooks/queries/usePlayerNotes'
+import { useUserAISettings, useSetByokKey } from '@/hooks/queries/useUserAISettings'
 ```
 
 ---
@@ -347,6 +364,8 @@ Gebruik altijd `statusMaps` voor het weergeven van statussen — nooit hardcoded
 ### Header-afbeelding positie
 
 `WorldEditPage` en `CampaignEditPage` ondersteunen drag-to-reposition van de header-afbeelding via `useImagePositioning` (mouse + touch events). De positie wordt opgeslagen als `"X% Y%"` string en teruggelezen als `object-position` op het `<img>`-element.
+
+Hetzelfde patroon geldt voor **karakterportretten**: `portrait_url` + `portrait_position` op de `characters`-tabel (migraties 033–034); drag-reposition via `useImagePositioning`.
 
 ---
 
@@ -481,6 +500,10 @@ interface ItemStatBonuses { ac_bonus?, str_bonus?, dex_bonus?, con_bonus?, int_b
 // character.types.ts
 type CharacterStatus = 'active' | 'inactive' | 'retired' | 'archived'
 
+// player_note.types.ts
+interface PlayerNote { id, session_id, user_id, character_id, content, updated_at }
+interface PlayerNoteWithCharacter extends PlayerNote { character: { name, character_class } | null }
+
 // ai.ts
 type Provider = 'groq' | 'gemini' | 'anthropic' | 'openai'
 interface AIResponse { reply, provider, model, window_remaining }
@@ -504,6 +527,7 @@ interface ErrorResponse { error, code, window_resets_at? }
 | `encounter_monsters` | encounter | Junction: wezens met aantallen per encounter |
 | `items` | campaign | Items/loot (DM-pool of toegewezen aan karakter) |
 | `quests` | campaign | Quests binnen een kroniek |
+| `player_notes` | session | Spelernotities per sessie (unique per session_id + user_id) |
 
 Alle tabellen hebben `committed boolean DEFAULT false` — bestaande rijen zijn `true`, nieuwe forge-aanmaak start als `false` (redirect naar edit voor invulling).
 
@@ -528,21 +552,24 @@ Alle tabellen hebben `committed boolean DEFAULT false` — bestaande rijen zijn 
 | 015 | `015_bestiaries.sql` | Bestiaries tabel + RLS + index op `(world_id, created_at DESC)` |
 | 016 | `016_fix_characters_updated_at.sql` | Fix `updated_at` trigger voor characters |
 | 017 | `017_avatar.sql` | Avatar kolom op profiles |
-| 017 | `017_quests.sql` | Quests tabel + RLS |
-| 018 | `018_campaign_id_to_characters.sql` | `campaign_id` FK op characters |
-| 018 | `018_encounters.sql` | Encounters + `encounter_monsters` junction tabel + RLS |
-| 019 | `019_items.sql` | Items tabel + RLS |
-| 020 | `020_characters_proficient_skills.sql` | `proficient_skills text[]` op characters |
-| 020 | `020_profile_ai_keys.sql` | `byok_keys jsonb` op profiles (Anthropic + OpenAI) |
-| 021 | `021_ai_usage.sql` | `ai_usage` + `ai_org_usage` tabellen + RLS + atomische RPC-functies |
-| 021 | `021_worlds_campaigns_notes.sql` | `notes text` kolom op worlds en campaigns |
-| 022 | `022_committed_column.sql` | `committed boolean` op alle entity-tabellen |
-| 023 | `023_item_equipped_slot.sql` | `equipped_slot text` op items + unique index per (character_id, slot) |
-| 024 | `024_atomic_ai_claim.sql` | `claim_ai_request()` PostgreSQL functie — atomische rate-limit claim (check + increment in één statement) |
-| 025 | `025_encounter_monsters_rls.sql` | Fix `encounter_monsters` RLS: encounter ownership verificatie toegevoegd aan policy |
-| 026 | `026_org_usage_upsert.sql` | Fix `increment_org_groq_usage()`: UPSERT i.p.v. bare UPDATE om stille nul-rijen te voorkomen |
-| 027 | `027_character_proficiencies.sql` | D&D 5.5e: 15 kolommen op characters — saving throws, expertise, talen, bekwaamheden, inspiration, hit die, death saves, exhaustion, uitlijning, roleplay traits |
-| 028 | `028_character_extended.sql` | D&D 5.5e uitbreiding: temp HP, spreuken (spell_slots jsonb), concentratie, feats, weapon masteries, condities, klasseresources, platina/elektrum, alternatieve snelheden, zintuigen, uiterlijk |
+| 018 | `018_quests.sql` | Quests tabel + RLS |
+| 019 | `019_campaign_id_to_characters.sql` | `campaign_id` FK op characters |
+| 020 | `020_encounters.sql` | Encounters + `encounter_monsters` junction tabel + RLS |
+| 021 | `021_items.sql` | Items tabel + RLS |
+| 022 | `022_characters_proficient_skills.sql` | `proficient_skills text[]` op characters |
+| 023 | `023_profile_ai_keys.sql` | `byok_keys jsonb` op profiles (Anthropic + OpenAI) |
+| 024 | `024_ai_usage.sql` | `ai_usage` + `ai_org_usage` tabellen + RLS + atomische RPC-functies |
+| 025 | `025_worlds_campaigns_notes.sql` | `notes text` kolom op worlds en campaigns |
+| 026 | `026_committed_column.sql` | `committed boolean` op alle entity-tabellen |
+| 027 | `027_item_equipped_slot.sql` | `equipped_slot text` op items + unique index per (character_id, slot) |
+| 028 | `028_atomic_ai_claim.sql` | `claim_ai_request()` PostgreSQL functie — atomische rate-limit claim (check + increment in één statement) |
+| 029 | `029_encounter_monsters_rls.sql` | Fix `encounter_monsters` RLS: encounter ownership verificatie toegevoegd aan policy |
+| 030 | `030_org_usage_upsert.sql` | Fix `increment_org_groq_usage()`: UPSERT i.p.v. bare UPDATE om stille nul-rijen te voorkomen |
+| 031 | `031_character_proficiencies.sql` | D&D 5.5e: 15 kolommen op characters — saving throws, expertise, talen, bekwaamheden, inspiration, hit die, death saves, exhaustion, uitlijning, roleplay traits |
+| 032 | `032_character_extended.sql` | D&D 5.5e uitbreiding: temp HP, spreuken (spell_slots jsonb), concentratie, feats, weapon masteries, condities, klasseresources, platina/elektrum, alternatieve snelheden, zintuigen, uiterlijk |
+| 033 | `033_character_portrait.sql` | `portrait_url text` kolom op characters |
+| 034 | `034_character_portrait_position.sql` | `portrait_position text DEFAULT 'center'` kolom op characters |
+| 035 | `035_player_notes.sql` | `player_notes` tabel + RLS: spelers zien eigen notities, DM ziet alle notities voor campaign-sessies; unique index op (session_id, user_id) |
 
 ---
 
@@ -598,6 +625,7 @@ Routes zijn gedefinieerd in `src/routes/index.tsx`. Lazy-loading voor alle pagin
 | `/campaigns/:id/quests` | `QuestsPage` | `requireAuth` |
 | `/campaigns/:id/encounters` | `EncountersPage` | `requireAuth` |
 | `/campaigns/:id/items` | `CampaignItemsPage` | `requireAuth` |
+| `/campaigns/:id/loot-generator` | `LootGeneratorPage` | `requireAuth` |
 | `/sessions/:id` | `SessionDetailPage` | `requireAuth` |
 | `/sessions/:id/edit` | `SessionEditPage` | `requireAuth` |
 | `/locations/:id` | `LocationDetailPage` | `requireAuth` |
@@ -613,6 +641,7 @@ Routes zijn gedefinieerd in `src/routes/index.tsx`. Lazy-loading voor alle pagin
 | `/quests/:id/edit` | `QuestEditPage` | `requireAuth` |
 | `/encounters/:id` | `EncounterDetailPage` | `requireAuth` |
 | `/encounters/:id/edit` | `EncounterEditPage` | `requireAuth` |
+| `/encounters/:id/run` | `EncounterRunPage` | `requireAuth` |
 | `/characters` | `CharactersPage` | `requireAuth` |
 | `/characters/:id` | `CharacterDetailPage` | `requireAuth` |
 | `/characters/:id/edit` | `CharacterEditPage` | `requireAuth` |
@@ -749,7 +778,7 @@ npm run test         # Vitest
 - [x] Voorkeuren-tab — sessieherinneringen, geluidseffecten, autosave, lore-suggesties, taal (nl/en/de/fr)
 - [x] Info-tab — PANGU branding, versie, status, licentie
 - [x] Preferences store (Zustand, per-gebruiker geïsoleerd via user ID)
-- [x] BYOK keys — Anthropic + OpenAI API keys opslaan via `byok_keys jsonb` op profiel (`020_profile_ai_keys.sql`)
+- [x] BYOK keys — Anthropic + OpenAI API keys opslaan via `byok_keys jsonb` op profiel (`023_profile_ai_keys.sql`)
 
 ### Dashboard
 - [x] Dashboard pagina `/dashboard` — recent: 4 werelden, 4 actieve campaigns, 6 geplande sessies
@@ -759,7 +788,7 @@ npm run test         # Vitest
 ### Werelden (DM)
 - [x] Worlds tabel + RLS (`003_worlds.sql`)
 - [x] Header image positie (`004_worlds_header_image_position.sql`)
-- [x] DM-notities kolom (`021_worlds_campaigns_notes.sql`)
+- [x] DM-notities kolom (`025_worlds_campaigns_notes.sql`)
 - [x] Werelden overzicht `/worlds` — grid met WorldCard + ForgeWorldCard, lege staat, responsief
 - [x] Wereld aanmaken — direct aanmaken + redirect naar bewerken
 - [x] Wereld bewerken `/worlds/:id/edit` — naam, subtitle, quote, beschrijving, DM-notities, header image + drag-to-reposition, status
@@ -770,7 +799,7 @@ npm run test         # Vitest
 ### Campaigns (DM)
 - [x] Campaigns tabel + RLS (`005_campaigns.sql`)
 - [x] Campaign header image (`006_campaigns_header_image.sql`)
-- [x] DM-notities kolom (`021_worlds_campaigns_notes.sql`)
+- [x] DM-notities kolom (`025_worlds_campaigns_notes.sql`)
 - [x] Campaign aanmaken (vanuit wereld detail, "+ Nieuwe kroniek") → direct redirect naar bewerken
 - [x] Campaign bewerken `/campaigns/:id/edit` — volledig formulier, DM-notities, drag-to-reposition, status
 - [x] Campaign verwijderen — met bevestigingsdialoog
@@ -785,6 +814,8 @@ npm run test         # Vitest
 - [x] Sessie bewerken `/sessions/:id/edit` — naam, subtitle, sessienummer, datum, status, beschrijving, DM-notities
 - [x] Sessie-detailpagina `/sessions/:id` — breadcrumbs, header met sessienummer-, datum- en statusbadge, beschrijving, DM-notities
 - [x] Sessie verwijderen — met bevestigingsdialoog
+- [x] Spelernotities (`035_player_notes.sql`) — `PlayerNotepad` component met debounced autosave; `DmPlayerNotesPanel` voor DM-overzicht; `usePlayerNotes` query hook
+- [x] Verhaallijntijdlijn — `StoryArcTracker` component met Romeinse sessienummers + `onForge` callback
 
 ### Wereld — Locaties
 - [x] Locations tabel + RLS (`008_locations.sql`)
@@ -815,7 +846,7 @@ npm run test         # Vitest
 
 ### Karakter (Spelersperspectief)
 - [x] Characters tabel + RLS (`014_characters.sql`) — global per user, full D&D stat block
-- [x] `campaign_id` op characters (`018_campaign_id_to_characters.sql`) — karakter koppelen aan één kroniek
+- [x] `campaign_id` op characters (`019_campaign_id_to_characters.sql`) — karakter koppelen aan één kroniek
 - [x] Karakters overzicht `/characters` — grid met CharacterCard + ForgeCharacterCard, zoekfilter
 - [x] Karakter aanmaken — direct aanmaken + redirect naar bewerken
 - [x] Karakter bewerken `/characters/:id/edit` — naam, klasse, subklasse, ras, level, XP, HP, AC, snelheid, initiatief, vaardigheidsbonus, 6 eigenschappen, vaardigheden (18 skills), schatkist, achtergrond, privénotities, kroniek-koppeling
@@ -823,28 +854,29 @@ npm run test         # Vitest
 - [x] Karakter verwijderen — met bevestigingsdialoog
 - [x] Navigatie-item "Karakters" in sidebar
 - [x] Karakters zichtbaar in kroniek-detailpagina (via campaign_id)
-- [x] Vaardigheden (skill proficiencies) — `proficient_skills text[]` op characters (`020_characters_proficient_skills.sql`); 18 D&D 5e vaardigheden, klikbare toggle in edit, berekende modifiers in detail
-- [x] D&D 5.5e — reddingsgooien, expertise, talen & bekwaamheden (`027_character_proficiencies.sql`); 3-state vaardigheids-cycle (geen → proficient → expertise); saving throw toggles; TagInput voor talen/wapens/uitrustingen/tools
-- [x] D&D 5.5e — uitgebreide gevechtsstate (`027`/`028`): temp HP, inspiratie, hit dice, death saves (klikbare pips), exhaustion badge
-- [x] D&D 5.5e — spreuken (`028_character_extended.sql`): spreuk-DC + aanvalsbonus, spreukslots 1-9 als klikbare pips, concentratie toggle; volledig Spreuken-tab in detailpagina
-- [x] D&D 5.5e — klasseresources (`028`): vrij configureerbare resources (Ki-punten, Woede, etc.) met ±1 widget in detailpagina
+- [x] Vaardigheden (skill proficiencies) — `proficient_skills text[]` op characters (`022_characters_proficient_skills.sql`); 18 D&D 5e vaardigheden, klikbare toggle in edit, berekende modifiers in detail
+- [x] D&D 5.5e — reddingsgooien, expertise, talen & bekwaamheden (`031_character_proficiencies.sql`); 3-state vaardigheids-cycle (geen → proficient → expertise); saving throw toggles; TagInput voor talen/wapens/uitrustingen/tools
+- [x] D&D 5.5e — uitgebreide gevechtsstate (`031`/`032`): temp HP, inspiratie, hit dice, death saves (klikbare pips), exhaustion badge
+- [x] D&D 5.5e — spreuken (`032_character_extended.sql`): spreuk-DC + aanvalsbonus, spreukslots 1-9 als klikbare pips, concentratie toggle; volledig Spreuken-tab in detailpagina
+- [x] D&D 5.5e — klasseresources (`032`): vrij configureerbare resources (Ki-punten, Woede, etc.) met ±1 widget in detailpagina
 - [x] D&D 5.5e — feats & weapon masteries als TagInput; uiterlijk (leeftijd/lengte/gewicht); alternatieve snelheden + duisterzicht; platina + elektrum valuta
 - [x] D&D 5.5e — condities picker (17 condities) in Stats-tab van detailpagina
+- [x] Karakterportret — `portrait_url` + `portrait_position` op characters (`033`/`034_character_portrait*.sql`); drag-to-reposition via `useImagePositioning`
 
 ### Items / Schatkist
-- [x] Items tabel + RLS (`019_items.sql`) — campaign-scoped, character_id nullable (DM-pool vs toegewezen)
+- [x] Items tabel + RLS (`021_items.sql`) — campaign-scoped, character_id nullable (DM-pool vs toegewezen)
 - [x] Item aanmaken vanuit kroniek-detailpagina — ForgeItemCard → redirect naar bewerken
 - [x] Item bewerken `/items/:id/edit` — naam, type, zeldzaamheid, magisch, aantal, gewicht, beschrijving, toewijzen aan karakter
 - [x] Items overzicht per kroniek `/campaigns/:id/items` — filter op alles/schatkist/karakter
 - [x] Items in kroniek-detailpagina (DM-pool preview max 6 + "Alle items bekijken →")
 - [x] Inventaris-tab in karakter-detailpagina — lijst van toegewezen items + "Teruggeven aan DM"
 - [x] ItemCard + ForgeItemCard component (`src/components/item/ItemCard.tsx`)
-- [x] Equipment slots — `equipped_slot text` op items (`023_item_equipped_slot.sql`); 10 slots (head/neck/chest/cloak/gloves/ring1/ring2/boots/main_hand/off_hand); uniek per character via partial index
+- [x] Equipment slots — `equipped_slot text` op items (`027_item_equipped_slot.sql`); 10 slots (head/neck/chest/cloak/gloves/ring1/ring2/boots/main_hand/off_hand); uniek per character via partial index
 - [x] `EquipmentSlot` type + `ItemStatBonuses` interface in `src/types/item.types.ts`
 - [x] `equipmentUtils.ts` — slot-labels (NL), slot-icons, `ALLOWED_SLOTS_BY_TYPE`, `calculateEffectiveStats`, `getEquippedItemsBySlot`, `formatItemBonuses`
 
 ### Wereld — Quests
-- [x] Quests tabel + RLS (`017_quests.sql`) — campaign-scoped, status (draft/active/completed/failed/archived)
+- [x] Quests tabel + RLS (`018_quests.sql`) — campaign-scoped, status (draft/active/completed/failed/archived)
 - [x] Quest-overzicht per campaign `/campaigns/:id/quests` — grid met QuestCard + ForgeQuestCard, lege staat
 - [x] Quest aanmaken — direct aanmaken + redirect naar bewerken
 - [x] Quest bewerken `/quests/:id/edit` — naam, subtitel, type, moeilijkheidsgraad, status, beloning, beschrijving, DM-notities
@@ -853,7 +885,7 @@ npm run test         # Vitest
 - [x] Quest-preview in kroniek-detailpagina (inline grid + "Alle quests bekijken →")
 
 ### Gevechten — Encounter Builder
-- [x] Encounters tabel + RLS + `session_id` FK (`018_encounters.sql`)
+- [x] Encounters tabel + RLS + `session_id` FK (`020_encounters.sql`)
 - [x] `encounter_monsters` junction tabel + RLS
 - [x] Gevechten-overzicht per kroniek `/campaigns/:id/encounters` — grid met EncounterCard + ForgeEncounterCard
 - [x] Gevecht aanmaken — direct aanmaken + redirect naar bewerken
@@ -862,21 +894,23 @@ npm run test         # Vitest
 - [x] Gevecht-detailpagina `/encounters/:id` — breadcrumbs, header met moeilijkheid- en omgevingsbadges, monsters-tabel met stats, beschrijving, DM-notities
 - [x] Gevecht verwijderen — met bevestigingsdialoog (cascade verwijdert encounter_monsters)
 - [x] Gevechten-preview in kroniek-detailpagina (max 3 + "Alle gevechten bekijken →")
+- [x] Live gevechtsrunner `/encounters/:id/run` — initiatiefvolgorde (d20 + DEX modifier), HP-balk met kleurovergang (teal→goud→crimson), ±HP controls, deelnemersbeheer (characters + monsters + handmatig), rondenteller
 
 ### AI-integratie (Lore Forge)
 - [x] Supabase Edge Function `ai-chat` (`supabase/functions/ai-chat/`)
   - [x] Cascaderende free-tier providers: Groq (llama-3.3-70b) → Gemini 2.5 Flash-Lite
   - [x] Per-user rate limiting via `ai_usage` tabel (configureerbaar via `config.ts`)
   - [x] Org-level Groq soft cap via `ai_org_usage` tabel
-  - [x] BYOK: keys opgeslagen in `user_ai_settings.byok_keys` (gelezen + geschreven via `useUserAISettings` / `useSetByokKey` hooks)
+  - [x] BYOK: keys opgeslagen in `profiles.byok_keys` (gelezen + geschreven via `useUserAISettings` / `useSetByokKey` hooks)
   - [x] `useAI()` hook (`src/hooks/useAI.ts`) + types (`src/types/ai.ts`)
-  - [x] Migraties `021_ai_usage.sql` + `024_atomic_ai_claim.sql` — atomische rate-limit claim via `claim_ai_request()` RPC
-  - [x] `025_encounter_monsters_rls.sql` — fix: encounter ownership verificatie in `encounter_monsters` policy
-  - [x] `026_org_usage_upsert.sql` — fix: `increment_org_groq_usage()` gebruikt UPSERT
+  - [x] Migraties `024_ai_usage.sql` + `028_atomic_ai_claim.sql` — atomische rate-limit claim via `claim_ai_request()` RPC
+  - [x] `029_encounter_monsters_rls.sql` — fix: encounter ownership verificatie in `encounter_monsters` policy
+  - [x] `030_org_usage_upsert.sql` — fix: `increment_org_groq_usage()` gebruikt UPSERT
   - [x] Groq→Gemini cascade fallback bij provider errors (inner try-catch in `index.ts`)
 - [x] Admin AI-testpaneel (`/admin`) — provider-badge, model-naam, resterend-verzoeken-teller
 - [x] Content genereren voor locaties (UI integratie)
 - [x] Content genereren voor NPCs (UI integratie)
 - [x] Content genereren voor lore (UI integratie)
 - [x] Wereldbouwer pagina `/worlds/:id/world-builder` — vrije prompt + 6 snelkoppelingen (Locatie, NPC, Quest, Wending, Gerucht, Buit); world-context wordt automatisch prepended; kopieer-knop + "Opnieuw genereren"; provider/model badge in response; Ctrl/Cmd+Enter om te genereren
+- [x] AI Lootgenerator `/campaigns/:id/loot-generator` — contextprompt + 5 snelkoppelingen (Kerkerbuit, Quest beloning, Bandietenleider, Toverdrankjes, Oud artefact); AI genereert JSON-array van items; bulk-aanmaken via `useCreateCampaignItem`; individueel verwijderen vóór opslaan
 - [x] Consistentiecheck op gegenereerde content — "Consistentiecheck" knop in Wereldbouwer na generatie; tweede AI-call toetst de gegenereerde tekst op consistentie met de wereld-context; resultaat getoond in teal-sectie onder het antwoord
