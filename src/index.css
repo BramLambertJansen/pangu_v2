@@ -957,6 +957,19 @@ body {
   background: var(--void-2);
 }
 
+/* ── Campaign card (custom hero variant) ────────────────── */
+
+.campaign-card:hover {
+  border-color: var(--hairline-strong);
+  box-shadow: 0 8px 32px rgba(0,0,0,0.45), 0 0 0 1px var(--hairline-strong);
+  transform: translateY(-2px);
+}
+
+.campaign-card:focus-visible {
+  outline: 2px solid var(--violet);
+  outline-offset: 2px;
+}
+
 /* ── Forge cards ─────────────────────────────────────────── */
 
 .forge-card {
