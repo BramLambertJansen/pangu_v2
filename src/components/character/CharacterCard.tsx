@@ -7,6 +7,8 @@ import { characterStatusLabel, characterStatusColor } from '@/lib/statusMaps'
 
 interface Props {
   character: Character
+  selected?: boolean
+  onSelect?: () => void
 }
 
 // ── CharacterCard ─────────────────────────────────────────────────────────────
@@ -266,7 +268,8 @@ export const CharacterCard = memo(function CharacterCard({ character }: Props) {
 
 // ── PartyMemberRow ────────────────────────────────────────────────────────────
 // Horizontal character card used in campaign / session "The Party" sections.
-export const PartyMemberRow = memo(function PartyMemberRow({ character }: Props) {
+// When onSelect is provided, clicking selects the character instead of navigating.
+export const PartyMemberRow = memo(function PartyMemberRow({ character, selected, onSelect }: Props) {
   const navigate = useNavigate()
   const accent = pickCharacterAccent(character.id)
   const portraitUrl = sanitizeImageUrl(character.portrait_url)
@@ -281,27 +284,30 @@ export const PartyMemberRow = memo(function PartyMemberRow({ character }: Props)
       role="button"
       tabIndex={0}
       aria-label={`Karakter: ${character.name}`}
-      onClick={() => navigate(`/characters/${character.id}`)}
-      onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); navigate(`/characters/${character.id}`) } }}
+      onClick={() => onSelect ? onSelect() : navigate(`/characters/${character.id}`)}
+      onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onSelect ? onSelect() : navigate(`/characters/${character.id}`) } }}
       style={{
         position: 'relative',
         overflow: 'hidden',
         display: 'flex',
         alignItems: 'stretch',
         borderRadius: 'var(--r-xl)',
-        border: '1px solid var(--hairline)',
-        background: 'var(--surface)',
+        border: `1px solid ${selected ? accent : 'var(--hairline)'}`,
+        background: selected ? `color-mix(in srgb, ${accent} 6%, var(--surface))` : 'var(--surface)',
         cursor: 'pointer',
         userSelect: 'none',
-        transition: 'border-color var(--t-fast), box-shadow var(--t-fast)',
+        transition: 'border-color var(--t-fast), box-shadow var(--t-fast), background var(--t-fast)',
         minHeight: 100,
+        boxShadow: selected ? `0 0 0 1px ${accent}33, 0 4px 20px rgba(0,0,0,0.25)` : undefined,
       }}
       onMouseEnter={(e) => {
+        if (selected) return
         const el = e.currentTarget as HTMLElement
         el.style.borderColor = accent
         el.style.boxShadow = `0 4px 20px rgba(0,0,0,0.35)`
       }}
       onMouseLeave={(e) => {
+        if (selected) return
         const el = e.currentTarget as HTMLElement
         el.style.borderColor = 'var(--hairline)'
         el.style.boxShadow = ''
