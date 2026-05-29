@@ -98,10 +98,12 @@ export default function WorldBuilderPage() {
   const { id } = useParams<{ id: string }>()
   const navigate = useNavigate()
   const { ask, loading: aiLoading, lastProvider, lastModel } = useAI()
+  const { ask: checkAsk, loading: checkLoading } = useAI()
 
   const [prompt, setPrompt] = useState('')
   const [response, setResponse] = useState<string | null>(null)
   const [copied, setCopied] = useState(false)
+  const [consistencyResult, setConsistencyResult] = useState<string | null>(null)
 
   const textareaRef = useRef<HTMLTextAreaElement>(null)
   const forgeCardRef = useRef<HTMLDivElement>(null)
@@ -147,6 +149,7 @@ export default function WorldBuilderPage() {
 
       const reply = await ask([{ role: 'user', content: fullPrompt }])
       setResponse(reply)
+      setConsistencyResult(null)
     } catch (err) {
       toast.error(err instanceof Error ? err.message : 'Genereren mislukt')
     }
@@ -160,6 +163,18 @@ export default function WorldBuilderPage() {
       setTimeout(() => setCopied(false), 2000)
     } catch {
       toast.error('Kopiëren mislukt')
+    }
+  }
+
+  async function handleConsistencyCheck() {
+    if (!response || !world) return
+    try {
+      const worldCtx = `World: "${world.name}". ${world.description ? world.description.trim() : ''}`
+      const checkPrompt = `${worldCtx}\n\nReview the following generated content for consistency with this world's established context. Point out any contradictions, tone mismatches, or elements that feel out of place. If everything fits well, confirm it briefly.\n\nGenerated content:\n"${response}"`
+      const result = await checkAsk([{ role: 'user', content: checkPrompt }])
+      setConsistencyResult(result)
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : 'Consistentiecheck mislukt')
     }
   }
 
@@ -483,29 +498,89 @@ export default function WorldBuilderPage() {
             {response}
           </p>
 
-          {/* Generate again */}
-          <button
-            type="button"
-            onClick={handleGenerate}
-            disabled={aiLoading}
-            style={{
+          {/* Generate again + consistency check */}
+          <div style={{ marginTop: 20, display: 'flex', alignItems: 'center', gap: 20, flexWrap: 'wrap' }}>
+            <button
+              type="button"
+              onClick={handleGenerate}
+              disabled={aiLoading || checkLoading}
+              style={{
+                display: 'inline-flex', alignItems: 'center', gap: 6,
+                background: 'none', border: 'none',
+                color: 'var(--violet)', cursor: (aiLoading || checkLoading) ? 'not-allowed' : 'pointer',
+                fontFamily: 'var(--font-body)', fontSize: 10, fontWeight: 700,
+                letterSpacing: '0.16em', textTransform: 'uppercase',
+                padding: 0, opacity: (aiLoading || checkLoading) ? 0.5 : 1,
+                transition: 'opacity var(--t-fast)',
+              }}
+              aria-label="Opnieuw genereren"
+            >
+              <svg aria-hidden="true" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M23 4v6h-6M1 20v-6h6" />
+                <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15" />
+              </svg>
+              Opnieuw genereren
+            </button>
+
+            <button
+              type="button"
+              onClick={handleConsistencyCheck}
+              disabled={aiLoading || checkLoading}
+              style={{
+                display: 'inline-flex', alignItems: 'center', gap: 6,
+                background: 'none', border: 'none',
+                color: checkLoading ? 'var(--muted)' : 'var(--teal)',
+                cursor: (aiLoading || checkLoading) ? 'not-allowed' : 'pointer',
+                fontFamily: 'var(--font-body)', fontSize: 10, fontWeight: 700,
+                letterSpacing: '0.16em', textTransform: 'uppercase',
+                padding: 0, opacity: (aiLoading || checkLoading) ? 0.5 : 1,
+                transition: 'opacity var(--t-fast)',
+              }}
+              aria-label="Controleer consistentie van de gegenereerde content"
+            >
+              {checkLoading ? (
+                <>
+                  <Spinner size="sm" />
+                  Controleren...
+                </>
+              ) : (
+                <>
+                  <svg aria-hidden="true" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M9 11l3 3L22 4" />
+                    <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11" />
+                  </svg>
+                  Consistentiecheck
+                </>
+              )}
+            </button>
+          </div>
+
+          {/* Consistency check result */}
+          {consistencyResult && (
+            <div style={{
               marginTop: 20,
-              display: 'inline-flex', alignItems: 'center', gap: 6,
-              background: 'none', border: 'none',
-              color: 'var(--violet)', cursor: aiLoading ? 'not-allowed' : 'pointer',
-              fontFamily: 'var(--font-body)', fontSize: 10, fontWeight: 700,
-              letterSpacing: '0.16em', textTransform: 'uppercase',
-              padding: 0, opacity: aiLoading ? 0.5 : 1,
-              transition: 'opacity var(--t-fast)',
-            }}
-            aria-label="Opnieuw genereren"
-          >
-            <svg aria-hidden="true" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M23 4v6h-6M1 20v-6h6" />
-              <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15" />
-            </svg>
-            Opnieuw genereren
-          </button>
+              padding: '16px 18px',
+              background: 'color-mix(in srgb, var(--teal) 7%, var(--surface))',
+              border: '1px solid rgba(62,207,178,0.2)',
+              borderRadius: 12,
+            }}>
+              <p style={{
+                fontFamily: 'var(--font-body)', fontSize: 10, fontWeight: 700,
+                letterSpacing: '0.18em', textTransform: 'uppercase',
+                color: 'var(--teal)', margin: '0 0 10px',
+              }}>
+                ✦ Consistentieanalyse
+              </p>
+              <p style={{
+                fontSize: 14, lineHeight: 1.75,
+                color: 'var(--ink-soft)',
+                margin: 0,
+                whiteSpace: 'pre-wrap',
+              }}>
+                {consistencyResult}
+              </p>
+            </div>
+          )}
         </div>
       ) : (
         /* Empty / awaiting state */
