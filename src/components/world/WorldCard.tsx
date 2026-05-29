@@ -1,6 +1,7 @@
 import { memo } from 'react'
 import { useNavigate } from 'react-router-dom'
 import type { World } from '@/types/world.types'
+import type { Campaign } from '@/types/campaign.types'
 import { CompassRose } from '@/components/world/CompassRose'
 import { EntityCard } from '@/components/ui/EntityCard'
 import { ForgeCard } from '@/components/ui/ForgeCard'
@@ -9,9 +10,10 @@ import { sanitizeImageUrl } from '@/utils/sanitizeUrl'
 
 interface Props {
   world: World
+  campaigns?: Pick<Campaign, 'id' | 'name'>[]
 }
 
-export const WorldCard = memo(function WorldCard({ world }: Props) {
+export const WorldCard = memo(function WorldCard({ world, campaigns }: Props) {
   const navigate = useNavigate()
   const initial = world.name.trim()[0]?.toUpperCase() ?? '?'
   const gradient = world.header_image ? undefined : pickGradient(world.id, coverGradients)
@@ -146,6 +148,85 @@ export const WorldCard = memo(function WorldCard({ world }: Props) {
             Een leeg kosmos wacht.
           </p>
         )}
+
+        {/* Active chronicles section */}
+        <div style={{
+          width: '100%',
+          marginTop: 4,
+          paddingTop: 14,
+          borderTop: '1px solid rgba(255,255,255,0.08)',
+        }}>
+          <div style={{
+            fontFamily: 'var(--font-body)',
+            fontSize: 9,
+            fontWeight: 700,
+            letterSpacing: '0.24em',
+            textTransform: 'uppercase',
+            color: 'var(--muted)',
+            marginBottom: 10,
+            textAlign: 'center',
+          }}>
+            Actieve kronieken
+          </div>
+
+          {campaigns && campaigns.length > 0 ? (
+            <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: 6 }}>
+              {campaigns.map(c => (
+                <li key={c.id}>
+                  <button
+                    type="button"
+                    onClick={e => { e.stopPropagation(); navigate(`/campaigns/${c.id}`) }}
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: 8,
+                      width: '100%',
+                      background: 'none',
+                      border: 'none',
+                      padding: '4px 6px',
+                      borderRadius: 6,
+                      cursor: 'pointer',
+                      textAlign: 'left',
+                      transition: 'background var(--t-fast)',
+                    }}
+                    onMouseEnter={e => { (e.currentTarget as HTMLButtonElement).style.background = 'rgba(255,255,255,0.06)' }}
+                    onMouseLeave={e => { (e.currentTarget as HTMLButtonElement).style.background = 'none' }}
+                    aria-label={`Naar kroniek: ${c.name}`}
+                  >
+                    <span aria-hidden="true" style={{
+                      width: 6, height: 6, borderRadius: '50%',
+                      background: 'var(--violet)',
+                      flexShrink: 0,
+                      boxShadow: '0 0 6px var(--violet)',
+                    }} />
+                    <span style={{
+                      flex: 1,
+                      fontSize: 12,
+                      color: 'var(--ink-soft)',
+                      overflow: 'hidden',
+                      textOverflow: 'ellipsis',
+                      whiteSpace: 'nowrap',
+                    }}>
+                      {c.name}
+                    </span>
+                    <span aria-hidden="true" style={{ fontSize: 11, color: 'var(--muted)', flexShrink: 0 }}>›</span>
+                  </button>
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <p style={{
+              fontFamily: 'var(--font-quote)',
+              fontStyle: 'italic',
+              fontSize: 12,
+              color: 'var(--subtle)',
+              margin: 0,
+              textAlign: 'center',
+            }}>
+              Leeg. Begin waar je wil.
+            </p>
+          )}
+        </div>
       </div>
     </EntityCard>
   )

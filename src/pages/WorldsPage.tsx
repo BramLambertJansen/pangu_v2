@@ -1,4 +1,4 @@
-import { useEffect } from 'react'
+import { useEffect, useMemo } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { useNavigate } from 'react-router-dom'
 import { toast } from 'sonner'
@@ -8,6 +8,7 @@ import { useAuthStore } from '@/stores/auth.store'
 import { EntityCardSkeleton } from '@/components/ui/EntityCardSkeleton'
 import { WorldCard, ForgeWorldCard } from '@/components/world/WorldCard'
 import type { World } from '@/types/world.types'
+import type { Campaign } from '@/types/campaign.types'
 
 export default function WorldsPage() {
   const navigate = useNavigate()
@@ -27,6 +28,30 @@ export default function WorldsPage() {
     },
     staleTime: 1000 * 60,
   })
+
+  const { data: activeCampaigns } = useQuery<Pick<Campaign, 'id' | 'name' | 'world_id'>[]>({
+    queryKey: queryKeys.campaigns.active,
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('campaigns')
+        .select('id, name, world_id')
+        .eq('committed', true)
+        .eq('status', 'active')
+        .order('updated_at', { ascending: false })
+      if (error) throw error
+      return data as Pick<Campaign, 'id' | 'name' | 'world_id'>[]
+    },
+    staleTime: 1000 * 60,
+  })
+
+  const campaignsByWorld = useMemo(() => {
+    const map: Record<string, Pick<Campaign, 'id' | 'name'>[]> = {}
+    activeCampaigns?.forEach(c => {
+      if (!map[c.world_id]) map[c.world_id] = []
+      map[c.world_id].push({ id: c.id, name: c.name })
+    })
+    return map
+  }, [activeCampaigns])
 
   // Garbage-collect uncommitted drafts older than 30 minutes
   useEffect(() => {
@@ -154,7 +179,7 @@ export default function WorldsPage() {
           >
             {worlds?.map((world) => (
               <li key={world.id}>
-                <WorldCard world={world} />
+                <WorldCard world={world} campaigns={campaignsByWorld[world.id] ?? []} />
               </li>
             ))}
             <li>
