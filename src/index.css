@@ -957,6 +957,43 @@ body {
   background: var(--void-2);
 }
 
+/* ── Campaign card (custom hero variant) ────────────────── */
+
+.campaign-card {
+  border-top:    0px solid transparent;
+  border-right:  0px solid transparent;
+  border-bottom: 0px solid transparent;
+  border-left:   4px solid rgba(245,180,50,0.9);
+  transition:
+    border-color        0.25s var(--ease-out),
+    border-left-color   0.25s var(--ease-out),
+    border-left-width   0.25s var(--ease-out),
+    border-width        0.25s var(--ease-out),
+    box-shadow          0.25s var(--ease-out),
+    transform           0.25s var(--ease-out);
+}
+
+.campaign-card:hover {
+  border-top-width:    1px;
+  border-right-width:  1px;
+  border-bottom-width: 1px;
+  border-top-color:    rgba(245,180,50,0.55);
+  border-right-color:  rgba(245,180,50,0.55);
+  border-bottom-color: rgba(245,180,50,0.55);
+  border-left-color:   rgba(245,180,50,1);
+  border-left-width:   5px;
+  box-shadow:
+    0 0 0 1px rgba(245,180,50,0.2),
+    0 8px 36px rgba(0,0,0,0.5),
+    0 0 32px rgba(245,180,50,0.1);
+  transform: translateY(-2px);
+}
+
+.campaign-card:focus-visible {
+  outline: 2px solid var(--violet);
+  outline-offset: 2px;
+}
+
 /* ── Forge cards ─────────────────────────────────────────── */
 
 .forge-card {
