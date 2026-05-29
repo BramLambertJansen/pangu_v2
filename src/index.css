@@ -960,8 +960,11 @@ body {
 /* ── Campaign card (custom hero variant) ────────────────── */
 
 .campaign-card:hover {
-  border-color: var(--hairline-strong);
-  box-shadow: 0 8px 32px rgba(0,0,0,0.45), 0 0 0 1px var(--hairline-strong);
+  border-color: rgba(245,180,50,0.85);
+  box-shadow:
+    0 0 0 1px rgba(245,180,50,0.55),
+    0 8px 32px rgba(0,0,0,0.45),
+    0 0 28px rgba(245,180,50,0.12);
   transform: translateY(-2px);
 }
 

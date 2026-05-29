@@ -49,13 +49,13 @@ export const CampaignCard = memo(function CampaignCard({ campaign }: Props) {
       style={{
         background: 'var(--surface)',
         borderRadius: 'var(--r-xl)',
-        border: '1px solid var(--hairline)',
+        border: '1px solid rgba(245,180,50,0.28)',
         overflow: 'hidden',
         cursor: 'pointer',
         display: 'flex',
         flexDirection: 'column',
         outline: 'none',
-        transition: 'border-color var(--t-base) var(--ease-out), box-shadow var(--t-base) var(--ease-out), transform var(--t-base) var(--ease-out)',
+        transition: 'border-color 0.22s var(--ease-out), box-shadow 0.22s var(--ease-out), transform 0.22s var(--ease-out)',
       }}
       className="campaign-card"
     >
@@ -76,6 +76,16 @@ export const CampaignCard = memo(function CampaignCard({ campaign }: Props) {
         ) : (
           <div style={{ width: '100%', height: '100%', background: gradient }} />
         )}
+
+        {/* Violet tint — always-visible purple atmospheric layer */}
+        <div
+          aria-hidden="true"
+          style={{
+            position: 'absolute', inset: 0,
+            background: 'linear-gradient(135deg, rgba(155,138,255,0.22) 0%, rgba(80,50,200,0.10) 50%, transparent 75%)',
+            pointerEvents: 'none',
+          }}
+        />
 
         {/* Bottom vignette */}
         <div
