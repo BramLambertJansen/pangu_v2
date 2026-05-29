@@ -103,6 +103,101 @@ export const BestiaryCard = memo(function BestiaryCard({ bestiary }: Props) {
   )
 })
 
+interface RowProps {
+  bestiary: Bestiary
+  selected?: boolean
+  onSelect: () => void
+}
+
+export const BestiaryRow = memo(function BestiaryRow({ bestiary, selected = false, onSelect }: RowProps) {
+  return (
+    <button
+      type="button"
+      aria-pressed={selected}
+      aria-label={`Selecteer wezen: ${bestiary.name}`}
+      onClick={onSelect}
+      style={{
+        width: '100%',
+        display: 'flex',
+        alignItems: 'center',
+        gap: 12,
+        padding: '10px 14px',
+        borderRadius: 10,
+        border: `1px solid ${selected ? 'rgba(62,207,178,0.35)' : 'var(--hairline)'}`,
+        background: selected ? 'rgba(62,207,178,0.08)' : 'var(--surface)',
+        cursor: 'pointer',
+        textAlign: 'left',
+        transition: 'background var(--t-fast), border-color var(--t-fast)',
+      }}
+    >
+      {/* Avatar */}
+      <div
+        aria-hidden="true"
+        style={{
+          width: 38, height: 38, borderRadius: 8, flexShrink: 0,
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+          background: selected ? 'rgba(62,207,178,0.15)' : 'var(--surface-2)',
+          border: `1px solid ${selected ? 'rgba(62,207,178,0.3)' : 'var(--hairline)'}`,
+          fontFamily: 'var(--font-display)',
+          fontSize: 18, fontWeight: 700,
+          color: selected ? 'var(--teal)' : 'var(--muted)',
+          transition: 'background var(--t-fast), color var(--t-fast)',
+        }}
+      >
+        {bestiary.name.trim()[0]?.toUpperCase() ?? '?'}
+      </div>
+
+      {/* Info */}
+      <div style={{ flex: 1, minWidth: 0 }}>
+        <p style={{
+          margin: 0,
+          fontFamily: 'var(--font-display)',
+          fontSize: 14, fontWeight: 600,
+          letterSpacing: '0.03em',
+          color: 'var(--ink)',
+          overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
+        }}>
+          {bestiary.name}
+        </p>
+        {bestiary.creature_type && (
+          <p style={{
+            margin: '2px 0 0',
+            fontSize: 9, fontWeight: 700,
+            letterSpacing: '0.14em', textTransform: 'uppercase',
+            color: 'var(--teal)', fontFamily: 'var(--font-body)',
+            overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
+          }}>
+            {bestiary.creature_type}
+            {bestiary.threat_level && (
+              <span style={{ color: 'var(--muted)', fontWeight: 400, letterSpacing: '0.06em', textTransform: 'none' }}>
+                {' · '}{bestiary.threat_level}
+              </span>
+            )}
+          </p>
+        )}
+      </div>
+
+      {/* HP / AC badges */}
+      <div style={{ display: 'flex', gap: 5, flexShrink: 0 }}>
+        <span style={{
+          fontSize: 10, fontWeight: 700,
+          color: selected ? 'var(--teal)' : 'var(--muted)',
+          fontFamily: 'var(--font-body)',
+        }}>
+          {bestiary.hp}<span style={{ fontSize: 8, fontWeight: 400, color: 'var(--subtle)' }}> hp</span>
+        </span>
+        <span style={{ fontSize: 10, color: 'var(--subtle)', fontFamily: 'var(--font-body)' }}>·</span>
+        <span style={{
+          fontSize: 10, fontWeight: 700,
+          color: 'var(--muted)', fontFamily: 'var(--font-body)',
+        }}>
+          {bestiary.ac}<span style={{ fontSize: 8, fontWeight: 400, color: 'var(--subtle)' }}> ac</span>
+        </span>
+      </div>
+    </button>
+  )
+})
+
 interface ForgeProps {
   onClick: () => void
   loading?: boolean

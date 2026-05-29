@@ -10,7 +10,8 @@ import { Spinner } from '@/components/ui/Spinner'
 import { StoryArcTracker } from '@/components/session/StoryArcTracker'
 import { LocationCard, ForgeLocationCard } from '@/components/location/LocationCard'
 import { LoreCard, ForgeLoreCard } from '@/components/lore/LoreCard'
-import { NpcCard, ForgeNpcCard } from '@/components/npc/NpcCard'
+import { NpcRow } from '@/components/npc/NpcCard'
+import { DmNpcPanel } from '@/components/npc/DmNpcPanel'
 import { QuestCard, ForgeQuestCard } from '@/components/quest/QuestCard'
 import { EncounterCard, ForgeEncounterCard } from '@/components/encounter/EncounterCard'
 import { PartyMemberRow } from '@/components/character/CharacterCard'
@@ -126,6 +127,110 @@ function PartySection({
           </p>
           <p style={{ fontSize: 12, color: 'var(--subtle)', margin: 0 }}>
             Spelers kunnen hun karakter koppelen via het karakterscherm (Karakters → Bewerken → Kampagne).
+          </p>
+        </div>
+      )}
+    </section>
+  )
+}
+
+// ── NpcSection ────────────────────────────────────────────────────────────────
+// Split-screen NPC view: left = clickable NPC list, right = DM info panel.
+function NpcSection({
+  npcs,
+  isLoading,
+  onForge,
+  onViewAll,
+}: {
+  npcs: import('@/types/npc.types').Npc[]
+  isLoading: boolean
+  onForge: () => void
+  onViewAll: () => void
+}) {
+  const [selectedId, setSelectedId] = useState<string | null>(
+    () => npcs[0]?.id ?? null
+  )
+  const selected = npcs.find(n => n.id === selectedId) ?? npcs[0] ?? null
+
+  return (
+    <section aria-labelledby="tab-npcs-heading">
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
+        <h2
+          id="tab-npcs-heading"
+          style={{
+            fontFamily: 'var(--font-display)',
+            fontSize: 'clamp(22px, 4vw, 30px)',
+            fontWeight: 600,
+            letterSpacing: '0.06em',
+            textTransform: 'uppercase',
+            color: 'var(--ink)',
+            margin: 0,
+          }}
+        >
+          NPC's
+        </h2>
+        <div style={{ display: 'flex', gap: 8 }}>
+          <button
+            type="button"
+            className="pangu-btn pangu-btn-ghost pangu-btn-sm"
+            onClick={onForge}
+          >
+            + NPC toevoegen
+          </button>
+          {npcs.length > 0 && (
+            <button
+              type="button"
+              className="pangu-btn pangu-btn-ghost pangu-btn-sm"
+              onClick={onViewAll}
+            >
+              Alle NPCs →
+            </button>
+          )}
+        </div>
+      </div>
+
+      {isLoading ? (
+        <div style={{ display: 'flex', justifyContent: 'center', padding: '40px 0' }} aria-live="polite" aria-busy="true">
+          <Spinner size="md" />
+        </div>
+      ) : npcs.length > 0 ? (
+        <div style={{
+          display: 'grid',
+          gridTemplateColumns: 'minmax(240px, 2fr) minmax(300px, 3fr)',
+          gap: 20,
+          alignItems: 'start',
+        }}>
+          {/* Left: NPC list */}
+          <ul
+            style={{ display: 'flex', flexDirection: 'column', gap: 8, listStyle: 'none', padding: 0, margin: 0 }}
+            role="list"
+            aria-label="NPC's in deze kroniek"
+          >
+            {npcs.map((npc) => (
+              <li key={npc.id}>
+                <NpcRow
+                  npc={npc}
+                  selected={npc.id === (selected?.id)}
+                  onSelect={() => setSelectedId(npc.id)}
+                />
+              </li>
+            ))}
+          </ul>
+
+          {/* Right: DM detail panel */}
+          {selected && (
+            <div style={{ position: 'sticky', top: 20, maxHeight: 'calc(100vh - 180px)' }}>
+              <DmNpcPanel npc={selected} />
+            </div>
+          )}
+        </div>
+      ) : (
+        <div className="pangu-surface" style={{ padding: 24, textAlign: 'center', borderStyle: 'dashed' }}>
+          <p style={{ fontSize: 14, color: 'var(--muted)', margin: '0 0 6px', fontStyle: 'italic' }}>
+            Nog geen NPC's in deze kroniek.
+          </p>
+          <p style={{ fontSize: 12, color: 'var(--subtle)', margin: 0 }}>
+            Voeg een NPC toe om personages bij te houden.
           </p>
         </div>
       )}
@@ -724,60 +829,12 @@ export default function CampaignDetailPage() {
 
         {/* NPCs */}
         {activeTab === 'npcs' && (
-          <section aria-labelledby="tab-npcs-heading">
-            <h2
-              id="tab-npcs-heading"
-              style={{
-                fontFamily: 'var(--font-display)',
-                fontSize: 'clamp(22px, 4vw, 30px)',
-                fontWeight: 600,
-                letterSpacing: '0.06em',
-                textTransform: 'uppercase',
-                color: 'var(--ink)',
-                margin: '0 0 24px',
-              }}
-            >
-              NPC's
-            </h2>
-            {isLoadingNpcs ? (
-              <div style={{ display: 'flex', justifyContent: 'center', padding: '40px 0' }} aria-live="polite" aria-busy="true">
-                <Spinner size="md" />
-              </div>
-            ) : (
-              <>
-                <ul
-                  style={{
-                    display: 'grid',
-                    gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))',
-                    gap: 'var(--sp-5)',
-                    listStyle: 'none',
-                    padding: 0,
-                    margin: 0,
-                  }}
-                  role="list"
-                  aria-label="NPCs in deze kroniek"
-                >
-                  {npcs?.map((npc) => (
-                    <li key={npc.id}><NpcCard npc={npc} /></li>
-                  ))}
-                  <li>
-                    <ForgeNpcCard onClick={() => createNpc.mutate()} loading={createNpc.isPending} />
-                  </li>
-                </ul>
-                {npcs && npcs.length > 0 && (
-                  <div style={{ marginTop: 16, display: 'flex', justifyContent: 'flex-end' }}>
-                    <button
-                      type="button"
-                      className="pangu-btn pangu-btn-ghost pangu-btn-sm"
-                      onClick={() => navigate(`/campaigns/${id}/npcs`)}
-                    >
-                      Alle NPCs bekijken →
-                    </button>
-                  </div>
-                )}
-              </>
-            )}
-          </section>
+          <NpcSection
+            npcs={npcs ?? []}
+            isLoading={isLoadingNpcs}
+            onForge={() => createNpc.mutate()}
+            onViewAll={() => navigate(`/campaigns/${id}/npcs`)}
+          />
         )}
 
         {/* Quests */}
