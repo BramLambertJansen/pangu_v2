@@ -960,24 +960,29 @@ body {
 /* ── Campaign card (custom hero variant) ────────────────── */
 
 .campaign-card {
-  border-top: 1px solid rgba(245,180,50,0.28);
-  border-right: 1px solid rgba(245,180,50,0.28);
-  border-bottom: 1px solid rgba(245,180,50,0.28);
-  border-left: 3px solid rgba(245,180,50,0.55);
+  /* thin gold outline on three sides, thick accent on left */
+  border-top:    1px solid rgba(245,180,50,0.2);
+  border-right:  1px solid rgba(245,180,50,0.2);
+  border-bottom: 1px solid rgba(245,180,50,0.2);
+  border-left:   4px solid rgba(245,180,50,0.9);
   transition:
-    border-color 0.22s var(--ease-out),
-    border-left-color 0.22s var(--ease-out),
-    box-shadow 0.22s var(--ease-out),
-    transform 0.22s var(--ease-out);
+    border-color        0.25s var(--ease-out),
+    border-left-color   0.25s var(--ease-out),
+    border-left-width   0.25s var(--ease-out),
+    box-shadow          0.25s var(--ease-out),
+    transform           0.25s var(--ease-out);
 }
 
 .campaign-card:hover {
-  border-color: rgba(245,180,50,0.85);
-  border-left-color: rgba(245,180,50,1);
+  border-top-color:    rgba(245,180,50,0.7);
+  border-right-color:  rgba(245,180,50,0.7);
+  border-bottom-color: rgba(245,180,50,0.7);
+  border-left-color:   rgba(245,180,50,1);
+  border-left-width:   5px;
   box-shadow:
-    0 0 0 2px rgba(245,180,50,0.45),
-    0 8px 32px rgba(0,0,0,0.45),
-    0 0 28px rgba(245,180,50,0.12);
+    0 0 0 2px rgba(245,180,50,0.35),
+    0 8px 36px rgba(0,0,0,0.5),
+    0 0 32px rgba(245,180,50,0.14);
   transform: translateY(-2px);
 }
 
