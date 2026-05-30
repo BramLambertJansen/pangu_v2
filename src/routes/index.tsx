@@ -46,6 +46,7 @@ const EncounterRunPage = lazy(() => import('@/pages/EncounterRunPage'))
 const CampaignItemsPage = lazy(() => import('@/pages/CampaignItemsPage'))
 const LootGeneratorPage = lazy(() => import('@/pages/LootGeneratorPage'))
 const ItemEditPage = lazy(() => import('@/pages/ItemEditPage'))
+const JoinPage = lazy(() => import('@/pages/JoinPage'))
 
 function wrap(Page: React.ComponentType) {
   return (
@@ -266,5 +267,10 @@ export const router = createBrowserRouter([
       },
       { path: '*', element: <RouteErrorPage /> },
     ],
+  },
+  {
+    path: '/join/:code',
+    element: wrap(JoinPage),
+    errorElement: <RouteErrorPage />,
   },
 ])

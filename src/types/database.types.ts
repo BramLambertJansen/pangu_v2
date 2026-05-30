@@ -98,6 +98,34 @@ export type Database = {
           }
         ]
       }
+      campaign_members: {
+        Row: {
+          id: string
+          campaign_id: string
+          user_id: string
+          joined_at: string
+        }
+        Insert: {
+          id?: string
+          campaign_id: string
+          user_id: string
+          joined_at?: string
+        }
+        Update: {
+          id?: string
+          campaign_id?: string
+          user_id?: string
+          joined_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: 'campaign_members_campaign_id_fkey'
+            columns: ['campaign_id']
+            referencedRelation: 'campaigns'
+            referencedColumns: ['id']
+          }
+        ]
+      }
       campaigns: {
         Row: {
           id: string
@@ -110,6 +138,7 @@ export type Database = {
           header_image_position: string
           status: string
           notes: string | null
+          invite_code: string | null
           committed: boolean
           created_at: string
           updated_at: string
@@ -125,6 +154,7 @@ export type Database = {
           header_image_position?: string
           status?: string
           notes?: string | null
+          invite_code?: string | null
           committed?: boolean
           created_at?: string
           updated_at?: string
@@ -140,6 +170,7 @@ export type Database = {
           header_image_position?: string
           status?: string
           notes?: string | null
+          invite_code?: string | null
           committed?: boolean
           created_at?: string
           updated_at?: string

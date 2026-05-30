@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
+import { Link, useNavigate, useSearchParams } from 'react-router-dom'
 import { toast } from 'sonner'
 import { supabase } from '@/lib/supabase'
 import { useAuthStore } from '@/stores/auth.store'
@@ -10,6 +10,7 @@ import type { Profile } from '@/types/database.types'
 
 export default function LoginPage() {
   const navigate = useNavigate()
+  const [searchParams] = useSearchParams()
   const setUser = useAuthStore(s => s.setUser)
   const setProfile = useAuthStore(s => s.setProfile)
 
@@ -51,7 +52,8 @@ export default function LoginPage() {
 
     setUser(data.user)
 
-    navigate(profile?.role === 'admin' ? '/admin' : '/dashboard', { replace: true })
+    const redirectTo = searchParams.get('redirect') ?? (profile?.role === 'admin' ? '/admin' : '/dashboard')
+    navigate(redirectTo, { replace: true })
   }
 
   return (
