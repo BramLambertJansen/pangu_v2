@@ -4,6 +4,7 @@ import { supabase } from '@/lib/supabase'
 import { queryKeys } from '@/lib/queryKeys'
 import { generateInviteCode } from '@/utils/inviteCode'
 import type { CampaignMemberWithProfile } from '@/types/campaign_member.types'
+import type { Character } from '@/types/character.types'
 
 export function useCampaignInvite(campaignId: string | undefined) {
   return useQuery<string | null>({
@@ -85,6 +86,54 @@ export function useJoinCampaign() {
     },
     onSuccess: (_data, { campaignId }) => {
       queryClient.invalidateQueries({ queryKey: queryKeys.campaigns.members(campaignId) })
+    },
+  })
+}
+
+export function useJoinWithCharacter() {
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: async ({ campaignId, userId, characterId }: { campaignId: string; userId: string; characterId: string }) => {
+      const { error: memberError } = await supabase
+        .from('campaign_members')
+        .insert({ campaign_id: campaignId, user_id: userId })
+      if (memberError) throw memberError
+
+      const { error: charError } = await supabase
+        .from('characters')
+        .update({ campaign_id: campaignId })
+        .eq('id', characterId)
+      if (charError) throw charError
+    },
+    onSuccess: (_data, { campaignId }) => {
+      queryClient.invalidateQueries({ queryKey: queryKeys.campaigns.members(campaignId) })
+      queryClient.invalidateQueries({ queryKey: queryKeys.characters.all })
+    },
+  })
+}
+
+export function useJoinAndCreateCharacter() {
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: async ({ campaignId, userId }: { campaignId: string; userId: string }) => {
+      const { error: memberError } = await supabase
+        .from('campaign_members')
+        .insert({ campaign_id: campaignId, user_id: userId })
+      if (memberError) throw memberError
+
+      const { data, error: charError } = await supabase
+        .from('characters')
+        .insert({ user_id: userId, campaign_id: campaignId, name: 'Nieuw karakter', status: 'active' })
+        .select()
+        .single()
+      if (charError) throw charError
+      return data as unknown as Character
+    },
+    onSuccess: (_data, { campaignId }) => {
+      queryClient.invalidateQueries({ queryKey: queryKeys.campaigns.members(campaignId) })
+      queryClient.invalidateQueries({ queryKey: queryKeys.characters.all })
     },
   })
 }

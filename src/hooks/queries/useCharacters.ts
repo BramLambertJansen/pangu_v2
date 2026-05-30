@@ -23,3 +23,24 @@ export function useCharacters() {
     staleTime: 30_000,
   })
 }
+
+export function useUnassignedCharacters() {
+  const user = useAuthStore(s => s.user)
+
+  return useQuery<Character[]>({
+    queryKey: [...queryKeys.characters.all, 'unassigned'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('characters')
+        .select('*')
+        .eq('user_id', user!.id)
+        .eq('committed', true)
+        .is('campaign_id', null)
+        .order('created_at', { ascending: false })
+      if (error) throw error
+      return data as unknown as Character[]
+    },
+    enabled: !!user,
+    staleTime: 30_000,
+  })
+}
