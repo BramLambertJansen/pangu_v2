@@ -147,7 +147,7 @@ export default function WorldBuilderPage() {
         ? `${worldCtx}\n\n${prompt.trim()}`
         : prompt.trim()
 
-      const reply = await ask([{ role: 'user', content: fullPrompt }])
+      const reply = await ask([{ role: 'user', content: fullPrompt }], 'Wereldbouwer inhoud gegenereerd')
       setResponse(reply)
       setConsistencyResult(null)
     } catch (err) {

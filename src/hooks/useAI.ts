@@ -3,7 +3,7 @@ import { supabase } from "@/lib/supabase";
 import type { AIResponse, ErrorResponse, Message, Provider } from "@/types/ai";
 
 interface UseAIReturn {
-  ask: (messages: Message[]) => Promise<string>;
+  ask: (messages: Message[], notificationLabel?: string) => Promise<string>;
   loading: boolean;
   /** Remaining free-tier requests this window. null = not yet fetched. -1 = BYOK (no cap). */
   windowRemaining: number | null;
@@ -22,7 +22,7 @@ export function useAI(): UseAIReturn {
   const [lastProvider, setLastProvider] = useState<Provider | null>(null);
   const [lastModel, setLastModel]       = useState<string | null>(null);
 
-  const ask = useCallback(async (messages: Message[]): Promise<string> => {
+  const ask = useCallback(async (messages: Message[], notificationLabel?: string): Promise<string> => {
     setLoading(true);
     try {
       const { data: { session } } = await supabase.auth.getSession();
@@ -54,6 +54,17 @@ export function useAI(): UseAIReturn {
       setRemaining(ok.window_remaining);
       setLastProvider(ok.provider);
       setLastModel(ok.model);
+
+      // Persist a notification when a label is provided (fire-and-forget)
+      if (notificationLabel) {
+        void supabase.from("notifications").insert({
+          user_id: session.user.id,
+          type: "ai_complete",
+          title: "Lore Forge klaar",
+          message: notificationLabel,
+        });
+      }
+
       return ok.reply;
 
     } finally {

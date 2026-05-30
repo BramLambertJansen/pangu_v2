@@ -93,7 +93,7 @@ Return ONLY a raw JSON array — no markdown, no explanation, just the array:
     setAddedKeys([])
     setPendingKeys([])
     try {
-      const reply = await ask([{ role: 'user', content: prompt }])
+      const reply = await ask([{ role: 'user', content: prompt }], 'Buitgenerator items gegenereerd')
       try {
         setResults(parseAIResponse(reply))
       } catch {

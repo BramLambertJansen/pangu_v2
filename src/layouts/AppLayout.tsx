@@ -8,6 +8,7 @@ import { toast } from 'sonner'
 import { useMemo, useState, useEffect, useRef } from 'react'
 import { Avatar } from '@/components/ui/Avatar'
 import { Badge } from '@/components/ui/Badge'
+import { NotificationCenter } from '@/components/ui/NotificationCenter'
 import { DEV_MODE } from '@/lib/constants'
 
 interface Star {
@@ -347,6 +348,7 @@ export default function AppLayout() {
                 )}
               </div>
             )}
+            <NotificationCenter />
             <div aria-hidden="true" style={{ height: '1px', background: 'var(--hairline)', margin: '0 8px' }} />
             <button
               onClick={() => setMobileOpen(false)}
