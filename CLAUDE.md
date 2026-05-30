@@ -672,18 +672,124 @@ Huidige testbestanden:
 
 ---
 
+## Test-agent (Technisch + Visueel)
+
+De test-agent voert vóór elke merge een volledige technische én visuele controle uit. Geen specifieke tooling is verplicht — de agent kiest de beschikbare tools op basis van de context.
+
+### Verplichte checks
+
+| Check | Methode |
+|---|---|
+| Unit + integratietests | `npm run test` — alle tests moeten slagen |
+| TypeScript | `npm run type-check` — nul fouten |
+| Linting | `npm run lint` — nul warnings/errors |
+| Visuele controle | Screenshot-vergelijking of handmatige inspectie van gewijzigde componenten op alle breakpoints (360px, 768px, 1280px) |
+| A11Y-scan | axe-core via browser DevTools, axe CLI of Playwright axe-plugin — nul critical/serious violations op gewijzigde pagina's |
+| Responsiveness | Controleer op mobiel (360px), tablet (768px) en desktop (1280px): geen horizontale scroll, correcte navigatieweergave, touch targets ≥ 44×44px |
+
+### Wanneer uitvoeren
+
+- Vóór elke PR of push naar `main`
+- Na elke significante UI-wijziging (nieuw component, layout-aanpassing, breakpoint-fix)
+
+### Slagingscriteria
+
+Alle checks moeten slagen. Bij een falende a11y-scan of visuele regressie: eerst fixen, dan pas mergen. Geen uitzonderingen.
+
+---
+
+## Review-agent
+
+De review-agent beoordeelt drie dimensies van elke wijziging. Bevindingen van categorie **blocker** moeten opgelost zijn vóór merge; **suggesties** kunnen na merge opgepakt worden.
+
+### 1. Code review (correctheid)
+
+- Bugs, type-onveiligheid en logicafouten
+- TypeScript strict-naleving — geen `any`, geen `@ts-ignore` zonder uitleg
+- Componentgrootte ≤ ~150 regels; business logica in hooks, niet in presentationele componenten
+- Query-logica in `src/hooks/queries/` — nooit inline in pagina-componenten
+- Geen directe Supabase-calls buiten `@/lib/supabase`
+- Foutafhandeling alleen aan systeemgrenzen (gebruikersinput, externe APIs)
+
+### 2. A11Y review
+
+- Volledige A11Y-checklist (zie hieronder) doorlopen op alle gewijzigde componenten en pagina's
+- Focus management na route-wijzigingen en modal-openingen
+- `aria-live` regio's aanwezig voor dynamische inhoud (toasts, laadstates, formulierfouten)
+- Geen `outline: none` zonder een zichtbare custom focus-stijl als vervanging
+- Screen reader-naamgeving correct via semantisch HTML, `aria-label` of `aria-labelledby`
+
+### 3. Responsive review
+
+- Visuele inspectie op alle drie breakpoints (< 640px, 640–900px, > 900px)
+- Sidebar/navigatie-gedrag correct: 240px left rail op desktop, bottom bar op mobiel
+- Grids en lijsten breken correct af; geen overlappende of afgeknipte elementen
+- Touch targets ≥ 44×44px op alle interactieve elementen op mobiel
+- Formulieren en modals bruikbaar en scrollbaar op smal scherm
+
+---
+
 ## A11Y-checklist
 
-Elke feature is pas **klaar** als alle punten gehaald zijn:
+Elke feature is pas **klaar** als alle punten gehaald zijn. A11Y is niet optioneel — geen merge zonder groene checklist.
+
+### Contrast & kleur
 
 - [ ] Tekstcontrast ≥ 4.5:1; UI-component contrast ≥ 3:1 (WCAG 1.4.11)
-- [ ] Focus ring zichtbaar op alle interactieve elementen; geen `outline: none` zonder custom stijl
-- [ ] Semantisch HTML (`nav`, `main`, `header`, `section`, `button`, etc.)
-- [ ] Forms: velden gekoppeld via `htmlFor`/`id`; fouten via `aria-describedby`
+- [ ] Kleurcontrast gecheckt vóór elk PR (browser DevTools accessibility panel of axe)
+- [ ] Informatie nooit uitsluitend via kleur overgebracht
+
+### Focus & toetsenbord
+
+- [ ] Focus ring zichtbaar op alle interactieve elementen; geen `outline: none` zonder zichtbare custom stijl als vervanging
+- [ ] Tab-volgorde logisch en voorspelbaar (volgt visuele leesvolgorde)
+- [ ] `Escape` sluit modals, dropdowns en popovers
+- [ ] Pijltjestoetsen navigeren binnen lijsten, menu's en radio-groepen (roving tabindex waar van toepassing)
+
+### Semantiek & structuur
+
+- [ ] Semantisch HTML (`nav`, `main`, `header`, `section`, `button`, `ul`/`li`, etc.)
+- [ ] Één `<h1>` per pagina; koppenstructuur hiërarchisch (h1 → h2 → h3)
+- [ ] Landmarks aanwezig: `<nav>`, `<main>`, `<header>`
+
+### Forms & feedback
+
+- [ ] Velden gekoppeld via `htmlFor`/`id`; fouten via `aria-describedby`
+- [ ] Foutmeldingen beschrijvend en gelinkt aan het veld
+- [ ] Laadstates en statuswijzigingen aangekondigd via `aria-live="polite"` of `role="status"`
+
+### Componenten
+
 - [ ] Icon-only knoppen hebben `aria-label`; decoratieve SVGs hebben `aria-hidden="true"`
-- [ ] Laadstates aangekondigd via `aria-live`; modals hebben `role="dialog"` + `aria-modal="true"` + focus trap
+- [ ] Modals hebben `role="dialog"` + `aria-modal="true"` + focus trap; focus keert terug naar trigger na sluiting
+- [ ] Screen reader-only hulptekst via `.sr-only` klasse (niet via `display: none` of `visibility: hidden`)
+
+### Mobiel & motion
+
 - [ ] Touch targets ≥ 44×44px
 - [ ] `prefers-reduced-motion` gerespecteerd (geen animaties forceren)
+- [ ] Geen horizontale scroll op mobiel (< 640px)
+
+---
+
+## Responsiveness
+
+Alle UI is **mobile-first** en werkt op mobiel, tablet en desktop. Dit is een harde eis, geen nice-to-have.
+
+| Breakpoint | Breedte | Navigatie |
+|---|---|---|
+| Mobiel | < 640px | Bottom navigation bar (64px hoogte) |
+| Tablet | 640–900px | Bottom navigation bar (64px hoogte) |
+| Desktop | > 900px | Left sidebar rail (240px breedte), inklapbaar |
+
+### Regels
+
+- **Mobile-first:** Tailwind-classes beginnen zonder prefix (mobiel), dan `sm:`, `md:`, `lg:`
+- **Grids:** `grid-cols-1` op mobiel → `grid-cols-2` op `sm:` → `grid-cols-3` of `grid-cols-4` op `lg:`
+- **Geen vaste breedtes** in `px` op elementen die de viewport kunnen overschrijden
+- **Geen horizontale scroll:** body heeft geen `overflow-x`; tabellen zitten in een `overflow-x-auto` wrapper
+- **Formulieren en modals:** max-breedte beperkt (`max-w-lg`), gecentreerd, scrollbaar bij smalle viewport
+- **Afbeeldingen:** altijd `w-full` of `max-w-full` — nooit buiten hun container
 
 ---
 
@@ -701,6 +807,8 @@ Elke feature is pas **klaar** als alle punten gehaald zijn:
 10. **`useEntityEdit` voor edit-pagina's** — standaard hook voor form state, dirty tracking, delete dialoog.
 11. **Equipment logica via `equipmentUtils`** — nooit slot-labels, -icons of stat-calculaties hardcoden; gebruik `EQUIPMENT_SLOT_LABELS`, `ALLOWED_SLOTS_BY_TYPE`, `calculateEffectiveStats`, etc.
 12. **Geen directe DB-calls buiten DEV_MODE-context** — `supabase.ts` exporteert de (eventueel gewrapped) client; importeer altijd via `@/lib/supabase`.
+13. **A11Y is niet optioneel** — de volledige A11Y-checklist is een harde exit-eis voor elke feature. Geen merge zonder groene checklist. Voer de axe-scan uit op elke gewijzigde pagina.
+14. **Volledig responsive** — alle componenten werken op mobiel (< 640px), tablet (640–900px) en desktop (> 900px). Zie de Responsiveness-sectie. Geen horizontale scroll, geen afgeknipte elementen.
 
 ---
 
