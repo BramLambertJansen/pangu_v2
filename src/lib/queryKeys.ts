@@ -63,4 +63,7 @@ export const queryKeys = {
     users: ['admin', 'users'] as const,
   },
   userAiSettings: (userId: string) => ['user_ai_settings', userId] as const,
+  notifications: {
+    list: (userId: string) => ['notifications', 'list', userId] as const,
+  },
 }
