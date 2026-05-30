@@ -123,6 +123,13 @@ export type Database = {
             columns: ['campaign_id']
             referencedRelation: 'campaigns'
             referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'campaign_members_user_id_fkey'
+            columns: ['user_id']
+            isOneToOne: false
+            referencedRelation: 'profiles'
+            referencedColumns: ['id']
           }
         ]
       }
