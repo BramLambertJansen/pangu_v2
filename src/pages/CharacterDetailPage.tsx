@@ -939,7 +939,7 @@ export default function CharacterDetailPage() {
             <button
               type="button"
               onClick={() => longRest.mutate()}
-              disabled={longRest.isPending}
+              disabled={longRest.isPending || updateHp.isPending || updateDeathSaves.isPending || updateSpellSlot.isPending || updateTempHp.isPending}
               style={{
                 fontSize: 11, padding: '7px 14px', borderRadius: 8,
                 border: '1px solid var(--hairline)', background: 'var(--surface)',

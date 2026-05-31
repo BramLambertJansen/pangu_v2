@@ -505,8 +505,9 @@ export default function CharacterEditPage() {
   })
 
   async function handleDiscardConfirm() {
-    const { error } = await supabase.from('characters').delete().eq('id', id!)
-    if (!error) {
+    if (guard.isDraftDiscard) {
+      const { error } = await supabase.from('characters').delete().eq('id', id!)
+      if (error) { toast.error('Verwijderen mislukt'); return }
       queryClient.removeQueries({ queryKey: queryKeys.characters.detail(id!) })
       queryClient.invalidateQueries({ queryKey: queryKeys.characters.all })
     }

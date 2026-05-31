@@ -276,7 +276,7 @@ function CharacterStatPopup({ character, hpCurrent, onAdjustHp }: { character: C
   )
 }
 
-function MonsterStatPopup({ bestiary, hpCurrent, onAdjustHp }: { bestiary: Bestiary; hpCurrent: number; onAdjustHp: (d: number) => void }) {
+function MonsterStatPopup({ bestiary, hpCurrent, hpMax, onAdjustHp }: { bestiary: Bestiary; hpCurrent: number; hpMax: number; onAdjustHp: (d: number) => void }) {
   const scores = [
     { label: 'STR', score: bestiary.stat_str },
     { label: 'DEX', score: bestiary.stat_dex },
@@ -297,7 +297,7 @@ function MonsterStatPopup({ bestiary, hpCurrent, onAdjustHp }: { bestiary: Besti
         <p style={{ color: 'var(--muted)', fontSize: 13, margin: '0 0 16px' }}>{metaLine}</p>
       )}
 
-      <HpRow current={hpCurrent} max={bestiary.hp} onAdjust={onAdjustHp} />
+      <HpRow current={hpCurrent} max={hpMax} onAdjust={onAdjustHp} />
 
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 10, marginBottom: 20 }}>
         <StatBox label="AC" value={bestiary.ac} />
@@ -637,7 +637,7 @@ export default function EncounterRunPage() {
     const newList = combatants.filter(c => c.id !== combatantId)
     setSelectedId(null)
     if (newList.length === 0) { setCombatants([]); setActiveIndex(0); return }
-    const newActive = idx <= activeIndex ? Math.max(0, activeIndex - 1) : activeIndex
+    const newActive = idx < activeIndex ? activeIndex - 1 : Math.min(activeIndex, newList.length - 1)
     setCombatants(newList)
     setActiveIndex(newActive % newList.length)
   }
@@ -666,7 +666,7 @@ export default function EncounterRunPage() {
 
   // ─── Loading ──────────────────────────────────────────────────────────────────
 
-  if (phase === 'loading' || encLoading) {
+  if (encLoading || (phase === 'loading' && !!encounter)) {
     return (
       <div style={{ display: 'flex', justifyContent: 'center', padding: '80px 0' }} aria-live="polite" aria-label="Gevecht laden...">
         <Spinner size="lg" />
@@ -773,7 +773,7 @@ export default function EncounterRunPage() {
           position: 'fixed', inset: 0,
           background: 'var(--void)',
           display: 'flex', flexDirection: 'column',
-          zIndex: 40,
+          zIndex: 60,
         }}
         role="main"
         aria-label="Initiatief tracker"
@@ -1028,6 +1028,7 @@ export default function EncounterRunPage() {
               <MonsterStatPopup
                 bestiary={selectedCombatant.bestiary}
                 hpCurrent={selectedCombatant.hpCurrent}
+                hpMax={selectedCombatant.hpMax}
                 onAdjustHp={d => adjustHp(selectedCombatant.id, d)}
               />
             ) : (

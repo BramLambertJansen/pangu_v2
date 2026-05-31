@@ -30,7 +30,7 @@ export default function WorldsPage() {
   })
 
   const { data: activeCampaigns } = useQuery<Pick<Campaign, 'id' | 'name' | 'world_id'>[]>({
-    queryKey: queryKeys.campaigns.active,
+    queryKey: queryKeys.campaigns.activeForWorlds,
     queryFn: async () => {
       const { data, error } = await supabase
         .from('campaigns')

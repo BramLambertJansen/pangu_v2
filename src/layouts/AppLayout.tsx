@@ -247,7 +247,7 @@ export default function AppLayout() {
           >
             {sidebarCollapsed ? (
               <img
-                src="/pangu-logo.png"
+                src="/pangu.svg"
                 alt="PANGU"
                 width={36}
                 height={36}
@@ -255,7 +255,7 @@ export default function AppLayout() {
               />
             ) : (
               <img
-                src="/pangu-logo.png"
+                src="/pangu.svg"
                 alt="PANGU Sanctum II"
                 style={{ width: '120px', height: 'auto', borderRadius: '8px', display: 'block' }}
               />
@@ -422,7 +422,7 @@ export default function AppLayout() {
 
           <Link to="/dashboard" className="mobile-topbar-brand" aria-label="Naar dashboard">
             <img
-              src="/pangu-logo.png"
+              src="/pangu.svg"
               alt="PANGU"
               width={28}
               height={28}

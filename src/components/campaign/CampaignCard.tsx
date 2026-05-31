@@ -53,7 +53,6 @@ export const CampaignCard = memo(function CampaignCard({ campaign }: Props) {
         cursor: 'pointer',
         display: 'flex',
         flexDirection: 'column',
-        outline: 'none',
       }}
       className="campaign-card"
     >

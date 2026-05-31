@@ -170,12 +170,14 @@ export const WorldCard = memo(function WorldCard({ world, campaigns }: Props) {
           </div>
 
           {campaigns && campaigns.length > 0 ? (
+            <>
             <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: 6 }}>
-              {campaigns.map(c => (
+              {campaigns.slice(0, 3).map(c => (
                 <li key={c.id}>
                   <button
                     type="button"
                     onClick={e => { e.stopPropagation(); navigate(`/campaigns/${c.id}`) }}
+                    onKeyDown={e => e.stopPropagation()}
                     style={{
                       display: 'flex',
                       alignItems: 'center',
@@ -214,6 +216,12 @@ export const WorldCard = memo(function WorldCard({ world, campaigns }: Props) {
                 </li>
               ))}
             </ul>
+            {campaigns.length > 3 && (
+              <p style={{ fontSize: 11, color: 'var(--muted)', margin: '6px 0 0', textAlign: 'center' }}>
+                +{campaigns.length - 3} meer
+              </p>
+            )}
+            </>
           ) : (
             <p style={{
               fontFamily: 'var(--font-quote)',

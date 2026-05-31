@@ -172,6 +172,7 @@ export default function EncounterEditPage() {
       }
       queryClient.invalidateQueries({ queryKey: queryKeys.campaigns.encounterDetail(id!) })
       queryClient.invalidateQueries({ queryKey: queryKeys.campaigns.encounterMonsters(id!) })
+      queryClient.invalidateQueries({ queryKey: queryKeys.campaigns.encounterMonstersFull(id!) })
       setCommitted(true)
       setDirty(false)
       setMonstersDirty(false)
@@ -201,8 +202,9 @@ export default function EncounterEditPage() {
   })
 
   async function handleDiscardConfirm() {
-    const { error } = await supabase.from('encounters').delete().eq('id', id!)
-    if (!error) {
+    if (guard.isDraftDiscard) {
+      const { error } = await supabase.from('encounters').delete().eq('id', id!)
+      if (error) { toast.error('Verwijderen mislukt'); return }
       queryClient.removeQueries({ queryKey: queryKeys.campaigns.encounterDetail(id!) })
       queryClient.removeQueries({ queryKey: queryKeys.campaigns.encounterMonsters(id!) })
       if (campaignId) {

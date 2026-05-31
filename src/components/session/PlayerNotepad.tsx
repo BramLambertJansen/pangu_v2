@@ -30,6 +30,12 @@ export function PlayerNotepad({ sessionId, campaignId }: Props) {
   const initialised = useRef(false)
 
   useEffect(() => {
+    initialised.current = false
+    setContent('')
+    setLastSaved(null)
+  }, [sessionId])
+
+  useEffect(() => {
     if (!isLoading && !initialised.current) {
       setContent(existingNote?.content ?? '')
       if (existingNote?.updated_at) setLastSaved(new Date(existingNote.updated_at))
