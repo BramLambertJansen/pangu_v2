@@ -137,8 +137,9 @@ export default function CampaignEditPage() {
   }
 
   async function handleDiscardConfirm() {
-    const { error } = await supabase.from('campaigns').delete().eq('id', id!)
-    if (!error) {
+    if (guard.isDraftDiscard) {
+      const { error } = await supabase.from('campaigns').delete().eq('id', id!)
+      if (error) { toast.error('Verwijderen mislukt'); return }
       const worldId = campaign?.world_id ?? worldIdFromState
       queryClient.invalidateQueries({ queryKey: queryKeys.campaigns.all })
       if (worldId) queryClient.invalidateQueries({ queryKey: queryKeys.campaigns.byWorld(worldId) })

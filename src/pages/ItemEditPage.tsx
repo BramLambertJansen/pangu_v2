@@ -191,8 +191,9 @@ export default function ItemEditPage() {
   })
 
   async function handleDiscardConfirm() {
-    const { error } = await supabase.from('items').delete().eq('id', id!)
-    if (!error) {
+    if (guard.isDraftDiscard) {
+      const { error } = await supabase.from('items').delete().eq('id', id!)
+      if (error) { toast.error('Verwijderen mislukt'); return }
       queryClient.removeQueries({ queryKey: queryKeys.items.detail(id!) })
       if (campaignId) {
         queryClient.invalidateQueries({ queryKey: queryKeys.items.byCampaign(campaignId) })

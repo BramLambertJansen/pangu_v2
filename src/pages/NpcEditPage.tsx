@@ -110,8 +110,9 @@ export default function NpcEditPage() {
   })
 
   async function handleDiscardConfirm() {
-    const { error } = await supabase.from('npcs').delete().eq('id', id!)
-    if (!error) {
+    if (guard.isDraftDiscard) {
+      const { error } = await supabase.from('npcs').delete().eq('id', id!)
+      if (error) { toast.error('Verwijderen mislukt'); return }
       queryClient.removeQueries({ queryKey: queryKeys.campaigns.npcDetail(id!) })
       if (campaignId) {
         queryClient.invalidateQueries({ queryKey: queryKeys.campaigns.npcs(campaignId) })

@@ -124,8 +124,9 @@ export default function WorldEditPage() {
   }
 
   async function handleDiscardConfirm() {
-    const { error } = await supabase.from('worlds').delete().eq('id', id!)
-    if (!error) {
+    if (guard.isDraftDiscard) {
+      const { error } = await supabase.from('worlds').delete().eq('id', id!)
+      if (error) { toast.error('Verwijderen mislukt'); return }
       queryClient.invalidateQueries({ queryKey: queryKeys.worlds.all })
     }
     const blockerHandled = guard.confirmLeave()

@@ -2,6 +2,7 @@ export const queryKeys = {
   campaigns: {
     all: ['campaigns'] as const,
     active: ['campaigns', 'active'] as const,
+    activeForWorlds: ['campaigns', 'active-for-worlds'] as const,
     detail: (id: string) => ['campaigns', id] as const,
     // Separate key for the variant that joins worlds — avoids cache shape collision with detail()
     detailWithWorld: (id: string) => ['campaigns', id, 'with-world'] as const,
