@@ -99,7 +99,7 @@ export function useCampaignMembers(campaignId: string | undefined) {
         .eq('campaign_id', campaignId!)
         .order('joined_at', { ascending: true })
       if (error) throw error
-      return data as CampaignMemberWithProfile[]
+      return data as unknown as CampaignMemberWithProfile[]
     },
     enabled: !!campaignId,
     staleTime: 1000 * 60,
