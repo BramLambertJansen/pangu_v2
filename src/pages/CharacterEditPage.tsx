@@ -355,18 +355,25 @@ export default function CharacterEditPage() {
     set('saving_throw_proficiencies', updated)
   }, [form.saving_throw_proficiencies, set])
 
-  // Load user's campaigns for the campaign selector
+  // Load campaigns the user owns or has joined as a player
   const { data: userCampaigns } = useQuery<Pick<Campaign, 'id' | 'name'>[]>({
     queryKey: [...queryKeys.campaigns.all, 'names'],
     queryFn: async () => {
       if (!user) return []
-      const { data, error } = await supabase
-        .from('campaigns')
-        .select('id, name')
-        .eq('user_id', user.id)
-        .order('name', { ascending: true })
-      if (error) throw error
-      return data as Pick<Campaign, 'id' | 'name'>[]
+      const [ownedRes, memberRes] = await Promise.all([
+        supabase.from('campaigns').select('id, name').eq('user_id', user.id),
+        supabase.from('campaign_members').select('campaigns!inner(id, name)').eq('user_id', user.id),
+      ])
+      if (ownedRes.error) throw ownedRes.error
+      if (memberRes.error) throw memberRes.error
+
+      const memberCampaigns = (memberRes.data ?? []).map(
+        (row) => (row as unknown as { campaigns: Pick<Campaign, 'id' | 'name'> }).campaigns
+      )
+      const seen = new Set<string>()
+      return [...(ownedRes.data ?? []), ...memberCampaigns]
+        .filter((c) => { if (seen.has(c.id)) return false; seen.add(c.id); return true })
+        .sort((a, b) => a.name.localeCompare(b.name)) as Pick<Campaign, 'id' | 'name'>[]
     },
     enabled: !!user,
     staleTime: 1000 * 60,
