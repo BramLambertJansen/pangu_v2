@@ -293,8 +293,9 @@ export default function CharacterEditPage() {
   const concentrationSpellId = useId()
   const portraitUrlId = useId()
 
-  const locationState = location.state as { isNew?: boolean } | null
+  const locationState = location.state as { isNew?: boolean; joinCampaignId?: string } | null
   const isNew = locationState?.isNew ?? false
+  const joinCampaignId = locationState?.joinCampaignId
 
   const { data: characterData, isLoading } = useQuery<Character>({
     queryKey: queryKeys.characters.detail(id!),
@@ -355,18 +356,25 @@ export default function CharacterEditPage() {
     set('saving_throw_proficiencies', updated)
   }, [form.saving_throw_proficiencies, set])
 
-  // Load user's campaigns for the campaign selector
+  // Load campaigns the user owns or has joined as a player
   const { data: userCampaigns } = useQuery<Pick<Campaign, 'id' | 'name'>[]>({
     queryKey: [...queryKeys.campaigns.all, 'names'],
     queryFn: async () => {
       if (!user) return []
-      const { data, error } = await supabase
-        .from('campaigns')
-        .select('id, name')
-        .eq('user_id', user.id)
-        .order('name', { ascending: true })
-      if (error) throw error
-      return data as Pick<Campaign, 'id' | 'name'>[]
+      const [ownedRes, memberRes] = await Promise.all([
+        supabase.from('campaigns').select('id, name').eq('user_id', user.id),
+        supabase.from('campaign_members').select('campaigns!inner(id, name)').eq('user_id', user.id),
+      ])
+      if (ownedRes.error) throw ownedRes.error
+      if (memberRes.error) throw memberRes.error
+
+      const memberCampaigns = (memberRes.data ?? []).map(
+        (row) => (row as unknown as { campaigns: Pick<Campaign, 'id' | 'name'> }).campaigns
+      )
+      const seen = new Set<string>()
+      return [...(ownedRes.data ?? []), ...memberCampaigns]
+        .filter((c) => { if (seen.has(c.id)) return false; seen.add(c.id); return true })
+        .sort((a, b) => a.name.localeCompare(b.name)) as Pick<Campaign, 'id' | 'name'>[]
     },
     enabled: !!user,
     staleTime: 1000 * 60,
@@ -457,11 +465,22 @@ export default function CharacterEditPage() {
         })
         .eq('id', id!)
       if (error) throw error
+
+      if (joinCampaignId && user) {
+        const { error: memberError } = await supabase
+          .from('campaign_members')
+          .insert({ campaign_id: joinCampaignId, user_id: user.id })
+        // 23505 = already a member (e.g. retry after network error), safe to ignore
+        if (memberError && memberError.code !== '23505') throw memberError
+      }
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: queryKeys.characters.all })
       queryClient.invalidateQueries({ queryKey: queryKeys.characters.detail(id!) })
       queryClient.invalidateQueries({ queryKey: ['characters', 'campaign'] })
+      if (joinCampaignId) {
+        queryClient.invalidateQueries({ queryKey: queryKeys.campaigns.members(joinCampaignId) })
+      }
       setCommitted(true)
       setDirty(false)
     },
