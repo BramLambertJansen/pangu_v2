@@ -37,7 +37,7 @@ export default function JoinPage() {
       } else {
         const newChar = await joinAndCreate.mutateAsync({ campaignId: campaign.id, userId: user.id })
         toast.success(`Je hebt '${campaign.name}' betreden!`)
-        navigate(`/characters/${newChar.id}/edit`, { state: { isNew: true } })
+        navigate(`/characters/${newChar.id}/edit`, { state: { isNew: true, joinCampaignId: campaign.id } })
       }
     } catch (err: unknown) {
       const errCode = (err as { code?: string })?.code
@@ -309,6 +309,7 @@ export default function JoinPage() {
             <Button
               onClick={handleConfirm}
               loading={isPending}
+              disabled={isLoadingCharacters}
               className="w-full"
             >
               {selectedCharacter

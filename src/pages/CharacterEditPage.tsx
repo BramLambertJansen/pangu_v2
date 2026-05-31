@@ -293,8 +293,9 @@ export default function CharacterEditPage() {
   const concentrationSpellId = useId()
   const portraitUrlId = useId()
 
-  const locationState = location.state as { isNew?: boolean } | null
+  const locationState = location.state as { isNew?: boolean; joinCampaignId?: string } | null
   const isNew = locationState?.isNew ?? false
+  const joinCampaignId = locationState?.joinCampaignId
 
   const { data: characterData, isLoading } = useQuery<Character>({
     queryKey: queryKeys.characters.detail(id!),
@@ -464,11 +465,22 @@ export default function CharacterEditPage() {
         })
         .eq('id', id!)
       if (error) throw error
+
+      if (joinCampaignId && user) {
+        const { error: memberError } = await supabase
+          .from('campaign_members')
+          .insert({ campaign_id: joinCampaignId, user_id: user.id })
+        // 23505 = already a member (e.g. retry after network error), safe to ignore
+        if (memberError && memberError.code !== '23505') throw memberError
+      }
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: queryKeys.characters.all })
       queryClient.invalidateQueries({ queryKey: queryKeys.characters.detail(id!) })
       queryClient.invalidateQueries({ queryKey: ['characters', 'campaign'] })
+      if (joinCampaignId) {
+        queryClient.invalidateQueries({ queryKey: queryKeys.campaigns.members(joinCampaignId) })
+      }
       setCommitted(true)
       setDirty(false)
     },

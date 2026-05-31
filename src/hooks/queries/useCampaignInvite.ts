@@ -104,6 +104,7 @@ export function useJoinWithCharacter() {
         .from('characters')
         .update({ campaign_id: campaignId })
         .eq('id', characterId)
+        .is('campaign_id', null)
       if (charError) throw charError
     },
     onSuccess: (_data, { campaignId }) => {
@@ -118,11 +119,6 @@ export function useJoinAndCreateCharacter() {
 
   return useMutation({
     mutationFn: async ({ campaignId, userId }: { campaignId: string; userId: string }) => {
-      const { error: memberError } = await supabase
-        .from('campaign_members')
-        .insert({ campaign_id: campaignId, user_id: userId })
-      if (memberError) throw memberError
-
       const { data, error: charError } = await supabase
         .from('characters')
         .insert({ user_id: userId, campaign_id: campaignId, name: 'Nieuw karakter', status: 'active' })
@@ -131,8 +127,7 @@ export function useJoinAndCreateCharacter() {
       if (charError) throw charError
       return data as unknown as Character
     },
-    onSuccess: (_data, { campaignId }) => {
-      queryClient.invalidateQueries({ queryKey: queryKeys.campaigns.members(campaignId) })
+    onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: queryKeys.characters.all })
     },
   })
