@@ -139,11 +139,13 @@ function PartySection({
 function NpcSection({
   npcs,
   isLoading,
+  forging,
   onForge,
   onViewAll,
 }: {
   npcs: import('@/types/npc.types').Npc[]
   isLoading: boolean
+  forging: boolean
   onForge: () => void
   onViewAll: () => void
 }) {
@@ -154,6 +156,10 @@ function NpcSection({
 
   return (
     <section aria-labelledby="tab-npcs-heading">
+      <style>{`
+        .npc-split { display: grid; grid-template-columns: minmax(240px, 2fr) minmax(300px, 3fr); gap: 20px; align-items: start; }
+        @media (max-width: 700px) { .npc-split { grid-template-columns: 1fr; } }
+      `}</style>
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
         <h2
           id="tab-npcs-heading"
@@ -174,8 +180,10 @@ function NpcSection({
             type="button"
             className="pangu-btn pangu-btn-ghost pangu-btn-sm"
             onClick={onForge}
+            disabled={forging}
+            aria-busy={forging}
           >
-            + NPC toevoegen
+            {forging ? 'Aanmaken…' : '+ NPC toevoegen'}
           </button>
           {npcs.length > 0 && (
             <button
@@ -194,12 +202,7 @@ function NpcSection({
           <Spinner size="md" />
         </div>
       ) : npcs.length > 0 ? (
-        <div style={{
-          display: 'grid',
-          gridTemplateColumns: 'minmax(240px, 2fr) minmax(300px, 3fr)',
-          gap: 20,
-          alignItems: 'start',
-        }}>
+        <div className="npc-split">
           {/* Left: NPC list */}
           <ul
             style={{ display: 'flex', flexDirection: 'column', gap: 8, listStyle: 'none', padding: 0, margin: 0 }}
@@ -832,6 +835,7 @@ export default function CampaignDetailPage() {
           <NpcSection
             npcs={npcs ?? []}
             isLoading={isLoadingNpcs}
+            forging={createNpc.isPending}
             onForge={() => createNpc.mutate()}
             onViewAll={() => navigate(`/campaigns/${id}/npcs`)}
           />

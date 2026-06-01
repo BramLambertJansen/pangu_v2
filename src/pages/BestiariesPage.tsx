@@ -132,6 +132,10 @@ export default function BestiariesPage() {
       <WorldDetailDivider label={`${committed.length} wezen${committed.length !== 1 ? 's' : ''}`} />
 
       {/* Splitscreen */}
+      <style>{`
+        .bestiary-split { display: grid; grid-template-columns: minmax(240px, 2fr) minmax(320px, 3fr); gap: 20px; align-items: start; }
+        @media (max-width: 700px) { .bestiary-split { grid-template-columns: 1fr; } }
+      `}</style>
       <div style={{ marginTop: 24 }}>
         {bestiariesLoading ? (
           <div style={{ display: 'flex', justifyContent: 'center', padding: '40px 0' }} aria-live="polite" aria-busy="true">
@@ -148,12 +152,7 @@ export default function BestiariesPage() {
             </div>
           </>
         ) : (
-          <div style={{
-            display: 'grid',
-            gridTemplateColumns: 'minmax(240px, 2fr) minmax(320px, 3fr)',
-            gap: 20,
-            alignItems: 'start',
-          }}>
+          <div className="bestiary-split">
             {/* Left: bestiary list */}
             <div>
               <ul
