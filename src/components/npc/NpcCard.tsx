@@ -98,6 +98,89 @@ export const NpcCard = memo(function NpcCard({ npc }: Props) {
   )
 })
 
+interface RowProps {
+  npc: Npc
+  selected?: boolean
+  onSelect: () => void
+}
+
+export const NpcRow = memo(function NpcRow({ npc, selected = false, onSelect }: RowProps) {
+  return (
+    <button
+      type="button"
+      aria-pressed={selected}
+      aria-label={`Selecteer NPC: ${npc.name}`}
+      onClick={onSelect}
+      style={{
+        width: '100%',
+        display: 'flex',
+        alignItems: 'center',
+        gap: 12,
+        padding: '10px 14px',
+        borderRadius: 10,
+        border: `1px solid ${selected ? 'rgba(220,90,80,0.35)' : 'var(--hairline)'}`,
+        background: selected ? 'rgba(220,90,80,0.08)' : 'var(--surface)',
+        cursor: 'pointer',
+        textAlign: 'left',
+        transition: 'background var(--t-fast), border-color var(--t-fast)',
+      }}
+    >
+      {/* Avatar */}
+      <div
+        aria-hidden="true"
+        style={{
+          width: 38, height: 38, borderRadius: 8, flexShrink: 0,
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+          background: selected ? 'rgba(220,90,80,0.15)' : 'var(--surface-2)',
+          border: `1px solid ${selected ? 'rgba(220,90,80,0.3)' : 'var(--hairline)'}`,
+          fontFamily: 'var(--font-display)',
+          fontSize: 18, fontWeight: 700,
+          color: selected ? 'var(--crimson)' : 'var(--muted)',
+          transition: 'background var(--t-fast), color var(--t-fast)',
+        }}
+      >
+        {npc.name.trim()[0]?.toUpperCase() ?? '?'}
+      </div>
+
+      {/* Info */}
+      <div style={{ flex: 1, minWidth: 0 }}>
+        <p style={{
+          margin: 0,
+          fontFamily: 'var(--font-display)',
+          fontSize: 14, fontWeight: 600,
+          letterSpacing: '0.03em',
+          color: 'var(--ink)',
+          overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
+        }}>
+          {npc.name}
+        </p>
+        {npc.npc_role && (
+          <p style={{
+            margin: '2px 0 0',
+            fontSize: 9, fontWeight: 700,
+            letterSpacing: '0.14em', textTransform: 'uppercase',
+            color: 'var(--crimson)',
+            fontFamily: 'var(--font-body)',
+            overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
+          }}>
+            {npc.npc_role}
+          </p>
+        )}
+      </div>
+
+      {/* Status dot */}
+      <div
+        aria-hidden="true"
+        style={{
+          width: 7, height: 7, borderRadius: '50%', flexShrink: 0,
+          background: npc.status === 'active' ? 'var(--violet)' : npc.status === 'draft' ? 'var(--gold)' : 'var(--muted)',
+        }}
+        title={npcStatusLabel[npc.status]}
+      />
+    </button>
+  )
+})
+
 interface ForgeProps {
   onClick: () => void
   loading?: boolean

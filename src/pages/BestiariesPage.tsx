@@ -5,10 +5,10 @@ import { toast } from 'sonner'
 import { supabase } from '@/lib/supabase'
 import { queryKeys } from '@/lib/queryKeys'
 import { Spinner } from '@/components/ui/Spinner'
-import { EntityCardSkeleton } from '@/components/ui/EntityCardSkeleton'
 import { EmptyState } from '@/components/ui/EmptyState'
 import { Breadcrumbs } from '@/components/ui/Breadcrumbs'
-import { BestiaryCard, ForgeBestiaryCard } from '@/components/bestiary/BestiaryCard'
+import { BestiaryRow, ForgeBestiaryCard } from '@/components/bestiary/BestiaryCard'
+import { DmBestiaryPanel } from '@/components/bestiary/DmBestiaryPanel'
 import { WorldDetailDivider } from '@/components/world/WorldDetailDivider'
 import type { Bestiary } from '@/types/bestiary.types'
 import { useAuthStore } from '@/stores/auth.store'
@@ -21,9 +21,17 @@ export default function BestiariesPage() {
   const queryClient = useQueryClient()
   const user = useAuthStore(s => s.user)
   const [creatingBestiary, setCreatingBestiary] = useState(false)
+  const [selectedId, setSelectedId] = useState<string | null>(null)
 
   const { data: world, isLoading: worldLoading } = useWorld(worldId)
   const { data: bestiaries, isLoading: bestiariesLoading } = useWorldBestiaries(worldId)
+
+  // Set first bestiary as selected when data loads
+  useEffect(() => {
+    if (bestiaries && bestiaries.length > 0 && !selectedId) {
+      setSelectedId(bestiaries[0].id)
+    }
+  }, [bestiaries, selectedId])
 
   // Garbage-collect uncommitted drafts older than 30 minutes
   useEffect(() => {
@@ -31,17 +39,17 @@ export default function BestiariesPage() {
     const cutoff = new Date(Date.now() - 30 * 60 * 1000).toISOString()
     void (async () => {
       try {
-      const { data } = await supabase
-        .from('bestiaries')
-        .select('id')
-        .eq('world_id', worldId!)
-        .eq('committed', false)
-        .lt('created_at', cutoff)
-      if (data?.length) {
-        await supabase.from('bestiaries').delete().in('id', data.map((r) => r.id))
-      }
+        const { data } = await supabase
+          .from('bestiaries')
+          .select('id')
+          .eq('world_id', worldId!)
+          .eq('committed', false)
+          .lt('created_at', cutoff)
+        if (data?.length) {
+          await supabase.from('bestiaries').delete().in('id', data.map((r) => r.id))
+        }
       } catch (err) {
-        console.warn("[GC] draft cleanup failed:", err)
+        console.warn('[GC] draft cleanup failed:', err)
       }
     })()
   }, [user?.id])
@@ -98,6 +106,9 @@ export default function BestiariesPage() {
     )
   }
 
+  const committed = bestiaries?.filter(b => b.committed) ?? []
+  const selected = committed.find(b => b.id === selectedId) ?? committed[0] ?? null
+
   return (
     <div>
       {/* Breadcrumb */}
@@ -118,29 +129,57 @@ export default function BestiariesPage() {
         </p>
       </header>
 
-      <WorldDetailDivider label={`${bestiaries?.length ?? 0} wezen${bestiaries?.length !== 1 ? 's' : ''}`} />
+      <WorldDetailDivider label={`${committed.length} wezen${committed.length !== 1 ? 's' : ''}`} />
 
-      {/* Bestiary grid */}
+      {/* Splitscreen */}
+      <style>{`
+        .bestiary-split { display: grid; grid-template-columns: minmax(240px, 2fr) minmax(320px, 3fr); gap: 20px; align-items: start; }
+        @media (max-width: 700px) { .bestiary-split { grid-template-columns: 1fr; } }
+      `}</style>
       <div style={{ marginTop: 24 }}>
         {bestiariesLoading ? (
-          <ul style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: 'var(--sp-4)', listStyle: 'none', padding: 0, margin: 0 }} aria-label="Bestiarium laden..." aria-live="polite">
-            <EntityCardSkeleton count={3} />
-          </ul>
-        ) : (
+          <div style={{ display: 'flex', justifyContent: 'center', padding: '40px 0' }} aria-live="polite" aria-busy="true">
+            <Spinner size="md" />
+          </div>
+        ) : committed.length === 0 ? (
           <>
-            {(!bestiaries || bestiaries.length === 0) && (
-              <EmptyState
-                title="Nog geen wezens"
-                description="Vul het bestiarium met de gevaarlijke en mysterieuze wezens van deze wereld."
-              />
-            )}
-            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-              {bestiaries?.map((bestiary) => (
-                <BestiaryCard key={bestiary.id} bestiary={bestiary} />
-              ))}
+            <EmptyState
+              title="Nog geen wezens"
+              description="Vul het bestiarium met de gevaarlijke en mysterieuze wezens van deze wereld."
+            />
+            <div style={{ marginTop: 16, maxWidth: 280 }}>
               <ForgeBestiaryCard onClick={handleCreateBestiary} loading={creatingBestiary} />
             </div>
           </>
+        ) : (
+          <div className="bestiary-split">
+            {/* Left: bestiary list */}
+            <div>
+              <ul
+                style={{ display: 'flex', flexDirection: 'column', gap: 8, listStyle: 'none', padding: 0, margin: '0 0 10px' }}
+                role="list"
+                aria-label="Wezens in dit bestiarium"
+              >
+                {committed.map((bestiary) => (
+                  <li key={bestiary.id}>
+                    <BestiaryRow
+                      bestiary={bestiary}
+                      selected={bestiary.id === (selected?.id)}
+                      onSelect={() => setSelectedId(bestiary.id)}
+                    />
+                  </li>
+                ))}
+              </ul>
+              <ForgeBestiaryCard onClick={handleCreateBestiary} loading={creatingBestiary} />
+            </div>
+
+            {/* Right: DM stat block panel */}
+            {selected && (
+              <div style={{ position: 'sticky', top: 20, maxHeight: 'calc(100vh - 180px)' }}>
+                <DmBestiaryPanel bestiary={selected} />
+              </div>
+            )}
+          </div>
         )}
       </div>
     </div>

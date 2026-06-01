@@ -12,6 +12,7 @@ export interface Bestiary {
   description: string | null
   notes: string | null
   status: BestiaryStatus
+  committed: boolean
   hp: number
   ac: number
   speed: number
