@@ -2,13 +2,19 @@ import { useId, useState } from 'react'
 import { useParams, useNavigate, useLocation } from 'react-router-dom'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { toast } from 'sonner'
+import type { SupabaseClient } from '@supabase/supabase-js'
 import { supabase } from '@/lib/supabase'
+
+// faction_id column on npcs is not yet in database.types.ts — migration 040 adds it but
+// types are regenerated after the migration runs on the live database.
+const db = supabase as unknown as SupabaseClient
 import { queryKeys } from '@/lib/queryKeys'
 import { Modal } from '@/components/ui/Modal'
 import { ConfirmDialog } from '@/components/ui/ConfirmDialog'
 import { Spinner } from '@/components/ui/Spinner'
 import { useEntityEdit } from '@/hooks/useEntityEdit'
 import { useAI } from '@/hooks/useAI'
+import { useCampaignFactions } from '@/hooks/queries/useCampaignFactions'
 import type { Npc, NpcStatus } from '@/types/npc.types'
 
 const statusOptions: { value: NpcStatus; label: string }[] = [
@@ -28,6 +34,7 @@ export default function NpcEditPage() {
   const notesId = useId()
   const statusId = useId()
   const npcRoleId = useId()
+  const factionId = useId()
 
   const { ask, loading: aiLoading } = useAI()
   const [aiPreview, setAiPreview] = useState<string | null>(null)
@@ -59,10 +66,11 @@ export default function NpcEditPage() {
   } = useEntityEdit({ entity: npcData, isNew })
 
   const campaignId = npcData?.campaign_id ?? campaignIdFromState
+  const { data: factions } = useCampaignFactions(npcData?.campaign_id ?? campaignIdFromState)
 
   const saveNpc = useMutation({
     mutationFn: async () => {
-      const { error } = await supabase
+      const { error } = await db
         .from('npcs')
         .update({
           name: form.name,
@@ -71,6 +79,7 @@ export default function NpcEditPage() {
           notes: form.notes,
           status: form.status,
           npc_role: form.npc_role ?? null,
+          faction_id: form.faction_id ?? null,
           committed: true,
           updated_at: new Date().toISOString(),
         })
@@ -301,6 +310,21 @@ export default function NpcEditPage() {
               >
                 {statusOptions.map((o) => (
                   <option key={o.value} value={o.value}>{o.label}</option>
+                ))}
+              </select>
+            </div>
+
+            <div>
+              <label className="pangu-label" htmlFor={factionId}>Factie</label>
+              <select
+                id={factionId}
+                className="pangu-select"
+                value={form.faction_id ?? ''}
+                onChange={(e) => set('faction_id', e.target.value || null)}
+              >
+                <option value="">— Geen factie —</option>
+                {factions?.map((f) => (
+                  <option key={f.id} value={f.id}>{f.name}</option>
                 ))}
               </select>
             </div>

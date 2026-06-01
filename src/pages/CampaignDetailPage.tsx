@@ -3,7 +3,12 @@ import { useParams, useNavigate } from 'react-router-dom'
 import { Breadcrumb } from '@/components/ui/Breadcrumb'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { toast } from 'sonner'
+import type { SupabaseClient } from '@supabase/supabase-js'
 import { supabase } from '@/lib/supabase'
+
+// factions is not yet in database.types.ts — migration 039 adds the table but types are
+// regenerated after the migration runs on the live database.
+const db = supabase as unknown as SupabaseClient
 import { queryKeys } from '@/lib/queryKeys'
 import { useAuthStore } from '@/stores/auth.store'
 import { Spinner } from '@/components/ui/Spinner'
@@ -26,6 +31,8 @@ import { useCampaignQuests } from '@/hooks/queries/useCampaignQuests'
 import { useCampaignEncounters } from '@/hooks/queries/useCampaignEncounters'
 import { useCampaignCharacters } from '@/hooks/queries/useCampaignCharacters'
 import { useCampaignItems } from '@/hooks/queries/useCampaignItems'
+import { useCampaignFactions } from '@/hooks/queries/useCampaignFactions'
+import { FactionCard, ForgeFactionCard } from '@/components/faction/FactionCard'
 import { InvitePanel } from '@/components/campaign/InvitePanel'
 import { pickGradient, coverGradients } from '@/utils/pickGradient'
 import { sanitizeImageUrl } from '@/utils/sanitizeUrl'
@@ -38,6 +45,7 @@ import type { Quest } from '@/types/quest.types'
 import type { Encounter } from '@/types/encounter.types'
 import type { Item } from '@/types/item.types'
 import type { Character } from '@/types/character.types'
+import type { Faction } from '@/types/faction.types'
 
 // ── PartySection ──────────────────────────────────────────────────────────────
 // Split-screen party view: left = member list, right = DM character panel.
@@ -245,7 +253,7 @@ function NpcSection({
 const scrimGradient =
   'linear-gradient(to top, var(--void) 0%, rgba(10,10,22,0.97) 20%, rgba(10,10,22,0.72) 40%, rgba(10,10,22,0.18) 62%, transparent 82%)'
 
-type TabId = 'party' | 'sessions' | 'locations' | 'lore' | 'npcs' | 'quests' | 'encounters' | 'treasury' | 'notes' | 'invite'
+type TabId = 'party' | 'sessions' | 'locations' | 'lore' | 'npcs' | 'factions' | 'quests' | 'encounters' | 'treasury' | 'notes' | 'invite'
 
 const TABS: { id: TabId; label: string; dmOnly?: boolean }[] = [
   { id: 'party', label: 'The Party' },
@@ -253,6 +261,7 @@ const TABS: { id: TabId; label: string; dmOnly?: boolean }[] = [
   { id: 'locations', label: 'Locaties' },
   { id: 'lore', label: 'Lore' },
   { id: 'npcs', label: "NPC's" },
+  { id: 'factions', label: 'Facties' },
   { id: 'quests', label: 'Quests' },
   { id: 'encounters', label: 'Gevechten' },
   { id: 'treasury', label: 'Schatkist' },
@@ -276,6 +285,7 @@ export default function CampaignDetailPage() {
   const { data: npcs, isLoading: isLoadingNpcs } = useCampaignNpcs(id)
   const { data: quests, isLoading: isLoadingQuests } = useCampaignQuests(id)
   const { data: encounters, isLoading: isLoadingEncounters } = useCampaignEncounters(id)
+  const { data: factions, isLoading: isLoadingFactions } = useCampaignFactions(id)
 
   const createSession = useMutation({
     mutationFn: async () => {
@@ -386,6 +396,24 @@ export default function CampaignDetailPage() {
       navigate(`/encounters/${newEncounter.id}/edit`, { state: { isNew: true, campaignId: id } })
     },
     onError: () => { toast.error('Gevecht aanmaken mislukt') },
+  })
+
+  const createFaction = useMutation({
+    mutationFn: async () => {
+      if (!user) throw new Error('Niet ingelogd')
+      const { data, error } = await db
+        .from('factions')
+        .insert({ campaign_id: id!, user_id: user.id, name: 'Nieuwe factie', status: 'draft', reputation: 'neutral' })
+        .select()
+        .single()
+      if (error) throw error
+      return data as Faction
+    },
+    onSuccess: (newFaction) => {
+      queryClient.invalidateQueries({ queryKey: queryKeys.campaigns.factions(id!) })
+      navigate(`/factions/${newFaction.id}/edit`, { state: { isNew: true, campaignId: id } })
+    },
+    onError: () => { toast.error('Factie aanmaken mislukt') },
   })
 
   const createItem = useMutation({
@@ -841,6 +869,64 @@ export default function CampaignDetailPage() {
             onForge={() => createNpc.mutate()}
             onViewAll={() => navigate(`/campaigns/${id}/npcs`)}
           />
+        )}
+
+        {/* Facties */}
+        {activeTab === 'factions' && (
+          <section aria-labelledby="tab-factions-heading">
+            <h2
+              id="tab-factions-heading"
+              style={{
+                fontFamily: 'var(--font-display)',
+                fontSize: 'clamp(22px, 4vw, 30px)',
+                fontWeight: 600,
+                letterSpacing: '0.06em',
+                textTransform: 'uppercase',
+                color: 'var(--ink)',
+                margin: '0 0 24px',
+              }}
+            >
+              Facties
+            </h2>
+            {isLoadingFactions ? (
+              <div style={{ display: 'flex', justifyContent: 'center', padding: '40px 0' }} aria-live="polite" aria-busy="true">
+                <Spinner size="md" />
+              </div>
+            ) : (
+              <>
+                <ul
+                  style={{
+                    display: 'grid',
+                    gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))',
+                    gap: 'var(--sp-5)',
+                    listStyle: 'none',
+                    padding: 0,
+                    margin: 0,
+                  }}
+                  role="list"
+                  aria-label="Facties in deze kroniek"
+                >
+                  {factions?.slice(0, 6).map((faction) => (
+                    <li key={faction.id}><FactionCard faction={faction} /></li>
+                  ))}
+                  <li>
+                    <ForgeFactionCard onClick={() => createFaction.mutate()} loading={createFaction.isPending} />
+                  </li>
+                </ul>
+                {factions && factions.length > 0 && (
+                  <div style={{ marginTop: 16, display: 'flex', justifyContent: 'flex-end' }}>
+                    <button
+                      type="button"
+                      className="pangu-btn pangu-btn-ghost pangu-btn-sm"
+                      onClick={() => navigate(`/campaigns/${id}/factions`)}
+                    >
+                      Alle facties bekijken →
+                    </button>
+                  </div>
+                )}
+              </>
+            )}
+          </section>
         )}
 
         {/* Quests */}

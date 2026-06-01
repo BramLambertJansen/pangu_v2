@@ -626,6 +626,9 @@ Routes zijn gedefinieerd in `src/routes/index.tsx`. Lazy-loading voor alle pagin
 | `/campaigns/:id/encounters` | `EncountersPage` | `requireAuth` |
 | `/campaigns/:id/items` | `CampaignItemsPage` | `requireAuth` |
 | `/campaigns/:id/loot-generator` | `LootGeneratorPage` | `requireAuth` |
+| `/campaigns/:id/factions` | `FactionsPage` | `requireAuth` |
+| `/factions/:id` | `FactionDetailPage` | `requireAuth` |
+| `/factions/:id/edit` | `FactionEditPage` | `requireAuth` |
 | `/sessions/:id` | `SessionDetailPage` | `requireAuth` |
 | `/sessions/:id/edit` | `SessionEditPage` | `requireAuth` |
 | `/locations/:id` | `LocationDetailPage` | `requireAuth` |
@@ -1030,5 +1033,27 @@ npm run test         # Vitest
 - [x] `src/hooks/queries/useEntityLinks.ts` — `useEntityLinks(type, id)`: twee aparte `.eq().eq()`-queries (DEV_MODE heeft geen `.or()`), merge + naam-resolutie via `.in()` per type (geen polymorfe joins); `useCreateLink()` + `useDeleteLink()` invalideren beide endpoints
 - [x] `src/components/link/RelatedEntities.tsx` — sectie op detailpagina's: gegroepeerd per doel-type, juist label per richting (outgoing/incoming), doorkliklinks, verwijderen via `ConfirmDialog`, "Verbind…"-knop opent modal, focus-restore na sluiting
 - [x] `src/components/link/LinkEntityModal.tsx` — drie-stappen modal (type → relatie → entiteit), zoekfilter in JS, hergebruikt bestaande campaign-query hooks, A11Y: `<label>` + `htmlFor`, stap-indicator
-- [x] Wiring op: `NpcDetailPage`, `LocationDetailPage`, `LoreDetailPage`, `QuestDetailPage`, `SessionDetailPage`, `EncounterDetailPage`, `CharacterDetailPage`, `ItemEditPage` (items routen naar `/edit`)
+- [x] Wiring op: `NpcDetailPage`, `LocationDetailPage`, `LoreDetailPage`, `QuestDetailPage`, `SessionDetailPage`, `EncounterDetailPage`, `CharacterDetailPage`, `ItemEditPage` (items routen naar `/edit`), `FactionDetailPage`
 - Notitie: items hebben geen `status`-kolom — name-resolution selecteert `'id, name'` voor items; `ResolvedLink.entity.status` is `string | null`
+
+### Facties & Organisaties
+- [x] Migratie `039_factions.sql` — `factions` tabel met `campaign_id` FK, `type`, `reputation` (default `neutral`), `status` (default `draft`), `motto`, `goals`, `description`, `notes`, `committed`; RLS op campaign-eigenaarschap; `update_factions_updated_at` trigger; index op `(campaign_id, created_at DESC)`
+- [x] Migratie `040_npc_faction.sql` — `faction_id uuid REFERENCES factions(id) ON DELETE SET NULL` op `npcs`; partial index op `faction_id`
+- [x] `src/types/faction.types.ts` — `FactionStatus`, `FactionType` (9 typen), `FactionReputation` (5 niveaus), `Faction` interface
+- [x] `src/types/npc.types.ts` — `faction_id: string | null` toegevoegd aan `Npc`
+- [x] `src/types/link.types.ts` — `'faction'` toegevoegd aan `LinkableEntityType`
+- [x] `src/lib/linkMaps.ts` — `linkableTypeLabel.faction = 'Factie'`, `linkableTypeRoute.faction = '/factions'`
+- [x] `src/lib/statusMaps.ts` — `factionStatusLabel/Color`, `factionTypeLabel`, `factionReputationLabel/Color`
+- [x] `src/utils/pickGradient.ts` — `factionGradients` palet (heraldisch crimson/goud)
+- [x] `src/lib/queryKeys.ts` — `campaigns.factions(id)`, `campaigns.factionDetail(id)`, `campaigns.factionDetailFull(id)`
+- [x] `src/hooks/queries/useCampaignFactions.ts` — `useCampaignFactions` (lijst) + `useCreateCampaignFaction` (forge)
+- [x] `src/hooks/queries/useFaction.ts` — `useFaction` (single), `useFactionFull` (met campaign+worlds join), `FactionWithCampaign` type
+- [x] `src/hooks/queries/useEntityLinks.ts` — `faction: 'factions'` toegevoegd aan `typeToTable`
+- [x] `src/components/link/LinkEntityModal.tsx` — `faction` toegevoegd aan `ALL_TYPES` en `entityListMap`
+- [x] `src/components/faction/FactionCard.tsx` — `FactionCard` (compact card met type/reputatie/motto) + `ForgeFactionCard`
+- [x] `src/pages/FactionsPage.tsx` — overzicht per kroniek; grid + ForgeCard + EmptyState; draft GC
+- [x] `src/pages/FactionDetailPage.tsx` — breadcrumbs (wereld · kroniek · facties), header met type/reputatie/status badges, motto, doelen, beschrijving, ledenlijst (NPCs via `.eq('faction_id', id)`), DM-notities, `<RelatedEntities type="faction" …/>`
+- [x] `src/pages/FactionEditPage.tsx` — naam, subtitel, type, reputatie, status, motto, doelen, beschrijving, DM-notities; `useEntityEdit` + `useEditGuard`; delete via `ConfirmDialog`
+- [x] `src/pages/NpcEditPage.tsx` — factie-dropdown (opties uit `useCampaignFactions`); schrijft `faction_id`
+- [x] `src/pages/NpcDetailPage.tsx` — doorklikbare factie-badge als `faction_id` gezet is
+- [x] `src/pages/CampaignDetailPage.tsx` — tab "Facties" (na NPC's); inline grid max 6 + "Alle facties bekijken →"; `createFaction` mutation

@@ -33,6 +33,9 @@ export const queryKeys = {
     encounterMonstersFull: (encounterId: string) => ['encounters', encounterId, 'monsters-full'] as const,
     invite: (id: string) => ['campaigns', id, 'invite'] as const,
     members: (id: string) => ['campaigns', id, 'members'] as const,
+    factions: (id: string) => ['campaigns', id, 'factions'] as const,
+    factionDetail: (factionId: string) => ['factions', factionId] as const,
+    factionDetailFull: (factionId: string) => ['factions', factionId, 'full'] as const,
   },
   invites: {
     byCode: (code: string) => ['invites', 'code', code] as const,

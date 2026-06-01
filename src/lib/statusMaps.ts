@@ -9,6 +9,7 @@ import type { BestiaryStatus } from '@/types/bestiary.types'
 import type { QuestStatus } from '@/types/quest.types'
 import type { EncounterStatus } from '@/types/encounter.types'
 import type { ItemRarity, ItemType } from '@/types/item.types'
+import type { FactionStatus, FactionType, FactionReputation } from '@/types/faction.types'
 
 export const worldStatusLabel: Record<WorldStatus, string> = {
   draft:    'Concept',
@@ -177,4 +178,44 @@ export const itemTypeLabel: Record<ItemType, string> = {
   wand:     'Toverstok',
   wondrous: 'Wonderlijk',
   misc:     'Overig',
+}
+
+export const factionStatusLabel: Record<FactionStatus, string> = {
+  draft:    'Concept',
+  active:   'Actief',
+  archived: 'Gearchiveerd',
+}
+
+export const factionStatusColor: Record<FactionStatus, string> = {
+  draft:    'var(--gold)',
+  active:   'var(--violet)',
+  archived: 'var(--muted)',
+}
+
+export const factionTypeLabel: Record<FactionType, string> = {
+  guild:       'Gilde',
+  noble_house: 'Adellijk huis',
+  religious:   'Religieuze orde',
+  criminal:    'Criminele organisatie',
+  military:    'Militaire orde',
+  merchant:    'Handelsgilde',
+  arcane:      'Arcane genootschap',
+  tribal:      'Stam',
+  other:       'Overig',
+}
+
+export const factionReputationLabel: Record<FactionReputation, string> = {
+  hostile:    'Vijandig',
+  unfriendly: 'Wantrouwend',
+  neutral:    'Neutraal',
+  friendly:   'Vriendelijk',
+  allied:     'Bondgenoot',
+}
+
+export const factionReputationColor: Record<FactionReputation, string> = {
+  hostile:    'var(--crimson)',
+  unfriendly: 'var(--gold)',
+  neutral:    'var(--muted)',
+  friendly:   'var(--teal)',
+  allied:     'var(--azure)',
 }

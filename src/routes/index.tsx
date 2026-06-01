@@ -47,6 +47,9 @@ const CampaignItemsPage = lazy(() => import('@/pages/CampaignItemsPage'))
 const LootGeneratorPage = lazy(() => import('@/pages/LootGeneratorPage'))
 const ItemEditPage = lazy(() => import('@/pages/ItemEditPage'))
 const JoinPage = lazy(() => import('@/pages/JoinPage'))
+const FactionsPage = lazy(() => import('@/pages/FactionsPage'))
+const FactionDetailPage = lazy(() => import('@/pages/FactionDetailPage'))
+const FactionEditPage = lazy(() => import('@/pages/FactionEditPage'))
 
 function wrap(Page: React.ComponentType) {
   return (
@@ -264,6 +267,21 @@ export const router = createBrowserRouter([
         path: '/items/:id/edit',
         loader: requireAuth,
         element: wrap(ItemEditPage),
+      },
+      {
+        path: '/campaigns/:id/factions',
+        loader: requireAuth,
+        element: wrap(FactionsPage),
+      },
+      {
+        path: '/factions/:id',
+        loader: requireAuth,
+        element: wrap(FactionDetailPage),
+      },
+      {
+        path: '/factions/:id/edit',
+        loader: requireAuth,
+        element: wrap(FactionEditPage),
       },
       { path: '*', element: <RouteErrorPage /> },
     ],

@@ -32,6 +32,7 @@ export const linkableTypeLabel: Record<LinkableEntityType, string> = {
   item:      'Item',
   encounter: 'Gevecht',
   character: 'Karakter',
+  faction:   'Factie',
 }
 
 export const linkableTypeRoute: Record<LinkableEntityType, string> = {
@@ -43,4 +44,5 @@ export const linkableTypeRoute: Record<LinkableEntityType, string> = {
   item:      '/items',
   encounter: '/encounters',
   character: '/characters',
+  faction:   '/factions',
 }
