@@ -1,7 +1,10 @@
 import { useEffect } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { toast } from 'sonner'
+import type { SupabaseClient } from '@supabase/supabase-js'
 import { supabase } from '@/lib/supabase'
+
+const db = supabase as unknown as SupabaseClient
 import { Spinner } from '@/components/ui/Spinner'
 import { EntityCardSkeleton } from '@/components/ui/EntityCardSkeleton'
 import { EmptyState } from '@/components/ui/EmptyState'
@@ -27,14 +30,14 @@ export default function FactionsPage() {
     const cutoff = new Date(Date.now() - 30 * 60 * 1000).toISOString()
     void (async () => {
       try {
-        const { data } = await supabase
+        const { data } = await db
           .from('factions')
           .select('id')
           .eq('campaign_id', campaignId)
           .eq('committed', false)
           .lt('created_at', cutoff)
         if (data?.length) {
-          await supabase.from('factions').delete().in('id', data.map((r) => r.id))
+          await db.from('factions').delete().in('id', data.map((r: { id: string }) => r.id))
         }
       } catch (err) {
         console.warn('[GC] faction draft cleanup failed:', err)

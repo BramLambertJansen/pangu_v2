@@ -2,7 +2,10 @@ import { useId } from 'react'
 import { useParams, useNavigate, useLocation } from 'react-router-dom'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { toast } from 'sonner'
+import type { SupabaseClient } from '@supabase/supabase-js'
 import { supabase } from '@/lib/supabase'
+
+const db = supabase as unknown as SupabaseClient
 import { queryKeys } from '@/lib/queryKeys'
 import { Modal } from '@/components/ui/Modal'
 import { ConfirmDialog } from '@/components/ui/ConfirmDialog'
@@ -70,7 +73,7 @@ export default function FactionEditPage() {
 
   const saveFaction = useMutation({
     mutationFn: async () => {
-      const { error } = await supabase
+      const { error } = await db
         .from('factions')
         .update({
           name: form.name,
@@ -104,7 +107,7 @@ export default function FactionEditPage() {
 
   const deleteFaction = useMutation({
     mutationFn: async () => {
-      const { error } = await supabase.from('factions').delete().eq('id', id!)
+      const { error } = await db.from('factions').delete().eq('id', id!)
       if (error) throw error
     },
     onSuccess: () => {
@@ -124,7 +127,7 @@ export default function FactionEditPage() {
 
   async function handleDiscardConfirm() {
     if (guard.isDraftDiscard) {
-      const { error } = await supabase.from('factions').delete().eq('id', id!)
+      const { error } = await db.from('factions').delete().eq('id', id!)
       if (error) { toast.error('Verwijderen mislukt'); return }
       queryClient.removeQueries({ queryKey: queryKeys.campaigns.factionDetail(id!) })
       if (campaignId) {

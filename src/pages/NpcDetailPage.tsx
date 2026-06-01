@@ -1,6 +1,11 @@
 import { useParams, useNavigate, Link } from 'react-router-dom'
 import { useQuery } from '@tanstack/react-query'
+import type { SupabaseClient } from '@supabase/supabase-js'
 import { supabase } from '@/lib/supabase'
+
+// factions join and faction_id column are not yet in database.types.ts — migration 039/040
+// adds them but types are regenerated after the migrations run on the live database.
+const db = supabase as unknown as SupabaseClient
 import { queryKeys } from '@/lib/queryKeys'
 import { Spinner } from '@/components/ui/Spinner'
 import { Breadcrumb } from '@/components/ui/Breadcrumb'
@@ -46,7 +51,7 @@ export default function NpcDetailPage() {
   const { data: npc, isLoading } = useQuery<NpcWithCampaign>({
     queryKey: queryKeys.campaigns.npcDetailFull(id!),
     queryFn: async () => {
-      const { data, error } = await supabase
+      const { data, error } = await db
         .from('npcs')
         .select('*, campaigns(id, name, world_id, worlds(id, name)), factions(id, name)')
         .eq('id', id!)

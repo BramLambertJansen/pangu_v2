@@ -1,6 +1,9 @@
 import { useParams, useNavigate, Link } from 'react-router-dom'
 import { useQuery } from '@tanstack/react-query'
+import type { SupabaseClient } from '@supabase/supabase-js'
 import { supabase } from '@/lib/supabase'
+
+const db = supabase as unknown as SupabaseClient
 import { queryKeys } from '@/lib/queryKeys'
 import { Spinner } from '@/components/ui/Spinner'
 import { Breadcrumb } from '@/components/ui/Breadcrumb'
@@ -22,7 +25,7 @@ export default function FactionDetailPage() {
   const { data: faction, isLoading } = useQuery<FactionWithCampaign>({
     queryKey: queryKeys.campaigns.factionDetailFull(id!),
     queryFn: async () => {
-      const { data, error } = await supabase
+      const { data, error } = await db
         .from('factions')
         .select('*, campaigns(id, name, world_id, worlds(id, name))')
         .eq('id', id!)
@@ -37,7 +40,7 @@ export default function FactionDetailPage() {
   const { data: members } = useQuery<Pick<Npc, 'id' | 'name' | 'npc_role' | 'status'>[]>({
     queryKey: ['factions', id!, 'members'],
     queryFn: async () => {
-      const { data, error } = await supabase
+      const { data, error } = await db
         .from('npcs')
         .select('id, name, npc_role, status')
         .eq('faction_id', id!)

@@ -3,7 +3,12 @@ import { useParams, useNavigate } from 'react-router-dom'
 import { Breadcrumb } from '@/components/ui/Breadcrumb'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { toast } from 'sonner'
+import type { SupabaseClient } from '@supabase/supabase-js'
 import { supabase } from '@/lib/supabase'
+
+// factions is not yet in database.types.ts — migration 039 adds the table but types are
+// regenerated after the migration runs on the live database.
+const db = supabase as unknown as SupabaseClient
 import { queryKeys } from '@/lib/queryKeys'
 import { useAuthStore } from '@/stores/auth.store'
 import { Spinner } from '@/components/ui/Spinner'
@@ -396,7 +401,7 @@ export default function CampaignDetailPage() {
   const createFaction = useMutation({
     mutationFn: async () => {
       if (!user) throw new Error('Niet ingelogd')
-      const { data, error } = await supabase
+      const { data, error } = await db
         .from('factions')
         .insert({ campaign_id: id!, user_id: user.id, name: 'Nieuwe factie', status: 'draft', reputation: 'neutral' })
         .select()

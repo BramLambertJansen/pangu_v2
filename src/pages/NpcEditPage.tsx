@@ -2,7 +2,12 @@ import { useId, useState } from 'react'
 import { useParams, useNavigate, useLocation } from 'react-router-dom'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { toast } from 'sonner'
+import type { SupabaseClient } from '@supabase/supabase-js'
 import { supabase } from '@/lib/supabase'
+
+// faction_id column on npcs is not yet in database.types.ts — migration 040 adds it but
+// types are regenerated after the migration runs on the live database.
+const db = supabase as unknown as SupabaseClient
 import { queryKeys } from '@/lib/queryKeys'
 import { Modal } from '@/components/ui/Modal'
 import { ConfirmDialog } from '@/components/ui/ConfirmDialog'
@@ -65,7 +70,7 @@ export default function NpcEditPage() {
 
   const saveNpc = useMutation({
     mutationFn: async () => {
-      const { error } = await supabase
+      const { error } = await db
         .from('npcs')
         .update({
           name: form.name,
