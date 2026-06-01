@@ -6,6 +6,7 @@ import { supabase } from '@/lib/supabase'
 import { queryKeys } from '@/lib/queryKeys'
 import { Spinner } from '@/components/ui/Spinner'
 import { Breadcrumb } from '@/components/ui/Breadcrumb'
+import { RelatedEntities } from '@/components/link/RelatedEntities'
 import {
   characterStatusLabel, characterStatusColor,
   itemRarityLabel, itemRarityColor, itemTypeLabel,
@@ -1716,6 +1717,10 @@ export default function CharacterDetailPage() {
           }
         </div>
       </div>
+
+      {character.campaign_id && (
+        <RelatedEntities type="character" id={character.id} campaignId={character.campaign_id} />
+      )}
     </div>
   )
 }

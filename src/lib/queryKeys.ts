@@ -67,4 +67,5 @@ export const queryKeys = {
   notifications: {
     list: (userId: string) => ['notifications', 'list', userId] as const,
   },
+  entityLinks: (type: string, id: string) => ['entity-links', type, id] as const,
 }

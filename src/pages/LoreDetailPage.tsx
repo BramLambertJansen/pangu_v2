@@ -5,6 +5,7 @@ import { queryKeys } from '@/lib/queryKeys'
 import { Spinner } from '@/components/ui/Spinner'
 import { Breadcrumb } from '@/components/ui/Breadcrumb'
 import { WorldDetailDivider } from '@/components/world/WorldDetailDivider'
+import { RelatedEntities } from '@/components/link/RelatedEntities'
 import type { Lore, LoreStatus } from '@/types/lore.types'
 
 type LoreWithCampaign = Lore & {
@@ -255,6 +256,8 @@ export default function LoreDetailPage() {
           Nog geen DM-notities.
         </p>
       )}
+
+      <RelatedEntities type="lore" id={lore.id} campaignId={lore.campaign_id} />
     </div>
   )
 }

@@ -5,6 +5,7 @@ import { queryKeys } from '@/lib/queryKeys'
 import { Spinner } from '@/components/ui/Spinner'
 import { Breadcrumb } from '@/components/ui/Breadcrumb'
 import { WorldDetailDivider } from '@/components/world/WorldDetailDivider'
+import { RelatedEntities } from '@/components/link/RelatedEntities'
 import type { Location, LocationStatus } from '@/types/location.types'
 
 type LocationWithCampaign = Location & {
@@ -256,6 +257,10 @@ export default function LocationDetailPage() {
         <p style={{ fontSize: 14, color: 'var(--muted)', fontStyle: 'italic', margin: 0 }}>
           Nog geen DM-notities.
         </p>
+      )}
+
+      {location.campaign_id && (
+        <RelatedEntities type="location" id={location.id} campaignId={location.campaign_id} />
       )}
     </div>
   )
