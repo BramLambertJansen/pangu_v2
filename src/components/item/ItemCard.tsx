@@ -50,11 +50,18 @@ export const ItemCard = memo(function ItemCard({ item }: Props) {
             </h2>
           </div>
 
-          <StatusBadge
-            label={itemRarityLabel[item.rarity]}
-            color={itemRarityColor[item.rarity]}
-            className="mt-0.5"
-          />
+          <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexShrink: 0 }}>
+            {item.source === 'srd' && (
+              <span style={{ fontSize: 9, fontWeight: 700, letterSpacing: '0.14em', textTransform: 'uppercase', color: 'var(--azure)', border: '1px solid rgba(56,152,255,0.3)', borderRadius: 4, padding: '1px 5px' }}>
+                SRD
+              </span>
+            )}
+            <StatusBadge
+              label={itemRarityLabel[item.rarity]}
+              color={itemRarityColor[item.rarity]}
+              className="mt-0.5"
+            />
+          </div>
         </div>
 
         {/* Type + quantity row */}

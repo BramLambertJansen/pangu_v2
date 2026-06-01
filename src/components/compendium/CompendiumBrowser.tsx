@@ -1,0 +1,160 @@
+import { useState, useEffect, useId } from 'react'
+import { Spinner } from '@/components/ui/Spinner'
+import { useSrdMonsterSearch, useSrdItemSearch } from '@/hooks/queries/useSrdSearch'
+import type { Open5eMonster, Open5eMagicItem } from '@/types/open5e.types'
+
+export type SrdKind = 'monster' | 'item'
+export type SrdResult = Open5eMonster | Open5eMagicItem
+
+interface Props {
+  kind: SrdKind
+  onImport: (data: SrdResult) => void
+  importedSlugs: string[]
+  isPending?: boolean
+}
+
+export function CompendiumBrowser({ kind, onImport, importedSlugs, isPending }: Props) {
+  const [query, setQuery] = useState('')
+  const [debouncedQuery, setDebouncedQuery] = useState('')
+  const inputId = useId()
+
+  useEffect(() => {
+    const t = setTimeout(() => setDebouncedQuery(query.trim()), 400)
+    return () => clearTimeout(t)
+  }, [query])
+
+  const monsterSearch = useSrdMonsterSearch(kind === 'monster' ? debouncedQuery : '')
+  const itemSearch = useSrdItemSearch(kind === 'item' ? debouncedQuery : '')
+  const { data, isLoading, isError } = kind === 'monster' ? monsterSearch : itemSearch
+  const results = (data ?? []) as SrdResult[]
+
+  const labelText = kind === 'monster' ? 'Wezen zoeken' : 'Magisch item zoeken'
+  const placeholder = kind === 'monster'
+    ? 'bijv. owlbear, dragon, goblin...'
+    : 'bijv. bag of holding, flame tongue...'
+
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+      <div>
+        <label
+          htmlFor={inputId}
+          style={{ display: 'block', fontSize: 12, fontWeight: 600, color: 'var(--ink-soft)', marginBottom: 6, letterSpacing: '0.06em', textTransform: 'uppercase' }}
+        >
+          {labelText}
+        </label>
+        <input
+          id={inputId}
+          type="search"
+          value={query}
+          onChange={e => setQuery(e.target.value)}
+          placeholder={placeholder}
+          autoFocus
+          style={{
+            width: '100%', boxSizing: 'border-box',
+            padding: '10px 12px', borderRadius: 8,
+            border: '1px solid var(--hairline)',
+            background: 'var(--surface-2)',
+            color: 'var(--ink)', fontSize: 14,
+            outline: 'none',
+          }}
+          onFocus={e => { e.currentTarget.style.borderColor = 'rgba(155,138,255,0.5)' }}
+          onBlur={e => { e.currentTarget.style.borderColor = 'var(--hairline)' }}
+        />
+      </div>
+
+      {debouncedQuery.length < 2 && (
+        <p style={{ color: 'var(--muted)', fontSize: 13, textAlign: 'center', padding: '12px 0' }}>
+          Typ minimaal 2 tekens om te zoeken in de SRD.
+        </p>
+      )}
+
+      {isLoading && debouncedQuery.length >= 2 && (
+        <div style={{ display: 'flex', justifyContent: 'center', padding: '20px 0' }} aria-live="polite" aria-label="Zoeken...">
+          <Spinner size="sm" />
+        </div>
+      )}
+
+      {isError && (
+        <p role="alert" style={{ color: 'var(--crimson)', fontSize: 13, textAlign: 'center', padding: '8px 0' }}>
+          Verbinding met Open5e mislukt. Controleer je internetverbinding.
+        </p>
+      )}
+
+      {!isLoading && !isError && debouncedQuery.length >= 2 && results.length === 0 && (
+        <p style={{ color: 'var(--muted)', fontSize: 13, textAlign: 'center', padding: '16px 0' }}>
+          Geen resultaten gevonden in de SRD.
+        </p>
+      )}
+
+      {results.length > 0 && (
+        <ul
+          role="list"
+          aria-label="SRD zoekresultaten"
+          style={{ display: 'flex', flexDirection: 'column', gap: 6, listStyle: 'none', padding: 0, margin: 0, maxHeight: 300, overflowY: 'auto' }}
+        >
+          {results.map(result => {
+            const alreadyImported = importedSlugs.includes(result.slug)
+            const meta = kind === 'monster'
+              ? monsterMeta(result as Open5eMonster)
+              : itemMeta(result as Open5eMagicItem)
+
+            return (
+              <li
+                key={result.slug}
+                style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '10px 12px', borderRadius: 8, border: '1px solid var(--hairline)', background: 'var(--surface-2)' }}
+              >
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <p style={{ margin: 0, fontWeight: 600, fontSize: 14, color: 'var(--ink)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                    {result.name}
+                  </p>
+                  <p style={{ margin: '2px 0 0', fontSize: 11, color: 'var(--muted)', letterSpacing: '0.06em' }}>
+                    {meta}
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => { if (!alreadyImported && !isPending) onImport(result) }}
+                  disabled={alreadyImported || isPending}
+                  aria-label={alreadyImported ? `${result.name} al geïmporteerd` : `Importeer ${result.name}`}
+                  style={{
+                    flexShrink: 0, padding: '6px 12px', borderRadius: 6,
+                    border: `1px solid ${alreadyImported ? 'var(--hairline)' : 'rgba(62,207,178,0.4)'}`,
+                    background: alreadyImported ? 'transparent' : 'rgba(62,207,178,0.08)',
+                    color: alreadyImported ? 'var(--muted)' : 'var(--teal)',
+                    fontSize: 11, fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase',
+                    cursor: alreadyImported || isPending ? 'default' : 'pointer',
+                    opacity: isPending && !alreadyImported ? 0.6 : 1,
+                    whiteSpace: 'nowrap',
+                  }}
+                >
+                  {alreadyImported ? '✓ In bibliotheek' : isPending ? '...' : 'Importeer'}
+                </button>
+              </li>
+            )
+          })}
+        </ul>
+      )}
+
+      <p style={{ fontSize: 11, color: 'var(--subtle)', textAlign: 'center', marginTop: 4, borderTop: '1px solid var(--hairline)', paddingTop: 10 }}>
+        Inhoud van de <abbr title="Systems Reference Document 5.1, Creative Commons Attribution 4.0 International">SRD 5.1</abbr> via Open5e · CC-BY-4.0 · Powered by Open5e
+      </p>
+    </div>
+  )
+}
+
+function monsterMeta(m: Open5eMonster): string {
+  const parts: string[] = []
+  if (m.type) parts.push(m.type)
+  if (m.challenge_rating) parts.push(`CR ${m.challenge_rating}`)
+  if (m.hit_points) parts.push(`${m.hit_points} HP`)
+  if (m.armor_class) parts.push(`AC ${m.armor_class}`)
+  return parts.join(' · ')
+}
+
+function itemMeta(i: Open5eMagicItem): string {
+  const parts: string[] = []
+  if (i.type) parts.push(i.type)
+  if (i.rarity) parts.push(i.rarity)
+  if (i.requires_attunement) parts.push('attunement')
+  return parts.join(' · ')
+}

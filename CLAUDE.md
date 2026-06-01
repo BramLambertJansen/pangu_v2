@@ -1057,3 +1057,21 @@ npm run test         # Vitest
 - [x] `src/pages/NpcEditPage.tsx` — factie-dropdown (opties uit `useCampaignFactions`); schrijft `faction_id`
 - [x] `src/pages/NpcDetailPage.tsx` — doorklikbare factie-badge als `faction_id` gezet is
 - [x] `src/pages/CampaignDetailPage.tsx` — tab "Facties" (na NPC's); inline grid max 6 + "Alle facties bekijken →"; `createFaction` mutation
+
+### SRD-Compendium (Open5e import) — Fase A
+- [x] Migratie `041_srd_source.sql` — `source text` + `source_slug text` op `bestiaries` en `items`; partial unique indexes op `(world_id, source_slug)` resp. `(campaign_id, source_slug)` waar `source_slug IS NOT NULL`
+- [x] `src/types/open5e.types.ts` — raw Open5e V2 API types: `Open5eDocument`, `Open5eListResponse<T>`, `Open5eMonster`, `Open5eMagicItem`, `Open5eSpell`
+- [x] `src/lib/open5e.ts` — V2 client (`searchMonsters`, `searchMagicItems`, `searchSpells`); mappers `mapMonsterToBestiary`, `mapMagicItemToItem`; hulpfuncties `mapChallengeRating`, `mapSpeed`, `mapItemType`, `mapItemRarity`; `SRD_SLUG = 'srd'` constante
+- [x] `src/types/bestiary.types.ts` — `source: string | null` + `source_slug: string | null` toegevoegd
+- [x] `src/types/item.types.ts` — `source: string | null` + `source_slug: string | null` toegevoegd
+- [x] `src/types/database.types.ts` — `source` + `source_slug` toegevoegd aan `bestiaries` en `items` Row/Insert/Update
+- [x] `src/lib/queryKeys.ts` — `srd.monsters(q)`, `srd.items(q)`, `srd.spells(q)` toegevoegd
+- [x] `src/hooks/queries/useSrdSearch.ts` — `useSrdMonsterSearch(query)`, `useSrdItemSearch(query)` (staleTime 1 uur); `useImportMonster(worldId)` + `useImportMagicItem(campaignId)` mutaties met dedup-check + Sonner-feedback
+- [x] `src/components/compendium/CompendiumBrowser.tsx` — herbruikbare zoekbrowser (kind: 'monster'|'item'); debounced zoekveld, resultatenlijst met "Importeer"-knop / "✓ In bibliotheek" label, CC-BY-4.0 + Open5e attributieregel
+- [x] `src/components/bestiary/BestiaryCard.tsx` — "SRD"-badge op `BestiaryCard` en `BestiaryRow` wanneer `source === 'srd'`
+- [x] `src/components/item/ItemCard.tsx` — "SRD"-badge op `ItemCard` wanneer `source === 'srd'`
+- [x] `src/pages/BestiariesPage.tsx` — "Importeer uit SRD"-knop in header → Modal met `CompendiumBrowser kind="monster"`
+- [x] `src/pages/CampaignItemsPage.tsx` — "Importeer uit SRD"-knop naast "AI Buitgenerator" → Modal met `CompendiumBrowser kind="item"`
+- [x] `src/pages/SettingsPage.tsx` — SRD/Open5e attributieblok in de "Over"-tab
+- [x] `src/test/open5e-mappers.test.ts` — 28 unit tests voor alle mappers en hulpfuncties (geen netwerkcalls)
+- Attentie: Open5e V2 CORS werkt client-side; geen proxy nodig. SRD-document-slug is `'srd'` (5.1 CC-BY-4.0); wijzig `SRD_SLUG` in `open5e.ts` voor 5.2.

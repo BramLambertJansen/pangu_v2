@@ -71,4 +71,9 @@ export const queryKeys = {
     list: (userId: string) => ['notifications', 'list', userId] as const,
   },
   entityLinks: (type: string, id: string) => ['entity-links', type, id] as const,
+  srd: {
+    monsters: (query: string) => ['srd', 'monsters', query] as const,
+    items: (query: string) => ['srd', 'items', query] as const,
+    spells: (query: string) => ['srd', 'spells', query] as const,
+  },
 }

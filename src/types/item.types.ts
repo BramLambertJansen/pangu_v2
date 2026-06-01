@@ -62,6 +62,8 @@ export interface Item {
   weight: number | null
   properties: ItemStatBonuses
   committed: boolean
+  source: string | null
+  source_slug: string | null
   created_at: string
   updated_at: string
 }

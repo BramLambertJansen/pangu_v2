@@ -57,11 +57,18 @@ export const BestiaryCard = memo(function BestiaryCard({ bestiary }: Props) {
             </h2>
           </div>
 
-          <StatusBadge
-            label={bestiaryStatusLabel[bestiary.status]}
-            color={bestiaryStatusColor[bestiary.status]}
-            className="mt-0.5"
-          />
+          <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexShrink: 0 }}>
+            {bestiary.source === 'srd' && (
+              <span style={{ fontSize: 9, fontWeight: 700, letterSpacing: '0.14em', textTransform: 'uppercase', color: 'var(--azure)', border: '1px solid rgba(56,152,255,0.3)', borderRadius: 4, padding: '1px 5px' }}>
+                SRD
+              </span>
+            )}
+            <StatusBadge
+              label={bestiaryStatusLabel[bestiary.status]}
+              color={bestiaryStatusColor[bestiary.status]}
+              className="mt-0.5"
+            />
+          </div>
         </div>
 
         {bestiary.creature_type && (
@@ -149,16 +156,24 @@ export const BestiaryRow = memo(function BestiaryRow({ bestiary, selected = fals
 
       {/* Info */}
       <div style={{ flex: 1, minWidth: 0 }}>
-        <p style={{
-          margin: 0,
-          fontFamily: 'var(--font-display)',
-          fontSize: 14, fontWeight: 600,
-          letterSpacing: '0.03em',
-          color: 'var(--ink)',
-          overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
-        }}>
-          {bestiary.name}
-        </p>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+          <p style={{
+            margin: 0,
+            fontFamily: 'var(--font-display)',
+            fontSize: 14, fontWeight: 600,
+            letterSpacing: '0.03em',
+            color: 'var(--ink)',
+            overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
+            flex: 1, minWidth: 0,
+          }}>
+            {bestiary.name}
+          </p>
+          {bestiary.source === 'srd' && (
+            <span aria-label="Geïmporteerd uit de SRD" style={{ fontSize: 8, fontWeight: 700, letterSpacing: '0.14em', textTransform: 'uppercase', color: 'var(--azure)', border: '1px solid rgba(56,152,255,0.25)', borderRadius: 3, padding: '1px 4px', flexShrink: 0 }}>
+              SRD
+            </span>
+          )}
+        </div>
         {bestiary.creature_type && (
           <p style={{
             margin: '2px 0 0',

@@ -36,6 +36,8 @@ export type Database = {
           stat_wis: number
           stat_cha: number
           committed: boolean
+          source: string | null
+          source_slug: string | null
           created_at: string
           updated_at: string
         }
@@ -61,6 +63,8 @@ export type Database = {
           stat_wis?: number
           stat_cha?: number
           committed?: boolean
+          source?: string | null
+          source_slug?: string | null
           created_at?: string
           updated_at?: string
         }
@@ -86,6 +90,8 @@ export type Database = {
           stat_wis?: number
           stat_cha?: number
           committed?: boolean
+          source?: string | null
+          source_slug?: string | null
           created_at?: string
           updated_at?: string
         }
@@ -862,6 +868,8 @@ export type Database = {
           weight: number | null
           properties: Json
           committed: boolean
+          source: string | null
+          source_slug: string | null
           created_at: string
           updated_at: string
         }
@@ -879,6 +887,8 @@ export type Database = {
           weight?: number | null
           properties?: Json
           committed?: boolean
+          source?: string | null
+          source_slug?: string | null
           created_at?: string
           updated_at?: string
         }
@@ -896,6 +906,8 @@ export type Database = {
           weight?: number | null
           properties?: Json
           committed?: boolean
+          source?: string | null
+          source_slug?: string | null
           created_at?: string
           updated_at?: string
         }

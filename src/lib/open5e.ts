@@ -1,0 +1,173 @@
+// Open5e API V2 client and mappers.
+// SRD document slug is 'srd' (5.1, CC-BY-4.0). Change SRD_SLUG to 'srd-2024' for 5.2.
+
+import type { Open5eListResponse, Open5eMonster, Open5eMagicItem, Open5eSpell } from '@/types/open5e.types'
+import type { BestiaryStatus } from '@/types/bestiary.types'
+import type { ItemType, ItemRarity } from '@/types/item.types'
+
+const BASE_URL = 'https://api.open5e.com/v2'
+export const SRD_SLUG = 'srd'
+
+async function fetchOpen5e<T>(endpoint: string, query: string): Promise<Open5eListResponse<T>> {
+  const url = new URL(`${BASE_URL}${endpoint}`)
+  url.searchParams.set('document__slug', SRD_SLUG)
+  url.searchParams.set('limit', '20')
+  url.searchParams.set('name__icontains', query)
+  const res = await fetch(url.toString())
+  if (!res.ok) throw new Error(`Open5e: ${res.status} ${res.statusText}`)
+  return res.json() as Promise<Open5eListResponse<T>>
+}
+
+export async function searchMonsters(query: string): Promise<Open5eMonster[]> {
+  const data = await fetchOpen5e<Open5eMonster>('/monsters/', query)
+  return data.results
+}
+
+export async function searchMagicItems(query: string): Promise<Open5eMagicItem[]> {
+  const data = await fetchOpen5e<Open5eMagicItem>('/magicitems/', query)
+  return data.results
+}
+
+export async function searchSpells(query: string): Promise<Open5eSpell[]> {
+  const data = await fetchOpen5e<Open5eSpell>('/spells/', query)
+  return data.results
+}
+
+// CR string (e.g. "1/8", "10", "0") → "CR X" threat label
+export function mapChallengeRating(cr: string | number | undefined | null): string | null {
+  if (cr == null || cr === '') return null
+  return `CR ${String(cr)}`
+}
+
+// Open5e speed object → walk speed in feet (integer)
+export function mapSpeed(speed: Record<string, number | string> | undefined | null): number {
+  if (!speed) return 30
+  const walk = speed['walk'] ?? speed['Walk'] ?? 30
+  return typeof walk === 'number' ? walk : (parseInt(String(walk), 10) || 30)
+}
+
+// Open5e magic item type string → Pangu ItemType
+export function mapItemType(type: string | undefined | null): ItemType {
+  if (!type) return 'misc'
+  const lower = type.toLowerCase()
+  if (lower.includes('weapon')) return 'weapon'
+  if (lower.includes('armor') || lower.includes('armour') || lower.includes('shield')) return 'armor'
+  if (lower.includes('potion') || lower.includes('oil')) return 'potion'
+  if (lower.includes('ring')) return 'ring'
+  if (lower.includes('rod')) return 'rod'
+  if (lower.includes('scroll')) return 'scroll'
+  if (lower.includes('staff')) return 'staff'
+  if (lower.includes('wand')) return 'wand'
+  if (lower.includes('wondrous')) return 'wondrous'
+  return 'misc'
+}
+
+// Open5e rarity string (any casing/spacing) → Pangu ItemRarity
+export function mapItemRarity(rarity: string | undefined | null): ItemRarity {
+  if (!rarity) return 'common'
+  const key = rarity.toLowerCase().replace(/\s+/g, '_')
+  const mapping: Record<string, ItemRarity> = {
+    common: 'common',
+    uncommon: 'uncommon',
+    rare: 'rare',
+    very_rare: 'very_rare',
+    legendary: 'legendary',
+    artifact: 'artifact',
+  }
+  return mapping[key] ?? 'common'
+}
+
+export interface BestiaryInsert {
+  world_id: string
+  user_id: string
+  name: string
+  subtitle: string | null
+  creature_type: string | null
+  threat_level: string | null
+  habitat: string | null
+  description: string | null
+  notes: string | null
+  status: BestiaryStatus
+  committed: boolean
+  hp: number
+  ac: number
+  speed: number
+  stat_str: number
+  stat_dex: number
+  stat_con: number
+  stat_int: number
+  stat_wis: number
+  stat_cha: number
+  source: string
+  source_slug: string
+}
+
+export function mapMonsterToBestiary(
+  monster: Open5eMonster,
+  worldId: string,
+  userId: string,
+): BestiaryInsert {
+  return {
+    world_id: worldId,
+    user_id: userId,
+    name: monster.name,
+    subtitle: monster.subtype || null,
+    creature_type: monster.type || null,
+    threat_level: mapChallengeRating(monster.challenge_rating ?? monster.cr),
+    habitat: null,
+    description: monster.desc || null,
+    notes: null,
+    status: 'active',
+    committed: true,
+    hp: monster.hit_points ?? 1,
+    ac: monster.armor_class ?? 10,
+    speed: mapSpeed(monster.speed),
+    stat_str: monster.strength ?? 10,
+    stat_dex: monster.dexterity ?? 10,
+    stat_con: monster.constitution ?? 10,
+    stat_int: monster.intelligence ?? 10,
+    stat_wis: monster.wisdom ?? 10,
+    stat_cha: monster.charisma ?? 10,
+    source: 'srd',
+    source_slug: monster.slug,
+  }
+}
+
+export interface ItemInsert {
+  campaign_id: string
+  character_id: null
+  equipped_slot: null
+  name: string
+  description: string | null
+  item_type: ItemType
+  rarity: ItemRarity
+  is_magical: boolean
+  quantity: number
+  weight: null
+  properties: Record<string, never>
+  committed: boolean
+  source: string
+  source_slug: string
+}
+
+export function mapMagicItemToItem(
+  magicItem: Open5eMagicItem,
+  campaignId: string,
+): ItemInsert {
+  return {
+    campaign_id: campaignId,
+    character_id: null,
+    equipped_slot: null,
+    name: magicItem.name,
+    description: magicItem.desc || null,
+    item_type: mapItemType(magicItem.type),
+    rarity: mapItemRarity(magicItem.rarity),
+    is_magical: true,
+    quantity: 1,
+    weight: null,
+    properties: {} as Record<string, never>,
+    committed: true,
+    source: 'srd',
+    source_slug: magicItem.slug,
+  }
+}
