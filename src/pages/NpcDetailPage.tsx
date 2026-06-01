@@ -5,6 +5,7 @@ import { queryKeys } from '@/lib/queryKeys'
 import { Spinner } from '@/components/ui/Spinner'
 import { Breadcrumb } from '@/components/ui/Breadcrumb'
 import { WorldDetailDivider } from '@/components/world/WorldDetailDivider'
+import { RelatedEntities } from '@/components/link/RelatedEntities'
 import type { Npc, NpcStatus } from '@/types/npc.types'
 
 type NpcWithCampaign = Npc & {
@@ -256,6 +257,10 @@ export default function NpcDetailPage() {
         <p style={{ fontSize: 14, color: 'var(--muted)', fontStyle: 'italic', margin: 0 }}>
           Nog geen DM-notities.
         </p>
+      )}
+
+      {npc.campaign_id && (
+        <RelatedEntities type="npc" id={npc.id} campaignId={npc.campaign_id} />
       )}
     </div>
   )

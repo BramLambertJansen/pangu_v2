@@ -5,6 +5,7 @@ import { queryKeys } from '@/lib/queryKeys'
 import { Spinner } from '@/components/ui/Spinner'
 import { Breadcrumb } from '@/components/ui/Breadcrumb'
 import { WorldDetailDivider } from '@/components/world/WorldDetailDivider'
+import { RelatedEntities } from '@/components/link/RelatedEntities'
 import type { Quest, QuestStatus } from '@/types/quest.types'
 
 type QuestWithCampaign = Quest & {
@@ -305,6 +306,8 @@ export default function QuestDetailPage() {
           Nog geen DM-notities.
         </p>
       )}
+
+      <RelatedEntities type="quest" id={quest.id} campaignId={quest.campaign_id} />
     </div>
   )
 }

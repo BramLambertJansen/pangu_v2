@@ -6,6 +6,7 @@ import { supabase } from '@/lib/supabase'
 import { queryKeys } from '@/lib/queryKeys'
 import { Modal } from '@/components/ui/Modal'
 import { ConfirmDialog } from '@/components/ui/ConfirmDialog'
+import { RelatedEntities } from '@/components/link/RelatedEntities'
 import { Spinner } from '@/components/ui/Spinner'
 import { useEntityEdit } from '@/hooks/useEntityEdit'
 import type { Json } from '@/types/database.types'
@@ -731,6 +732,10 @@ export default function ItemEditPage() {
         </div>
 
       </div>
+
+      {itemData.committed && itemData.campaign_id && (
+        <RelatedEntities type="item" id={itemData.id} campaignId={itemData.campaign_id} />
+      )}
 
       {/* Delete modal */}
       <Modal

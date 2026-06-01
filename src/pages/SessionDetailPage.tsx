@@ -6,6 +6,7 @@ import { useAuthStore } from '@/stores/auth.store'
 import { Spinner } from '@/components/ui/Spinner'
 import { Breadcrumb } from '@/components/ui/Breadcrumb'
 import { WorldDetailDivider } from '@/components/world/WorldDetailDivider'
+import { RelatedEntities } from '@/components/link/RelatedEntities'
 import { PartyMemberRow } from '@/components/character/CharacterCard'
 import { useCampaignCharacters } from '@/hooks/queries/useCampaignCharacters'
 import { sessionStatusLabel, sessionStatusColor } from '@/lib/statusMaps'
@@ -310,6 +311,8 @@ export default function SessionDetailPage() {
         ? <DmPlayerNotesPanel sessionId={id!} />
         : <PlayerNotepad sessionId={id!} campaignId={session.campaign_id} />
       }
+
+      <RelatedEntities type="session" id={session.id} campaignId={session.campaign_id} />
     </div>
   )
 }

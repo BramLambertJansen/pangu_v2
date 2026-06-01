@@ -1022,3 +1022,13 @@ npm run test         # Vitest
 - [x] Wereldbouwer pagina `/worlds/:id/world-builder` — vrije prompt + 6 snelkoppelingen (Locatie, NPC, Quest, Wending, Gerucht, Buit); world-context wordt automatisch prepended; kopieer-knop + "Opnieuw genereren"; provider/model badge in response; Ctrl/Cmd+Enter om te genereren
 - [x] AI Lootgenerator `/campaigns/:id/loot-generator` — contextprompt + 5 snelkoppelingen (Kerkerbuit, Quest beloning, Bandietenleider, Toverdrankjes, Oud artefact); AI genereert JSON-array van items; bulk-aanmaken via `useCreateCampaignItem`; individueel verwijderen vóór opslaan
 - [x] Consistentiecheck op gegenereerde content — "Consistentiecheck" knop in Wereldbouwer na generatie; tweede AI-call toetst de gegenereerde tekst op consistentie met de wereld-context; resultaat getoond in teal-sectie onder het antwoord
+
+### Entiteitsrelaties (Entity Links)
+- [x] Migratie `038_entity_links.sql` — generieke relatietabel (`entity_links`) met campaign-scoped RLS (subquery op `campaigns.user_id`), CHECK tegen zelf-link, UNIQUE op gerichte link + relatie, indexes op beide richtingen
+- [x] `src/types/link.types.ts` — `LinkableEntityType`, `LinkRelation`, `EntityLink`, `ResolvedLink` (normaliseert naar "de andere kant" + direction)
+- [x] `src/lib/linkMaps.ts` — `relationLabel`, `relationInverseLabel`, `linkableTypeLabel`, `linkableTypeRoute` (parallel aan `statusMaps.ts`)
+- [x] `src/hooks/queries/useEntityLinks.ts` — `useEntityLinks(type, id)`: twee aparte `.eq().eq()`-queries (DEV_MODE heeft geen `.or()`), merge + naam-resolutie via `.in()` per type (geen polymorfe joins); `useCreateLink()` + `useDeleteLink()` invalideren beide endpoints
+- [x] `src/components/link/RelatedEntities.tsx` — sectie op detailpagina's: gegroepeerd per doel-type, juist label per richting (outgoing/incoming), doorkliklinks, verwijderen via `ConfirmDialog`, "Verbind…"-knop opent modal, focus-restore na sluiting
+- [x] `src/components/link/LinkEntityModal.tsx` — drie-stappen modal (type → relatie → entiteit), zoekfilter in JS, hergebruikt bestaande campaign-query hooks, A11Y: `<label>` + `htmlFor`, stap-indicator
+- [x] Wiring op: `NpcDetailPage`, `LocationDetailPage`, `LoreDetailPage`, `QuestDetailPage`, `SessionDetailPage`, `EncounterDetailPage`, `CharacterDetailPage`, `ItemEditPage` (items routen naar `/edit`)
+- Notitie: items hebben geen `status`-kolom — name-resolution selecteert `'id, name'` voor items; `ResolvedLink.entity.status` is `string | null`

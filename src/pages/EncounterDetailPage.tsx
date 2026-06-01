@@ -5,6 +5,7 @@ import { queryKeys } from '@/lib/queryKeys'
 import { Spinner } from '@/components/ui/Spinner'
 import { Breadcrumb } from '@/components/ui/Breadcrumb'
 import { WorldDetailDivider } from '@/components/world/WorldDetailDivider'
+import { RelatedEntities } from '@/components/link/RelatedEntities'
 import type { Encounter, EncounterStatus } from '@/types/encounter.types'
 import type { Bestiary } from '@/types/bestiary.types'
 
@@ -403,6 +404,8 @@ export default function EncounterDetailPage() {
           Nog geen DM-notities.
         </p>
       )}
+
+      <RelatedEntities type="encounter" id={encounter.id} campaignId={encounter.campaign_id} />
     </div>
   )
 }
