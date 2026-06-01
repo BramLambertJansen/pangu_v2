@@ -7,6 +7,7 @@ export type LinkableEntityType =
   | 'item'
   | 'encounter'
   | 'character'
+  | 'faction'
 
 export type LinkRelation =
   | 'related_to'

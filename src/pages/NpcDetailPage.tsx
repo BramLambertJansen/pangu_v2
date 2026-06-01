@@ -10,6 +10,7 @@ import type { Npc, NpcStatus } from '@/types/npc.types'
 
 type NpcWithCampaign = Npc & {
   campaigns: { id: string; name: string; world_id: string; worlds: { id: string; name: string } | null } | null
+  factions: { id: string; name: string } | null
 }
 
 const statusLabel: Record<NpcStatus, string> = {
@@ -47,7 +48,7 @@ export default function NpcDetailPage() {
     queryFn: async () => {
       const { data, error } = await supabase
         .from('npcs')
-        .select('*, campaigns(id, name, world_id, worlds(id, name))')
+        .select('*, campaigns(id, name, world_id, worlds(id, name)), factions(id, name)')
         .eq('id', id!)
         .single()
       if (error) throw error
@@ -78,6 +79,7 @@ export default function NpcDetailPage() {
 
   const campaign = npc.campaigns
   const world = campaign?.worlds ?? null
+  const faction = npc.factions ?? null
   const gradient = pickGradient(npc.id)
   const initial = npc.name.trim()[0]?.toUpperCase() ?? '?'
 
@@ -151,8 +153,31 @@ export default function NpcDetailPage() {
           {initial}
         </div>
 
-        {/* Role + status badges */}
+        {/* Role + faction + status badges */}
         <div style={{ position: 'relative', display: 'flex', justifyContent: 'flex-end', gap: 8, padding: '20px 28px 0', flexWrap: 'wrap' }}>
+          {faction && (
+            <Link
+              to={`/factions/${faction.id}`}
+              aria-label={`Factie: ${faction.name}`}
+              style={{
+                display: 'inline-flex', alignItems: 'center',
+                padding: '4px 12px',
+                border: '1px solid rgba(245,180,50,0.4)',
+                borderRadius: 'var(--r-full)',
+                fontFamily: 'var(--font-body)',
+                fontSize: 10, fontWeight: 700,
+                letterSpacing: '0.16em', textTransform: 'uppercase',
+                color: 'var(--gold)',
+                background: 'rgba(245,180,50,0.08)',
+                textDecoration: 'none',
+                transition: 'background var(--t-fast)',
+              }}
+              onMouseEnter={(e: React.MouseEvent<HTMLAnchorElement>) => (e.currentTarget.style.background = 'rgba(245,180,50,0.14)')}
+              onMouseLeave={(e: React.MouseEvent<HTMLAnchorElement>) => (e.currentTarget.style.background = 'rgba(245,180,50,0.08)')}
+            >
+              ⚑ {faction.name}
+            </Link>
+          )}
           {npc.npc_role && (
             <span style={{
               display: 'inline-flex', alignItems: 'center',

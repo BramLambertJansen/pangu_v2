@@ -10,6 +10,7 @@ export interface Npc {
   notes: string | null
   status: NpcStatus
   npc_role: string | null
+  faction_id: string | null
   created_at: string
   updated_at: string
 }

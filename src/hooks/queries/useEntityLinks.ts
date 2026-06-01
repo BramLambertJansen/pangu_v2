@@ -27,6 +27,7 @@ const typeToTable: Record<LinkableEntityType, string> = {
   item:      'items',
   encounter: 'encounters',
   character: 'characters',
+  faction:   'factions',
 }
 
 async function resolveNames(

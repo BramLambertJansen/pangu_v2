@@ -9,11 +9,12 @@ import { useCampaignSessions } from '@/hooks/queries/useCampaignSessions'
 import { useCampaignItems } from '@/hooks/queries/useCampaignItems'
 import { useCampaignEncounters } from '@/hooks/queries/useCampaignEncounters'
 import { useCampaignCharacters } from '@/hooks/queries/useCampaignCharacters'
+import { useCampaignFactions } from '@/hooks/queries/useCampaignFactions'
 import { useCreateLink } from '@/hooks/queries/useEntityLinks'
 import { linkableTypeLabel, relationLabel } from '@/lib/linkMaps'
 import type { LinkableEntityType, LinkRelation } from '@/types/link.types'
 
-const ALL_TYPES: LinkableEntityType[] = ['location', 'npc', 'lore', 'quest', 'session', 'item', 'encounter', 'character']
+const ALL_TYPES: LinkableEntityType[] = ['location', 'npc', 'lore', 'quest', 'session', 'item', 'encounter', 'character', 'faction']
 const ALL_RELATIONS: LinkRelation[] = ['related_to', 'located_in', 'member_of', 'owns', 'involved_in', 'ally_of', 'enemy_of', 'mentions']
 
 type Step = 'type' | 'relation' | 'entity'
@@ -66,6 +67,7 @@ export function LinkEntityModal({ open, onClose, sourceType, sourceId, campaignI
   const items      = useCampaignItems(gatedId)
   const encounters = useCampaignEncounters(gatedId)
   const characters = useCampaignCharacters(gatedId)
+  const factions   = useCampaignFactions(gatedId)
 
   const entityListMap: Record<LinkableEntityType, Array<{ id: string; name: string }>> = {
     location:  locations.data  ?? [],
@@ -76,6 +78,7 @@ export function LinkEntityModal({ open, onClose, sourceType, sourceId, campaignI
     item:      items.data      ?? [],
     encounter: encounters.data ?? [],
     character: characters.data ?? [],
+    faction:   factions.data   ?? [],
   }
 
   const entities = targetType
