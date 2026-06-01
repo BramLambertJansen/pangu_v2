@@ -80,29 +80,36 @@ export function useEntityLinks(type: LinkableEntityType, id: string) {
 
       const nameMap = await resolveNames(others)
 
+      // Filter out links whose target entity was deleted (name not found in DB).
+      // entity_links uses polymorphic IDs so there is no FK cascade; deleted entities
+      // leave stale rows that resolve to an empty nameMap entry.
       const resolved: ResolvedLink[] = [
-        ...fromLinks.map(l => ({
-          linkId: l.id,
-          relation: l.relation,
-          direction: 'outgoing' as const,
-          entity: {
-            id: l.to_id,
-            type: l.to_type,
-            name: nameMap.get(l.to_id)?.name ?? l.to_id,
-            status: nameMap.get(l.to_id)?.status ?? null,
-          },
-        })),
-        ...toLinks.map(l => ({
-          linkId: l.id,
-          relation: l.relation,
-          direction: 'incoming' as const,
-          entity: {
-            id: l.from_id,
-            type: l.from_type,
-            name: nameMap.get(l.from_id)?.name ?? l.from_id,
-            status: nameMap.get(l.from_id)?.status ?? null,
-          },
-        })),
+        ...fromLinks
+          .filter(l => nameMap.has(l.to_id))
+          .map(l => ({
+            linkId: l.id,
+            relation: l.relation,
+            direction: 'outgoing' as const,
+            entity: {
+              id: l.to_id,
+              type: l.to_type,
+              name: nameMap.get(l.to_id)!.name,
+              status: nameMap.get(l.to_id)!.status,
+            },
+          })),
+        ...toLinks
+          .filter(l => nameMap.has(l.from_id))
+          .map(l => ({
+            linkId: l.id,
+            relation: l.relation,
+            direction: 'incoming' as const,
+            entity: {
+              id: l.from_id,
+              type: l.from_type,
+              name: nameMap.get(l.from_id)!.name,
+              status: nameMap.get(l.from_id)!.status,
+            },
+          })),
       ]
 
       return resolved

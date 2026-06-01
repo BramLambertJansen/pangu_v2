@@ -49,14 +49,23 @@ export function LinkEntityModal({ open, onClose, sourceType, sourceId, campaignI
     }
   }, [open])
 
-  const locations  = useCampaignLocations(campaignId)
-  const npcs       = useCampaignNpcs(campaignId)
-  const lore       = useCampaignLore(campaignId)
-  const quests     = useCampaignQuests(campaignId)
-  const sessions   = useCampaignSessions(campaignId)
-  const items      = useCampaignItems(campaignId)
-  const encounters = useCampaignEncounters(campaignId)
-  const characters = useCampaignCharacters(campaignId)
+  // Clear entity selection when target type changes to prevent submitting
+  // a to_id that belongs to a previously selected type
+  useEffect(() => {
+    setSelectedId('')
+    setSearch('')
+  }, [targetType])
+
+  // Gate on `open` so detail pages don't fire all eight campaign list queries on load
+  const gatedId = open ? campaignId : undefined
+  const locations  = useCampaignLocations(gatedId)
+  const npcs       = useCampaignNpcs(gatedId)
+  const lore       = useCampaignLore(gatedId)
+  const quests     = useCampaignQuests(gatedId)
+  const sessions   = useCampaignSessions(gatedId)
+  const items      = useCampaignItems(gatedId)
+  const encounters = useCampaignEncounters(gatedId)
+  const characters = useCampaignCharacters(gatedId)
 
   const entityListMap: Record<LinkableEntityType, Array<{ id: string; name: string }>> = {
     location:  locations.data  ?? [],
