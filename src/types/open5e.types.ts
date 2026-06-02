@@ -41,10 +41,10 @@ export interface Open5eMonster {
   type: string | Open5eCreatureType
   subcategory?: string | null                     // v2 (was subtype)
   subtype?: string | null                         // v1 compat
-  alignment: string
+  alignment?: string
   armor_class: number
   hit_points: number
-  hit_dice: string
+  hit_dice?: string
   speed: Record<string, number | string>
   ability_scores?: Open5eAbilityScores            // v2 nested
   strength?: number                               // v1 compat
@@ -59,8 +59,6 @@ export interface Open5eMonster {
   passive_perception: number
   senses?: string
   languages?: string
-  alignment?: string
-  hit_dice?: string
   saving_throws?: string | Record<string, number>
   skills?: string | Record<string, number>
   damage_immunities?: string | string[]
