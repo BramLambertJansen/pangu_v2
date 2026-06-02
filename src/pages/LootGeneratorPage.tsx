@@ -7,7 +7,8 @@ import { useCreateCampaignItem } from '@/hooks/queries/useCampaignItems'
 import { Spinner } from '@/components/ui/Spinner'
 import { Breadcrumb } from '@/components/ui/Breadcrumb'
 import { itemTypeLabel, itemRarityLabel, itemRarityColor } from '@/lib/statusMaps'
-import type { ItemType, ItemRarity } from '@/types/item.types'
+import type { ItemType, ItemRarity, ItemStatBonuses } from '@/types/item.types'
+import { formatItemBonuses } from '@/utils/equipmentUtils'
 
 interface GeneratedItem {
   _key: string
@@ -17,6 +18,7 @@ interface GeneratedItem {
   rarity: ItemRarity
   is_magical: boolean
   weight: number | null
+  properties: ItemStatBonuses
 }
 
 const ITEM_TYPES: ItemType[] = ['weapon', 'armor', 'potion', 'ring', 'rod', 'scroll', 'staff', 'wand', 'wondrous', 'misc']
@@ -49,6 +51,9 @@ function parseAIResponse(raw: string): GeneratedItem[] {
       rarity: ITEM_RARITIES.includes(obj['rarity'] as ItemRarity) ? (obj['rarity'] as ItemRarity) : 'common',
       is_magical: Boolean(obj['is_magical']),
       weight: obj['weight'] != null ? Number(obj['weight']) : null,
+      properties: (obj['properties'] && typeof obj['properties'] === 'object' && !Array.isArray(obj['properties']))
+        ? obj['properties'] as ItemStatBonuses
+        : {},
     }
   })
 }
@@ -80,8 +85,10 @@ export default function LootGeneratorPage() {
     return `Generate loot for the campaign "${campaign.name}" set in the world "${worldName}".${contextClause}
 
 Produce exactly ${count} item${count > 1 ? 's' : ''}${typeClause}${rarityClause}. Make each item atmospheric and specific to this world.
+Magical items may include stat bonuses via the "properties" object (all keys optional, use only what makes sense for the item):
+  ac_bonus, str_bonus, dex_bonus, con_bonus, int_bonus, wis_bonus, cha_bonus, hp_bonus, speed_bonus, initiative_bonus, attack_bonus, damage_bonus (all integers), damage_dice (string like "1d6"), stealth_disadvantage (boolean).
 Return ONLY a raw JSON array — no markdown, no explanation, just the array:
-[{"name":"Item Name","description":"1-2 evocative sentences describing the item.","item_type":"misc","rarity":"common","is_magical":false,"weight":null}]`
+[{"name":"Item Name","description":"1-2 evocative sentences describing the item.","item_type":"misc","rarity":"common","is_magical":false,"weight":null,"properties":{}}]`
   }, [campaign, count, itemType, rarity, context])
 
   async function handleGenerate() {
@@ -117,6 +124,7 @@ Return ONLY a raw JSON array — no markdown, no explanation, just the array:
         rarity: item.rarity,
         is_magical: item.is_magical,
         weight: item.weight,
+        properties: item.properties,
       })
       setAddedKeys(prev => [...prev, item._key])
       toast.success(`"${item.name}" toegevoegd aan schatkist`)
@@ -619,6 +627,30 @@ Return ONLY a raw JSON array — no markdown, no explanation, just the array:
                         {item.description}
                       </p>
                     )}
+                    {item.properties && Object.keys(item.properties).length > 0 && (() => {
+                      const bonusLines = formatItemBonuses(item.properties)
+                      if (bonusLines.length === 0) return null
+                      return (
+                        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, marginTop: 10 }}>
+                          {bonusLines.map(bonus => (
+                            <span
+                              key={bonus}
+                              style={{
+                                fontFamily: 'var(--font-body)', fontSize: 10, fontWeight: 700,
+                                letterSpacing: '0.1em', textTransform: 'uppercase',
+                                color: 'var(--teal)',
+                                padding: '3px 8px',
+                                background: 'rgba(62,207,178,0.08)',
+                                border: '1px solid rgba(62,207,178,0.2)',
+                                borderRadius: 'var(--r-full)',
+                              }}
+                            >
+                              {bonus}
+                            </span>
+                          ))}
+                        </div>
+                      )
+                    })()}
                   </div>
 
                   <button
