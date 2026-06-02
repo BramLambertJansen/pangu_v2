@@ -111,6 +111,7 @@ export default function FactionEditPage() {
       if (error) throw error
     },
     onSuccess: () => {
+      setDeleteOpen(false)
       queryClient.removeQueries({ queryKey: queryKeys.campaigns.factionDetail(id!) })
       queryClient.removeQueries({ queryKey: queryKeys.campaigns.factionDetailFull(id!) })
       if (campaignId) {
@@ -130,6 +131,7 @@ export default function FactionEditPage() {
       const { error } = await db.from('factions').delete().eq('id', id!)
       if (error) { toast.error('Verwijderen mislukt'); return }
       queryClient.removeQueries({ queryKey: queryKeys.campaigns.factionDetail(id!) })
+      queryClient.removeQueries({ queryKey: queryKeys.campaigns.factionDetailFull(id!) })
       if (campaignId) {
         queryClient.invalidateQueries({ queryKey: queryKeys.campaigns.factions(campaignId) })
       }
@@ -174,7 +176,6 @@ export default function FactionEditPage() {
       success: 'Factie verwijderd',
       error: 'Verwijderen mislukt',
     })
-    setDeleteOpen(false)
   }
 
   if (isLoading) {

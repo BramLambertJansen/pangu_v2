@@ -48,6 +48,7 @@ export function useImportSpell() {
         .from('spells')
         .select('id')
         .eq('source_slug', spell.slug)
+        .eq('user_id', user.id)
         .maybeSingle()
       if (existing) throw new Error('Deze spreuk is al in je bibliotheek.')
 
@@ -56,7 +57,10 @@ export function useImportSpell() {
         .insert(mapSpellToSpell(spell, user.id))
         .select()
         .single()
-      if (error) throw error
+      if (error) {
+        if ((error as { code?: string }).code === '23505') throw new Error('Deze spreuk is al in je bibliotheek.')
+        throw error
+      }
       return data as Spell
     },
     onSuccess: (data) => {
@@ -90,7 +94,10 @@ export function useImportMonster(worldId: string) {
         .insert(mapMonsterToBestiary(monster, worldId, user.id))
         .select()
         .single()
-      if (error) throw error
+      if (error) {
+        if ((error as { code?: string }).code === '23505') throw new Error('Dit wezen is al geïmporteerd in dit bestiarium.')
+        throw error
+      }
       return data as Bestiary
     },
     onSuccess: (data) => {
@@ -121,7 +128,10 @@ export function useImportMagicItem(campaignId: string) {
         .insert(mapMagicItemToItem(magicItem, campaignId))
         .select()
         .single()
-      if (error) throw error
+      if (error) {
+        if ((error as { code?: string }).code === '23505') throw new Error('Dit item is al geïmporteerd in deze kroniek.')
+        throw error
+      }
       return data as Item
     },
     onSuccess: (data) => {

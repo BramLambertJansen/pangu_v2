@@ -91,6 +91,11 @@ export default function NpcEditPage() {
         queryClient.invalidateQueries({ queryKey: queryKeys.campaigns.npcs(campaignId) })
       }
       queryClient.invalidateQueries({ queryKey: queryKeys.campaigns.npcDetail(id!) })
+      // Invalidate faction member lists for old and new faction (faction_id may have changed)
+      const oldFactionId = npcData?.faction_id
+      const newFactionId = form.faction_id
+      if (oldFactionId) queryClient.invalidateQueries({ queryKey: queryKeys.campaigns.factionMembers(oldFactionId) })
+      if (newFactionId && newFactionId !== oldFactionId) queryClient.invalidateQueries({ queryKey: queryKeys.campaigns.factionMembers(newFactionId) })
       setCommitted(true)
       setDirty(false)
     },
@@ -106,6 +111,9 @@ export default function NpcEditPage() {
     },
     onSuccess: () => {
       queryClient.removeQueries({ queryKey: queryKeys.campaigns.npcDetail(id!) })
+      // NPC removed from faction — invalidate that faction's member list
+      const factionId = npcData?.faction_id
+      if (factionId) queryClient.invalidateQueries({ queryKey: queryKeys.campaigns.factionMembers(factionId) })
       if (campaignId) {
         queryClient.invalidateQueries({ queryKey: queryKeys.campaigns.npcs(campaignId) })
         navigate(`/campaigns/${campaignId}/npcs`)
