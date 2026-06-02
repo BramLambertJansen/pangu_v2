@@ -167,7 +167,7 @@ export default function BestiariesPage() {
       <Modal open={srdOpen} onClose={() => setSrdOpen(false)} title="Wezens importeren uit de SRD" className="max-w-xl">
         <CompendiumBrowser
           kind="monster"
-          onImport={data => importMonster.mutate(data as Open5eMonster)}
+          onImport={(data, edition) => importMonster.mutate({ monster: data as Open5eMonster, edition })}
           importedSlugs={importedSlugs}
           isPending={importMonster.isPending}
         />

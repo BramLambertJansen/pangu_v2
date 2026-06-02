@@ -74,9 +74,9 @@ export const queryKeys = {
   },
   entityLinks: (type: string, id: string) => ['entity-links', type, id] as const,
   srd: {
-    monsters: (query: string) => ['srd', 'monsters', query] as const,
-    items: (query: string) => ['srd', 'items', query] as const,
-    spells: (query: string) => ['srd', 'spells', query] as const,
+    monsters: (query: string, edition: string = '2014') => ['srd', 'monsters', edition, query] as const,
+    items: (query: string, edition: string = '2014') => ['srd', 'items', edition, query] as const,
+    spells: (query: string, edition: string = '2014') => ['srd', 'spells', edition, query] as const,
   },
   spells: {
     all: ['spells'] as const,

@@ -3,34 +3,35 @@ import { toast } from 'sonner'
 import { supabase } from '@/lib/supabase'
 import { queryKeys } from '@/lib/queryKeys'
 import { searchMonsters, searchMagicItems, searchSpells, mapMonsterToBestiary, mapMagicItemToItem, mapSpellToSpell } from '@/lib/open5e'
+import type { SrdEdition } from '@/lib/open5e'
 import { useAuthStore } from '@/stores/auth.store'
 import type { Open5eMonster, Open5eMagicItem, Open5eSpell } from '@/types/open5e.types'
 import type { Bestiary } from '@/types/bestiary.types'
 import type { Item } from '@/types/item.types'
 import type { Spell } from '@/types/spell.types'
 
-export function useSrdMonsterSearch(query: string) {
+export function useSrdMonsterSearch(query: string, edition: SrdEdition = '2014') {
   return useQuery<Open5eMonster[]>({
-    queryKey: queryKeys.srd.monsters(query),
-    queryFn: () => searchMonsters(query),
+    queryKey: queryKeys.srd.monsters(query, edition),
+    queryFn: () => searchMonsters(query, edition),
     enabled: query.length >= 2,
     staleTime: 1000 * 60 * 60,
   })
 }
 
-export function useSrdItemSearch(query: string) {
+export function useSrdItemSearch(query: string, edition: SrdEdition = '2014') {
   return useQuery<Open5eMagicItem[]>({
-    queryKey: queryKeys.srd.items(query),
-    queryFn: () => searchMagicItems(query),
+    queryKey: queryKeys.srd.items(query, edition),
+    queryFn: () => searchMagicItems(query, edition),
     enabled: query.length >= 2,
     staleTime: 1000 * 60 * 60,
   })
 }
 
-export function useSrdSpellSearch(query: string) {
+export function useSrdSpellSearch(query: string, edition: SrdEdition = '2014') {
   return useQuery<Open5eSpell[]>({
-    queryKey: queryKeys.srd.spells(query),
-    queryFn: () => searchSpells(query),
+    queryKey: queryKeys.srd.spells(query, edition),
+    queryFn: () => searchSpells(query, edition),
     enabled: query.length >= 2,
     staleTime: 1000 * 60 * 60,
   })
@@ -41,7 +42,7 @@ export function useImportSpell() {
   const user = useAuthStore(s => s.user)
 
   return useMutation({
-    mutationFn: async (spell: Open5eSpell) => {
+    mutationFn: async ({ spell, edition = '2014' }: { spell: Open5eSpell; edition?: SrdEdition }) => {
       if (!user) throw new Error('Niet ingelogd')
 
       const { data: existing } = await supabase
@@ -54,7 +55,7 @@ export function useImportSpell() {
 
       const { data, error } = await supabase
         .from('spells')
-        .insert(mapSpellToSpell(spell, user.id))
+        .insert(mapSpellToSpell(spell, user.id, edition))
         .select()
         .single()
       if (error) {
@@ -78,7 +79,7 @@ export function useImportMonster(worldId: string) {
   const user = useAuthStore(s => s.user)
 
   return useMutation({
-    mutationFn: async (monster: Open5eMonster) => {
+    mutationFn: async ({ monster, edition = '2014' }: { monster: Open5eMonster; edition?: SrdEdition }) => {
       if (!user) throw new Error('Niet ingelogd')
 
       const { data: existing } = await supabase
@@ -91,7 +92,7 @@ export function useImportMonster(worldId: string) {
 
       const { data, error } = await supabase
         .from('bestiaries')
-        .insert(mapMonsterToBestiary(monster, worldId, user.id))
+        .insert(mapMonsterToBestiary(monster, worldId, user.id, edition))
         .select()
         .single()
       if (error) {
@@ -114,7 +115,7 @@ export function useImportMagicItem(campaignId: string) {
   const queryClient = useQueryClient()
 
   return useMutation({
-    mutationFn: async (magicItem: Open5eMagicItem) => {
+    mutationFn: async ({ magicItem, edition = '2014' }: { magicItem: Open5eMagicItem; edition?: SrdEdition }) => {
       const { data: existing } = await supabase
         .from('items')
         .select('id')
@@ -125,7 +126,7 @@ export function useImportMagicItem(campaignId: string) {
 
       const { data, error } = await supabase
         .from('items')
-        .insert(mapMagicItemToItem(magicItem, campaignId))
+        .insert(mapMagicItemToItem(magicItem, campaignId, edition))
         .select()
         .single()
       if (error) {

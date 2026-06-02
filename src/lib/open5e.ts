@@ -1,13 +1,18 @@
 // Open5e API V2 client and mappers.
 // In Open5e V2, the SRD 5.1 document key is 'srd-2014' and SRD 5.2 is 'srd-2024'.
-// Change SRD_SLUG to 'srd-2024' to import from the 2024 rules edition instead.
 
 import type { Open5eListResponse, Open5eMonster, Open5eMagicItem, Open5eSpell } from '@/types/open5e.types'
 import type { BestiaryStatus } from '@/types/bestiary.types'
 import type { ItemType, ItemRarity } from '@/types/item.types'
 import type { SpellSchool } from '@/types/spell.types'
 
-export const SRD_SLUG = 'srd-2014'
+export type SrdEdition = '2014' | '2024'
+export const SRD_SLUG_2014 = 'srd-2014'
+export const SRD_SLUG_2024 = 'srd-2024'
+
+function editionToSlug(edition: SrdEdition): string {
+  return edition === '2024' ? SRD_SLUG_2024 : SRD_SLUG_2014
+}
 
 // Open5e v2 returns some fields as { slug, label } objects instead of plain strings.
 function toStr(val: unknown): string {
@@ -22,9 +27,9 @@ function toStr(val: unknown): string {
   return ''
 }
 
-async function fetchOpen5e<T>(endpoint: string, query: string): Promise<Open5eListResponse<T>> {
+async function fetchOpen5e<T>(endpoint: string, query: string, edition: SrdEdition = '2014'): Promise<Open5eListResponse<T>> {
   const url = new URL(`https://api.open5e.com/v2${endpoint}`)
-  url.searchParams.set('document__key', SRD_SLUG)
+  url.searchParams.set('document__key', editionToSlug(edition))
   url.searchParams.set('limit', '20')
   url.searchParams.set('name__icontains', query)
   const res = await fetch(url.toString(), { headers: { Accept: 'application/json' } })
@@ -32,18 +37,18 @@ async function fetchOpen5e<T>(endpoint: string, query: string): Promise<Open5eLi
   return res.json() as Promise<Open5eListResponse<T>>
 }
 
-export async function searchMonsters(query: string): Promise<Open5eMonster[]> {
-  const data = await fetchOpen5e<Open5eMonster>('/creatures/', query)
+export async function searchMonsters(query: string, edition: SrdEdition = '2014'): Promise<Open5eMonster[]> {
+  const data = await fetchOpen5e<Open5eMonster>('/creatures/', query, edition)
   return data.results
 }
 
-export async function searchMagicItems(query: string): Promise<Open5eMagicItem[]> {
-  const data = await fetchOpen5e<Open5eMagicItem>('/magicitems/', query)
+export async function searchMagicItems(query: string, edition: SrdEdition = '2014'): Promise<Open5eMagicItem[]> {
+  const data = await fetchOpen5e<Open5eMagicItem>('/magicitems/', query, edition)
   return data.results
 }
 
-export async function searchSpells(query: string): Promise<Open5eSpell[]> {
-  const data = await fetchOpen5e<Open5eSpell>('/spells/', query)
+export async function searchSpells(query: string, edition: SrdEdition = '2014'): Promise<Open5eSpell[]> {
+  const data = await fetchOpen5e<Open5eSpell>('/spells/', query, edition)
   return data.results
 }
 
@@ -120,6 +125,7 @@ export function mapMonsterToBestiary(
   monster: Open5eMonster,
   worldId: string,
   userId: string,
+  edition: SrdEdition = '2014',
 ): BestiaryInsert {
   const ab = monster.ability_scores
   return {
@@ -143,7 +149,7 @@ export function mapMonsterToBestiary(
     stat_int: monster.intelligence ?? ab?.intelligence ?? 10,
     stat_wis: monster.wisdom ?? ab?.wisdom ?? 10,
     stat_cha: monster.charisma ?? ab?.charisma ?? 10,
-    source: 'srd',
+    source: edition === '2024' ? 'srd-2024' : 'srd',
     source_slug: monster.slug ?? monster.key,
   }
 }
@@ -176,7 +182,7 @@ export interface SpellInsert {
   source_slug: string
 }
 
-export function mapSpellToSpell(spell: Open5eSpell, userId: string): SpellInsert {
+export function mapSpellToSpell(spell: Open5eSpell, userId: string, edition: SrdEdition = '2014'): SpellInsert {
   return {
     user_id: userId,
     name: spell.name,
@@ -191,7 +197,7 @@ export function mapSpellToSpell(spell: Open5eSpell, userId: string): SpellInsert
     description: spell.desc || null,
     higher_level: spell.higher_level || null,
     classes: spell.dnd_class ? spell.dnd_class.split(',').map(c => c.trim()).filter(Boolean) : [],
-    source: 'srd',
+    source: edition === '2024' ? 'srd-2024' : 'srd',
     source_slug: spell.slug,
   }
 }
@@ -216,6 +222,7 @@ export interface ItemInsert {
 export function mapMagicItemToItem(
   magicItem: Open5eMagicItem,
   campaignId: string,
+  edition: SrdEdition = '2014',
 ): ItemInsert {
   return {
     campaign_id: campaignId,
@@ -230,7 +237,7 @@ export function mapMagicItemToItem(
     weight: null,
     properties: {} as Record<string, never>,
     committed: true,
-    source: 'srd',
+    source: edition === '2024' ? 'srd-2024' : 'srd',
     source_slug: magicItem.slug,
   }
 }
