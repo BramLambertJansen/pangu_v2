@@ -29,6 +29,7 @@ export interface Bestiary {
   stat_cha: number
   source: string | null
   source_slug: string | null
+  image_url: string | null
   alignment: string | null
   hit_dice: string | null
   proficiency_bonus: number | null

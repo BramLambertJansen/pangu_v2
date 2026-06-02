@@ -1,4 +1,4 @@
-import { useId } from 'react'
+import { useId, useRef, useState } from 'react'
 import { useParams, useNavigate, useLocation } from 'react-router-dom'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { toast } from 'sonner'
@@ -8,7 +8,10 @@ import { Modal } from '@/components/ui/Modal'
 import { ConfirmDialog } from '@/components/ui/ConfirmDialog'
 import { Spinner } from '@/components/ui/Spinner'
 import { useEntityEdit } from '@/hooks/useEntityEdit'
+import { useAuthStore } from '@/stores/auth.store'
 import type { Bestiary, BestiaryStatus } from '@/types/bestiary.types'
+
+const MAX_IMAGE_BYTES = 5 * 1024 * 1024
 
 const statusOptions: { value: BestiaryStatus; label: string }[] = [
   { value: 'draft',    label: 'Concept'      },
@@ -48,6 +51,9 @@ export default function BestiaryEditPage() {
   const navigate = useNavigate()
   const location = useLocation()
   const queryClient = useQueryClient()
+  const user = useAuthStore((s) => s.user)
+  const imageInputRef = useRef<HTMLInputElement>(null)
+  const [imageUploading, setImageUploading] = useState(false)
 
   const descriptionId = useId()
   const notesId = useId()
@@ -106,6 +112,7 @@ export default function BestiaryEditPage() {
           stat_int: form.stat_int,
           stat_wis: form.stat_wis,
           stat_cha: form.stat_cha,
+          image_url: form.image_url ?? null,
           committed: true,
           updated_at: new Date().toISOString(),
         })
@@ -182,6 +189,66 @@ export default function BestiaryEditPage() {
     }
   }
 
+  function extractStoragePath(url: string): string | null {
+    const marker = '/entity-images/'
+    const idx = url.indexOf(marker)
+    return idx !== -1 ? url.slice(idx + marker.length) : null
+  }
+
+  async function deleteStorageObject(url: string) {
+    const path = extractStoragePath(url)
+    if (path) await supabase.storage.from('entity-images').remove([path])
+  }
+
+  async function handleImageUpload(file: File) {
+    if (!user || !id) return
+    if (!file.type.startsWith('image/')) {
+      toast.error('Alleen afbeeldingen zijn toegestaan')
+      return
+    }
+    if (file.size > MAX_IMAGE_BYTES) {
+      toast.error('Afbeelding mag maximaal 5 MB zijn')
+      return
+    }
+    setImageUploading(true)
+    try {
+      const oldUrl = form.image_url as string | null | undefined
+      const ext = file.name.split('.').pop() ?? 'jpg'
+      const path = `bestiaries/${user.id}/${id}/${Date.now()}.${ext}`
+      const { error: uploadError } = await supabase.storage
+        .from('entity-images')
+        .upload(path, file, { upsert: true })
+      if (uploadError) throw uploadError
+      const { data: urlData } = supabase.storage.from('entity-images').getPublicUrl(path)
+      const imageUrl = urlData.publicUrl
+      const { error: updateError } = await supabase
+        .from('bestiaries')
+        .update({ image_url: imageUrl })
+        .eq('id', id)
+      if (updateError) throw updateError
+      if (oldUrl) await deleteStorageObject(oldUrl)
+      set('image_url', imageUrl)
+      toast.success('Afbeelding opgeslagen')
+    } catch {
+      toast.error('Uploaden mislukt')
+    } finally {
+      setImageUploading(false)
+    }
+  }
+
+  async function handleImageRemove() {
+    if (!id) return
+    const oldUrl = form.image_url as string | null | undefined
+    const { error } = await supabase
+      .from('bestiaries')
+      .update({ image_url: null })
+      .eq('id', id)
+    if (error) { toast.error('Verwijderen mislukt'); return }
+    if (oldUrl) await deleteStorageObject(oldUrl)
+    set('image_url', null)
+    toast.success('Afbeelding verwijderd')
+  }
+
   function handleSave() {
     toast.promise(saveBestiary.mutateAsync(), {
       loading: 'Opslaan...',
@@ -253,6 +320,92 @@ export default function BestiaryEditPage() {
             Pas de details van dit wezen aan.
           </p>
         </header>
+
+        {/* Afbeelding */}
+        <div className="pangu-surface" style={{ padding: 28, marginBottom: 16 }}>
+          <p className="pangu-section-title" style={{ marginBottom: 4 }}>Afbeelding</p>
+          <p style={{ fontSize: 13, color: 'var(--muted)', marginBottom: 20, marginTop: 0 }}>
+            Voeg een illustratie toe van dit wezen. Maximaal 5 MB.
+          </p>
+          <input
+            ref={imageInputRef}
+            type="file"
+            accept="image/*"
+            className="sr-only"
+            aria-hidden="true"
+            tabIndex={-1}
+            onChange={(e) => {
+              const file = e.target.files?.[0]
+              if (file) handleImageUpload(file)
+              e.target.value = ''
+            }}
+          />
+          <div style={{ display: 'flex', alignItems: 'flex-start', gap: 20, flexWrap: 'wrap' }}>
+            <div style={{ position: 'relative', flexShrink: 0 }}>
+              {form.image_url ? (
+                <img
+                  src={form.image_url}
+                  alt={`Afbeelding van ${form.name ?? 'wezen'}`}
+                  style={{
+                    width: 140, height: 140, objectFit: 'cover',
+                    borderRadius: 12,
+                    border: '1px solid var(--hairline)',
+                    display: 'block',
+                  }}
+                />
+              ) : (
+                <div
+                  aria-hidden="true"
+                  style={{
+                    width: 140, height: 140, borderRadius: 12,
+                    border: '1px dashed var(--hairline)',
+                    background: 'var(--surface-2)',
+                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    flexDirection: 'column', gap: 6,
+                  }}
+                >
+                  <svg aria-hidden="true" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="var(--muted)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                    <rect x="3" y="3" width="18" height="18" rx="2" />
+                    <circle cx="8.5" cy="8.5" r="1.5" />
+                    <polyline points="21 15 16 10 5 21" />
+                  </svg>
+                  <span style={{ fontSize: 11, color: 'var(--subtle)', fontFamily: 'var(--font-body)' }}>Geen afbeelding</span>
+                </div>
+              )}
+              {imageUploading && (
+                <div
+                  className="absolute inset-0 flex items-center justify-center"
+                  style={{ background: 'rgba(0,0,0,0.5)', borderRadius: 12 }}
+                  aria-live="polite"
+                  aria-label="Afbeelding wordt geüpload"
+                >
+                  <Spinner size="sm" />
+                </div>
+              )}
+            </div>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+              <button
+                type="button"
+                className="pangu-btn pangu-btn-secondary pangu-btn-sm"
+                disabled={imageUploading}
+                onClick={() => imageInputRef.current?.click()}
+              >
+                {imageUploading ? 'Uploaden...' : form.image_url ? 'Afbeelding wijzigen' : 'Afbeelding uploaden'}
+              </button>
+              {form.image_url && (
+                <button
+                  type="button"
+                  className="pangu-btn pangu-btn-ghost pangu-btn-sm"
+                  disabled={imageUploading}
+                  onClick={handleImageRemove}
+                  style={{ color: 'var(--crimson)' }}
+                >
+                  Afbeelding verwijderen
+                </button>
+              )}
+            </div>
+          </div>
+        </div>
 
         {/* Basis */}
         <div className="pangu-surface" style={{ padding: 28, marginBottom: 16 }}>
