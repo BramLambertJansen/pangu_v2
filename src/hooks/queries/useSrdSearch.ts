@@ -48,12 +48,12 @@ export function useImportSpell() {
       const { data: existing } = await supabase
         .from('spells')
         .select('id')
-        .eq('source_slug', spell.slug)
+        .eq('source_slug', spell.key ?? spell.slug ?? '')
         .eq('user_id', user.id)
         .maybeSingle()
       if (existing) throw new Error('Deze spreuk is al in je bibliotheek.')
 
-      const fullSpell = await fetchSpellDetail(spell.slug)
+      const fullSpell = await fetchSpellDetail(spell.key ?? spell.slug ?? '')
 
       const { data, error } = await supabase
         .from('spells')

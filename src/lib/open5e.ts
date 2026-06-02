@@ -222,7 +222,7 @@ export function mapSpellToSpell(spell: Open5eSpell, userId: string, edition: Srd
     higher_level: spell.higher_level || null,
     classes: spell.dnd_class ? spell.dnd_class.split(',').map(c => c.trim()).filter(Boolean) : [],
     source: edition === '2024' ? 'srd-2024' : 'srd',
-    source_slug: spell.slug,
+    source_slug: spell.key ?? spell.slug ?? '',
   }
 }
 

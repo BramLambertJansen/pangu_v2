@@ -75,7 +75,8 @@ export interface Open5eMagicItem {
 
 // /v2/spells/
 export interface Open5eSpell {
-  slug: string
+  key: string                                     // v2 identifier
+  slug?: string                                   // v1 compat
   name: string
   document: Open5eDocument
   school: string | { slug: string; label: string }

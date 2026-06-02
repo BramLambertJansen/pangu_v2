@@ -127,7 +127,7 @@ export function CompendiumBrowser({ kind, onImport, importedSlugs, isPending }: 
           style={{ display: 'flex', flexDirection: 'column', gap: 6, listStyle: 'none', padding: 0, margin: 0, maxHeight: 300, overflowY: 'auto' }}
         >
           {results.map(result => {
-            const alreadyImported = importedSlugs.includes(result.slug ?? (result as Open5eMonster).key ?? '')
+            const alreadyImported = importedSlugs.includes((result as Open5eMonster).key ?? result.slug ?? '')
             const meta =
               kind === 'monster' ? monsterMeta(result as Open5eMonster) :
               kind === 'item' ? itemMeta(result as Open5eMagicItem) :
@@ -135,7 +135,7 @@ export function CompendiumBrowser({ kind, onImport, importedSlugs, isPending }: 
 
             return (
               <li
-                key={result.slug}
+                key={(result as Open5eMonster).key ?? result.slug}
                 style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '10px 12px', borderRadius: 8, border: '1px solid var(--hairline)', background: 'var(--surface-2)' }}
               >
                 <div style={{ flex: 1, minWidth: 0 }}>
