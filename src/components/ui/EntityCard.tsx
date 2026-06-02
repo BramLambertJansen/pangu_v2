@@ -3,7 +3,7 @@ import { cn } from '@/utils/cn'
 
 export interface EntityCardProps {
   children: ReactNode
-  onClick: () => void
+  onClick?: () => void
   ariaLabel: string
   variant?: 'hero' | 'compact'
   className?: string
@@ -11,7 +11,7 @@ export interface EntityCardProps {
 
 export const EntityCard = memo(function EntityCard({ children, onClick, ariaLabel, variant = 'compact', className }: EntityCardProps) {
   function handleKeyDown(e: KeyboardEvent<HTMLElement>) {
-    if (e.key === 'Enter' || e.key === ' ') {
+    if (onClick && (e.key === 'Enter' || e.key === ' ')) {
       e.preventDefault()
       onClick()
     }
@@ -19,11 +19,11 @@ export const EntityCard = memo(function EntityCard({ children, onClick, ariaLabe
 
   return (
     <article
-      role="button"
-      tabIndex={0}
+      role={onClick ? 'button' : undefined}
+      tabIndex={onClick ? 0 : undefined}
       aria-label={ariaLabel}
       onClick={onClick}
-      onKeyDown={handleKeyDown}
+      onKeyDown={onClick ? handleKeyDown : undefined}
       data-variant={variant}
       className={cn('entity-card', className)}
     >
