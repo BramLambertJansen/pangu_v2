@@ -85,8 +85,7 @@ export default function LootGeneratorPage() {
     return `Generate loot for the campaign "${campaign.name}" set in the world "${worldName}".${contextClause}
 
 Produce exactly ${count} item${count > 1 ? 's' : ''}${typeClause}${rarityClause}. Make each item atmospheric and specific to this world.
-Magical items may include stat bonuses via the "properties" object (all keys optional, use only what makes sense for the item):
-  ac_bonus, str_bonus, dex_bonus, con_bonus, int_bonus, wis_bonus, cha_bonus, hp_bonus, speed_bonus, initiative_bonus, attack_bonus, damage_bonus (all integers), damage_dice (string like "1d6"), stealth_disadvantage (boolean).
+Most items should have an empty "properties" object. Only rare, very_rare, legendary or artifact items may occasionally carry a stat bonus — and even then only if it fits the item's nature. Keep bonuses modest (typically +1, at most +2 for legendary/artifact). Use only the relevant keys: ac_bonus, str_bonus, dex_bonus, con_bonus, int_bonus, wis_bonus, cha_bonus, hp_bonus, speed_bonus, initiative_bonus, attack_bonus, damage_bonus (integers), damage_dice (string e.g. "1d6"), stealth_disadvantage (boolean).
 Return ONLY a raw JSON array — no markdown, no explanation, just the array:
 [{"name":"Item Name","description":"1-2 evocative sentences describing the item.","item_type":"misc","rarity":"common","is_magical":false,"weight":null,"properties":{}}]`
   }, [campaign, count, itemType, rarity, context])
