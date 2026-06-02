@@ -29,6 +29,7 @@ export interface CreateItemInput {
   is_magical: boolean
   weight: number | null
   properties?: ItemStatBonuses
+  image_url?: string | null
 }
 
 export function useCreateCampaignItem(campaignId: string) {
@@ -47,6 +48,7 @@ export function useCreateCampaignItem(campaignId: string) {
           weight: input.weight,
           quantity: 1,
           properties: (input.properties ?? {}) as Record<string, unknown>,
+          image_url: input.image_url ?? null,
           committed: true,
         })
         .select()
