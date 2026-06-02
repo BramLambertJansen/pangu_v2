@@ -12,6 +12,7 @@ import { Breadcrumb } from '@/components/ui/Breadcrumb'
 import { itemTypeLabel, itemRarityLabel, itemRarityColor } from '@/lib/statusMaps'
 import type { ItemType, ItemRarity, ItemStatBonuses } from '@/types/item.types'
 import { formatItemBonuses } from '@/utils/equipmentUtils'
+import { searchCCImage, buildImageSearchQuery, type CCImageResult } from '@/lib/ccImageSearch'
 
 // Builds a Pollinations.ai URL from a text prompt — no API key required
 function pollinationsUrl(prompt: string): string {
@@ -28,6 +29,7 @@ interface GeneratedItem {
   weight: number | null
   properties: ItemStatBonuses
   image_url: string | null
+  image_attribution: CCImageResult | null
 }
 
 const ITEM_TYPES: ItemType[] = ['weapon', 'armor', 'potion', 'ring', 'rod', 'scroll', 'staff', 'wand', 'wondrous', 'misc']
@@ -64,6 +66,7 @@ function parseAIResponse(raw: string): GeneratedItem[] {
         ? obj['properties'] as ItemStatBonuses
         : {},
       image_url: null,
+      image_attribution: null,
     }
   })
 }
@@ -150,7 +153,7 @@ Return ONLY a raw JSON array — no markdown, no explanation, just the array:
         const prompt = `Fantasy RPG item artwork: ${item.name}. ${item.description ?? ''}`.trim()
         url = pollinationsUrl(prompt)
       }
-      setResults(prev => prev.map(r => r._key === item._key ? { ...r, image_url: url } : r))
+      setResults(prev => prev.map(r => r._key === item._key ? { ...r, image_url: url, image_attribution: null } : r))
     } catch (err) {
       toast.error(err instanceof Error ? err.message : 'Afbeelding genereren mislukt')
     } finally {
@@ -158,8 +161,28 @@ Return ONLY a raw JSON array — no markdown, no explanation, just the array:
     }
   }
 
+  async function searchCCImageForItem(item: GeneratedItem) {
+    setImageLoadingKeys(prev => [...prev, `cc-${item._key}`])
+    try {
+      const query = buildImageSearchQuery(item.name, item.item_type)
+      const result = await searchCCImage(query)
+      if (!result) {
+        toast.error('Geen CC-afbeelding gevonden — probeer een handmatige URL')
+        return
+      }
+      setResults(prev => prev.map(r =>
+        r._key === item._key ? { ...r, image_url: result.url, image_attribution: result } : r
+      ))
+    } catch {
+      toast.error('CC-zoekactie mislukt')
+    } finally {
+      setImageLoadingKeys(prev => prev.filter(k => k !== `cc-${item._key}`))
+    }
+  }
+
   function setItemImageUrl(key: string, url: string) {
-    setResults(prev => prev.map(r => r._key === key ? { ...r, image_url: url || null } : r))
+    // Clear attribution when user manually enters a URL
+    setResults(prev => prev.map(r => r._key === key ? { ...r, image_url: url || null, image_attribution: null } : r))
   }
 
   async function addItem(item: GeneratedItem) {
@@ -705,15 +728,34 @@ Return ONLY a raw JSON array — no markdown, no explanation, just the array:
                     {/* Image section */}
                     {!isAdded && (() => {
                       const isImgLoading = imageLoadingKeys.includes(item._key)
+                      const isCCLoading = imageLoadingKeys.includes(`cc-${item._key}`)
+                      const anyLoading = isImgLoading || isCCLoading
                       return (
                         <div style={{ marginTop: 14 }}>
                           {item.image_url && (
-                            <div style={{ marginBottom: 10, borderRadius: 8, overflow: 'hidden', maxWidth: 200, border: '1px solid var(--hairline)' }}>
-                              <img
-                                src={item.image_url}
-                                alt={`Afbeelding van ${item.name}`}
-                                style={{ width: '100%', height: 'auto', display: 'block' }}
-                              />
+                            <div style={{ marginBottom: 8 }}>
+                              <div style={{ borderRadius: 8, overflow: 'hidden', maxWidth: 200, border: '1px solid var(--hairline)', marginBottom: 6 }}>
+                                <img
+                                  src={item.image_url}
+                                  alt={`Afbeelding van ${item.name}`}
+                                  style={{ width: '100%', height: 'auto', display: 'block' }}
+                                />
+                              </div>
+                              {item.image_attribution && (
+                                <p style={{ fontSize: 10, color: 'var(--subtle)', margin: 0, lineHeight: 1.5 }}>
+                                  <a
+                                    href={item.image_attribution.sourceUrl}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    style={{ color: 'var(--subtle)', textDecoration: 'underline' }}
+                                  >
+                                    {item.image_attribution.title}
+                                  </a>
+                                  {item.image_attribution.author && ` · ${item.image_attribution.author}`}
+                                  {' · '}{item.image_attribution.license}
+                                  {' · '}{item.image_attribution.provider === 'wikimedia' ? 'Wikimedia Commons' : 'Openverse'}
+                                </p>
+                              )}
                             </div>
                           )}
                           <div style={{ display: 'flex', gap: 8, alignItems: 'center', flexWrap: 'wrap' }}>
@@ -724,7 +766,7 @@ Return ONLY a raw JSON array — no markdown, no explanation, just the array:
                               onChange={e => setItemImageUrl(item._key, e.target.value)}
                               aria-label={`Afbeeldings-URL voor ${item.name}`}
                               style={{
-                                flex: 1, minWidth: 160,
+                                flex: 1, minWidth: 140,
                                 padding: '6px 10px',
                                 background: 'var(--surface-2)',
                                 border: '1px solid var(--hairline)',
@@ -737,10 +779,47 @@ Return ONLY a raw JSON array — no markdown, no explanation, just the array:
                               onFocus={e => (e.currentTarget.style.borderColor = 'rgba(212,170,87,0.45)')}
                               onBlur={e => (e.currentTarget.style.borderColor = 'var(--hairline)')}
                             />
+                            {/* CC image search: Wikimedia → Openverse */}
+                            <button
+                              type="button"
+                              onClick={() => void searchCCImageForItem(item)}
+                              disabled={anyLoading}
+                              title="Zoek gratis CC-afbeelding (Wikimedia Commons → Openverse)"
+                              aria-label={`Zoek CC-afbeelding voor ${item.name}`}
+                              style={{
+                                flexShrink: 0,
+                                display: 'inline-flex', alignItems: 'center', gap: 5,
+                                padding: '6px 12px',
+                                background: 'var(--surface-2)',
+                                border: '1px solid var(--hairline)',
+                                borderRadius: 8,
+                                color: 'var(--muted)',
+                                fontFamily: 'var(--font-body)', fontSize: 10, fontWeight: 700,
+                                letterSpacing: '0.1em', textTransform: 'uppercase',
+                                cursor: anyLoading ? 'not-allowed' : 'pointer',
+                                whiteSpace: 'nowrap',
+                                transition: 'all var(--t-fast)',
+                                opacity: anyLoading ? 0.6 : 1,
+                              }}
+                              onMouseEnter={e => { if (!anyLoading) { e.currentTarget.style.borderColor = 'rgba(62,207,178,0.4)'; e.currentTarget.style.color = 'var(--teal)' } }}
+                              onMouseLeave={e => { if (!anyLoading) { e.currentTarget.style.borderColor = 'var(--hairline)'; e.currentTarget.style.color = 'var(--muted)' } }}
+                            >
+                              {isCCLoading ? (
+                                <><Spinner size="sm" /> Zoeken…</>
+                              ) : (
+                                <>
+                                  <svg aria-hidden="true" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                    <circle cx="11" cy="11" r="8" /><path d="M21 21l-4.35-4.35" />
+                                  </svg>
+                                  Zoek CC
+                                </>
+                              )}
+                            </button>
+                            {/* Generate button: DALL-E or Pollinations */}
                             <button
                               type="button"
                               onClick={() => void generateImage(item)}
-                              disabled={isImgLoading}
+                              disabled={anyLoading}
                               title={hasOpenAIKey ? 'Genereer via DALL-E 3 (OpenAI BYOK)' : 'Genereer via Pollinations.ai'}
                               aria-label={`Genereer afbeelding voor ${item.name}`}
                               style={{
@@ -753,13 +832,13 @@ Return ONLY a raw JSON array — no markdown, no explanation, just the array:
                                 color: 'var(--muted)',
                                 fontFamily: 'var(--font-body)', fontSize: 10, fontWeight: 700,
                                 letterSpacing: '0.1em', textTransform: 'uppercase',
-                                cursor: isImgLoading ? 'not-allowed' : 'pointer',
+                                cursor: anyLoading ? 'not-allowed' : 'pointer',
                                 whiteSpace: 'nowrap',
                                 transition: 'all var(--t-fast)',
-                                opacity: isImgLoading ? 0.6 : 1,
+                                opacity: anyLoading ? 0.6 : 1,
                               }}
-                              onMouseEnter={e => { if (!isImgLoading) { e.currentTarget.style.borderColor = 'rgba(212,170,87,0.4)'; e.currentTarget.style.color = 'var(--gold)' } }}
-                              onMouseLeave={e => { if (!isImgLoading) { e.currentTarget.style.borderColor = 'var(--hairline)'; e.currentTarget.style.color = 'var(--muted)' } }}
+                              onMouseEnter={e => { if (!anyLoading) { e.currentTarget.style.borderColor = 'rgba(212,170,87,0.4)'; e.currentTarget.style.color = 'var(--gold)' } }}
+                              onMouseLeave={e => { if (!anyLoading) { e.currentTarget.style.borderColor = 'var(--hairline)'; e.currentTarget.style.color = 'var(--muted)' } }}
                             >
                               {isImgLoading ? (
                                 <><Spinner size="sm" /> Genereren…</>
