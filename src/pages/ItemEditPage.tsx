@@ -232,6 +232,17 @@ export default function ItemEditPage() {
     }
   }
 
+  function extractStoragePath(url: string): string | null {
+    const marker = '/entity-images/'
+    const idx = url.indexOf(marker)
+    return idx !== -1 ? url.slice(idx + marker.length) : null
+  }
+
+  async function deleteStorageObject(url: string) {
+    const path = extractStoragePath(url)
+    if (path) await supabase.storage.from('entity-images').remove([path])
+  }
+
   async function handleImageUpload(file: File) {
     if (!user || !id) return
     if (!file.type.startsWith('image/')) {
@@ -244,6 +255,7 @@ export default function ItemEditPage() {
     }
     setImageUploading(true)
     try {
+      const oldUrl = form.image_url as string | null | undefined
       const ext = file.name.split('.').pop() ?? 'jpg'
       const path = `items/${user.id}/${id}/${Date.now()}.${ext}`
       const { error: uploadError } = await supabase.storage
@@ -257,8 +269,8 @@ export default function ItemEditPage() {
         .update({ image_url: imageUrl })
         .eq('id', id)
       if (updateError) throw updateError
+      if (oldUrl) await deleteStorageObject(oldUrl)
       set('image_url', imageUrl)
-      queryClient.invalidateQueries({ queryKey: queryKeys.items.detail(id) })
       toast.success('Afbeelding opgeslagen')
     } catch {
       toast.error('Uploaden mislukt')
@@ -269,13 +281,14 @@ export default function ItemEditPage() {
 
   async function handleImageRemove() {
     if (!id) return
+    const oldUrl = form.image_url as string | null | undefined
     const { error } = await supabase
       .from('items')
       .update({ image_url: null })
       .eq('id', id)
     if (error) { toast.error('Verwijderen mislukt'); return }
+    if (oldUrl) await deleteStorageObject(oldUrl)
     set('image_url', null)
-    queryClient.invalidateQueries({ queryKey: queryKeys.items.detail(id) })
     toast.success('Afbeelding verwijderd')
   }
 
