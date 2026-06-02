@@ -104,6 +104,7 @@ export default function ItemEditPage() {
   const [imageGenerating, setImageGenerating] = useState(false)
   const [ccSearching, setCcSearching] = useState(false)
   const [ccAttribution, setCcAttribution] = useState<CCImageResult | null>(null)
+  const [imagePromptExtra, setImagePromptExtra] = useState('')
 
   const { data: aiSettings } = useUserAISettings()
   const hasOpenAIKey = !!(aiSettings?.byok_keys?.['openai'])
@@ -111,7 +112,9 @@ export default function ItemEditPage() {
   async function handleGenerateImage() {
     const name = form.name ?? itemData?.name ?? 'item'
     const itemType = (form.item_type ?? itemData?.item_type ?? 'misc') as string
-    const prompt = `A detailed fantasy illustration of: ${name}. Style: medieval fantasy RPG item art, high quality`
+    const extra = imagePromptExtra.trim()
+    const basePrompt = `A detailed fantasy illustration of: ${name}${extra ? `. ${extra}` : ''}. Style: medieval fantasy RPG item art, high quality`
+    const prompt = basePrompt
     if (hasOpenAIKey) {
       setImageGenerating(true)
       try {
@@ -133,7 +136,7 @@ export default function ItemEditPage() {
         setImageGenerating(false)
       }
     } else {
-      const url = pollinationsUrl(`${name} ${itemType} fantasy RPG item illustration`)
+      const url = pollinationsUrl(`${name}${extra ? ` ${extra}` : ` ${itemType}`} fantasy RPG item illustration`)
       set('image_url', url)
       setCcAttribution(null)
       toast.success('Afbeelding gegenereerd via Pollinations')
@@ -143,9 +146,11 @@ export default function ItemEditPage() {
   async function handleSearchCCImage() {
     const name = form.name ?? itemData?.name ?? 'item'
     const itemType = (form.item_type ?? itemData?.item_type ?? 'misc') as string
+    const extra = imagePromptExtra.trim()
     setCcSearching(true)
     try {
-      const result = await searchCCImage(buildImageSearchQuery(name, itemType))
+      const baseQuery = buildImageSearchQuery(name, itemType)
+      const result = await searchCCImage(extra ? `${baseQuery} ${extra}` : baseQuery)
       if (!result) { toast.error('Geen CC-afbeelding gevonden'); return }
       set('image_url', result.url)
       setCcAttribution(result)
@@ -556,6 +561,19 @@ export default function ItemEditPage() {
               )}
             </div>
             <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+              <div>
+                <label className="pangu-label" htmlFor="image-prompt-extra" style={{ fontSize: 11 }}>
+                  Verfijn prompt <span style={{ color: 'var(--subtle)', fontWeight: 400 }}>(optioneel)</span>
+                </label>
+                <input
+                  id="image-prompt-extra"
+                  className="pangu-input"
+                  style={{ fontSize: 13 }}
+                  value={imagePromptExtra}
+                  onChange={(e) => setImagePromptExtra(e.target.value)}
+                  placeholder="bijv. glowing blue runes, wooden handle"
+                />
+              </div>
               <button
                 type="button"
                 className="pangu-btn pangu-btn-secondary pangu-btn-sm"
