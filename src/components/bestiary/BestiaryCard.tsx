@@ -32,7 +32,21 @@ export const BestiaryCard = memo(function BestiaryCard({ bestiary }: Props) {
       />
 
       {/* Content */}
-      <div style={{ position: 'relative', display: 'flex', flexDirection: 'column', gap: 8, flex: 1 }}>
+      <div style={{ position: 'relative', display: 'flex', gap: 12, flex: 1 }}>
+        {bestiary.image_url && (
+          <img
+            src={bestiary.image_url}
+            alt=""
+            aria-hidden="true"
+            style={{
+              width: 64, height: 64, objectFit: 'cover',
+              borderRadius: 8, flexShrink: 0,
+              border: '1px solid var(--hairline)',
+              alignSelf: 'flex-start',
+            }}
+          />
+        )}
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 8, flex: 1, minWidth: 0 }}>
         <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 12 }}>
           <div style={{ minWidth: 0 }}>
             {bestiary.subtitle && (
@@ -105,6 +119,7 @@ export const BestiaryCard = memo(function BestiaryCard({ bestiary }: Props) {
             Een onbekend wezen wacht op zijn beschrijving.
           </p>
         )}
+      </div>
       </div>
     </EntityCard>
   )

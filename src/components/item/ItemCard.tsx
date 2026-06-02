@@ -32,7 +32,21 @@ export const ItemCard = memo(function ItemCard({ item }: Props) {
       />
 
       {/* Content */}
-      <div style={{ position: 'relative', display: 'flex', flexDirection: 'column', gap: 8, flex: 1 }}>
+      <div style={{ position: 'relative', display: 'flex', gap: 12, flex: 1 }}>
+        {item.image_url && (
+          <img
+            src={item.image_url}
+            alt=""
+            aria-hidden="true"
+            style={{
+              width: 64, height: 64, objectFit: 'cover',
+              borderRadius: 8, flexShrink: 0,
+              border: '1px solid var(--hairline)',
+              alignSelf: 'flex-start',
+            }}
+          />
+        )}
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 8, flex: 1, minWidth: 0 }}>
         <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 12 }}>
           <div style={{ minWidth: 0 }}>
             <h2 style={{
@@ -103,6 +117,7 @@ export const ItemCard = memo(function ItemCard({ item }: Props) {
             Een mysterieus voorwerp wacht op zijn bestemming.
           </p>
         )}
+      </div>
       </div>
     </EntityCard>
   )

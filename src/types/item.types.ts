@@ -65,6 +65,7 @@ export interface Item {
   requires_attunement: boolean
   source: string | null
   source_slug: string | null
+  image_url: string | null
   created_at: string
   updated_at: string
 }

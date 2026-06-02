@@ -57,6 +57,7 @@ export type Database = {
           legendary_desc: string | null
           legendary_actions: Json | null
           lair_actions: Json | null
+          image_url: string | null
           created_at: string
           updated_at: string
         }
@@ -103,6 +104,7 @@ export type Database = {
           legendary_desc?: string | null
           legendary_actions?: Json | null
           lair_actions?: Json | null
+          image_url?: string | null
           created_at?: string
           updated_at?: string
         }
@@ -149,6 +151,7 @@ export type Database = {
           legendary_desc?: string | null
           legendary_actions?: Json | null
           lair_actions?: Json | null
+          image_url?: string | null
           created_at?: string
           updated_at?: string
         }
@@ -928,6 +931,7 @@ export type Database = {
           requires_attunement: boolean
           source: string | null
           source_slug: string | null
+          image_url: string | null
           created_at: string
           updated_at: string
         }
@@ -948,6 +952,7 @@ export type Database = {
           requires_attunement?: boolean
           source?: string | null
           source_slug?: string | null
+          image_url?: string | null
           created_at?: string
           updated_at?: string
         }
@@ -968,6 +973,7 @@ export type Database = {
           requires_attunement?: boolean
           source?: string | null
           source_slug?: string | null
+          image_url?: string | null
           created_at?: string
           updated_at?: string
         }

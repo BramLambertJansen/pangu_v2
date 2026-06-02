@@ -202,32 +202,48 @@ export default function BestiaryDetailPage() {
 
         <div style={{ flex: 1 }} />
 
-        <div style={{ position: 'relative', padding: '0 clamp(24px, 4vw, 48px) 32px' }}>
-          {bestiary.subtitle && (
-            <p style={{
-              fontFamily: "'Cormorant Garamond', Georgia, serif",
-              fontStyle: 'italic',
-              fontSize: 'clamp(14px, 1.6vw, 17px)', letterSpacing: '0.03em',
-              color: 'var(--gold)', margin: '0 0 12px',
+        <div style={{ position: 'relative', padding: '0 clamp(24px, 4vw, 48px) 32px', display: 'flex', alignItems: 'flex-end', gap: 24 }}>
+          {bestiary.image_url && (
+            <img
+              src={bestiary.image_url}
+              alt={bestiary.name}
+              style={{
+                width: 120, height: 120,
+                objectFit: 'cover',
+                borderRadius: 12,
+                border: '2px solid var(--hairline)',
+                flexShrink: 0,
+                boxShadow: '0 4px 24px rgba(0,0,0,0.4)',
+              }}
+            />
+          )}
+          <div>
+            {bestiary.subtitle && (
+              <p style={{
+                fontFamily: "'Cormorant Garamond', Georgia, serif",
+                fontStyle: 'italic',
+                fontSize: 'clamp(14px, 1.6vw, 17px)', letterSpacing: '0.03em',
+                color: 'var(--gold)', margin: '0 0 12px',
+              }}>
+                {bestiary.subtitle}
+              </p>
+            )}
+            <h1 style={{
+              fontFamily: 'var(--font-display)',
+              fontSize: 'clamp(40px, 6.5vw, 80px)',
+              fontWeight: 600, lineHeight: 0.95,
+              letterSpacing: '0.04em', textTransform: 'uppercase',
+              color: 'var(--ink)', margin: 0,
+              overflowWrap: 'break-word',
             }}>
-              {bestiary.subtitle}
-            </p>
-          )}
-          <h1 style={{
-            fontFamily: 'var(--font-display)',
-            fontSize: 'clamp(40px, 6.5vw, 80px)',
-            fontWeight: 600, lineHeight: 0.95,
-            letterSpacing: '0.04em', textTransform: 'uppercase',
-            color: 'var(--ink)', margin: 0,
-            overflowWrap: 'break-word',
-          }}>
-            {bestiary.name}
-          </h1>
-          {bestiary.habitat && (
-            <p style={{ marginTop: 10, fontSize: 13, color: 'var(--ink-soft)', fontStyle: 'italic' }}>
-              Leefgebied: {bestiary.habitat}
-            </p>
-          )}
+              {bestiary.name}
+            </h1>
+            {bestiary.habitat && (
+              <p style={{ marginTop: 10, fontSize: 13, color: 'var(--ink-soft)', fontStyle: 'italic' }}>
+                Leefgebied: {bestiary.habitat}
+              </p>
+            )}
+          </div>
         </div>
       </div>
 
