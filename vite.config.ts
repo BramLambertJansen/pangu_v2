@@ -39,23 +39,6 @@ export default defineConfig({
       '@': path.resolve(__dirname, './src'),
     },
   },
-  server: {
-    proxy: {
-      '/api/open5e': {
-        target: 'https://api.open5e.com',
-        changeOrigin: true,
-        rewrite: (p) => {
-          const qIdx = p.indexOf('?')
-          const qs = qIdx >= 0 ? p.slice(qIdx + 1) : ''
-          const params = new URLSearchParams(qs)
-          const endpoint = params.get('path') ?? '/'
-          params.delete('path')
-          const rest = params.toString()
-          return `/v2${endpoint}${rest ? '?' + rest : ''}`
-        },
-      },
-    },
-  },
   test: {
     environment: 'jsdom',
     globals: true,
