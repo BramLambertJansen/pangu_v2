@@ -23,7 +23,7 @@ function toStr(val: unknown): string {
 
 async function fetchOpen5e<T>(endpoint: string, query: string): Promise<Open5eListResponse<T>> {
   const url = new URL(`https://api.open5e.com/v2${endpoint}`)
-  url.searchParams.set('document__slug', SRD_SLUG)
+  url.searchParams.set('document__key', SRD_SLUG)
   url.searchParams.set('limit', '20')
   url.searchParams.set('name__icontains', query)
   const res = await fetch(url.toString(), { headers: { Accept: 'application/json' } })
