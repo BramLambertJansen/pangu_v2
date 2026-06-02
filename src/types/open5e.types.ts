@@ -55,9 +55,18 @@ export interface Open5eMonster {
   charisma?: number
   challenge_rating: string | number
   cr?: number
+  proficiency_bonus?: number
   passive_perception: number
-  senses: string
-  languages: string
+  senses?: string
+  languages?: string
+  alignment?: string
+  hit_dice?: string
+  saving_throws?: string | Record<string, number>
+  skills?: string | Record<string, number>
+  damage_immunities?: string | string[]
+  damage_resistances?: string | string[]
+  damage_vulnerabilities?: string | string[]
+  condition_immunities?: string | Array<{ name: string } | string>
   desc?: string
   special_abilities?: Array<{ name: string; desc: string }>
   actions?: Array<{ name: string; desc: string }>
@@ -77,8 +86,9 @@ export interface Open5eMagicItem {
   document: Open5eDocument
   type: string | { slug: string; label: string }
   rarity: string | { slug: string; label: string }
-  requires_attunement: string
+  requires_attunement: string | boolean
   desc: string
+  weight?: number | null
 }
 
 // /v2/spells/

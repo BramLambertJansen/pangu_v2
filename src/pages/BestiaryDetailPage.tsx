@@ -290,6 +290,41 @@ export default function BestiaryDetailPage() {
         </div>
       </div>
 
+      {/* Extended stat block */}
+      {(bestiary.alignment || bestiary.hit_dice || bestiary.proficiency_bonus != null ||
+        bestiary.senses || bestiary.languages || bestiary.saving_throws || bestiary.skills ||
+        bestiary.damage_immunities || bestiary.damage_resistances || bestiary.damage_vulnerabilities ||
+        bestiary.condition_immunities || bestiary.speed_details) && (
+        <>
+          <WorldDetailDivider label="Aanvullende Statistieken" />
+          <div className="pangu-surface" style={{ padding: 24 }}>
+            <dl style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(240px, 1fr))', gap: '12px 24px', margin: 0 }}>
+              {([
+                ['Uitlijning', bestiary.alignment],
+                ['Trefdobbelsteen', bestiary.hit_dice],
+                ['Vaardigheidsbonus', bestiary.proficiency_bonus != null ? `+${bestiary.proficiency_bonus}` : null],
+                ['Snelheid (details)', bestiary.speed_details],
+                ['Zintuigen', bestiary.senses],
+                ['Talen', bestiary.languages],
+                ['Reddingsgooien', bestiary.saving_throws],
+                ['Vaardigheden', bestiary.skills],
+                ['Schade immuniteiten', bestiary.damage_immunities],
+                ['Schade resistenties', bestiary.damage_resistances],
+                ['Schade kwetsbaarheden', bestiary.damage_vulnerabilities],
+                ['Conditie immuniteiten', bestiary.condition_immunities],
+              ] as [string, string | number | null][]).filter(([, v]) => v != null).map(([label, value]) => (
+                <div key={label}>
+                  <dt style={{ fontSize: 10, fontWeight: 700, letterSpacing: '0.12em', textTransform: 'uppercase', color: 'var(--muted)', marginBottom: 3 }}>
+                    {label}
+                  </dt>
+                  <dd style={{ fontSize: 14, color: 'var(--ink-soft)', margin: 0 }}>{value}</dd>
+                </div>
+              ))}
+            </dl>
+          </div>
+        </>
+      )}
+
       {/* Combat sections */}
       {(['special_abilities', 'actions', 'bonus_actions', 'reactions'] as const).map(section => {
         const entries = bestiary[section] as BestiaryAction[] | null
