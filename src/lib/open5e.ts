@@ -1,12 +1,13 @@
 // Open5e API V2 client and mappers.
-// SRD document slug is 'srd' (5.1, CC-BY-4.0). Change SRD_SLUG to 'srd-2024' for 5.2.
+// In Open5e V2, the SRD 5.1 document key is 'srd-2014' and SRD 5.2 is 'srd-2024'.
+// Change SRD_SLUG to 'srd-2024' to import from the 2024 rules edition instead.
 
 import type { Open5eListResponse, Open5eMonster, Open5eMagicItem, Open5eSpell } from '@/types/open5e.types'
 import type { BestiaryStatus } from '@/types/bestiary.types'
 import type { ItemType, ItemRarity } from '@/types/item.types'
 import type { SpellSchool } from '@/types/spell.types'
 
-export const SRD_SLUG = 'srd'
+export const SRD_SLUG = 'srd-2014'
 
 // Open5e v2 returns some fields as { slug, label } objects instead of plain strings.
 function toStr(val: unknown): string {

@@ -1061,7 +1061,7 @@ npm run test         # Vitest
 ### SRD-Compendium (Open5e import) — Fase A
 - [x] Migratie `041_srd_source.sql` — `source text` + `source_slug text` op `bestiaries` en `items`; partial unique indexes op `(world_id, source_slug)` resp. `(campaign_id, source_slug)` waar `source_slug IS NOT NULL`
 - [x] `src/types/open5e.types.ts` — raw Open5e V2 API types: `Open5eDocument`, `Open5eListResponse<T>`, `Open5eMonster`, `Open5eMagicItem`, `Open5eSpell`
-- [x] `src/lib/open5e.ts` — V2 client (`searchMonsters`, `searchMagicItems`, `searchSpells`); mappers `mapMonsterToBestiary`, `mapMagicItemToItem`; hulpfuncties `mapChallengeRating`, `mapSpeed`, `mapItemType`, `mapItemRarity`; `SRD_SLUG = 'srd'` constante
+- [x] `src/lib/open5e.ts` — V2 client (`searchMonsters`, `searchMagicItems`, `searchSpells`); mappers `mapMonsterToBestiary`, `mapMagicItemToItem`; hulpfuncties `mapChallengeRating`, `mapSpeed`, `mapItemType`, `mapItemRarity`; `SRD_SLUG = 'srd-2014'` constante
 - [x] `src/types/bestiary.types.ts` — `source: string | null` + `source_slug: string | null` toegevoegd
 - [x] `src/types/item.types.ts` — `source: string | null` + `source_slug: string | null` toegevoegd
 - [x] `src/types/database.types.ts` — `source` + `source_slug` toegevoegd aan `bestiaries` en `items` Row/Insert/Update
@@ -1074,7 +1074,7 @@ npm run test         # Vitest
 - [x] `src/pages/CampaignItemsPage.tsx` — "Importeer uit SRD"-knop naast "AI Buitgenerator" → Modal met `CompendiumBrowser kind="item"`
 - [x] `src/pages/SettingsPage.tsx` — SRD/Open5e attributieblok in de "Over"-tab
 - [x] `src/test/open5e-mappers.test.ts` — 28 unit tests voor alle mappers en hulpfuncties (geen netwerkcalls)
-- Attentie: Open5e V2 CORS werkt client-side; geen proxy nodig. SRD-document-slug is `'srd'` (5.1 CC-BY-4.0); wijzig `SRD_SLUG` in `open5e.ts` voor 5.2.
+- Attentie: Open5e V2 CORS werkt client-side; geen proxy nodig. SRD-document-key is `'srd-2014'` (5.1 CC-BY-4.0); wijzig `SRD_SLUG` naar `'srd-2024'` in `open5e.ts` voor de 2024-editie.
 
 ### SRD-Compendium (Open5e import) — Fase B: Spreukenbibliotheek
 - [x] Migratie `042_spells.sql` — `spells` tabel (user-scoped): id, user_id, name, level (0-9), school, casting_time, range, components, duration, concentration, ritual, description, higher_level, classes text[], source, source_slug; RLS owner-only; unique index op `(user_id, source_slug) WHERE source_slug IS NOT NULL`
