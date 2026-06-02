@@ -99,7 +99,7 @@ useEffect(() => {
           style={{ display: 'flex', flexDirection: 'column', gap: 6, listStyle: 'none', padding: 0, margin: 0, maxHeight: 300, overflowY: 'auto' }}
         >
           {results.map(result => {
-            const alreadyImported = importedSlugs.includes(result.slug)
+            const alreadyImported = importedSlugs.includes(result.slug ?? (result as Open5eMonster).key ?? '')
             const meta =
               kind === 'monster' ? monsterMeta(result as Open5eMonster) :
               kind === 'item' ? itemMeta(result as Open5eMagicItem) :

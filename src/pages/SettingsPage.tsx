@@ -1,4 +1,5 @@
 import { useState, useId, useRef } from 'react'
+import { useLocation } from 'react-router-dom'
 import { CompassRose } from '@/components/world/CompassRose'
 import { Spinner } from '@/components/ui/Spinner'
 import { Button } from '@/components/ui/Button'
@@ -781,7 +782,9 @@ function PanguTab() {
 
 export default function SettingsPage() {
   const profile = useAuthStore(s => s.profile)
-  const [activeTab, setActiveTab] = useState<Tab>('profile')
+  const location = useLocation()
+  const initialTab = (location.state as { tab?: Tab } | null)?.tab ?? 'profile'
+  const [activeTab, setActiveTab] = useState<Tab>(initialTab)
 
   const tabs: { id: Tab; label: string; special?: boolean }[] = [
     { id: 'profile', label: 'Profiel' },

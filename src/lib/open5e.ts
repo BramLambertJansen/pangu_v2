@@ -79,7 +79,7 @@ export function mapItemType(type: unknown): ItemType {
 
 // Open5e rarity string (any casing/spacing) → Pangu ItemRarity
 export function mapItemRarity(rarity: unknown): ItemRarity {
-  const key = toStr(rarity).toLowerCase().replace(/\s+/g, '_')
+  const key = toStr(rarity).toLowerCase().replace(/[\s-]+/g, '_')
   if (!key) return 'common'
   const mapping: Record<string, ItemRarity> = {
     common: 'common',

@@ -85,7 +85,7 @@ export function useImportMonster(worldId: string) {
         .from('bestiaries')
         .select('id')
         .eq('world_id', worldId)
-        .eq('source_slug', monster.slug)
+        .eq('source_slug', monster.slug ?? monster.key)
         .maybeSingle()
       if (existing) throw new Error('Dit wezen is al geïmporteerd in dit bestiarium.')
 
