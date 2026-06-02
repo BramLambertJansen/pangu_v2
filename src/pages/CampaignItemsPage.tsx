@@ -1,10 +1,11 @@
-import { useState, useEffect, useMemo } from 'react'
+import { useState, useEffect, useMemo, useRef } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { toast } from 'sonner'
 import { supabase } from '@/lib/supabase'
 import { queryKeys } from '@/lib/queryKeys'
 import { useAuthStore } from '@/stores/auth.store'
+import { useAI } from '@/hooks/useAI'
 import { Spinner } from '@/components/ui/Spinner'
 import { Modal } from '@/components/ui/Modal'
 import { ItemCard, ForgeItemCard } from '@/components/item/ItemCard'
@@ -14,8 +15,12 @@ import { useCampaignItems } from '@/hooks/queries/useCampaignItems'
 import { useCampaignCharacters } from '@/hooks/queries/useCampaignCharacters'
 import { useImportMagicItem } from '@/hooks/queries/useSrdSearch'
 import { Breadcrumb } from '@/components/ui/Breadcrumb'
-import type { Item } from '@/types/item.types'
+import { itemTypeLabel, itemRarityLabel } from '@/lib/statusMaps'
+import type { Item, ItemType, ItemRarity } from '@/types/item.types'
 import type { Open5eMagicItem } from '@/types/open5e.types'
+
+const ITEM_TYPES: ItemType[] = ['weapon', 'armor', 'potion', 'ring', 'rod', 'scroll', 'staff', 'wand', 'wondrous', 'misc']
+const ITEM_RARITIES: ItemRarity[] = ['common', 'uncommon', 'rare', 'very_rare', 'legendary', 'artifact']
 
 type FilterTab = 'all' | 'unassigned' | string  // string = character id
 
@@ -27,6 +32,10 @@ export default function CampaignItemsPage() {
 
   const [activeTab, setActiveTab] = useState<FilterTab>('all')
   const [srdOpen, setSrdOpen] = useState(false)
+  const [aiOpen, setAiOpen] = useState(false)
+  const [aiContext, setAiContext] = useState('')
+  const aiContextRef = useRef<HTMLTextAreaElement>(null)
+  const { ask, loading: aiLoading } = useAI()
 
   const { data: campaign, isLoading: isLoadingCampaign } = useCampaignWithWorld(id)
   const { data: items, isLoading: isLoadingItems } = useCampaignItems(id)
@@ -78,6 +87,54 @@ export default function CampaignItemsPage() {
     },
   })
 
+  async function handleAIGenerate() {
+    if (!campaign) return
+    const worldName = campaign.worlds?.name ?? 'onbekende wereld'
+    const contextClause = aiContext.trim() ? `\nContext: ${aiContext.trim()}` : ''
+    const prompt = `Generate exactly 1 item for the campaign "${campaign.name}" set in the world "${worldName}".${contextClause}
+Make it atmospheric and specific to this world. Most items should have empty properties. Only rare+ items may carry a modest stat bonus (+1, max +2 for legendary).
+Return ONLY a raw JSON array with one item — no markdown, no explanation:
+[{"name":"Item Name","description":"1-2 evocative sentences.","item_type":"misc","rarity":"common","is_magical":false,"weight":null,"properties":{}}]`
+
+    try {
+      const reply = await ask([{ role: 'user', content: prompt }])
+      let cleaned = reply.trim().replace(/^```(?:json)?\s*/i, '').replace(/\s*```\s*$/, '')
+      const arrayMatch = cleaned.match(/\[[\s\S]*\]/)
+      if (arrayMatch) cleaned = arrayMatch[0]
+      const parsed = JSON.parse(cleaned) as Record<string, unknown>[]
+      const obj = Array.isArray(parsed) ? parsed[0] : null
+      if (!obj) throw new Error('Geen item in respons')
+
+      const itemType = ITEM_TYPES.includes(obj['item_type'] as ItemType) ? (obj['item_type'] as ItemType) : 'misc'
+      const rarity = ITEM_RARITIES.includes(obj['rarity'] as ItemRarity) ? (obj['rarity'] as ItemRarity) : 'common'
+
+      const { data, error } = await supabase
+        .from('items')
+        .insert({
+          campaign_id: id!,
+          name: String(obj['name'] ?? 'Gegenereerd item'),
+          description: obj['description'] ? String(obj['description']) : null,
+          item_type: itemType,
+          rarity,
+          is_magical: Boolean(obj['is_magical']),
+          weight: obj['weight'] != null ? Number(obj['weight']) : null,
+          quantity: 1,
+          properties: (obj['properties'] && typeof obj['properties'] === 'object' ? obj['properties'] : {}) as Record<string, unknown>,
+          committed: true,
+        })
+        .select()
+        .single()
+      if (error) throw error
+
+      queryClient.invalidateQueries({ queryKey: queryKeys.items.byCampaign(id!) })
+      setAiOpen(false)
+      setAiContext('')
+      navigate(`/items/${(data as Item).id}/edit`, { state: { isNew: true, campaignId: id } })
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : 'Genereren mislukt')
+    }
+  }
+
   if (isLoadingCampaign) {
     return (
       <div style={{ display: 'flex', justifyContent: 'center', padding: '80px 0' }} aria-live="polite">
@@ -124,6 +181,29 @@ export default function CampaignItemsPage() {
           </p>
         </div>
         <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+          <button
+            type="button"
+            onClick={() => { setAiOpen(true); setTimeout(() => aiContextRef.current?.focus(), 50) }}
+            style={{
+              flexShrink: 0, display: 'inline-flex', alignItems: 'center', gap: 6,
+              padding: '8px 16px',
+              background: 'rgba(212,170,87,0.1)',
+              border: '1px solid rgba(212,170,87,0.3)',
+              borderRadius: 'var(--r-full)',
+              color: 'var(--gold)',
+              fontFamily: 'var(--font-body)', fontSize: 11, fontWeight: 700,
+              letterSpacing: '0.14em', textTransform: 'uppercase',
+              cursor: 'pointer', transition: 'all var(--t-fast)', whiteSpace: 'nowrap',
+            }}
+            onMouseEnter={e => { e.currentTarget.style.background = 'rgba(212,170,87,0.18)'; e.currentTarget.style.borderColor = 'rgba(212,170,87,0.5)' }}
+            onMouseLeave={e => { e.currentTarget.style.background = 'rgba(212,170,87,0.1)'; e.currentTarget.style.borderColor = 'rgba(212,170,87,0.3)' }}
+            aria-label="Genereer een item met AI"
+          >
+            <svg aria-hidden="true" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M12 2l2.4 7.4H22l-6.2 4.5 2.4 7.4L12 17l-6.2 4.3 2.4-7.4L2 9.4h7.6z" />
+            </svg>
+            Genereer item
+          </button>
           <button
             type="button"
             onClick={() => setSrdOpen(true)}
@@ -251,6 +331,99 @@ export default function CampaignItemsPage() {
           Geen items toegewezen aan dit karakter.
         </p>
       )}
+
+      {/* AI generate single item modal */}
+      <Modal
+        open={aiOpen}
+        onClose={() => { if (!aiLoading) { setAiOpen(false); setAiContext('') } }}
+        title="Genereer een item met AI"
+      >
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+          <p style={{ fontSize: 14, color: 'var(--ink-soft)', margin: 0, lineHeight: 1.6 }}>
+            Beschrijf het item dat je wilt genereren, of laat het veld leeg voor een willekeurig item passend bij de kroniek.
+          </p>
+          <div>
+            <label
+              htmlFor="ai-item-context"
+              style={{
+                display: 'block', fontSize: 10, fontWeight: 700,
+                letterSpacing: '0.18em', textTransform: 'uppercase',
+                color: 'var(--muted)', marginBottom: 8,
+                fontFamily: 'var(--font-body)',
+              }}
+            >
+              Context (optioneel)
+            </label>
+            <textarea
+              id="ai-item-context"
+              ref={aiContextRef}
+              value={aiContext}
+              onChange={e => setAiContext(e.target.value)}
+              disabled={aiLoading}
+              placeholder="Bijv. een vervloekt zwaard gevonden in een verlaten tempel, of een drankje van een reizende heks..."
+              rows={3}
+              onKeyDown={e => { if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') void handleAIGenerate() }}
+              style={{
+                width: '100%', padding: '10px 12px',
+                background: 'var(--surface-2)',
+                border: '1px solid var(--hairline)',
+                borderRadius: 10,
+                color: 'var(--ink)', fontSize: 14, lineHeight: 1.5,
+                fontFamily: 'var(--font-body)',
+                resize: 'vertical', outline: 'none',
+                opacity: aiLoading ? 0.6 : 1,
+                boxSizing: 'border-box',
+              }}
+              onFocus={e => (e.currentTarget.style.borderColor = 'rgba(212,170,87,0.45)')}
+              onBlur={e => (e.currentTarget.style.borderColor = 'var(--hairline)')}
+              aria-describedby="ai-item-hint"
+            />
+            <p id="ai-item-hint" style={{ fontSize: 11, color: 'var(--subtle)', margin: '6px 0 0', textAlign: 'right' }}>
+              Ctrl+Enter om te genereren
+            </p>
+          </div>
+          <div style={{ display: 'flex', gap: 10, justifyContent: 'flex-end' }}>
+            <button
+              type="button"
+              onClick={() => { setAiOpen(false); setAiContext('') }}
+              disabled={aiLoading}
+              style={{
+                padding: '8px 18px',
+                background: 'none', border: '1px solid var(--hairline)',
+                borderRadius: 'var(--r-full)', color: 'var(--muted)',
+                fontFamily: 'var(--font-body)', fontSize: 11, fontWeight: 700,
+                letterSpacing: '0.12em', textTransform: 'uppercase',
+                cursor: aiLoading ? 'not-allowed' : 'pointer',
+                opacity: aiLoading ? 0.5 : 1,
+              }}
+            >
+              Annuleren
+            </button>
+            <button
+              type="button"
+              onClick={() => void handleAIGenerate()}
+              disabled={aiLoading}
+              style={{
+                display: 'inline-flex', alignItems: 'center', gap: 7,
+                padding: '8px 20px',
+                background: aiLoading ? 'rgba(212,170,87,0.1)' : 'linear-gradient(135deg, rgba(212,170,87,0.22), rgba(212,170,87,0.1))',
+                border: '1px solid rgba(212,170,87,0.35)',
+                borderRadius: 'var(--r-full)', color: 'var(--gold)',
+                fontFamily: 'var(--font-body)', fontSize: 11, fontWeight: 700,
+                letterSpacing: '0.12em', textTransform: 'uppercase',
+                cursor: aiLoading ? 'not-allowed' : 'pointer',
+              }}
+            >
+              {aiLoading ? <><Spinner size="sm" /> Genereren...</> : <>
+                <svg aria-hidden="true" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M12 2l2.4 7.4H22l-6.2 4.5 2.4 7.4L12 17l-6.2 4.3 2.4-7.4L2 9.4h7.6z" />
+                </svg>
+                Genereer &amp; open
+              </>}
+            </button>
+          </div>
+        </div>
+      </Modal>
 
       <Modal open={srdOpen} onClose={() => setSrdOpen(false)} title="Magische items importeren uit de SRD" className="max-w-xl">
         <CompendiumBrowser
