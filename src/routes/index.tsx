@@ -50,6 +50,7 @@ const JoinPage = lazy(() => import('@/pages/JoinPage'))
 const FactionsPage = lazy(() => import('@/pages/FactionsPage'))
 const FactionDetailPage = lazy(() => import('@/pages/FactionDetailPage'))
 const FactionEditPage = lazy(() => import('@/pages/FactionEditPage'))
+const SpellsPage = lazy(() => import('@/pages/SpellsPage'))
 
 function wrap(Page: React.ComponentType) {
   return (
@@ -282,6 +283,11 @@ export const router = createBrowserRouter([
         path: '/factions/:id/edit',
         loader: requireAuth,
         element: wrap(FactionEditPage),
+      },
+      {
+        path: '/spells',
+        loader: requireAuth,
+        element: wrap(SpellsPage),
       },
       { path: '*', element: <RouteErrorPage /> },
     ],

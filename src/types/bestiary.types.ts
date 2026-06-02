@@ -22,6 +22,8 @@ export interface Bestiary {
   stat_int: number
   stat_wis: number
   stat_cha: number
+  source: string | null
+  source_slug: string | null
   created_at: string
   updated_at: string
 }

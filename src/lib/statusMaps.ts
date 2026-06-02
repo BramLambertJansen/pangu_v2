@@ -10,6 +10,7 @@ import type { QuestStatus } from '@/types/quest.types'
 import type { EncounterStatus } from '@/types/encounter.types'
 import type { ItemRarity, ItemType } from '@/types/item.types'
 import type { FactionStatus, FactionType, FactionReputation } from '@/types/faction.types'
+import type { SpellSchool } from '@/types/spell.types'
 
 export const worldStatusLabel: Record<WorldStatus, string> = {
   draft:    'Concept',
@@ -218,4 +219,26 @@ export const factionReputationColor: Record<FactionReputation, string> = {
   neutral:    'var(--muted)',
   friendly:   'var(--teal)',
   allied:     'var(--azure)',
+}
+
+export const spellSchoolLabel: Record<SpellSchool, string> = {
+  abjuration:    'Abjuratie',
+  conjuration:   'Bezwering',
+  divination:    'Waarzeggerij',
+  enchantment:   'Betovering',
+  evocation:     'Oproeping',
+  illusion:      'Illusie',
+  necromancy:    'Necromantie',
+  transmutation: 'Transmutatie',
+}
+
+export const spellSchoolColor: Record<SpellSchool, string> = {
+  abjuration:    'var(--azure)',
+  conjuration:   'var(--teal)',
+  divination:    'var(--gold)',
+  enchantment:   'var(--crimson)',
+  evocation:     'var(--crimson)',
+  illusion:      'var(--violet)',
+  necromancy:    'var(--muted)',
+  transmutation: 'var(--teal)',
 }

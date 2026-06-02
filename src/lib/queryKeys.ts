@@ -45,6 +45,7 @@ export const queryKeys = {
     detail: (id: string) => ['characters', id] as const,
     byCampaign: (campaignId: string) => ['characters', 'campaign', campaignId] as const,
     items: (characterId: string) => ['characters', characterId, 'items'] as const,
+    spells: (characterId: string) => ['characters', characterId, 'spells'] as const,
   },
   items: {
     byCampaign: (campaignId: string) => ['items', 'campaign', campaignId] as const,
@@ -71,4 +72,13 @@ export const queryKeys = {
     list: (userId: string) => ['notifications', 'list', userId] as const,
   },
   entityLinks: (type: string, id: string) => ['entity-links', type, id] as const,
+  srd: {
+    monsters: (query: string) => ['srd', 'monsters', query] as const,
+    items: (query: string) => ['srd', 'items', query] as const,
+    spells: (query: string) => ['srd', 'spells', query] as const,
+  },
+  spells: {
+    all: ['spells'] as const,
+    detail: (id: string) => ['spells', id] as const,
+  },
 }

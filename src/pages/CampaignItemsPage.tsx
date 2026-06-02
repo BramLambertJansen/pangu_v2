@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { toast } from 'sonner'
@@ -6,12 +6,16 @@ import { supabase } from '@/lib/supabase'
 import { queryKeys } from '@/lib/queryKeys'
 import { useAuthStore } from '@/stores/auth.store'
 import { Spinner } from '@/components/ui/Spinner'
+import { Modal } from '@/components/ui/Modal'
 import { ItemCard, ForgeItemCard } from '@/components/item/ItemCard'
+import { CompendiumBrowser } from '@/components/compendium/CompendiumBrowser'
 import { useCampaignWithWorld } from '@/hooks/queries/useCampaign'
 import { useCampaignItems } from '@/hooks/queries/useCampaignItems'
 import { useCampaignCharacters } from '@/hooks/queries/useCampaignCharacters'
+import { useImportMagicItem } from '@/hooks/queries/useSrdSearch'
 import { Breadcrumb } from '@/components/ui/Breadcrumb'
 import type { Item } from '@/types/item.types'
+import type { Open5eMagicItem } from '@/types/open5e.types'
 
 type FilterTab = 'all' | 'unassigned' | string  // string = character id
 
@@ -22,10 +26,16 @@ export default function CampaignItemsPage() {
   const user = useAuthStore(s => s.user)
 
   const [activeTab, setActiveTab] = useState<FilterTab>('all')
+  const [srdOpen, setSrdOpen] = useState(false)
 
   const { data: campaign, isLoading: isLoadingCampaign } = useCampaignWithWorld(id)
   const { data: items, isLoading: isLoadingItems } = useCampaignItems(id)
   const { data: characters, isLoading: isLoadingCharacters } = useCampaignCharacters(id)
+  const importItem = useImportMagicItem(id ?? '')
+  const importedSlugs = useMemo(
+    () => (items ?? []).map(it => it.source_slug).filter((s): s is string => s !== null),
+    [items],
+  )
 
   // Garbage-collect uncommitted drafts older than 30 minutes
   useEffect(() => {
@@ -113,38 +123,63 @@ export default function CampaignItemsPage() {
             Beheer alle magische items in deze kroniek. Maak items aan en wijs ze toe aan karakters.
           </p>
         </div>
-        <button
-          type="button"
-          onClick={() => navigate(`/campaigns/${id}/loot-generator`)}
-          style={{
-            flexShrink: 0,
-            display: 'inline-flex', alignItems: 'center', gap: 6,
-            padding: '8px 16px',
-            background: 'rgba(212,170,87,0.1)',
-            border: '1px solid rgba(212,170,87,0.3)',
-            borderRadius: 'var(--r-full)',
-            color: 'var(--gold)',
-            fontFamily: 'var(--font-body)', fontSize: 11, fontWeight: 700,
-            letterSpacing: '0.14em', textTransform: 'uppercase',
-            cursor: 'pointer',
-            transition: 'all var(--t-fast)',
-            whiteSpace: 'nowrap',
-          }}
-          onMouseEnter={e => {
-            e.currentTarget.style.background = 'rgba(212,170,87,0.18)'
-            e.currentTarget.style.borderColor = 'rgba(212,170,87,0.5)'
-          }}
-          onMouseLeave={e => {
-            e.currentTarget.style.background = 'rgba(212,170,87,0.1)'
-            e.currentTarget.style.borderColor = 'rgba(212,170,87,0.3)'
-          }}
-          aria-label="Open AI Buitgenerator"
-        >
-          <svg aria-hidden="true" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <path d="M12 2l2.4 7.4H22l-6.2 4.5 2.4 7.4L12 17l-6.2 4.3 2.4-7.4L2 9.4h7.6z" />
-          </svg>
-          AI Buitgenerator
-        </button>
+        <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+          <button
+            type="button"
+            onClick={() => setSrdOpen(true)}
+            style={{
+              flexShrink: 0, display: 'inline-flex', alignItems: 'center', gap: 6,
+              padding: '8px 16px',
+              background: 'rgba(56,152,255,0.08)',
+              border: '1px solid rgba(56,152,255,0.3)',
+              borderRadius: 'var(--r-full)',
+              color: 'var(--azure)',
+              fontFamily: 'var(--font-body)', fontSize: 11, fontWeight: 700,
+              letterSpacing: '0.14em', textTransform: 'uppercase',
+              cursor: 'pointer', transition: 'all var(--t-fast)', whiteSpace: 'nowrap',
+            }}
+            onMouseEnter={e => { e.currentTarget.style.background = 'rgba(56,152,255,0.15)' }}
+            onMouseLeave={e => { e.currentTarget.style.background = 'rgba(56,152,255,0.08)' }}
+            aria-label="Magische items importeren uit de SRD via Open5e"
+          >
+            <svg aria-hidden="true" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/>
+            </svg>
+            Importeer uit SRD
+          </button>
+          <button
+            type="button"
+            onClick={() => navigate(`/campaigns/${id}/loot-generator`)}
+            style={{
+              flexShrink: 0,
+              display: 'inline-flex', alignItems: 'center', gap: 6,
+              padding: '8px 16px',
+              background: 'rgba(212,170,87,0.1)',
+              border: '1px solid rgba(212,170,87,0.3)',
+              borderRadius: 'var(--r-full)',
+              color: 'var(--gold)',
+              fontFamily: 'var(--font-body)', fontSize: 11, fontWeight: 700,
+              letterSpacing: '0.14em', textTransform: 'uppercase',
+              cursor: 'pointer',
+              transition: 'all var(--t-fast)',
+              whiteSpace: 'nowrap',
+            }}
+            onMouseEnter={e => {
+              e.currentTarget.style.background = 'rgba(212,170,87,0.18)'
+              e.currentTarget.style.borderColor = 'rgba(212,170,87,0.5)'
+            }}
+            onMouseLeave={e => {
+              e.currentTarget.style.background = 'rgba(212,170,87,0.1)'
+              e.currentTarget.style.borderColor = 'rgba(212,170,87,0.3)'
+            }}
+            aria-label="Open AI Buitgenerator"
+          >
+            <svg aria-hidden="true" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M12 2l2.4 7.4H22l-6.2 4.5 2.4 7.4L12 17l-6.2 4.3 2.4-7.4L2 9.4h7.6z" />
+            </svg>
+            AI Buitgenerator
+          </button>
+        </div>
       </div>
 
       {/* Filter tabs */}
@@ -216,6 +251,15 @@ export default function CampaignItemsPage() {
           Geen items toegewezen aan dit karakter.
         </p>
       )}
+
+      <Modal open={srdOpen} onClose={() => setSrdOpen(false)} title="Magische items importeren uit de SRD" className="max-w-xl">
+        <CompendiumBrowser
+          kind="item"
+          onImport={data => importItem.mutate(data as Open5eMagicItem)}
+          importedSlugs={importedSlugs}
+          isPending={importItem.isPending}
+        />
+      </Modal>
     </div>
   )
 }

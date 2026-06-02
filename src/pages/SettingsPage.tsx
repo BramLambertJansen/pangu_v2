@@ -658,6 +658,33 @@ function OverTab() {
           </div>
         ))}
       </div>
+
+      {/* SRD Attribution */}
+      <div
+        style={{
+          maxWidth: 480,
+          width: '100%',
+          margin: '24px auto 0',
+          padding: '16px',
+          borderRadius: 10,
+          border: '1px solid var(--hairline)',
+          background: 'rgba(56,152,255,0.05)',
+          textAlign: 'left',
+        }}
+      >
+        <p style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.12em', textTransform: 'uppercase', color: 'var(--azure)', margin: '0 0 8px' }}>
+          Powered by Open5e · SRD-content
+        </p>
+        <p style={{ fontSize: 12, color: 'var(--ink-soft)', lineHeight: 1.6, margin: 0 }}>
+          Sommige content in PANGU is afkomstig van de{' '}
+          <abbr title="Systems Reference Document 5.1">SRD 5.1</abbr>
+          {' '}via <span style={{ color: 'var(--azure)' }}>Open5e</span>.
+          Deze content is beschikbaar onder de{' '}
+          <abbr title="Creative Commons Attribution 4.0 International">CC-BY-4.0</abbr>
+          {' '}licentie.
+          © Wizards of the Coast, gelicenseerd via de SRD 5.1.
+        </p>
+      </div>
     </div>
   )
 }

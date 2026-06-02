@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { toast } from 'sonner'
@@ -7,13 +7,17 @@ import { queryKeys } from '@/lib/queryKeys'
 import { Spinner } from '@/components/ui/Spinner'
 import { EmptyState } from '@/components/ui/EmptyState'
 import { Breadcrumbs } from '@/components/ui/Breadcrumbs'
+import { Modal } from '@/components/ui/Modal'
 import { BestiaryRow, ForgeBestiaryCard } from '@/components/bestiary/BestiaryCard'
 import { DmBestiaryPanel } from '@/components/bestiary/DmBestiaryPanel'
 import { WorldDetailDivider } from '@/components/world/WorldDetailDivider'
+import { CompendiumBrowser } from '@/components/compendium/CompendiumBrowser'
 import type { Bestiary } from '@/types/bestiary.types'
+import type { Open5eMonster } from '@/types/open5e.types'
 import { useAuthStore } from '@/stores/auth.store'
 import { useWorld } from '@/hooks/queries/useWorld'
 import { useWorldBestiaries } from '@/hooks/queries/useWorldBestiaries'
+import { useImportMonster } from '@/hooks/queries/useSrdSearch'
 
 export default function BestiariesPage() {
   const { id: worldId } = useParams<{ id: string }>()
@@ -22,9 +26,15 @@ export default function BestiariesPage() {
   const user = useAuthStore(s => s.user)
   const [creatingBestiary, setCreatingBestiary] = useState(false)
   const [selectedId, setSelectedId] = useState<string | null>(null)
+  const [srdOpen, setSrdOpen] = useState(false)
 
   const { data: world, isLoading: worldLoading } = useWorld(worldId)
   const { data: bestiaries, isLoading: bestiariesLoading } = useWorldBestiaries(worldId)
+  const importMonster = useImportMonster(worldId ?? '')
+  const importedSlugs = useMemo(
+    () => (bestiaries ?? []).map(b => b.source_slug).filter((s): s is string => s !== null),
+    [bestiaries],
+  )
 
   // Set first bestiary as selected when data loads
   useEffect(() => {
@@ -121,13 +131,47 @@ export default function BestiariesPage() {
       </div>
 
       {/* Page header */}
-      <header style={{ marginBottom: 32 }}>
-        <p className="pangu-eyebrow">Wereld — {world.name}</p>
-        <h1 className="pangu-display-xl">Bestiarium</h1>
-        <p style={{ marginTop: 8, fontSize: 14, color: 'var(--ink-soft)' }}>
-          Catalogiseer de wezens en monsters van deze wereld.
-        </p>
+      <header style={{ marginBottom: 32, display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 16, flexWrap: 'wrap' }}>
+        <div>
+          <p className="pangu-eyebrow">Wereld — {world.name}</p>
+          <h1 className="pangu-display-xl">Bestiarium</h1>
+          <p style={{ marginTop: 8, fontSize: 14, color: 'var(--ink-soft)' }}>
+            Catalogiseer de wezens en monsters van deze wereld.
+          </p>
+        </div>
+        <button
+          type="button"
+          onClick={() => setSrdOpen(true)}
+          style={{
+            flexShrink: 0, display: 'inline-flex', alignItems: 'center', gap: 6,
+            padding: '8px 16px',
+            background: 'rgba(56,152,255,0.08)',
+            border: '1px solid rgba(56,152,255,0.3)',
+            borderRadius: 'var(--r-full)',
+            color: 'var(--azure)',
+            fontFamily: 'var(--font-body)', fontSize: 11, fontWeight: 700,
+            letterSpacing: '0.14em', textTransform: 'uppercase',
+            cursor: 'pointer', transition: 'all var(--t-fast)', whiteSpace: 'nowrap',
+          }}
+          onMouseEnter={e => { e.currentTarget.style.background = 'rgba(56,152,255,0.15)' }}
+          onMouseLeave={e => { e.currentTarget.style.background = 'rgba(56,152,255,0.08)' }}
+          aria-label="Wezens importeren uit de SRD via Open5e"
+        >
+          <svg aria-hidden="true" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/>
+          </svg>
+          Importeer uit SRD
+        </button>
       </header>
+
+      <Modal open={srdOpen} onClose={() => setSrdOpen(false)} title="Wezens importeren uit de SRD" className="max-w-xl">
+        <CompendiumBrowser
+          kind="monster"
+          onImport={data => importMonster.mutate(data as Open5eMonster)}
+          importedSlugs={importedSlugs}
+          isPending={importMonster.isPending}
+        />
+      </Modal>
 
       <WorldDetailDivider label={`${committed.length} wezen${committed.length !== 1 ? 's' : ''}`} />
 

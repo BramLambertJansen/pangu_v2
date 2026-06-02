@@ -104,6 +104,18 @@ const baseNavItems = [
       </svg>
     ),
   },
+  {
+    to: '/spells',
+    label: 'Spreuken',
+    icon: (
+      <svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M15 3 C15 3 20 8 20 13 C20 16.31 17.31 19 14 19 L14 21 L10 21 L10 19 C6.69 19 4 16.31 4 13 C4 8 9 3 9 3 Z" />
+        <line x1="12" y1="3" x2="12" y2="7" />
+        <line x1="9" y1="3" x2="7" y2="6" />
+        <line x1="15" y1="3" x2="17" y2="6" />
+      </svg>
+    ),
+  },
 ]
 
 const adminNavItem = {
