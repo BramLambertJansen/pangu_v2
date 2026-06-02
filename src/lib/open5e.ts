@@ -169,6 +169,10 @@ export interface BestiaryInsert {
 function toStringList(val: unknown): string | null {
   if (!val) return null
   if (typeof val === 'string') return val || null
+  if (typeof val === 'object' && !Array.isArray(val)) {
+    const o = val as Record<string, unknown>
+    if (typeof o.as_string === 'string') return o.as_string || null
+  }
   if (Array.isArray(val)) {
     const parts = val.map(v => (typeof v === 'string' ? v : toStr(v))).filter(Boolean)
     return parts.length ? parts.join(', ') : null
@@ -188,8 +192,11 @@ function formatModifiers(val: unknown): string | null {
   if (!val) return null
   if (typeof val === 'string') return val || null
   if (typeof val === 'object' && !Array.isArray(val)) {
-    const parts = Object.entries(val as Record<string, number>)
-      .map(([k, v]) => `${k} ${v >= 0 ? '+' : ''}${v}`)
+    const o = val as Record<string, unknown>
+    if (typeof o.as_string === 'string') return o.as_string || null
+    const parts = Object.entries(o)
+      .filter(([, v]) => typeof v === 'number')
+      .map(([k, v]) => `${k} ${(v as number) >= 0 ? '+' : ''}${v}`)
     return parts.length ? parts.join(', ') : null
   }
   return null
@@ -228,8 +235,8 @@ export function mapMonsterToBestiary(
     alignment: monster.alignment || null,
     hit_dice: monster.hit_dice || null,
     proficiency_bonus: monster.proficiency_bonus ?? null,
-    senses: monster.senses || null,
-    languages: monster.languages || null,
+    senses: toStringList(monster.senses),
+    languages: toStringList(monster.languages),
     saving_throws: formatModifiers(monster.saving_throws),
     skills: formatModifiers(monster.skills),
     damage_immunities: toStringList(monster.damage_immunities),

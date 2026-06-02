@@ -18,6 +18,12 @@ export interface Open5eListResponse<T> {
 // /v2/creatures/ (was /v2/monsters/ in v1)
 // v2 restructured several fields: type is now a nested object,
 // ability scores moved to ability_scores, slug renamed to key.
+// Many list fields are returned as { as_string, data[] } objects.
+interface Open5eStringList {
+  as_string: string
+  data: Array<{ name: string; key: string; desc?: string }>
+}
+
 interface Open5eCreatureType {
   name: string
   key: string
@@ -57,14 +63,14 @@ export interface Open5eMonster {
   cr?: number
   proficiency_bonus?: number
   passive_perception: number
-  senses?: string
-  languages?: string
-  saving_throws?: string | Record<string, number>
-  skills?: string | Record<string, number>
-  damage_immunities?: string | string[]
-  damage_resistances?: string | string[]
-  damage_vulnerabilities?: string | string[]
-  condition_immunities?: string | Array<{ name: string } | string>
+  senses?: string | Open5eStringList
+  languages?: string | Open5eStringList
+  saving_throws?: string | Record<string, number> | Open5eStringList
+  skills?: string | Record<string, number> | Open5eStringList
+  damage_immunities?: string | string[] | Open5eStringList
+  damage_resistances?: string | string[] | Open5eStringList
+  damage_vulnerabilities?: string | string[] | Open5eStringList
+  condition_immunities?: string | Array<{ name: string } | string> | Open5eStringList
   desc?: string
   special_abilities?: Array<{ name: string; desc: string }>
   actions?: Array<{ name: string; desc: string }>
