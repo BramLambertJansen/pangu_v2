@@ -149,6 +149,12 @@ useEffect(() => {
   )
 }
 
+function strField(val: string | { slug: string; label: string } | undefined | null): string {
+  if (!val) return ''
+  if (typeof val === 'string') return val
+  return val.label || val.slug
+}
+
 function monsterMeta(m: Open5eMonster): string {
   const parts: string[] = []
   if (m.type) parts.push(m.type)
@@ -160,8 +166,10 @@ function monsterMeta(m: Open5eMonster): string {
 
 function itemMeta(i: Open5eMagicItem): string {
   const parts: string[] = []
-  if (i.type) parts.push(i.type)
-  if (i.rarity) parts.push(i.rarity)
+  const type = strField(i.type)
+  const rarity = strField(i.rarity)
+  if (type) parts.push(type)
+  if (rarity) parts.push(rarity)
   if (i.requires_attunement) parts.push('attunement')
   return parts.join(' · ')
 }
@@ -170,7 +178,8 @@ function spellMeta(s: Open5eSpell): string {
   const parts: string[] = []
   const level = typeof s.level === 'number' ? s.level : parseInt(String(s.level), 10)
   parts.push(level === 0 ? 'Kantrip' : `Niveau ${level}`)
-  if (s.school) parts.push(s.school)
+  const school = strField(s.school)
+  if (school) parts.push(school)
   if (s.casting_time) parts.push(s.casting_time)
   if (s.concentration) parts.push('Concentratie')
   return parts.join(' · ')

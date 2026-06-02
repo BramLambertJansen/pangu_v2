@@ -8,6 +8,19 @@ import type { SpellSchool } from '@/types/spell.types'
 
 export const SRD_SLUG = 'srd'
 
+// Open5e v2 returns some fields as { slug, label } objects instead of plain strings.
+function toStr(val: unknown): string {
+  if (val == null) return ''
+  if (typeof val === 'string') return val
+  if (typeof val === 'object') {
+    const o = val as Record<string, unknown>
+    if (typeof o.slug === 'string') return o.slug
+    if (typeof o.label === 'string') return o.label
+    if (typeof o.name === 'string') return o.name
+  }
+  return ''
+}
+
 async function fetchOpen5e<T>(endpoint: string, query: string): Promise<Open5eListResponse<T>> {
   const params = new URLSearchParams({
     path: endpoint,
@@ -49,9 +62,9 @@ export function mapSpeed(speed: Record<string, number | string> | undefined | nu
 }
 
 // Open5e magic item type string → Pangu ItemType
-export function mapItemType(type: string | undefined | null): ItemType {
-  if (!type) return 'misc'
-  const lower = type.toLowerCase()
+export function mapItemType(type: unknown): ItemType {
+  const lower = toStr(type).toLowerCase()
+  if (!lower) return 'misc'
   if (lower.includes('weapon')) return 'weapon'
   if (lower.includes('armor') || lower.includes('armour') || lower.includes('shield')) return 'armor'
   if (lower.includes('potion') || lower.includes('oil')) return 'potion'
@@ -65,9 +78,9 @@ export function mapItemType(type: string | undefined | null): ItemType {
 }
 
 // Open5e rarity string (any casing/spacing) → Pangu ItemRarity
-export function mapItemRarity(rarity: string | undefined | null): ItemRarity {
-  if (!rarity) return 'common'
-  const key = rarity.toLowerCase().replace(/\s+/g, '_')
+export function mapItemRarity(rarity: unknown): ItemRarity {
+  const key = toStr(rarity).toLowerCase().replace(/\s+/g, '_')
+  if (!key) return 'common'
   const mapping: Record<string, ItemRarity> = {
     common: 'common',
     uncommon: 'uncommon',
@@ -140,8 +153,8 @@ const VALID_SCHOOLS: SpellSchool[] = [
   'evocation', 'illusion', 'necromancy', 'transmutation',
 ]
 
-export function mapSpellSchool(school: string | undefined | null): SpellSchool {
-  const normalized = school?.toLowerCase().trim() ?? ''
+export function mapSpellSchool(school: unknown): SpellSchool {
+  const normalized = toStr(school).toLowerCase().trim()
   return VALID_SCHOOLS.find(s => s === normalized) ?? 'evocation'
 }
 

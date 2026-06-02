@@ -45,12 +45,13 @@ export interface Open5eMonster {
 }
 
 // /v2/magicitems/
+// Note: v2 may return type/rarity as { slug, label } objects instead of plain strings.
 export interface Open5eMagicItem {
   slug: string
   name: string
   document: Open5eDocument
-  type: string
-  rarity: string
+  type: string | { slug: string; label: string }
+  rarity: string | { slug: string; label: string }
   requires_attunement: string
   desc: string
 }
@@ -60,7 +61,7 @@ export interface Open5eSpell {
   slug: string
   name: string
   document: Open5eDocument
-  school: string
+  school: string | { slug: string; label: string }
   level: number
   casting_time: string
   range: string
