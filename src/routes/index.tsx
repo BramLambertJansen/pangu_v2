@@ -51,6 +51,7 @@ const FactionsPage = lazy(() => import('@/pages/FactionsPage'))
 const FactionDetailPage = lazy(() => import('@/pages/FactionDetailPage'))
 const FactionEditPage = lazy(() => import('@/pages/FactionEditPage'))
 const SpellsPage = lazy(() => import('@/pages/SpellsPage'))
+const ItemsPage = lazy(() => import('@/pages/ItemsPage'))
 
 function wrap(Page: React.ComponentType) {
   return (
@@ -288,6 +289,11 @@ export const router = createBrowserRouter([
         path: '/spells',
         loader: requireAuth,
         element: wrap(SpellsPage),
+      },
+      {
+        path: '/items',
+        loader: requireAuth,
+        element: wrap(ItemsPage),
       },
       { path: '*', element: <RouteErrorPage /> },
     ],
