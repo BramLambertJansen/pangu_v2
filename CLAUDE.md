@@ -1091,3 +1091,10 @@ npm run test         # Vitest
 - [x] `src/routes/index.tsx` — `/spells` route (lazy SpellsPage, requireAuth)
 - [x] `src/layouts/AppLayout.tsx` — "Spreuken" nav-item toegevoegd (na Karakters)
 - [x] `src/test/open5e-mappers.test.ts` — `mapSpellSchool` (alle 8 scholen + fallback) + `mapSpellToSpell` tests uitgebreid (niveau 0, concentratie, ritueel, klassen-parsing, lege klassen)
+
+### SRD-Compendium (Open5e import) — Fase C: Karakter-spreuklijst
+- [x] Migratie `043_character_spells.sql` — `character_spells` junction tabel (character_id FK, spell_id FK, prepared bool); RLS op karakter-eigenaarschap; unique index op `(character_id, spell_id)`
+- [x] `src/types/database.types.ts` — `character_spells` tabel (Row/Insert/Update) toegevoegd
+- [x] `src/lib/queryKeys.ts` — `characters.spells(characterId)` query key toegevoegd
+- [x] `src/hooks/queries/useCharacterSpells.ts` — `useCharacterSpells(characterId)` (met geneste spell-join), `useAddCharacterSpell`, `useRemoveCharacterSpell`, `useToggleSpellPrepared`
+- [x] `src/pages/CharacterDetailPage.tsx` — Spreuken-tab uitgebreid met: spreukpicker (selecteer uit bibliotheek), "Gekende Spreuken"-lijst met voorbereid-toggle (✦/○ pip), uitklapbare beschrijving + hogere-niveaus tekst, verwijderknop per spreuk

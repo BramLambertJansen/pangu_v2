@@ -45,6 +45,7 @@ export const queryKeys = {
     detail: (id: string) => ['characters', id] as const,
     byCampaign: (campaignId: string) => ['characters', 'campaign', campaignId] as const,
     items: (characterId: string) => ['characters', characterId, 'items'] as const,
+    spells: (characterId: string) => ['characters', characterId, 'spells'] as const,
   },
   items: {
     byCampaign: (campaignId: string) => ['items', 'campaign', campaignId] as const,

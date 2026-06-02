@@ -1112,6 +1112,43 @@ export type Database = {
         }
         Relationships: []
       }
+      character_spells: {
+        Row: {
+          id: string
+          character_id: string
+          spell_id: string
+          prepared: boolean
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          character_id: string
+          spell_id: string
+          prepared?: boolean
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          character_id?: string
+          spell_id?: string
+          prepared?: boolean
+          created_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: 'character_spells_character_id_fkey'
+            columns: ['character_id']
+            referencedRelation: 'characters'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'character_spells_spell_id_fkey'
+            columns: ['spell_id']
+            referencedRelation: 'spells'
+            referencedColumns: ['id']
+          }
+        ]
+      }
     }
     Views: {
       [_ in never]: never
