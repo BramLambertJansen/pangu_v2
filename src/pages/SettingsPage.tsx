@@ -1,14 +1,19 @@
 import { useState, useId, useRef } from 'react'
 import { CompassRose } from '@/components/world/CompassRose'
 import { Spinner } from '@/components/ui/Spinner'
+import { Button } from '@/components/ui/Button'
+import { UserTable } from '@/components/admin/UserTable'
+import { CreateUserModal } from '@/components/admin/CreateUserModal'
 import { useMutation } from '@tanstack/react-query'
 import { toast } from 'sonner'
 import { supabase } from '@/lib/supabase'
 import { useAuthStore } from '@/stores/auth.store'
 import { usePreferencesStore, type PreferencesLanguage } from '@/stores/preferences.store'
 import { useUserAISettings, useSetByokKey } from '@/hooks/queries/useUserAISettings'
+import { useAI } from '@/hooks/useAI'
+import type { Provider } from '@/types/ai'
 
-type Tab = 'profile' | 'prefs' | 'ai' | 'about'
+type Tab = 'profile' | 'prefs' | 'ai' | 'about' | 'pangu'
 
 interface ProfileForm {
   display_name: string
@@ -689,16 +694,101 @@ function OverTab() {
   )
 }
 
+// ── Pangu tab (admin-only) ────────────────────────────────
+
+const PROVIDER_LABELS: Record<Provider, string> = {
+  groq: 'Groq', gemini: 'Gemini', anthropic: 'Anthropic', openai: 'OpenAI',
+}
+const PROVIDER_COLORS: Record<Provider, string> = {
+  groq: 'var(--teal)', gemini: 'var(--azure)', anthropic: 'var(--violet)', openai: 'var(--gold)',
+}
+interface AITestResult { reply: string; provider: Provider; model: string; windowRemaining: number | null }
+
+function PanguTab() {
+  const [createOpen, setCreateOpen] = useState(false)
+  const [testResult, setTestResult] = useState<AITestResult | null>(null)
+  const { ask, loading, lastProvider, lastModel, windowRemaining } = useAI()
+
+  async function handleTestAI() {
+    setTestResult(null)
+    try {
+      const reply = await ask([{ role: 'user', content: 'Reageer in het Nederlands. Zeg in één zin welke AI-provider en model je bent, en geef een kort D&D-gezegde.' }])
+      if (lastProvider && lastModel) {
+        setTestResult({ reply, provider: lastProvider, model: lastModel, windowRemaining })
+      }
+      toast.success('AI-test geslaagd')
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : 'AI-test mislukt')
+    }
+  }
+
+  return (
+    <div className="flex flex-col gap-6">
+      {/* Accountbeheer section */}
+      <div>
+        <div className="flex items-center justify-between gap-4" style={{ marginBottom: 16 }}>
+          <div>
+            <p className="pangu-section-title" style={{ marginBottom: 2 }}>Accountbeheer</p>
+            <p style={{ fontSize: 13, color: 'var(--muted)' }}>Overzicht en beheer van alle accounts</p>
+          </div>
+          <Button onClick={() => setCreateOpen(true)} size="sm">
+            Nieuw account
+          </Button>
+        </div>
+        <UserTable />
+        <CreateUserModal open={createOpen} onClose={() => setCreateOpen(false)} />
+      </div>
+
+      {/* AI integration test section */}
+      <div className="pangu-surface" style={{ padding: 24 }}>
+        <div className="flex flex-wrap items-center justify-between gap-3" style={{ marginBottom: 16 }}>
+          <div>
+            <p className="pangu-section-title" style={{ marginBottom: 2 }}>AI-integratie</p>
+            <p style={{ fontSize: 13, color: 'var(--muted)' }}>Test de cascaderende AI-providers (Groq → Gemini)</p>
+          </div>
+          <Button
+            variant="secondary"
+            size="sm"
+            loading={loading}
+            onClick={handleTestAI}
+            aria-label="Test AI-verbinding"
+          >
+            {loading ? 'Bezig…' : 'Test Gemini / Groq'}
+          </Button>
+        </div>
+        {testResult && (
+          <div className="rounded-lg p-4 space-y-3" style={{ background: 'var(--surface-2)', border: '1px solid var(--hairline)' }} role="status" aria-live="polite">
+            <div className="flex flex-wrap items-center gap-2">
+              <span className="rounded-full px-2.5 py-0.5 text-xs font-semibold" style={{ background: `color-mix(in srgb, ${PROVIDER_COLORS[testResult.provider]} 15%, transparent)`, color: PROVIDER_COLORS[testResult.provider], border: `1px solid color-mix(in srgb, ${PROVIDER_COLORS[testResult.provider]} 35%, transparent)` }}>
+                {PROVIDER_LABELS[testResult.provider]}
+              </span>
+              <span className="text-xs" style={{ color: 'var(--muted)' }}>{testResult.model}</span>
+              {testResult.windowRemaining !== null && testResult.windowRemaining >= 0 && (
+                <span className="ml-auto text-xs" style={{ color: 'var(--subtle)' }}>
+                  {testResult.windowRemaining} verzoek{testResult.windowRemaining !== 1 ? 'en' : ''} resterend
+                </span>
+              )}
+            </div>
+            <p className="text-sm leading-relaxed" style={{ color: 'var(--ink-soft)' }}>{testResult.reply}</p>
+          </div>
+        )}
+      </div>
+    </div>
+  )
+}
+
 // ── Settings page ─────────────────────────────────────────
 
 export default function SettingsPage() {
+  const profile = useAuthStore(s => s.profile)
   const [activeTab, setActiveTab] = useState<Tab>('profile')
 
-  const tabs: { id: Tab; label: string }[] = [
+  const tabs: { id: Tab; label: string; special?: boolean }[] = [
     { id: 'profile', label: 'Profiel' },
     { id: 'prefs', label: 'Voorkeuren' },
     { id: 'ai', label: 'AI' },
     { id: 'about', label: 'Over' },
+    ...(profile?.role === 'admin' ? [{ id: 'pangu' as Tab, label: 'Pangu', special: true }] : []),
   ]
 
   return (
@@ -725,7 +815,11 @@ export default function SettingsPage() {
               onClick={() => setActiveTab(tab.id)}
               type="button"
               className="pangu-tab"
+              style={tab.special ? { color: activeTab === tab.id ? 'var(--violet)' : 'color-mix(in srgb, var(--violet) 60%, var(--muted))' } : undefined}
             >
+              {tab.special && (
+                <span aria-hidden="true" style={{ display: 'inline-block', width: 6, height: 6, borderRadius: '50%', background: 'var(--violet)', marginRight: 6, verticalAlign: 'middle', opacity: 0.8 }} />
+              )}
               {tab.label}
             </button>
           ))}
@@ -742,6 +836,7 @@ export default function SettingsPage() {
         {activeTab === 'prefs' && <VoorkeurenTab />}
         {activeTab === 'ai' && <AISleutelsTab />}
         {activeTab === 'about' && <OverTab />}
+        {activeTab === 'pangu' && <PanguTab />}
       </div>
     </div></div>
   )
