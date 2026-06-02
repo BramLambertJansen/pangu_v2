@@ -1,7 +1,6 @@
 import { useState, useEffect, useId } from 'react'
 import { Spinner } from '@/components/ui/Spinner'
 import { useSrdMonsterSearch, useSrdItemSearch, useSrdSpellSearch } from '@/hooks/queries/useSrdSearch'
-import { DEV_MODE } from '@/lib/constants'
 import type { Open5eMonster, Open5eMagicItem, Open5eSpell } from '@/types/open5e.types'
 
 export type SrdKind = 'monster' | 'item' | 'spell'
@@ -19,20 +18,7 @@ export function CompendiumBrowser({ kind, onImport, importedSlugs, isPending }: 
   const [debouncedQuery, setDebouncedQuery] = useState('')
   const inputId = useId()
 
-  if (DEV_MODE) {
-    return (
-      <div style={{ padding: '24px 0', textAlign: 'center' }}>
-        <p style={{ color: 'var(--muted)', fontSize: 14, marginBottom: 8 }}>
-          SRD-compendium is niet beschikbaar in dev-modus.
-        </p>
-        <p style={{ color: 'var(--subtle)', fontSize: 12 }}>
-          De Open5e API vereist een actieve internetverbinding. Schakel dev-modus uit om te importeren.
-        </p>
-      </div>
-    )
-  }
-
-  useEffect(() => {
+useEffect(() => {
     const t = setTimeout(() => setDebouncedQuery(query.trim()), 400)
     return () => clearTimeout(t)
   }, [query])

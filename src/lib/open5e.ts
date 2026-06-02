@@ -6,15 +6,16 @@ import type { BestiaryStatus } from '@/types/bestiary.types'
 import type { ItemType, ItemRarity } from '@/types/item.types'
 import type { SpellSchool } from '@/types/spell.types'
 
-const BASE_URL = 'https://api.open5e.com/v2'
 export const SRD_SLUG = 'srd'
 
 async function fetchOpen5e<T>(endpoint: string, query: string): Promise<Open5eListResponse<T>> {
-  const url = new URL(`${BASE_URL}${endpoint}`)
-  url.searchParams.set('document__slug', SRD_SLUG)
-  url.searchParams.set('limit', '20')
-  url.searchParams.set('name__icontains', query)
-  const res = await fetch(url.toString())
+  const params = new URLSearchParams({
+    path: endpoint,
+    document__slug: SRD_SLUG,
+    limit: '20',
+    name__icontains: query,
+  })
+  const res = await fetch(`/api/open5e?${params}`)
   if (!res.ok) throw new Error(`Open5e: ${res.status} ${res.statusText}`)
   return res.json() as Promise<Open5eListResponse<T>>
 }
