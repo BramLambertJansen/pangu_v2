@@ -5,7 +5,7 @@ import { queryKeys } from '@/lib/queryKeys'
 import { Spinner } from '@/components/ui/Spinner'
 import { Breadcrumb } from '@/components/ui/Breadcrumb'
 import { WorldDetailDivider } from '@/components/world/WorldDetailDivider'
-import type { BestiaryWithWorld, BestiaryStatus } from '@/types/bestiary.types'
+import type { BestiaryWithWorld, BestiaryStatus, BestiaryAction } from '@/types/bestiary.types'
 
 const statusLabel: Record<BestiaryStatus, string> = {
   draft:    'Concept',
@@ -289,6 +289,76 @@ export default function BestiaryDetailPage() {
           </div>
         </div>
       </div>
+
+      {/* Combat sections */}
+      {(['special_abilities', 'actions', 'bonus_actions', 'reactions'] as const).map(section => {
+        const entries = bestiary[section] as BestiaryAction[] | null
+        if (!entries?.length) return null
+        const labels: Record<string, string> = {
+          special_abilities: 'Speciale Eigenschappen',
+          actions: 'Acties',
+          bonus_actions: 'Bonusacties',
+          reactions: 'Reacties',
+        }
+        return (
+          <div key={section}>
+            <WorldDetailDivider label={labels[section]} />
+            <div className="pangu-surface" style={{ padding: 24, display: 'flex', flexDirection: 'column', gap: 16 }}>
+              {entries.map((entry, i) => (
+                <div key={i}>
+                  <p style={{ margin: '0 0 4px', fontSize: 14, fontWeight: 700, color: 'var(--ink)' }}>
+                    <em>{entry.name}.</em>
+                  </p>
+                  <p style={{ margin: 0, fontSize: 14, lineHeight: 1.7, color: 'var(--ink-soft)', whiteSpace: 'pre-wrap' }}>
+                    {entry.desc}
+                  </p>
+                </div>
+              ))}
+            </div>
+          </div>
+        )
+      })}
+
+      {(bestiary.legendary_actions?.length || bestiary.legendary_desc) && (
+        <div>
+          <WorldDetailDivider label="Legendarische Acties" />
+          <div className="pangu-surface" style={{ padding: 24, display: 'flex', flexDirection: 'column', gap: 16 }}>
+            {bestiary.legendary_desc && (
+              <p style={{ margin: 0, fontSize: 14, lineHeight: 1.7, color: 'var(--ink-soft)', fontStyle: 'italic' }}>
+                {bestiary.legendary_desc}
+              </p>
+            )}
+            {(bestiary.legendary_actions as BestiaryAction[] | null)?.map((entry, i) => (
+              <div key={i}>
+                <p style={{ margin: '0 0 4px', fontSize: 14, fontWeight: 700, color: 'var(--ink)' }}>
+                  <em>{entry.name}.</em>
+                </p>
+                <p style={{ margin: 0, fontSize: 14, lineHeight: 1.7, color: 'var(--ink-soft)', whiteSpace: 'pre-wrap' }}>
+                  {entry.desc}
+                </p>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {(bestiary.lair_actions as BestiaryAction[] | null)?.length && (
+        <div>
+          <WorldDetailDivider label="Hol Acties" />
+          <div className="pangu-surface" style={{ padding: 24, display: 'flex', flexDirection: 'column', gap: 16 }}>
+            {(bestiary.lair_actions as BestiaryAction[]).map((entry, i) => (
+              <div key={i}>
+                <p style={{ margin: '0 0 4px', fontSize: 14, fontWeight: 700, color: 'var(--ink)' }}>
+                  <em>{entry.name}.</em>
+                </p>
+                <p style={{ margin: 0, fontSize: 14, lineHeight: 1.7, color: 'var(--ink-soft)', whiteSpace: 'pre-wrap' }}>
+                  {entry.desc}
+                </p>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
 
       {/* Description */}
       <WorldDetailDivider label="Beschrijving" />

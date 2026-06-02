@@ -143,33 +143,13 @@ export interface BestiaryInsert {
   stat_cha: number
   source: string
   source_slug: string
-}
-
-function buildMonsterDescription(monster: Open5eMonster): string | null {
-  const sections: string[] = []
-
-  if (monster.desc) sections.push(monster.desc)
-
-  const addSection = (title: string, entries: Array<{ name: string; desc: string }> | undefined) => {
-    if (!entries?.length) return
-    sections.push(`**${title}**`)
-    entries.forEach(e => sections.push(`*${e.name}.* ${e.desc}`))
-  }
-
-  addSection('Speciale Eigenschappen', monster.special_abilities)
-  addSection('Acties', monster.actions)
-  addSection('Bonusacties', monster.bonus_actions)
-  addSection('Reacties', monster.reactions)
-
-  if (monster.legendary_desc || monster.legendary_actions?.length) {
-    sections.push('**Legendarische Acties**')
-    if (monster.legendary_desc) sections.push(monster.legendary_desc)
-    monster.legendary_actions?.forEach(e => sections.push(`*${e.name}.* ${e.desc}`))
-  }
-
-  addSection('Hol Acties', monster.lair_actions)
-
-  return sections.length ? sections.join('\n\n') : null
+  special_abilities: Array<{ name: string; desc: string }> | null
+  actions: Array<{ name: string; desc: string }> | null
+  bonus_actions: Array<{ name: string; desc: string }> | null
+  reactions: Array<{ name: string; desc: string }> | null
+  legendary_desc: string | null
+  legendary_actions: Array<{ name: string; desc: string }> | null
+  lair_actions: Array<{ name: string; desc: string }> | null
 }
 
 export function mapMonsterToBestiary(
@@ -187,7 +167,7 @@ export function mapMonsterToBestiary(
     creature_type: toStr(monster.type) || null,
     threat_level: mapChallengeRating(monster.challenge_rating ?? monster.cr),
     habitat: null,
-    description: buildMonsterDescription(monster),
+    description: monster.desc || null,
     notes: null,
     status: 'active',
     committed: true,
@@ -202,6 +182,13 @@ export function mapMonsterToBestiary(
     stat_cha: monster.charisma ?? ab?.charisma ?? 10,
     source: edition === '2024' ? 'srd-2024' : 'srd',
     source_slug: monster.key ?? monster.slug ?? '',
+    special_abilities: monster.special_abilities?.length ? monster.special_abilities : null,
+    actions: monster.actions?.length ? monster.actions : null,
+    bonus_actions: monster.bonus_actions?.length ? monster.bonus_actions : null,
+    reactions: monster.reactions?.length ? monster.reactions : null,
+    legendary_desc: monster.legendary_desc || null,
+    legendary_actions: monster.legendary_actions?.length ? monster.legendary_actions : null,
+    lair_actions: monster.lair_actions?.length ? monster.lair_actions : null,
   }
 }
 
