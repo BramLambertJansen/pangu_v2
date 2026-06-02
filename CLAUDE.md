@@ -1075,3 +1075,19 @@ npm run test         # Vitest
 - [x] `src/pages/SettingsPage.tsx` — SRD/Open5e attributieblok in de "Over"-tab
 - [x] `src/test/open5e-mappers.test.ts` — 28 unit tests voor alle mappers en hulpfuncties (geen netwerkcalls)
 - Attentie: Open5e V2 CORS werkt client-side; geen proxy nodig. SRD-document-slug is `'srd'` (5.1 CC-BY-4.0); wijzig `SRD_SLUG` in `open5e.ts` voor 5.2.
+
+### SRD-Compendium (Open5e import) — Fase B: Spreukenbibliotheek
+- [x] Migratie `042_spells.sql` — `spells` tabel (user-scoped): id, user_id, name, level (0-9), school, casting_time, range, components, duration, concentration, ritual, description, higher_level, classes text[], source, source_slug; RLS owner-only; unique index op `(user_id, source_slug) WHERE source_slug IS NOT NULL`
+- [x] `src/types/spell.types.ts` — `SpellSchool` union (8 scholen) + `Spell` interface
+- [x] `src/types/database.types.ts` — `spells` tabel (Row/Insert/Update) toegevoegd
+- [x] `src/lib/statusMaps.ts` — `spellSchoolLabel` (Dutch) + `spellSchoolColor` (8 scholen, elk een eigen kleur)
+- [x] `src/utils/pickGradient.ts` — `spellGradients` palet (violet/azure arcane theme, 4 varianten)
+- [x] `src/lib/queryKeys.ts` — `spells.all` + `spells.detail(id)` query keys
+- [x] `src/lib/open5e.ts` — `mapSpellSchool()` + `mapSpellToSpell()` mapper toegevoegd
+- [x] `src/hooks/queries/useSpells.ts` — `useSpells()` (alle spreuken van de user, gesorteerd op level + name) + `useDeleteSpell()` (met cache-invalidatie + toast)
+- [x] `src/hooks/queries/useSrdSearch.ts` — `useSrdSpellSearch(query)` + `useImportSpell()` mutatie met dedup-check + Sonner-feedback; `CompendiumBrowser` kind uitgebreid met `'spell'`
+- [x] `src/components/spell/SpellCard.tsx` — compact card: school-kleur, level-label (Kantrip/Niveau X), C/R/SRD badges, casting time/range/duration rij, klassen-rij, delete-knop
+- [x] `src/pages/SpellsPage.tsx` — spreukbibliotheek met level- en school-filters, grid van SpellCards, "Importeer uit SRD"-knop, EmptyState, ConfirmDialog voor verwijderen
+- [x] `src/routes/index.tsx` — `/spells` route (lazy SpellsPage, requireAuth)
+- [x] `src/layouts/AppLayout.tsx` — "Spreuken" nav-item toegevoegd (na Karakters)
+- [x] `src/test/open5e-mappers.test.ts` — `mapSpellSchool` (alle 8 scholen + fallback) + `mapSpellToSpell` tests uitgebreid (niveau 0, concentratie, ritueel, klassen-parsing, lege klassen)

@@ -2,12 +2,14 @@ import { describe, it, expect } from 'vitest'
 import {
   mapMonsterToBestiary,
   mapMagicItemToItem,
+  mapSpellToSpell,
   mapChallengeRating,
   mapSpeed,
   mapItemType,
   mapItemRarity,
+  mapSpellSchool,
 } from '@/lib/open5e'
-import type { Open5eMonster, Open5eMagicItem } from '@/types/open5e.types'
+import type { Open5eMonster, Open5eMagicItem, Open5eSpell } from '@/types/open5e.types'
 
 const mockDoc = { name: 'SRD', key: 'srd', display_name: 'SRD', permalink: '' }
 
@@ -175,6 +177,90 @@ describe('mapMonsterToBestiary', () => {
   it('handles fractional CR', () => {
     const result = mapMonsterToBestiary({ ...owlbear, challenge_rating: '1/2' }, 'w', 'u')
     expect(result.threat_level).toBe('CR 1/2')
+  })
+})
+
+const fireball: Open5eSpell = {
+  slug: 'fireball',
+  name: 'Fireball',
+  document: mockDoc,
+  school: 'evocation',
+  level: 3,
+  casting_time: '1 action',
+  range: '150 feet',
+  components: 'V, S, M (a tiny ball of bat guano and sulfur)',
+  duration: 'Instantaneous',
+  concentration: false,
+  ritual: false,
+  desc: 'A bright streak flashes from your pointing finger...',
+  higher_level: 'When you cast this spell using a slot of 4th level or higher...',
+  dnd_class: 'Sorcerer, Wizard',
+}
+
+describe('mapSpellSchool', () => {
+  it('maps each school case-insensitively', () => {
+    expect(mapSpellSchool('evocation')).toBe('evocation')
+    expect(mapSpellSchool('Evocation')).toBe('evocation')
+    expect(mapSpellSchool('NECROMANCY')).toBe('necromancy')
+    expect(mapSpellSchool('transmutation')).toBe('transmutation')
+  })
+  it('falls back to evocation for unknown school', () => {
+    expect(mapSpellSchool('unknown')).toBe('evocation')
+    expect(mapSpellSchool(null)).toBe('evocation')
+  })
+  it('maps all 8 schools', () => {
+    const schools = ['abjuration', 'conjuration', 'divination', 'enchantment', 'evocation', 'illusion', 'necromancy', 'transmutation']
+    for (const school of schools) {
+      expect(mapSpellSchool(school)).toBe(school)
+    }
+  })
+})
+
+describe('mapSpellToSpell', () => {
+  it('maps core fields correctly', () => {
+    const result = mapSpellToSpell(fireball, 'user-1')
+    expect(result.name).toBe('Fireball')
+    expect(result.user_id).toBe('user-1')
+    expect(result.level).toBe(3)
+    expect(result.school).toBe('evocation')
+    expect(result.casting_time).toBe('1 action')
+    expect(result.range).toBe('150 feet')
+    expect(result.duration).toBe('Instantaneous')
+    expect(result.concentration).toBe(false)
+    expect(result.ritual).toBe(false)
+    expect(result.source).toBe('srd')
+    expect(result.source_slug).toBe('fireball')
+  })
+
+  it('maps classes from comma-separated string', () => {
+    const result = mapSpellToSpell(fireball, 'u')
+    expect(result.classes).toEqual(['Sorcerer', 'Wizard'])
+  })
+
+  it('maps description and higher_level', () => {
+    const result = mapSpellToSpell(fireball, 'u')
+    expect(result.description).toContain('bright streak')
+    expect(result.higher_level).toContain('4th level')
+  })
+
+  it('handles cantrip (level 0)', () => {
+    const result = mapSpellToSpell({ ...fireball, level: 0 }, 'u')
+    expect(result.level).toBe(0)
+  })
+
+  it('handles concentration spell', () => {
+    const result = mapSpellToSpell({ ...fireball, concentration: true }, 'u')
+    expect(result.concentration).toBe(true)
+  })
+
+  it('handles ritual spell', () => {
+    const result = mapSpellToSpell({ ...fireball, ritual: true }, 'u')
+    expect(result.ritual).toBe(true)
+  })
+
+  it('handles empty dnd_class', () => {
+    const result = mapSpellToSpell({ ...fireball, dnd_class: '' }, 'u')
+    expect(result.classes).toEqual([])
   })
 })
 

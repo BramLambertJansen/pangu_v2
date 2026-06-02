@@ -1,0 +1,158 @@
+import { useState, useMemo } from 'react'
+import { Spinner } from '@/components/ui/Spinner'
+import { EmptyState } from '@/components/ui/EmptyState'
+import { Modal } from '@/components/ui/Modal'
+import { ConfirmDialog } from '@/components/ui/ConfirmDialog'
+import { SpellCard } from '@/components/spell/SpellCard'
+import { CompendiumBrowser } from '@/components/compendium/CompendiumBrowser'
+import { useSpells, useDeleteSpell } from '@/hooks/queries/useSpells'
+import { useImportSpell } from '@/hooks/queries/useSrdSearch'
+import type { Open5eSpell } from '@/types/open5e.types'
+import type { SpellSchool } from '@/types/spell.types'
+import { spellSchoolLabel } from '@/lib/statusMaps'
+
+const ALL_SCHOOLS: SpellSchool[] = [
+  'abjuration', 'conjuration', 'divination', 'enchantment',
+  'evocation', 'illusion', 'necromancy', 'transmutation',
+]
+
+export default function SpellsPage() {
+  const { data: spells, isLoading } = useSpells()
+  const deleteSpell = useDeleteSpell()
+  const importSpell = useImportSpell()
+  const [srdOpen, setSrdOpen] = useState(false)
+  const [deleteId, setDeleteId] = useState<string | null>(null)
+  const [schoolFilter, setSchoolFilter] = useState<SpellSchool | 'all'>('all')
+  const [levelFilter, setLevelFilter] = useState<number | 'all'>('all')
+
+  const importedSlugs = useMemo(
+    () => (spells ?? []).map(s => s.source_slug).filter((s): s is string => s !== null),
+    [spells],
+  )
+
+  const filtered = useMemo(() => {
+    let list = spells ?? []
+    if (schoolFilter !== 'all') list = list.filter(s => s.school === schoolFilter)
+    if (levelFilter !== 'all') list = list.filter(s => s.level === levelFilter)
+    return list
+  }, [spells, schoolFilter, levelFilter])
+
+  const spellToDelete = spells?.find(s => s.id === deleteId)
+
+  return (
+    <div>
+      {/* Page header */}
+      <div style={{ marginBottom: 32, display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 16, flexWrap: 'wrap' }}>
+        <div>
+          <p className="pangu-eyebrow">Persoonlijke bibliotheek</p>
+          <h1 className="pangu-display-xl">Spreuken</h1>
+          <p style={{ marginTop: 8, fontSize: 14, color: 'var(--ink-soft)' }}>
+            Importeer spreuken uit de SRD en bouw je spreukbibliotheek.
+          </p>
+        </div>
+        <button
+          type="button"
+          onClick={() => setSrdOpen(true)}
+          style={{
+            flexShrink: 0, display: 'inline-flex', alignItems: 'center', gap: 6,
+            padding: '8px 16px',
+            background: 'rgba(155,138,255,0.08)',
+            border: '1px solid rgba(155,138,255,0.3)',
+            borderRadius: 'var(--r-full)',
+            color: 'var(--violet)',
+            fontFamily: 'var(--font-body)', fontSize: 11, fontWeight: 700,
+            letterSpacing: '0.14em', textTransform: 'uppercase',
+            cursor: 'pointer', transition: 'all var(--t-fast)', whiteSpace: 'nowrap',
+          }}
+          onMouseEnter={e => { e.currentTarget.style.background = 'rgba(155,138,255,0.15)' }}
+          onMouseLeave={e => { e.currentTarget.style.background = 'rgba(155,138,255,0.08)' }}
+          aria-label="Spreuken importeren uit de SRD via Open5e"
+        >
+          <svg aria-hidden="true" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/>
+          </svg>
+          Importeer uit SRD
+        </button>
+      </div>
+
+      {/* Filters */}
+      {!isLoading && (spells?.length ?? 0) > 0 && (
+        <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginBottom: 20 }}>
+          <select
+            value={levelFilter}
+            onChange={e => setLevelFilter(e.target.value === 'all' ? 'all' : Number(e.target.value))}
+            aria-label="Filteren op niveau"
+            style={{ padding: '6px 10px', borderRadius: 6, border: '1px solid var(--hairline)', background: 'var(--surface-2)', color: 'var(--ink)', fontSize: 12, cursor: 'pointer' }}
+          >
+            <option value="all">Alle niveaus</option>
+            <option value="0">Kantrippen</option>
+            {[1,2,3,4,5,6,7,8,9].map(l => <option key={l} value={l}>Niveau {l}</option>)}
+          </select>
+          <select
+            value={schoolFilter}
+            onChange={e => setSchoolFilter(e.target.value as SpellSchool | 'all')}
+            aria-label="Filteren op spreukschool"
+            style={{ padding: '6px 10px', borderRadius: 6, border: '1px solid var(--hairline)', background: 'var(--surface-2)', color: 'var(--ink)', fontSize: 12, cursor: 'pointer' }}
+          >
+            <option value="all">Alle scholen</option>
+            {ALL_SCHOOLS.map(s => <option key={s} value={s}>{spellSchoolLabel[s]}</option>)}
+          </select>
+        </div>
+      )}
+
+      {/* Content */}
+      {isLoading ? (
+        <div style={{ display: 'flex', justifyContent: 'center', padding: '60px 0' }} aria-live="polite" aria-busy="true">
+          <Spinner size="lg" />
+        </div>
+      ) : (spells?.length ?? 0) === 0 ? (
+        <EmptyState
+          title="Nog geen spreuken"
+          description="Importeer spreuken uit de SRD om je bibliotheek te vullen."
+        />
+      ) : filtered.length === 0 ? (
+        <p style={{ fontSize: 14, color: 'var(--muted)', textAlign: 'center', padding: '32px 0' }}>
+          Geen spreuken gevonden voor de geselecteerde filters.
+        </p>
+      ) : (
+        <ul
+          style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: 'var(--sp-5)', listStyle: 'none', padding: 0, margin: 0 }}
+          role="list"
+          aria-label={`${filtered.length} spreuk${filtered.length !== 1 ? 'en' : ''} in je bibliotheek`}
+        >
+          {filtered.map(spell => (
+            <li key={spell.id}>
+              <SpellCard spell={spell} onDelete={() => setDeleteId(spell.id)} />
+            </li>
+          ))}
+        </ul>
+      )}
+
+      {/* SRD import modal */}
+      <Modal open={srdOpen} onClose={() => setSrdOpen(false)} title="Spreuken importeren uit de SRD" className="max-w-xl">
+        <CompendiumBrowser
+          kind="spell"
+          onImport={data => importSpell.mutate(data as Open5eSpell)}
+          importedSlugs={importedSlugs}
+          isPending={importSpell.isPending}
+        />
+      </Modal>
+
+      {/* Delete confirmation */}
+      <ConfirmDialog
+        open={!!deleteId}
+        title="Spreuk verwijderen"
+        confirmLabel="Verwijderen"
+        confirmVariant="crimson"
+        loading={deleteSpell.isPending}
+        onConfirm={() => {
+          if (deleteId) deleteSpell.mutate(deleteId)
+          setDeleteId(null)
+        }}
+        onClose={() => setDeleteId(null)}
+      >
+        Wil je <strong>{spellToDelete?.name ?? ''}</strong> uit je bibliotheek verwijderen?
+      </ConfirmDialog>
+    </div>
+  )
+}

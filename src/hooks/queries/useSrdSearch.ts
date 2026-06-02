@@ -2,11 +2,12 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { toast } from 'sonner'
 import { supabase } from '@/lib/supabase'
 import { queryKeys } from '@/lib/queryKeys'
-import { searchMonsters, searchMagicItems, mapMonsterToBestiary, mapMagicItemToItem } from '@/lib/open5e'
+import { searchMonsters, searchMagicItems, searchSpells, mapMonsterToBestiary, mapMagicItemToItem, mapSpellToSpell } from '@/lib/open5e'
 import { useAuthStore } from '@/stores/auth.store'
-import type { Open5eMonster, Open5eMagicItem } from '@/types/open5e.types'
+import type { Open5eMonster, Open5eMagicItem, Open5eSpell } from '@/types/open5e.types'
 import type { Bestiary } from '@/types/bestiary.types'
 import type { Item } from '@/types/item.types'
+import type { Spell } from '@/types/spell.types'
 
 export function useSrdMonsterSearch(query: string) {
   return useQuery<Open5eMonster[]>({
@@ -23,6 +24,48 @@ export function useSrdItemSearch(query: string) {
     queryFn: () => searchMagicItems(query),
     enabled: query.length >= 2,
     staleTime: 1000 * 60 * 60,
+  })
+}
+
+export function useSrdSpellSearch(query: string) {
+  return useQuery<Open5eSpell[]>({
+    queryKey: queryKeys.srd.spells(query),
+    queryFn: () => searchSpells(query),
+    enabled: query.length >= 2,
+    staleTime: 1000 * 60 * 60,
+  })
+}
+
+export function useImportSpell() {
+  const queryClient = useQueryClient()
+  const user = useAuthStore(s => s.user)
+
+  return useMutation({
+    mutationFn: async (spell: Open5eSpell) => {
+      if (!user) throw new Error('Niet ingelogd')
+
+      const { data: existing } = await supabase
+        .from('spells')
+        .select('id')
+        .eq('source_slug', spell.slug)
+        .maybeSingle()
+      if (existing) throw new Error('Deze spreuk is al in je bibliotheek.')
+
+      const { data, error } = await supabase
+        .from('spells')
+        .insert(mapSpellToSpell(spell, user.id))
+        .select()
+        .single()
+      if (error) throw error
+      return data as Spell
+    },
+    onSuccess: (data) => {
+      queryClient.invalidateQueries({ queryKey: queryKeys.spells.all })
+      toast.success(`${data.name} toegevoegd aan bibliotheek`)
+    },
+    onError: (err: Error) => {
+      toast.error(err.message)
+    },
   })
 }
 

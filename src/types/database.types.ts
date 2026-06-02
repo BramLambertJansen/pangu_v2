@@ -1052,6 +1052,66 @@ export type Database = {
           }
         ]
       }
+      spells: {
+        Row: {
+          id: string
+          user_id: string
+          name: string
+          level: number
+          school: string
+          casting_time: string
+          range: string
+          components: string
+          duration: string
+          concentration: boolean
+          ritual: boolean
+          description: string | null
+          higher_level: string | null
+          classes: string[]
+          source: string | null
+          source_slug: string | null
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          user_id: string
+          name?: string
+          level?: number
+          school?: string
+          casting_time?: string
+          range?: string
+          components?: string
+          duration?: string
+          concentration?: boolean
+          ritual?: boolean
+          description?: string | null
+          higher_level?: string | null
+          classes?: string[]
+          source?: string | null
+          source_slug?: string | null
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          user_id?: string
+          name?: string
+          level?: number
+          school?: string
+          casting_time?: string
+          range?: string
+          components?: string
+          duration?: string
+          concentration?: boolean
+          ritual?: boolean
+          description?: string | null
+          higher_level?: string | null
+          classes?: string[]
+          source?: string | null
+          source_slug?: string | null
+          created_at?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never

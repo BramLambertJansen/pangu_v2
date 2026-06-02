@@ -76,4 +76,8 @@ export const queryKeys = {
     items: (query: string) => ['srd', 'items', query] as const,
     spells: (query: string) => ['srd', 'spells', query] as const,
   },
+  spells: {
+    all: ['spells'] as const,
+    detail: (id: string) => ['spells', id] as const,
+  },
 }

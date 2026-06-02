@@ -88,6 +88,14 @@ export const factionGradients = [
   'radial-gradient(ellipse 65% 50% at 25% 40%, rgba(220,90,80,0.18) 0%, rgba(155,138,255,0.14) 55%, transparent 80%)',
 ]
 
+// Spell: violet/azure (arcane/magical theme)
+export const spellGradients = [
+  'radial-gradient(ellipse 70% 55% at 30% 40%, rgba(155,138,255,0.22) 0%, rgba(56,152,255,0.10) 55%, transparent 80%)',
+  'radial-gradient(ellipse 65% 52% at 28% 42%, rgba(56,152,255,0.18) 0%, rgba(155,138,255,0.12) 55%, transparent 80%)',
+  'radial-gradient(ellipse 65% 52% at 30% 42%, rgba(155,138,255,0.20) 0%, rgba(62,207,178,0.10) 55%, transparent 80%)',
+  'radial-gradient(ellipse 65% 50% at 25% 40%, rgba(56,152,255,0.16) 0%, rgba(155,138,255,0.16) 55%, transparent 80%)',
+]
+
 // Quest: gold-tinted (treasure/adventure theme)
 export const questGradients = [
   'radial-gradient(ellipse 70% 55% at 30% 40%, rgba(245,180,50,0.22) 0%, rgba(200,120,30,0.12) 55%, transparent 80%)',

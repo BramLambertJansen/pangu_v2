@@ -1,10 +1,10 @@
 import { useState, useEffect, useId } from 'react'
 import { Spinner } from '@/components/ui/Spinner'
-import { useSrdMonsterSearch, useSrdItemSearch } from '@/hooks/queries/useSrdSearch'
-import type { Open5eMonster, Open5eMagicItem } from '@/types/open5e.types'
+import { useSrdMonsterSearch, useSrdItemSearch, useSrdSpellSearch } from '@/hooks/queries/useSrdSearch'
+import type { Open5eMonster, Open5eMagicItem, Open5eSpell } from '@/types/open5e.types'
 
-export type SrdKind = 'monster' | 'item'
-export type SrdResult = Open5eMonster | Open5eMagicItem
+export type SrdKind = 'monster' | 'item' | 'spell'
+export type SrdResult = Open5eMonster | Open5eMagicItem | Open5eSpell
 
 interface Props {
   kind: SrdKind
@@ -25,13 +25,19 @@ export function CompendiumBrowser({ kind, onImport, importedSlugs, isPending }: 
 
   const monsterSearch = useSrdMonsterSearch(kind === 'monster' ? debouncedQuery : '')
   const itemSearch = useSrdItemSearch(kind === 'item' ? debouncedQuery : '')
-  const { data, isLoading, isError } = kind === 'monster' ? monsterSearch : itemSearch
+  const spellSearch = useSrdSpellSearch(kind === 'spell' ? debouncedQuery : '')
+  const { data, isLoading, isError } =
+    kind === 'monster' ? monsterSearch : kind === 'item' ? itemSearch : spellSearch
   const results = (data ?? []) as SrdResult[]
 
-  const labelText = kind === 'monster' ? 'Wezen zoeken' : 'Magisch item zoeken'
-  const placeholder = kind === 'monster'
-    ? 'bijv. owlbear, dragon, goblin...'
-    : 'bijv. bag of holding, flame tongue...'
+  const labelText =
+    kind === 'monster' ? 'Wezen zoeken' :
+    kind === 'item' ? 'Magisch item zoeken' :
+    'Spreuk zoeken'
+  const placeholder =
+    kind === 'monster' ? 'bijv. owlbear, dragon, goblin...' :
+    kind === 'item' ? 'bijv. bag of holding, flame tongue...' :
+    'bijv. fireball, cure wounds, detect magic...'
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
@@ -94,9 +100,10 @@ export function CompendiumBrowser({ kind, onImport, importedSlugs, isPending }: 
         >
           {results.map(result => {
             const alreadyImported = importedSlugs.includes(result.slug)
-            const meta = kind === 'monster'
-              ? monsterMeta(result as Open5eMonster)
-              : itemMeta(result as Open5eMagicItem)
+            const meta =
+              kind === 'monster' ? monsterMeta(result as Open5eMonster) :
+              kind === 'item' ? itemMeta(result as Open5eMagicItem) :
+              spellMeta(result as Open5eSpell)
 
             return (
               <li
@@ -156,5 +163,15 @@ function itemMeta(i: Open5eMagicItem): string {
   if (i.type) parts.push(i.type)
   if (i.rarity) parts.push(i.rarity)
   if (i.requires_attunement) parts.push('attunement')
+  return parts.join(' · ')
+}
+
+function spellMeta(s: Open5eSpell): string {
+  const parts: string[] = []
+  const level = typeof s.level === 'number' ? s.level : parseInt(String(s.level), 10)
+  parts.push(level === 0 ? 'Kantrip' : `Niveau ${level}`)
+  if (s.school) parts.push(s.school)
+  if (s.casting_time) parts.push(s.casting_time)
+  if (s.concentration) parts.push('Concentratie')
   return parts.join(' · ')
 }

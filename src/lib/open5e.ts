@@ -4,6 +4,7 @@
 import type { Open5eListResponse, Open5eMonster, Open5eMagicItem, Open5eSpell } from '@/types/open5e.types'
 import type { BestiaryStatus } from '@/types/bestiary.types'
 import type { ItemType, ItemRarity } from '@/types/item.types'
+import type { SpellSchool } from '@/types/spell.types'
 
 const BASE_URL = 'https://api.open5e.com/v2'
 export const SRD_SLUG = 'srd'
@@ -130,6 +131,54 @@ export function mapMonsterToBestiary(
     stat_cha: monster.charisma ?? 10,
     source: 'srd',
     source_slug: monster.slug,
+  }
+}
+
+const VALID_SCHOOLS: SpellSchool[] = [
+  'abjuration', 'conjuration', 'divination', 'enchantment',
+  'evocation', 'illusion', 'necromancy', 'transmutation',
+]
+
+export function mapSpellSchool(school: string | undefined | null): SpellSchool {
+  const normalized = school?.toLowerCase().trim() ?? ''
+  return VALID_SCHOOLS.find(s => s === normalized) ?? 'evocation'
+}
+
+export interface SpellInsert {
+  user_id: string
+  name: string
+  level: number
+  school: SpellSchool
+  casting_time: string
+  range: string
+  components: string
+  duration: string
+  concentration: boolean
+  ritual: boolean
+  description: string | null
+  higher_level: string | null
+  classes: string[]
+  source: string
+  source_slug: string
+}
+
+export function mapSpellToSpell(spell: Open5eSpell, userId: string): SpellInsert {
+  return {
+    user_id: userId,
+    name: spell.name,
+    level: typeof spell.level === 'number' ? spell.level : (parseInt(String(spell.level), 10) || 0),
+    school: mapSpellSchool(spell.school),
+    casting_time: spell.casting_time || '1 action',
+    range: spell.range || '',
+    components: spell.components || '',
+    duration: spell.duration || '',
+    concentration: spell.concentration ?? false,
+    ritual: spell.ritual ?? false,
+    description: spell.desc || null,
+    higher_level: spell.higher_level || null,
+    classes: spell.dnd_class ? spell.dnd_class.split(',').map(c => c.trim()).filter(Boolean) : [],
+    source: 'srd',
+    source_slug: spell.slug,
   }
 }
 
