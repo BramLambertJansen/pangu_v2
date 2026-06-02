@@ -1,7 +1,6 @@
 import { useState, useEffect, useId } from 'react'
 import { Spinner } from '@/components/ui/Spinner'
 import { useSrdMonsterSearch, useSrdItemSearch, useSrdSpellSearch } from '@/hooks/queries/useSrdSearch'
-import { DEV_MODE } from '@/lib/constants'
 import type { Open5eMonster, Open5eMagicItem, Open5eSpell } from '@/types/open5e.types'
 
 export type SrdKind = 'monster' | 'item' | 'spell'
@@ -19,20 +18,7 @@ export function CompendiumBrowser({ kind, onImport, importedSlugs, isPending }: 
   const [debouncedQuery, setDebouncedQuery] = useState('')
   const inputId = useId()
 
-  if (DEV_MODE) {
-    return (
-      <div style={{ padding: '24px 0', textAlign: 'center' }}>
-        <p style={{ color: 'var(--muted)', fontSize: 14, marginBottom: 8 }}>
-          SRD-compendium is niet beschikbaar in dev-modus.
-        </p>
-        <p style={{ color: 'var(--subtle)', fontSize: 12 }}>
-          De Open5e API vereist een actieve internetverbinding. Schakel dev-modus uit om te importeren.
-        </p>
-      </div>
-    )
-  }
-
-  useEffect(() => {
+useEffect(() => {
     const t = setTimeout(() => setDebouncedQuery(query.trim()), 400)
     return () => clearTimeout(t)
   }, [query])
@@ -113,7 +99,7 @@ export function CompendiumBrowser({ kind, onImport, importedSlugs, isPending }: 
           style={{ display: 'flex', flexDirection: 'column', gap: 6, listStyle: 'none', padding: 0, margin: 0, maxHeight: 300, overflowY: 'auto' }}
         >
           {results.map(result => {
-            const alreadyImported = importedSlugs.includes(result.slug)
+            const alreadyImported = importedSlugs.includes(result.slug ?? (result as Open5eMonster).key ?? '')
             const meta =
               kind === 'monster' ? monsterMeta(result as Open5eMonster) :
               kind === 'item' ? itemMeta(result as Open5eMagicItem) :
@@ -163,9 +149,20 @@ export function CompendiumBrowser({ kind, onImport, importedSlugs, isPending }: 
   )
 }
 
+function strField(val: unknown): string {
+  if (!val) return ''
+  if (typeof val === 'string') return val
+  if (typeof val === 'object') {
+    const o = val as Record<string, unknown>
+    return (o.label as string) || (o.name as string) || (o.slug as string) || (o.key as string) || ''
+  }
+  return ''
+}
+
 function monsterMeta(m: Open5eMonster): string {
   const parts: string[] = []
-  if (m.type) parts.push(m.type)
+  const type = strField(m.type)
+  if (type) parts.push(type)
   if (m.challenge_rating) parts.push(`CR ${m.challenge_rating}`)
   if (m.hit_points) parts.push(`${m.hit_points} HP`)
   if (m.armor_class) parts.push(`AC ${m.armor_class}`)
@@ -174,8 +171,10 @@ function monsterMeta(m: Open5eMonster): string {
 
 function itemMeta(i: Open5eMagicItem): string {
   const parts: string[] = []
-  if (i.type) parts.push(i.type)
-  if (i.rarity) parts.push(i.rarity)
+  const type = strField(i.type)
+  const rarity = strField(i.rarity)
+  if (type) parts.push(type)
+  if (rarity) parts.push(rarity)
   if (i.requires_attunement) parts.push('attunement')
   return parts.join(' · ')
 }
@@ -184,7 +183,8 @@ function spellMeta(s: Open5eSpell): string {
   const parts: string[] = []
   const level = typeof s.level === 'number' ? s.level : parseInt(String(s.level), 10)
   parts.push(level === 0 ? 'Kantrip' : `Niveau ${level}`)
-  if (s.school) parts.push(s.school)
+  const school = strField(s.school)
+  if (school) parts.push(school)
   if (s.casting_time) parts.push(s.casting_time)
   if (s.concentration) parts.push('Concentratie')
   return parts.join(' · ')

@@ -4,7 +4,6 @@ import { supabase } from '@/lib/supabase'
 import { queryKeys } from '@/lib/queryKeys'
 import { searchMonsters, searchMagicItems, searchSpells, mapMonsterToBestiary, mapMagicItemToItem, mapSpellToSpell } from '@/lib/open5e'
 import { useAuthStore } from '@/stores/auth.store'
-import { DEV_MODE } from '@/lib/constants'
 import type { Open5eMonster, Open5eMagicItem, Open5eSpell } from '@/types/open5e.types'
 import type { Bestiary } from '@/types/bestiary.types'
 import type { Item } from '@/types/item.types'
@@ -14,7 +13,7 @@ export function useSrdMonsterSearch(query: string) {
   return useQuery<Open5eMonster[]>({
     queryKey: queryKeys.srd.monsters(query),
     queryFn: () => searchMonsters(query),
-    enabled: !DEV_MODE && query.length >= 2,
+    enabled: query.length >= 2,
     staleTime: 1000 * 60 * 60,
   })
 }
@@ -23,7 +22,7 @@ export function useSrdItemSearch(query: string) {
   return useQuery<Open5eMagicItem[]>({
     queryKey: queryKeys.srd.items(query),
     queryFn: () => searchMagicItems(query),
-    enabled: !DEV_MODE && query.length >= 2,
+    enabled: query.length >= 2,
     staleTime: 1000 * 60 * 60,
   })
 }
@@ -32,7 +31,7 @@ export function useSrdSpellSearch(query: string) {
   return useQuery<Open5eSpell[]>({
     queryKey: queryKeys.srd.spells(query),
     queryFn: () => searchSpells(query),
-    enabled: !DEV_MODE && query.length >= 2,
+    enabled: query.length >= 2,
     staleTime: 1000 * 60 * 60,
   })
 }
@@ -86,7 +85,7 @@ export function useImportMonster(worldId: string) {
         .from('bestiaries')
         .select('id')
         .eq('world_id', worldId)
-        .eq('source_slug', monster.slug)
+        .eq('source_slug', monster.slug ?? monster.key)
         .maybeSingle()
       if (existing) throw new Error('Dit wezen is al geïmporteerd in dit bestiarium.')
 
