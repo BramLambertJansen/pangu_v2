@@ -51,9 +51,9 @@ export const ItemCard = memo(function ItemCard({ item }: Props) {
           </div>
 
           <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexShrink: 0 }}>
-            {item.source === 'srd' && (
+            {item.source?.startsWith('srd') && (
               <span style={{ fontSize: 9, fontWeight: 700, letterSpacing: '0.14em', textTransform: 'uppercase', color: 'var(--azure)', border: '1px solid rgba(56,152,255,0.3)', borderRadius: 4, padding: '1px 5px' }}>
-                SRD
+                {item.source === 'srd-2024' ? 'SRD 2024' : 'SRD'}
               </span>
             )}
             <StatusBadge

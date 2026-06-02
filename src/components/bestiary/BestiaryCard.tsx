@@ -58,9 +58,9 @@ export const BestiaryCard = memo(function BestiaryCard({ bestiary }: Props) {
           </div>
 
           <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexShrink: 0 }}>
-            {bestiary.source === 'srd' && (
+            {bestiary.source?.startsWith('srd') && (
               <span style={{ fontSize: 9, fontWeight: 700, letterSpacing: '0.14em', textTransform: 'uppercase', color: 'var(--azure)', border: '1px solid rgba(56,152,255,0.3)', borderRadius: 4, padding: '1px 5px' }}>
-                SRD
+                {bestiary.source === 'srd-2024' ? 'SRD 2024' : 'SRD'}
               </span>
             )}
             <StatusBadge
@@ -168,9 +168,9 @@ export const BestiaryRow = memo(function BestiaryRow({ bestiary, selected = fals
           }}>
             {bestiary.name}
           </p>
-          {bestiary.source === 'srd' && (
+          {bestiary.source?.startsWith('srd') && (
             <span aria-label="Geïmporteerd uit de SRD" style={{ fontSize: 8, fontWeight: 700, letterSpacing: '0.14em', textTransform: 'uppercase', color: 'var(--azure)', border: '1px solid rgba(56,152,255,0.25)', borderRadius: 3, padding: '1px 4px', flexShrink: 0 }}>
-              SRD
+              {bestiary.source === 'srd-2024' ? 'SRD 2024' : 'SRD'}
             </span>
           )}
         </div>

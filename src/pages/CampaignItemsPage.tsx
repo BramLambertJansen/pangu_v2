@@ -255,7 +255,7 @@ export default function CampaignItemsPage() {
       <Modal open={srdOpen} onClose={() => setSrdOpen(false)} title="Magische items importeren uit de SRD" className="max-w-xl">
         <CompendiumBrowser
           kind="item"
-          onImport={data => importItem.mutate(data as Open5eMagicItem)}
+          onImport={(data, edition) => importItem.mutate({ magicItem: data as Open5eMagicItem, edition })}
           importedSlugs={importedSlugs}
           isPending={importItem.isPending}
         />

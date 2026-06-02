@@ -1,6 +1,7 @@
 import { useState, useEffect, useId } from 'react'
 import { Spinner } from '@/components/ui/Spinner'
 import { useSrdMonsterSearch, useSrdItemSearch, useSrdSpellSearch } from '@/hooks/queries/useSrdSearch'
+import type { SrdEdition } from '@/lib/open5e'
 import type { Open5eMonster, Open5eMagicItem, Open5eSpell } from '@/types/open5e.types'
 
 export type SrdKind = 'monster' | 'item' | 'spell'
@@ -8,7 +9,7 @@ export type SrdResult = Open5eMonster | Open5eMagicItem | Open5eSpell
 
 interface Props {
   kind: SrdKind
-  onImport: (data: SrdResult) => void
+  onImport: (data: SrdResult, edition: SrdEdition) => void
   importedSlugs: string[]
   isPending?: boolean
 }
@@ -16,16 +17,18 @@ interface Props {
 export function CompendiumBrowser({ kind, onImport, importedSlugs, isPending }: Props) {
   const [query, setQuery] = useState('')
   const [debouncedQuery, setDebouncedQuery] = useState('')
+  const [edition, setEdition] = useState<SrdEdition>('2014')
   const inputId = useId()
+  const editionId = useId()
 
-useEffect(() => {
+  useEffect(() => {
     const t = setTimeout(() => setDebouncedQuery(query.trim()), 400)
     return () => clearTimeout(t)
   }, [query])
 
-  const monsterSearch = useSrdMonsterSearch(kind === 'monster' ? debouncedQuery : '')
-  const itemSearch = useSrdItemSearch(kind === 'item' ? debouncedQuery : '')
-  const spellSearch = useSrdSpellSearch(kind === 'spell' ? debouncedQuery : '')
+  const monsterSearch = useSrdMonsterSearch(kind === 'monster' ? debouncedQuery : '', edition)
+  const itemSearch = useSrdItemSearch(kind === 'item' ? debouncedQuery : '', edition)
+  const spellSearch = useSrdSpellSearch(kind === 'spell' ? debouncedQuery : '', edition)
   const { data, isLoading, isError } =
     kind === 'monster' ? monsterSearch : kind === 'item' ? itemSearch : spellSearch
   const results = (data ?? []) as SrdResult[]
@@ -41,31 +44,56 @@ useEffect(() => {
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-      <div>
-        <label
-          htmlFor={inputId}
-          style={{ display: 'block', fontSize: 12, fontWeight: 600, color: 'var(--ink-soft)', marginBottom: 6, letterSpacing: '0.06em', textTransform: 'uppercase' }}
-        >
-          {labelText}
-        </label>
-        <input
-          id={inputId}
-          type="search"
-          value={query}
-          onChange={e => setQuery(e.target.value)}
-          placeholder={placeholder}
-          autoFocus
-          style={{
-            width: '100%', boxSizing: 'border-box',
-            padding: '10px 12px', borderRadius: 8,
-            border: '1px solid var(--hairline)',
-            background: 'var(--surface-2)',
-            color: 'var(--ink)', fontSize: 14,
-            outline: 'none',
-          }}
-          onFocus={e => { e.currentTarget.style.borderColor = 'rgba(155,138,255,0.5)' }}
-          onBlur={e => { e.currentTarget.style.borderColor = 'var(--hairline)' }}
-        />
+      <div style={{ display: 'flex', alignItems: 'flex-end', gap: 10 }}>
+        <div style={{ flex: 1 }}>
+          <label
+            htmlFor={inputId}
+            style={{ display: 'block', fontSize: 12, fontWeight: 600, color: 'var(--ink-soft)', marginBottom: 6, letterSpacing: '0.06em', textTransform: 'uppercase' }}
+          >
+            {labelText}
+          </label>
+          <input
+            id={inputId}
+            type="search"
+            value={query}
+            onChange={e => setQuery(e.target.value)}
+            placeholder={placeholder}
+            autoFocus
+            style={{
+              width: '100%', boxSizing: 'border-box',
+              padding: '10px 12px', borderRadius: 8,
+              border: '1px solid var(--hairline)',
+              background: 'var(--surface-2)',
+              color: 'var(--ink)', fontSize: 14,
+              outline: 'none',
+            }}
+            onFocus={e => { e.currentTarget.style.borderColor = 'rgba(155,138,255,0.5)' }}
+            onBlur={e => { e.currentTarget.style.borderColor = 'var(--hairline)' }}
+          />
+        </div>
+        <div>
+          <label
+            htmlFor={editionId}
+            style={{ display: 'block', fontSize: 12, fontWeight: 600, color: 'var(--ink-soft)', marginBottom: 6, letterSpacing: '0.06em', textTransform: 'uppercase' }}
+          >
+            Editie
+          </label>
+          <select
+            id={editionId}
+            value={edition}
+            onChange={e => setEdition(e.target.value as SrdEdition)}
+            style={{
+              padding: '10px 10px', borderRadius: 8,
+              border: '1px solid var(--hairline)',
+              background: 'var(--surface-2)',
+              color: 'var(--ink)', fontSize: 13,
+              cursor: 'pointer', outline: 'none',
+            }}
+          >
+            <option value="2014">SRD 5.1 (2014)</option>
+            <option value="2024">SRD 5.2 (2024)</option>
+          </select>
+        </div>
       </div>
 
       {debouncedQuery.length < 2 && (
@@ -120,7 +148,7 @@ useEffect(() => {
                 </div>
                 <button
                   type="button"
-                  onClick={() => { if (!alreadyImported && !isPending) onImport(result) }}
+                  onClick={() => { if (!alreadyImported && !isPending) onImport(result, edition) }}
                   disabled={alreadyImported || isPending}
                   aria-label={alreadyImported ? `${result.name} al geïmporteerd` : `Importeer ${result.name}`}
                   style={{
@@ -143,7 +171,10 @@ useEffect(() => {
       )}
 
       <p style={{ fontSize: 11, color: 'var(--subtle)', textAlign: 'center', marginTop: 4, borderTop: '1px solid var(--hairline)', paddingTop: 10 }}>
-        Inhoud van de <abbr title="Systems Reference Document 5.1, Creative Commons Attribution 4.0 International">SRD 5.1</abbr> via Open5e · CC-BY-4.0 · Powered by Open5e
+        {edition === '2024'
+          ? <>Inhoud van de <abbr title="Systems Reference Document 5.2, Creative Commons Attribution 4.0 International">SRD 5.2 (2024)</abbr> via Open5e · CC-BY-4.0 · Powered by Open5e</>
+          : <>Inhoud van de <abbr title="Systems Reference Document 5.1, Creative Commons Attribution 4.0 International">SRD 5.1 (2014)</abbr> via Open5e · CC-BY-4.0 · Powered by Open5e</>
+        }
       </p>
     </div>
   )
