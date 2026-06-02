@@ -59,6 +59,13 @@ export interface Open5eMonster {
   senses: string
   languages: string
   desc?: string
+  special_abilities?: Array<{ name: string; desc: string }>
+  actions?: Array<{ name: string; desc: string }>
+  bonus_actions?: Array<{ name: string; desc: string }>
+  reactions?: Array<{ name: string; desc: string }>
+  legendary_desc?: string
+  legendary_actions?: Array<{ name: string; desc: string }>
+  lair_actions?: Array<{ name: string; desc: string }>
 }
 
 // /v2/magicitems/

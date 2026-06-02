@@ -145,6 +145,33 @@ export interface BestiaryInsert {
   source_slug: string
 }
 
+function buildMonsterDescription(monster: Open5eMonster): string | null {
+  const sections: string[] = []
+
+  if (monster.desc) sections.push(monster.desc)
+
+  const addSection = (title: string, entries: Array<{ name: string; desc: string }> | undefined) => {
+    if (!entries?.length) return
+    sections.push(`**${title}**`)
+    entries.forEach(e => sections.push(`*${e.name}.* ${e.desc}`))
+  }
+
+  addSection('Speciale Eigenschappen', monster.special_abilities)
+  addSection('Acties', monster.actions)
+  addSection('Bonusacties', monster.bonus_actions)
+  addSection('Reacties', monster.reactions)
+
+  if (monster.legendary_desc || monster.legendary_actions?.length) {
+    sections.push('**Legendarische Acties**')
+    if (monster.legendary_desc) sections.push(monster.legendary_desc)
+    monster.legendary_actions?.forEach(e => sections.push(`*${e.name}.* ${e.desc}`))
+  }
+
+  addSection('Hol Acties', monster.lair_actions)
+
+  return sections.length ? sections.join('\n\n') : null
+}
+
 export function mapMonsterToBestiary(
   monster: Open5eMonster,
   worldId: string,
@@ -160,7 +187,7 @@ export function mapMonsterToBestiary(
     creature_type: toStr(monster.type) || null,
     threat_level: mapChallengeRating(monster.challenge_rating ?? monster.cr),
     habitat: null,
-    description: monster.desc || null,
+    description: buildMonsterDescription(monster),
     notes: null,
     status: 'active',
     committed: true,
