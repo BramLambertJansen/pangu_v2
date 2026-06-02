@@ -38,6 +38,13 @@ export type Database = {
           committed: boolean
           source: string | null
           source_slug: string | null
+          special_abilities: Json | null
+          actions: Json | null
+          bonus_actions: Json | null
+          reactions: Json | null
+          legendary_desc: string | null
+          legendary_actions: Json | null
+          lair_actions: Json | null
           created_at: string
           updated_at: string
         }
@@ -65,6 +72,13 @@ export type Database = {
           committed?: boolean
           source?: string | null
           source_slug?: string | null
+          special_abilities?: Json | null
+          actions?: Json | null
+          bonus_actions?: Json | null
+          reactions?: Json | null
+          legendary_desc?: string | null
+          legendary_actions?: Json | null
+          lair_actions?: Json | null
           created_at?: string
           updated_at?: string
         }
@@ -92,6 +106,13 @@ export type Database = {
           committed?: boolean
           source?: string | null
           source_slug?: string | null
+          special_abilities?: Json | null
+          actions?: Json | null
+          bonus_actions?: Json | null
+          reactions?: Json | null
+          legendary_desc?: string | null
+          legendary_actions?: Json | null
+          lair_actions?: Json | null
           created_at?: string
           updated_at?: string
         }
