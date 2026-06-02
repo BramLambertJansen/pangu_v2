@@ -60,6 +60,22 @@ export async function searchSpells(query: string, edition: SrdEdition = '2014'):
   return data.results
 }
 
+export async function fetchSpellDetail(slug: string): Promise<Open5eSpell> {
+  const res = await fetch(`https://api.open5e.com/v2/spells/${encodeURIComponent(slug)}/`, {
+    headers: { Accept: 'application/json' },
+  })
+  if (!res.ok) throw new Error(`Open5e: ${res.status} ${res.statusText}`)
+  return res.json() as Promise<Open5eSpell>
+}
+
+export async function fetchMagicItemDetail(slug: string): Promise<Open5eMagicItem> {
+  const res = await fetch(`https://api.open5e.com/v2/magicitems/${encodeURIComponent(slug)}/`, {
+    headers: { Accept: 'application/json' },
+  })
+  if (!res.ok) throw new Error(`Open5e: ${res.status} ${res.statusText}`)
+  return res.json() as Promise<Open5eMagicItem>
+}
+
 // CR string (e.g. "1/8", "10", "0") → "CR X" threat label
 export function mapChallengeRating(cr: string | number | undefined | null): string | null {
   if (cr == null || cr === '') return null
