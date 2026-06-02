@@ -10,8 +10,15 @@ import { RelatedEntities } from '@/components/link/RelatedEntities'
 import { Spinner } from '@/components/ui/Spinner'
 import { useEntityEdit } from '@/hooks/useEntityEdit'
 import { useAuthStore } from '@/stores/auth.store'
+import { useUserAISettings } from '@/hooks/queries/useUserAISettings'
+import { searchCCImage, buildImageSearchQuery } from '@/lib/ccImageSearch'
+import type { CCImageResult } from '@/lib/ccImageSearch'
 
 const MAX_IMAGE_BYTES = 5 * 1024 * 1024
+
+function pollinationsUrl(prompt: string): string {
+  return `https://image.pollinations.ai/prompt/${encodeURIComponent(prompt)}?width=512&height=512&nologo=true&model=flux&seed=${Math.floor(Math.random() * 99999)}`
+}
 import type { Json } from '@/types/database.types'
 import type { Item, ItemType, ItemRarity, ItemStatBonuses } from '@/types/item.types'
 import type { Character } from '@/types/character.types'
@@ -94,6 +101,61 @@ export default function ItemEditPage() {
   const user = useAuthStore((s) => s.user)
   const imageInputRef = useRef<HTMLInputElement>(null)
   const [imageUploading, setImageUploading] = useState(false)
+  const [imageGenerating, setImageGenerating] = useState(false)
+  const [ccSearching, setCcSearching] = useState(false)
+  const [ccAttribution, setCcAttribution] = useState<CCImageResult | null>(null)
+
+  const { data: aiSettings } = useUserAISettings()
+  const hasOpenAIKey = !!(aiSettings?.byok_keys?.['openai'])
+
+  async function handleGenerateImage() {
+    const name = form.name ?? itemData?.name ?? 'item'
+    const itemType = (form.item_type ?? itemData?.item_type ?? 'misc') as string
+    const prompt = `A detailed fantasy illustration of: ${name}. Style: medieval fantasy RPG item art, high quality`
+    if (hasOpenAIKey) {
+      setImageGenerating(true)
+      try {
+        const { data: { session } } = await supabase.auth.getSession()
+        if (!session) { toast.error('Niet ingelogd'); return }
+        const resp = await fetch('/api/generate-image', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${session.access_token}` },
+          body: JSON.stringify({ prompt }),
+        })
+        const json = await resp.json() as { url?: string; error?: string }
+        if (!resp.ok || !json.url) { toast.error(json.error ?? 'Genereren mislukt'); return }
+        set('image_url', json.url)
+        setCcAttribution(null)
+        toast.success('Afbeelding gegenereerd')
+      } catch {
+        toast.error('Genereren mislukt')
+      } finally {
+        setImageGenerating(false)
+      }
+    } else {
+      const url = pollinationsUrl(`${name} ${itemType} fantasy RPG item illustration`)
+      set('image_url', url)
+      setCcAttribution(null)
+      toast.success('Afbeelding gegenereerd via Pollinations')
+    }
+  }
+
+  async function handleSearchCCImage() {
+    const name = form.name ?? itemData?.name ?? 'item'
+    const itemType = (form.item_type ?? itemData?.item_type ?? 'misc') as string
+    setCcSearching(true)
+    try {
+      const result = await searchCCImage(buildImageSearchQuery(name, itemType))
+      if (!result) { toast.error('Geen CC-afbeelding gevonden'); return }
+      set('image_url', result.url)
+      setCcAttribution(result)
+      toast.success(`Afbeelding gevonden via ${result.provider === 'wikimedia' ? 'Wikimedia' : 'Openverse'}`)
+    } catch {
+      toast.error('Zoeken mislukt')
+    } finally {
+      setCcSearching(false)
+    }
+  }
 
   const locationState = location.state as { isNew?: boolean; campaignId?: string } | null
   const isNew = locationState?.isNew ?? false
@@ -497,16 +559,36 @@ export default function ItemEditPage() {
               <button
                 type="button"
                 className="pangu-btn pangu-btn-secondary pangu-btn-sm"
-                disabled={imageUploading}
+                disabled={imageUploading || imageGenerating || ccSearching}
                 onClick={() => imageInputRef.current?.click()}
               >
                 {imageUploading ? 'Uploaden...' : form.image_url ? 'Afbeelding wijzigen' : 'Afbeelding uploaden'}
+              </button>
+              <button
+                type="button"
+                className="pangu-btn pangu-btn-sm"
+                disabled={imageUploading || imageGenerating || ccSearching}
+                onClick={handleGenerateImage}
+                style={{ background: 'rgba(212,175,55,0.15)', color: 'var(--gold)', border: '1px solid rgba(212,175,55,0.3)' }}
+                title={hasOpenAIKey ? 'Genereer via DALL-E 3' : 'Genereer via Pollinations (gratis)'}
+              >
+                {imageGenerating ? 'Genereren...' : hasOpenAIKey ? '✦ DALL-E' : '✦ Genereer'}
+              </button>
+              <button
+                type="button"
+                className="pangu-btn pangu-btn-sm"
+                disabled={imageUploading || imageGenerating || ccSearching}
+                onClick={handleSearchCCImage}
+                style={{ background: 'rgba(45,212,191,0.1)', color: 'var(--teal)', border: '1px solid rgba(45,212,191,0.25)' }}
+                title="Zoek een vrij herbruikbare afbeelding (CC-licentie) via Wikimedia of Openverse"
+              >
+                {ccSearching ? 'Zoeken...' : '🔍 Zoek CC'}
               </button>
               {form.image_url && (
                 <button
                   type="button"
                   className="pangu-btn pangu-btn-ghost pangu-btn-sm"
-                  disabled={imageUploading}
+                  disabled={imageUploading || imageGenerating || ccSearching}
                   onClick={handleImageRemove}
                   style={{ color: 'var(--crimson)' }}
                 >
@@ -515,6 +597,19 @@ export default function ItemEditPage() {
               )}
             </div>
           </div>
+          {ccAttribution && (
+            <div style={{ marginTop: 12, padding: '8px 12px', background: 'rgba(45,212,191,0.06)', borderRadius: 8, border: '1px solid rgba(45,212,191,0.2)' }}>
+              <p style={{ fontSize: 12, color: 'var(--ink-soft)', margin: 0 }}>
+                📷 <strong>{ccAttribution.title}</strong>
+                {ccAttribution.author && <> · {ccAttribution.author}</>}
+                {' · '}<span style={{ color: 'var(--teal)' }}>{ccAttribution.license}</span>
+                {' · '}
+                <a href={ccAttribution.sourceUrl} target="_blank" rel="noopener noreferrer" style={{ color: 'var(--teal)' }}>
+                  Bron ({ccAttribution.provider === 'wikimedia' ? 'Wikimedia' : 'Openverse'})
+                </a>
+              </p>
+            </div>
+          )}
         </div>
 
         {/* ── Basisgegevens ── */}
