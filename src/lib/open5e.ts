@@ -34,7 +34,7 @@ async function fetchOpen5e<T>(endpoint: string, query: string): Promise<Open5eLi
 }
 
 export async function searchMonsters(query: string): Promise<Open5eMonster[]> {
-  const data = await fetchOpen5e<Open5eMonster>('/monsters/', query)
+  const data = await fetchOpen5e<Open5eMonster>('/creatures/', query)
   return data.results
 }
 
@@ -122,13 +122,14 @@ export function mapMonsterToBestiary(
   worldId: string,
   userId: string,
 ): BestiaryInsert {
+  const ab = monster.ability_scores
   return {
     world_id: worldId,
     user_id: userId,
     name: monster.name,
-    subtitle: monster.subtype || null,
-    creature_type: monster.type || null,
-    threat_level: mapChallengeRating(monster.challenge_rating || monster.cr),
+    subtitle: toStr(monster.subtype ?? monster.subcategory) || null,
+    creature_type: toStr(monster.type) || null,
+    threat_level: mapChallengeRating(monster.challenge_rating ?? monster.cr),
     habitat: null,
     description: monster.desc || null,
     notes: null,
@@ -137,14 +138,14 @@ export function mapMonsterToBestiary(
     hp: monster.hit_points ?? 1,
     ac: monster.armor_class ?? 10,
     speed: mapSpeed(monster.speed),
-    stat_str: monster.strength ?? 10,
-    stat_dex: monster.dexterity ?? 10,
-    stat_con: monster.constitution ?? 10,
-    stat_int: monster.intelligence ?? 10,
-    stat_wis: monster.wisdom ?? 10,
-    stat_cha: monster.charisma ?? 10,
+    stat_str: monster.strength ?? ab?.strength ?? 10,
+    stat_dex: monster.dexterity ?? ab?.dexterity ?? 10,
+    stat_con: monster.constitution ?? ab?.constitution ?? 10,
+    stat_int: monster.intelligence ?? ab?.intelligence ?? 10,
+    stat_wis: monster.wisdom ?? ab?.wisdom ?? 10,
+    stat_cha: monster.charisma ?? ab?.charisma ?? 10,
     source: 'srd',
-    source_slug: monster.slug,
+    source_slug: monster.slug ?? monster.key,
   }
 }
 

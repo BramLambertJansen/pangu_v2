@@ -149,15 +149,20 @@ useEffect(() => {
   )
 }
 
-function strField(val: string | { slug: string; label: string } | undefined | null): string {
+function strField(val: unknown): string {
   if (!val) return ''
   if (typeof val === 'string') return val
-  return val.label || val.slug
+  if (typeof val === 'object') {
+    const o = val as Record<string, unknown>
+    return (o.label as string) || (o.name as string) || (o.slug as string) || (o.key as string) || ''
+  }
+  return ''
 }
 
 function monsterMeta(m: Open5eMonster): string {
   const parts: string[] = []
-  if (m.type) parts.push(m.type)
+  const type = strField(m.type)
+  if (type) parts.push(type)
   if (m.challenge_rating) parts.push(`CR ${m.challenge_rating}`)
   if (m.hit_points) parts.push(`${m.hit_points} HP`)
   if (m.armor_class) parts.push(`AC ${m.armor_class}`)
