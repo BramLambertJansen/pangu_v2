@@ -233,6 +233,16 @@ export interface SpellInsert {
   source_slug: string
 }
 
+function resolveSpellClasses(spell: Open5eSpell): string[] {
+  if (Array.isArray(spell.classes)) {
+    return spell.classes.map(c => (typeof c === 'string' ? c : c.name)).filter(Boolean)
+  }
+  if (spell.dnd_class) {
+    return spell.dnd_class.split(',').map(c => c.trim()).filter(Boolean)
+  }
+  return []
+}
+
 export function mapSpellToSpell(spell: Open5eSpell, userId: string, edition: SrdEdition = '2014'): SpellInsert {
   return {
     user_id: userId,
@@ -247,7 +257,7 @@ export function mapSpellToSpell(spell: Open5eSpell, userId: string, edition: Srd
     ritual: spell.ritual ?? false,
     description: spell.desc || null,
     higher_level: spell.higher_level || null,
-    classes: spell.dnd_class ? spell.dnd_class.split(',').map(c => c.trim()).filter(Boolean) : [],
+    classes: resolveSpellClasses(spell),
     source: edition === '2024' ? 'srd-2024' : 'srd',
     source_slug: spell.key ?? spell.slug ?? '',
   }

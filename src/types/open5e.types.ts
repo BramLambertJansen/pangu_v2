@@ -97,5 +97,6 @@ export interface Open5eSpell {
   ritual: boolean
   desc: string
   higher_level: string
-  dnd_class: string
+  dnd_class?: string                              // v1: comma-separated string
+  classes?: Array<{ name: string } | string>      // v2: may be array
 }
