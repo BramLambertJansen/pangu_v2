@@ -42,6 +42,14 @@ export async function searchMonsters(query: string, edition: SrdEdition = '2014'
   return data.results
 }
 
+export async function fetchMonsterDetail(key: string): Promise<Open5eMonster> {
+  const res = await fetch(`https://api.open5e.com/v2/creatures/${encodeURIComponent(key)}/`, {
+    headers: { Accept: 'application/json' },
+  })
+  if (!res.ok) throw new Error(`Open5e: ${res.status} ${res.statusText}`)
+  return res.json() as Promise<Open5eMonster>
+}
+
 export async function searchMagicItems(query: string, edition: SrdEdition = '2014'): Promise<Open5eMagicItem[]> {
   const data = await fetchOpen5e<Open5eMagicItem>('/magicitems/', query, edition)
   return data.results
