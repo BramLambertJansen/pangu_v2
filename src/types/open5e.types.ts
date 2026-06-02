@@ -64,7 +64,8 @@ export interface Open5eMonster {
 // /v2/magicitems/
 // Note: v2 may return type/rarity as { slug, label } objects instead of plain strings.
 export interface Open5eMagicItem {
-  slug: string
+  key: string                                     // v2 identifier
+  slug?: string                                   // v1 compat
   name: string
   document: Open5eDocument
   type: string | { slug: string; label: string }

@@ -84,7 +84,7 @@ export function useImportMonster(worldId: string) {
     mutationFn: async ({ monster, edition = '2014' }: { monster: Open5eMonster; edition?: SrdEdition }) => {
       if (!user) throw new Error('Niet ingelogd')
 
-      const sourceSlug = monster.slug ?? monster.key
+      const sourceSlug = monster.key ?? monster.slug ?? ''
       const { data: existing } = await supabase
         .from('bestiaries')
         .select('id')
@@ -126,11 +126,11 @@ export function useImportMagicItem(campaignId: string) {
         .from('items')
         .select('id')
         .eq('campaign_id', campaignId)
-        .eq('source_slug', magicItem.slug)
+        .eq('source_slug', magicItem.key ?? magicItem.slug ?? '')
         .maybeSingle()
       if (existing) throw new Error('Dit item is al geïmporteerd in deze kroniek.')
 
-      const fullItem = await fetchMagicItemDetail(magicItem.slug)
+      const fullItem = await fetchMagicItemDetail(magicItem.key ?? magicItem.slug ?? '')
 
       const { data, error } = await supabase
         .from('items')

@@ -174,7 +174,7 @@ export function mapMonsterToBestiary(
     stat_wis: monster.wisdom ?? ab?.wisdom ?? 10,
     stat_cha: monster.charisma ?? ab?.charisma ?? 10,
     source: edition === '2024' ? 'srd-2024' : 'srd',
-    source_slug: monster.slug ?? monster.key,
+    source_slug: monster.key ?? monster.slug ?? '',
   }
 }
 
@@ -262,6 +262,6 @@ export function mapMagicItemToItem(
     properties: {} as Record<string, never>,
     committed: true,
     source: edition === '2024' ? 'srd-2024' : 'srd',
-    source_slug: magicItem.slug,
+    source_slug: magicItem.key ?? magicItem.slug ?? '',
   }
 }
