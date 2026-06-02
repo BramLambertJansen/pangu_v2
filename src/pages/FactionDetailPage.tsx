@@ -38,7 +38,7 @@ export default function FactionDetailPage() {
   })
 
   const { data: members } = useQuery<Pick<Npc, 'id' | 'name' | 'npc_role' | 'status'>[]>({
-    queryKey: ['factions', id!, 'members'],
+    queryKey: queryKeys.campaigns.factionMembers(id!),
     queryFn: async () => {
       const { data, error } = await db
         .from('npcs')

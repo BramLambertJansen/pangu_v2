@@ -146,8 +146,7 @@ export default function SpellsPage() {
         confirmVariant="crimson"
         loading={deleteSpell.isPending}
         onConfirm={() => {
-          if (deleteId) deleteSpell.mutate(deleteId)
-          setDeleteId(null)
+          if (deleteId) deleteSpell.mutate(deleteId, { onSettled: () => setDeleteId(null) })
         }}
         onClose={() => setDeleteId(null)}
       >

@@ -114,7 +114,7 @@ export function mapMonsterToBestiary(
     name: monster.name,
     subtitle: monster.subtype || null,
     creature_type: monster.type || null,
-    threat_level: mapChallengeRating(monster.challenge_rating ?? monster.cr),
+    threat_level: mapChallengeRating(monster.challenge_rating || monster.cr),
     habitat: null,
     description: monster.desc || null,
     notes: null,

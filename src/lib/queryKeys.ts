@@ -36,6 +36,7 @@ export const queryKeys = {
     factions: (id: string) => ['campaigns', id, 'factions'] as const,
     factionDetail: (factionId: string) => ['factions', factionId] as const,
     factionDetailFull: (factionId: string) => ['factions', factionId, 'full'] as const,
+    factionMembers: (factionId: string) => ['factions', factionId, 'members'] as const,
   },
   invites: {
     byCode: (code: string) => ['invites', 'code', code] as const,

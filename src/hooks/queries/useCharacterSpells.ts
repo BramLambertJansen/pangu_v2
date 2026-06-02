@@ -17,6 +17,7 @@ export function useCharacterSpells(characterId: string | undefined) {
   return useQuery({
     queryKey: queryKeys.characters.spells(characterId ?? ''),
     enabled: !!characterId,
+    staleTime: 1000 * 60,
     queryFn: async () => {
       const { data, error } = await supabase
         .from('character_spells')

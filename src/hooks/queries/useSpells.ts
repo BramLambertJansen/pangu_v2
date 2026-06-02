@@ -32,6 +32,8 @@ export function useDeleteSpell() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: queryKeys.spells.all })
+      // DB cascade removes character_spells rows — invalidate all character spell caches
+      queryClient.invalidateQueries({ queryKey: ['characters'] })
       toast.success('Spreuk verwijderd')
     },
     onError: () => toast.error('Spreuk verwijderen mislukt'),
