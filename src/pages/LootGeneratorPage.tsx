@@ -43,6 +43,31 @@ const SHORTCUTS = [
   { label: 'Oud artefact', context: 'Oud en krachtig relikwie uit een vergeten beschaving' },
 ]
 
+const NUMERIC_BONUS_KEYS: (keyof ItemStatBonuses)[] = [
+  'ac_bonus', 'str_bonus', 'dex_bonus', 'con_bonus', 'int_bonus',
+  'wis_bonus', 'cha_bonus', 'hp_bonus', 'speed_bonus', 'initiative_bonus',
+  'attack_bonus', 'damage_bonus',
+]
+
+function sanitizeStatBonuses(raw: unknown): ItemStatBonuses {
+  if (!raw || typeof raw !== 'object' || Array.isArray(raw)) return {}
+  const obj = raw as Record<string, unknown>
+  const result: ItemStatBonuses = {}
+  for (const key of NUMERIC_BONUS_KEYS) {
+    const val = obj[key]
+    if (val === undefined || val === null) continue
+    const n = Number(val)
+    if (Number.isFinite(n) && n !== 0) (result as Record<string, unknown>)[key] = Math.round(n)
+  }
+  if (typeof obj['damage_dice'] === 'string' && /^\d+d\d+$/.test(obj['damage_dice'])) {
+    result.damage_dice = obj['damage_dice']
+  }
+  if (typeof obj['stealth_disadvantage'] === 'boolean') {
+    result.stealth_disadvantage = obj['stealth_disadvantage']
+  }
+  return result
+}
+
 function parseAIResponse(raw: string): GeneratedItem[] {
   let cleaned = raw.trim()
   // Strip markdown code blocks
@@ -62,9 +87,7 @@ function parseAIResponse(raw: string): GeneratedItem[] {
       rarity: ITEM_RARITIES.includes(obj['rarity'] as ItemRarity) ? (obj['rarity'] as ItemRarity) : 'common',
       is_magical: Boolean(obj['is_magical']),
       weight: obj['weight'] != null ? Number(obj['weight']) : null,
-      properties: (obj['properties'] && typeof obj['properties'] === 'object' && !Array.isArray(obj['properties']))
-        ? obj['properties'] as ItemStatBonuses
-        : {},
+      properties: sanitizeStatBonuses(obj['properties']),
       image_url: null,
       image_attribution: null,
     }
@@ -187,8 +210,20 @@ Return ONLY a raw JSON array — no markdown, no explanation, just the array:
 
   async function addItem(item: GeneratedItem) {
     if (addedKeys.includes(item._key)) return
+    // Don't save while an image is still being fetched for this item
+    if (imageLoadingKeys.includes(item._key) || imageLoadingKeys.includes(`cc-${item._key}`)) return
     setPendingKeys(prev => [...prev, item._key])
     try {
+      // Persist CC attribution inside properties so it can be shown with the image later
+      const propertiesWithCredit = item.image_attribution
+        ? { ...item.properties, _image_credit: {
+            title: item.image_attribution.title,
+            author: item.image_attribution.author,
+            license: item.image_attribution.license,
+            sourceUrl: item.image_attribution.sourceUrl,
+            provider: item.image_attribution.provider,
+          } }
+        : item.properties
       await createItem.mutateAsync({
         name: item.name,
         description: item.description,
@@ -196,7 +231,7 @@ Return ONLY a raw JSON array — no markdown, no explanation, just the array:
         rarity: item.rarity,
         is_magical: item.is_magical,
         weight: item.weight,
-        properties: item.properties,
+        properties: propertiesWithCredit as ItemStatBonuses,
         image_url: item.image_url,
       })
       setAddedKeys(prev => [...prev, item._key])
@@ -641,6 +676,7 @@ Return ONLY a raw JSON array — no markdown, no explanation, just the array:
             {results.map(item => {
               const isAdded = addedKeys.includes(item._key)
               const isPending = pendingKeys.includes(item._key)
+              const isImagePending = imageLoadingKeys.includes(item._key) || imageLoadingKeys.includes(`cc-${item._key}`)
               const rarityColor = itemRarityColor[item.rarity]
               return (
                 <div
@@ -862,8 +898,8 @@ Return ONLY a raw JSON array — no markdown, no explanation, just the array:
                   <button
                     type="button"
                     onClick={() => void addItem(item)}
-                    disabled={isAdded || isPending}
-                    aria-label={isAdded ? `${item.name} is al toegevoegd` : `Voeg ${item.name} toe aan schatkist`}
+                    disabled={isAdded || isPending || isImagePending}
+                    aria-label={isAdded ? `${item.name} is al toegevoegd` : isImagePending ? `Wacht op afbeelding voor ${item.name}` : `Voeg ${item.name} toe aan schatkist`}
                     style={{
                       flexShrink: 0,
                       padding: '8px 16px',
@@ -873,7 +909,7 @@ Return ONLY a raw JSON array — no markdown, no explanation, just the array:
                       color: isAdded ? 'var(--teal)' : 'var(--ink-soft)',
                       fontFamily: 'var(--font-body)', fontSize: 10, fontWeight: 700,
                       letterSpacing: '0.14em', textTransform: 'uppercase',
-                      cursor: isAdded || isPending ? 'default' : 'pointer',
+                      cursor: isAdded || isPending || isImagePending ? 'default' : 'pointer',
                       transition: 'all var(--t-fast)',
                       display: 'inline-flex', alignItems: 'center', gap: 5,
                       whiteSpace: 'nowrap',

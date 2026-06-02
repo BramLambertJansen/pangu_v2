@@ -56,7 +56,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         n: 1,
         size: '1024x1024',
         quality: 'standard',
-        response_format: 'url',
+        response_format: 'b64_json',
       }),
     })
 
@@ -67,11 +67,30 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       })
     }
 
-    const result = await response.json() as { data: { url: string }[] }
-    const url = result.data[0]?.url
-    if (!url) return res.status(500).json({ error: 'Geen afbeelding ontvangen' })
+    const result = await response.json() as { data: { b64_json: string }[] }
+    const b64 = result.data[0]?.b64_json
+    if (!b64) return res.status(500).json({ error: 'Geen afbeelding ontvangen' })
 
-    return res.status(200).json({ url })
+    // Upload to Supabase Storage so the URL is permanent
+    const imageBuffer = Buffer.from(b64, 'base64')
+    const fileName = `items/${user.id}/${Date.now()}.png`
+
+    const { error: uploadError } = await adminClient.storage
+      .from('entity-images')
+      .upload(fileName, imageBuffer, {
+        contentType: 'image/png',
+        upsert: false,
+      })
+
+    if (uploadError) {
+      return res.status(500).json({ error: `Opslaan afbeelding mislukt: ${uploadError.message}` })
+    }
+
+    const { data: publicUrlData } = adminClient.storage
+      .from('entity-images')
+      .getPublicUrl(fileName)
+
+    return res.status(200).json({ url: publicUrlData.publicUrl })
   } catch {
     return res.status(502).json({ error: 'OpenAI niet bereikbaar' })
   }
