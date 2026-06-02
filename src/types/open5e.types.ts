@@ -18,6 +18,12 @@ export interface Open5eListResponse<T> {
 // /v2/creatures/ (was /v2/monsters/ in v1)
 // v2 restructured several fields: type is now a nested object,
 // ability scores moved to ability_scores, slug renamed to key.
+// Many list fields are returned as { as_string, data[] } objects.
+interface Open5eStringList {
+  as_string: string
+  data: Array<{ name: string; key: string; desc?: string }>
+}
+
 interface Open5eCreatureType {
   name: string
   key: string
@@ -41,10 +47,10 @@ export interface Open5eMonster {
   type: string | Open5eCreatureType
   subcategory?: string | null                     // v2 (was subtype)
   subtype?: string | null                         // v1 compat
-  alignment: string
+  alignment?: string
   armor_class: number
   hit_points: number
-  hit_dice: string
+  hit_dice?: string
   speed: Record<string, number | string>
   ability_scores?: Open5eAbilityScores            // v2 nested
   strength?: number                               // v1 compat
@@ -55,27 +61,44 @@ export interface Open5eMonster {
   charisma?: number
   challenge_rating: string | number
   cr?: number
+  proficiency_bonus?: number
   passive_perception: number
-  senses: string
-  languages: string
+  senses?: string | Open5eStringList
+  languages?: string | Open5eStringList
+  saving_throws?: string | Record<string, number> | Open5eStringList
+  skills?: string | Record<string, number> | Open5eStringList
+  damage_immunities?: string | string[] | Open5eStringList
+  damage_resistances?: string | string[] | Open5eStringList
+  damage_vulnerabilities?: string | string[] | Open5eStringList
+  condition_immunities?: string | Array<{ name: string } | string> | Open5eStringList
   desc?: string
+  special_abilities?: Array<{ name: string; desc: string }>
+  actions?: Array<{ name: string; desc: string }>
+  bonus_actions?: Array<{ name: string; desc: string }>
+  reactions?: Array<{ name: string; desc: string }>
+  legendary_desc?: string
+  legendary_actions?: Array<{ name: string; desc: string }>
+  lair_actions?: Array<{ name: string; desc: string }>
 }
 
 // /v2/magicitems/
 // Note: v2 may return type/rarity as { slug, label } objects instead of plain strings.
 export interface Open5eMagicItem {
-  slug: string
+  key: string                                     // v2 identifier
+  slug?: string                                   // v1 compat
   name: string
   document: Open5eDocument
   type: string | { slug: string; label: string }
   rarity: string | { slug: string; label: string }
-  requires_attunement: string
+  requires_attunement: string | boolean
   desc: string
+  weight?: number | null
 }
 
 // /v2/spells/
 export interface Open5eSpell {
-  slug: string
+  key: string                                     // v2 identifier
+  slug?: string                                   // v1 compat
   name: string
   document: Open5eDocument
   school: string | { slug: string; label: string }
@@ -88,5 +111,6 @@ export interface Open5eSpell {
   ritual: boolean
   desc: string
   higher_level: string
-  dnd_class: string
+  dnd_class?: string                              // v1: comma-separated string
+  classes?: Array<{ name: string } | string>      // v2: may be array
 }

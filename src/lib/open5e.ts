@@ -120,6 +120,8 @@ export function mapItemRarity(rarity: unknown): ItemRarity {
   return mapping[key] ?? 'common'
 }
 
+type ActionEntry = { name: string; desc: string }
+
 export interface BestiaryInsert {
   world_id: string
   user_id: string
@@ -143,6 +145,61 @@ export interface BestiaryInsert {
   stat_cha: number
   source: string
   source_slug: string
+  alignment: string | null
+  hit_dice: string | null
+  proficiency_bonus: number | null
+  senses: string | null
+  languages: string | null
+  saving_throws: string | null
+  skills: string | null
+  damage_immunities: string | null
+  damage_resistances: string | null
+  damage_vulnerabilities: string | null
+  condition_immunities: string | null
+  speed_details: string | null
+  special_abilities: ActionEntry[] | null
+  actions: ActionEntry[] | null
+  bonus_actions: ActionEntry[] | null
+  reactions: ActionEntry[] | null
+  legendary_desc: string | null
+  legendary_actions: ActionEntry[] | null
+  lair_actions: ActionEntry[] | null
+}
+
+function toStringList(val: unknown): string | null {
+  if (!val) return null
+  if (typeof val === 'string') return val || null
+  if (typeof val === 'object' && !Array.isArray(val)) {
+    const o = val as Record<string, unknown>
+    if (typeof o.as_string === 'string') return o.as_string || null
+  }
+  if (Array.isArray(val)) {
+    const parts = val.map(v => (typeof v === 'string' ? v : toStr(v))).filter(Boolean)
+    return parts.length ? parts.join(', ') : null
+  }
+  return toStr(val) || null
+}
+
+function formatSpeedDetails(speed: Record<string, number | string> | undefined | null): string | null {
+  if (!speed) return null
+  const parts = Object.entries(speed)
+    .filter(([, v]) => v != null && v !== 0 && v !== '')
+    .map(([k, v]) => `${k} ${v} ft.`)
+  return parts.length > 1 ? parts.join(', ') : null
+}
+
+function formatModifiers(val: unknown): string | null {
+  if (!val) return null
+  if (typeof val === 'string') return val || null
+  if (typeof val === 'object' && !Array.isArray(val)) {
+    const o = val as Record<string, unknown>
+    if (typeof o.as_string === 'string') return o.as_string || null
+    const parts = Object.entries(o)
+      .filter(([, v]) => typeof v === 'number')
+      .map(([k, v]) => `${k} ${(v as number) >= 0 ? '+' : ''}${v}`)
+    return parts.length ? parts.join(', ') : null
+  }
+  return null
 }
 
 export function mapMonsterToBestiary(
@@ -174,7 +231,26 @@ export function mapMonsterToBestiary(
     stat_wis: monster.wisdom ?? ab?.wisdom ?? 10,
     stat_cha: monster.charisma ?? ab?.charisma ?? 10,
     source: edition === '2024' ? 'srd-2024' : 'srd',
-    source_slug: monster.slug ?? monster.key,
+    source_slug: monster.key ?? monster.slug ?? '',
+    alignment: monster.alignment || null,
+    hit_dice: monster.hit_dice || null,
+    proficiency_bonus: monster.proficiency_bonus ?? null,
+    senses: toStringList(monster.senses),
+    languages: toStringList(monster.languages),
+    saving_throws: formatModifiers(monster.saving_throws),
+    skills: formatModifiers(monster.skills),
+    damage_immunities: toStringList(monster.damage_immunities),
+    damage_resistances: toStringList(monster.damage_resistances),
+    damage_vulnerabilities: toStringList(monster.damage_vulnerabilities),
+    condition_immunities: toStringList(monster.condition_immunities),
+    speed_details: formatSpeedDetails(monster.speed),
+    special_abilities: monster.special_abilities?.length ? monster.special_abilities : null,
+    actions: monster.actions?.length ? monster.actions : null,
+    bonus_actions: monster.bonus_actions?.length ? monster.bonus_actions : null,
+    reactions: monster.reactions?.length ? monster.reactions : null,
+    legendary_desc: monster.legendary_desc || null,
+    legendary_actions: monster.legendary_actions?.length ? monster.legendary_actions : null,
+    lair_actions: monster.lair_actions?.length ? monster.lair_actions : null,
   }
 }
 
@@ -206,6 +282,16 @@ export interface SpellInsert {
   source_slug: string
 }
 
+function resolveSpellClasses(spell: Open5eSpell): string[] {
+  if (Array.isArray(spell.classes)) {
+    return spell.classes.map(c => (typeof c === 'string' ? c : c.name)).filter(Boolean)
+  }
+  if (spell.dnd_class) {
+    return spell.dnd_class.split(',').map(c => c.trim()).filter(Boolean)
+  }
+  return []
+}
+
 export function mapSpellToSpell(spell: Open5eSpell, userId: string, edition: SrdEdition = '2014'): SpellInsert {
   return {
     user_id: userId,
@@ -220,9 +306,9 @@ export function mapSpellToSpell(spell: Open5eSpell, userId: string, edition: Srd
     ritual: spell.ritual ?? false,
     description: spell.desc || null,
     higher_level: spell.higher_level || null,
-    classes: spell.dnd_class ? spell.dnd_class.split(',').map(c => c.trim()).filter(Boolean) : [],
+    classes: resolveSpellClasses(spell),
     source: edition === '2024' ? 'srd-2024' : 'srd',
-    source_slug: spell.slug,
+    source_slug: spell.key ?? spell.slug ?? '',
   }
 }
 
@@ -236,9 +322,10 @@ export interface ItemInsert {
   rarity: ItemRarity
   is_magical: boolean
   quantity: number
-  weight: null
+  weight: number | null
   properties: Record<string, never>
   committed: boolean
+  requires_attunement: boolean
   source: string
   source_slug: string
 }
@@ -248,6 +335,10 @@ export function mapMagicItemToItem(
   campaignId: string,
   edition: SrdEdition = '2014',
 ): ItemInsert {
+  const requiresAttunement = typeof magicItem.requires_attunement === 'boolean'
+    ? magicItem.requires_attunement
+    : (typeof magicItem.requires_attunement === 'string' && magicItem.requires_attunement.toLowerCase().includes('requires attunement'))
+
   return {
     campaign_id: campaignId,
     character_id: null,
@@ -258,10 +349,11 @@ export function mapMagicItemToItem(
     rarity: mapItemRarity(magicItem.rarity),
     is_magical: true,
     quantity: 1,
-    weight: null,
+    weight: magicItem.weight ?? null,
     properties: {} as Record<string, never>,
     committed: true,
+    requires_attunement: requiresAttunement,
     source: edition === '2024' ? 'srd-2024' : 'srd',
-    source_slug: magicItem.slug,
+    source_slug: magicItem.key ?? magicItem.slug ?? '',
   }
 }

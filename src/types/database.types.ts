@@ -38,6 +38,25 @@ export type Database = {
           committed: boolean
           source: string | null
           source_slug: string | null
+          alignment: string | null
+          hit_dice: string | null
+          proficiency_bonus: number | null
+          senses: string | null
+          languages: string | null
+          saving_throws: string | null
+          skills: string | null
+          damage_immunities: string | null
+          damage_resistances: string | null
+          damage_vulnerabilities: string | null
+          condition_immunities: string | null
+          speed_details: string | null
+          special_abilities: Json | null
+          actions: Json | null
+          bonus_actions: Json | null
+          reactions: Json | null
+          legendary_desc: string | null
+          legendary_actions: Json | null
+          lair_actions: Json | null
           created_at: string
           updated_at: string
         }
@@ -65,6 +84,25 @@ export type Database = {
           committed?: boolean
           source?: string | null
           source_slug?: string | null
+          alignment?: string | null
+          hit_dice?: string | null
+          proficiency_bonus?: number | null
+          senses?: string | null
+          languages?: string | null
+          saving_throws?: string | null
+          skills?: string | null
+          damage_immunities?: string | null
+          damage_resistances?: string | null
+          damage_vulnerabilities?: string | null
+          condition_immunities?: string | null
+          speed_details?: string | null
+          special_abilities?: Json | null
+          actions?: Json | null
+          bonus_actions?: Json | null
+          reactions?: Json | null
+          legendary_desc?: string | null
+          legendary_actions?: Json | null
+          lair_actions?: Json | null
           created_at?: string
           updated_at?: string
         }
@@ -92,6 +130,25 @@ export type Database = {
           committed?: boolean
           source?: string | null
           source_slug?: string | null
+          alignment?: string | null
+          hit_dice?: string | null
+          proficiency_bonus?: number | null
+          senses?: string | null
+          languages?: string | null
+          saving_throws?: string | null
+          skills?: string | null
+          damage_immunities?: string | null
+          damage_resistances?: string | null
+          damage_vulnerabilities?: string | null
+          condition_immunities?: string | null
+          speed_details?: string | null
+          special_abilities?: Json | null
+          actions?: Json | null
+          bonus_actions?: Json | null
+          reactions?: Json | null
+          legendary_desc?: string | null
+          legendary_actions?: Json | null
+          lair_actions?: Json | null
           created_at?: string
           updated_at?: string
         }
@@ -868,6 +925,7 @@ export type Database = {
           weight: number | null
           properties: Json
           committed: boolean
+          requires_attunement: boolean
           source: string | null
           source_slug: string | null
           created_at: string
@@ -887,6 +945,7 @@ export type Database = {
           weight?: number | null
           properties?: Json
           committed?: boolean
+          requires_attunement?: boolean
           source?: string | null
           source_slug?: string | null
           created_at?: string
@@ -906,6 +965,7 @@ export type Database = {
           weight?: number | null
           properties?: Json
           committed?: boolean
+          requires_attunement?: boolean
           source?: string | null
           source_slug?: string | null
           created_at?: string

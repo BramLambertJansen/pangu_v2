@@ -8,8 +8,8 @@ import { CompendiumBrowser } from '@/components/compendium/CompendiumBrowser'
 import { useSpells, useDeleteSpell } from '@/hooks/queries/useSpells'
 import { useImportSpell } from '@/hooks/queries/useSrdSearch'
 import type { Open5eSpell } from '@/types/open5e.types'
-import type { SpellSchool } from '@/types/spell.types'
-import { spellSchoolLabel } from '@/lib/statusMaps'
+import type { Spell, SpellSchool } from '@/types/spell.types'
+import { spellSchoolLabel, spellSchoolColor } from '@/lib/statusMaps'
 
 const ALL_SCHOOLS: SpellSchool[] = [
   'abjuration', 'conjuration', 'divination', 'enchantment',
@@ -22,6 +22,7 @@ export default function SpellsPage() {
   const importSpell = useImportSpell()
   const [srdOpen, setSrdOpen] = useState(false)
   const [deleteId, setDeleteId] = useState<string | null>(null)
+  const [detailSpell, setDetailSpell] = useState<Spell | null>(null)
   const [schoolFilter, setSchoolFilter] = useState<SpellSchool | 'all'>('all')
   const [levelFilter, setLevelFilter] = useState<number | 'all'>('all')
 
@@ -122,7 +123,7 @@ export default function SpellsPage() {
         >
           {filtered.map(spell => (
             <li key={spell.id}>
-              <SpellCard spell={spell} onDelete={() => setDeleteId(spell.id)} />
+              <SpellCard spell={spell} onClick={() => setDetailSpell(spell)} onDelete={() => setDeleteId(spell.id)} />
             </li>
           ))}
         </ul>
@@ -136,6 +137,57 @@ export default function SpellsPage() {
           importedSlugs={importedSlugs}
           isPending={importSpell.isPending}
         />
+      </Modal>
+
+      {/* Spell detail modal */}
+      <Modal open={!!detailSpell} onClose={() => setDetailSpell(null)} title={detailSpell?.name ?? ''}>
+        {detailSpell && (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+            {/* School + level */}
+            <p style={{ margin: 0, fontSize: 13, color: spellSchoolColor[detailSpell.school], fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase' }}>
+              {detailSpell.level === 0 ? 'Kantrip' : `Niveau ${detailSpell.level}`} · {spellSchoolLabel[detailSpell.school]}
+              {detailSpell.concentration && ' · Concentratie'}
+              {detailSpell.ritual && ' · Ritueel'}
+            </p>
+
+            {/* Cast info grid */}
+            <dl style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px 16px', margin: 0, padding: '12px 16px', background: 'var(--surface-2)', borderRadius: 8, border: '1px solid var(--hairline)' }}>
+              {([
+                ['Uitwerptijd', detailSpell.casting_time],
+                ['Bereik', detailSpell.range],
+                ['Componenten', detailSpell.components],
+                ['Duur', detailSpell.duration],
+              ] as [string, string | null][]).filter(([, v]) => v).map(([label, value]) => (
+                <div key={label}>
+                  <dt style={{ fontSize: 10, fontWeight: 700, letterSpacing: '0.12em', textTransform: 'uppercase', color: 'var(--muted)', marginBottom: 2 }}>{label}</dt>
+                  <dd style={{ fontSize: 13, color: 'var(--ink-soft)', margin: 0 }}>{value}</dd>
+                </div>
+              ))}
+            </dl>
+
+            {/* Description */}
+            {detailSpell.description && (
+              <p style={{ margin: 0, fontSize: 14, lineHeight: 1.75, color: 'var(--ink-soft)', whiteSpace: 'pre-wrap' }}>
+                {detailSpell.description}
+              </p>
+            )}
+
+            {/* At higher levels */}
+            {detailSpell.higher_level && (
+              <div style={{ padding: '12px 16px', background: 'rgba(155,138,255,0.06)', borderRadius: 8, border: '1px solid rgba(155,138,255,0.18)' }}>
+                <p style={{ margin: '0 0 6px', fontSize: 10, fontWeight: 700, letterSpacing: '0.12em', textTransform: 'uppercase', color: 'var(--violet)' }}>Op hogere niveaus</p>
+                <p style={{ margin: 0, fontSize: 13, lineHeight: 1.7, color: 'var(--ink-soft)' }}>{detailSpell.higher_level}</p>
+              </div>
+            )}
+
+            {/* Classes */}
+            {detailSpell.classes.length > 0 && (
+              <p style={{ margin: 0, fontSize: 12, color: 'var(--muted)' }}>
+                <strong style={{ color: 'var(--ink-soft)' }}>Klassen:</strong> {detailSpell.classes.join(', ')}
+              </p>
+            )}
+          </div>
+        )}
       </Modal>
 
       {/* Delete confirmation */}

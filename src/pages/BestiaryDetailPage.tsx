@@ -5,7 +5,7 @@ import { queryKeys } from '@/lib/queryKeys'
 import { Spinner } from '@/components/ui/Spinner'
 import { Breadcrumb } from '@/components/ui/Breadcrumb'
 import { WorldDetailDivider } from '@/components/world/WorldDetailDivider'
-import type { BestiaryWithWorld, BestiaryStatus } from '@/types/bestiary.types'
+import type { BestiaryWithWorld, BestiaryStatus, BestiaryAction } from '@/types/bestiary.types'
 
 const statusLabel: Record<BestiaryStatus, string> = {
   draft:    'Concept',
@@ -289,6 +289,111 @@ export default function BestiaryDetailPage() {
           </div>
         </div>
       </div>
+
+      {/* Extended stat block */}
+      {(bestiary.alignment || bestiary.hit_dice || bestiary.proficiency_bonus != null ||
+        bestiary.senses || bestiary.languages || bestiary.saving_throws || bestiary.skills ||
+        bestiary.damage_immunities || bestiary.damage_resistances || bestiary.damage_vulnerabilities ||
+        bestiary.condition_immunities || bestiary.speed_details) && (
+        <>
+          <WorldDetailDivider label="Aanvullende Statistieken" />
+          <div className="pangu-surface" style={{ padding: 24 }}>
+            <dl style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(240px, 1fr))', gap: '12px 24px', margin: 0 }}>
+              {([
+                ['Uitlijning', bestiary.alignment],
+                ['Trefdobbelsteen', bestiary.hit_dice],
+                ['Vaardigheidsbonus', bestiary.proficiency_bonus != null ? `+${bestiary.proficiency_bonus}` : null],
+                ['Snelheid (details)', bestiary.speed_details],
+                ['Zintuigen', bestiary.senses],
+                ['Talen', bestiary.languages],
+                ['Reddingsgooien', bestiary.saving_throws],
+                ['Vaardigheden', bestiary.skills],
+                ['Schade immuniteiten', bestiary.damage_immunities],
+                ['Schade resistenties', bestiary.damage_resistances],
+                ['Schade kwetsbaarheden', bestiary.damage_vulnerabilities],
+                ['Conditie immuniteiten', bestiary.condition_immunities],
+              ] as [string, string | number | null][]).filter(([, v]) => v != null).map(([label, value]) => (
+                <div key={label}>
+                  <dt style={{ fontSize: 10, fontWeight: 700, letterSpacing: '0.12em', textTransform: 'uppercase', color: 'var(--muted)', marginBottom: 3 }}>
+                    {label}
+                  </dt>
+                  <dd style={{ fontSize: 14, color: 'var(--ink-soft)', margin: 0 }}>{value}</dd>
+                </div>
+              ))}
+            </dl>
+          </div>
+        </>
+      )}
+
+      {/* Combat sections */}
+      {(['special_abilities', 'actions', 'bonus_actions', 'reactions'] as const).map(section => {
+        const entries = bestiary[section] as BestiaryAction[] | null
+        if (!entries?.length) return null
+        const labels: Record<string, string> = {
+          special_abilities: 'Speciale Eigenschappen',
+          actions: 'Acties',
+          bonus_actions: 'Bonusacties',
+          reactions: 'Reacties',
+        }
+        return (
+          <div key={section}>
+            <WorldDetailDivider label={labels[section]} />
+            <div className="pangu-surface" style={{ padding: 24, display: 'flex', flexDirection: 'column', gap: 16 }}>
+              {entries.map((entry, i) => (
+                <div key={i}>
+                  <p style={{ margin: '0 0 4px', fontSize: 14, fontWeight: 700, color: 'var(--ink)' }}>
+                    <em>{entry.name}.</em>
+                  </p>
+                  <p style={{ margin: 0, fontSize: 14, lineHeight: 1.7, color: 'var(--ink-soft)', whiteSpace: 'pre-wrap' }}>
+                    {entry.desc}
+                  </p>
+                </div>
+              ))}
+            </div>
+          </div>
+        )
+      })}
+
+      {(bestiary.legendary_actions?.length || bestiary.legendary_desc) && (
+        <div>
+          <WorldDetailDivider label="Legendarische Acties" />
+          <div className="pangu-surface" style={{ padding: 24, display: 'flex', flexDirection: 'column', gap: 16 }}>
+            {bestiary.legendary_desc && (
+              <p style={{ margin: 0, fontSize: 14, lineHeight: 1.7, color: 'var(--ink-soft)', fontStyle: 'italic' }}>
+                {bestiary.legendary_desc}
+              </p>
+            )}
+            {(bestiary.legendary_actions as BestiaryAction[] | null)?.map((entry, i) => (
+              <div key={i}>
+                <p style={{ margin: '0 0 4px', fontSize: 14, fontWeight: 700, color: 'var(--ink)' }}>
+                  <em>{entry.name}.</em>
+                </p>
+                <p style={{ margin: 0, fontSize: 14, lineHeight: 1.7, color: 'var(--ink-soft)', whiteSpace: 'pre-wrap' }}>
+                  {entry.desc}
+                </p>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {(bestiary.lair_actions as BestiaryAction[] | null)?.length && (
+        <div>
+          <WorldDetailDivider label="Hol Acties" />
+          <div className="pangu-surface" style={{ padding: 24, display: 'flex', flexDirection: 'column', gap: 16 }}>
+            {(bestiary.lair_actions as BestiaryAction[]).map((entry, i) => (
+              <div key={i}>
+                <p style={{ margin: '0 0 4px', fontSize: 14, fontWeight: 700, color: 'var(--ink)' }}>
+                  <em>{entry.name}.</em>
+                </p>
+                <p style={{ margin: 0, fontSize: 14, lineHeight: 1.7, color: 'var(--ink-soft)', whiteSpace: 'pre-wrap' }}>
+                  {entry.desc}
+                </p>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
 
       {/* Description */}
       <WorldDetailDivider label="Beschrijving" />

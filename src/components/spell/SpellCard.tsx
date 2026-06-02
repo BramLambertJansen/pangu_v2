@@ -7,14 +7,15 @@ import { spellSchoolLabel, spellSchoolColor } from '@/lib/statusMaps'
 interface Props {
   spell: Spell
   onDelete?: () => void
+  onClick?: () => void
 }
 
-export const SpellCard = memo(function SpellCard({ spell, onDelete }: Props) {
+export const SpellCard = memo(function SpellCard({ spell, onDelete, onClick }: Props) {
   const gradient = pickGradient(spell.id, spellGradients)
   const levelLabel = spell.level === 0 ? 'Kantrip' : `Niveau ${spell.level}`
 
   return (
-    <EntityCard variant="compact" ariaLabel={`Spreuk: ${spell.name}`}>
+    <EntityCard variant="compact" ariaLabel={`Spreuk: ${spell.name}`} onClick={onClick}>
       <div aria-hidden="true" style={{ position: 'absolute', inset: 0, background: gradient, pointerEvents: 'none' }} />
 
       <div style={{ position: 'relative', display: 'flex', flexDirection: 'column', gap: 8, flex: 1 }}>
