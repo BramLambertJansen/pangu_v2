@@ -1,3 +1,4 @@
+import { STALE } from '@/lib/queryClient'
 import { useQuery } from '@tanstack/react-query'
 import { supabase } from '@/lib/supabase'
 import { queryKeys } from '@/lib/queryKeys'
@@ -17,6 +18,6 @@ export function useCampaignCharacters(campaignId: string | undefined) {
       return data as unknown as Character[]
     },
     enabled: !!campaignId,
-    staleTime: 1000 * 30,
+    staleTime: STALE.list,
   })
 }

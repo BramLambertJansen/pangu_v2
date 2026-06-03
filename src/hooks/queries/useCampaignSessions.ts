@@ -1,3 +1,4 @@
+import { STALE } from '@/lib/queryClient'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { useNavigate } from 'react-router-dom'
 import { toast } from 'sonner'
@@ -21,7 +22,7 @@ export function useCampaignSessions(campaignId: string | undefined) {
       return data as Session[]
     },
     enabled: !!campaignId,
-    staleTime: 1000 * 30,
+    staleTime: STALE.list,
   })
 }
 

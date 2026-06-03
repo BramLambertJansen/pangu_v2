@@ -1,3 +1,4 @@
+import { STALE } from '@/lib/queryClient'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { toast } from 'sonner'
 import { supabase } from '@/lib/supabase'
@@ -39,7 +40,7 @@ export function useEncounterWithCampaign(id: string | undefined) {
       return data as EncounterWithCampaignId
     },
     enabled: !!id,
-    staleTime: 1000 * 60,
+    staleTime: STALE.detail,
   })
 }
 
@@ -56,7 +57,7 @@ export function useEncounterFull(id: string | undefined) {
       return data as EncounterWithCampaignFull
     },
     enabled: !!id,
-    staleTime: 1000 * 60,
+    staleTime: STALE.detail,
   })
 }
 
@@ -73,7 +74,7 @@ export function useEncounterMonstersEdit(id: string | undefined) {
       return data as EncounterMonsterEdit[]
     },
     enabled: !!id,
-    staleTime: 1000 * 60,
+    staleTime: STALE.detail,
   })
 }
 

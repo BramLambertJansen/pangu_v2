@@ -1,3 +1,4 @@
+import { STALE } from '@/lib/queryClient'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { useNavigate } from 'react-router-dom'
 import { toast } from 'sonner'
@@ -20,7 +21,7 @@ export function useAllCampaignsWithWorlds() {
       if (error) throw error
       return data as CampaignWithWorldIds[]
     },
-    staleTime: 1000 * 60,
+    staleTime: STALE.detail,
   })
 }
 
@@ -38,7 +39,7 @@ export function useActiveCampaigns() {
       if (error) throw error
       return data as Campaign[]
     },
-    staleTime: 1000 * 60,
+    staleTime: STALE.detail,
   })
 }
 
@@ -81,7 +82,7 @@ export function useCampaignsByWorld(worldId: string | undefined) {
       return data as Campaign[]
     },
     enabled: !!worldId,
-    staleTime: 1000 * 60,
+    staleTime: STALE.detail,
   })
 }
 
@@ -99,7 +100,7 @@ export function useUserCampaignsWithWorld() {
       return data as CampaignWithWorld[]
     },
     enabled: !!user,
-    staleTime: 1000 * 60,
+    staleTime: STALE.detail,
   })
 }
 
@@ -170,7 +171,7 @@ export function useUserCampaignNames(userId: string | undefined) {
         .sort((a, b) => a.name.localeCompare(b.name)) as Pick<Campaign, 'id' | 'name'>[]
     },
     enabled: !!userId,
-    staleTime: 1000 * 60,
+    staleTime: STALE.detail,
   })
 }
 
@@ -189,7 +190,7 @@ export function useCampaign(id: string | undefined) {
       return data as Campaign
     },
     enabled: !!id,
-    staleTime: 1000 * 60,
+    staleTime: STALE.detail,
   })
 }
 
@@ -206,6 +207,6 @@ export function useCampaignWithWorld(id: string | undefined) {
       return data as CampaignWithWorld
     },
     enabled: !!id,
-    staleTime: 1000 * 60,
+    staleTime: STALE.detail,
   })
 }

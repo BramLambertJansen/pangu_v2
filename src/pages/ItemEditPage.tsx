@@ -18,6 +18,7 @@ function pollinationsUrl(prompt: string): string {
   return `https://image.pollinations.ai/prompt/${encodeURIComponent(prompt)}?width=512&height=512&nologo=true&model=flux&seed=${Math.floor(Math.random() * 99999)}`
 }
 import type { ItemType, ItemRarity, ItemStatBonuses } from '@/types/item.types'
+import { D5E_SKILLS } from '@/utils/dnd5e'
 
 const rarityOptions: { value: ItemRarity; label: string }[] = [
   { value: 'common',    label: 'Gewoon'          },
@@ -41,12 +42,7 @@ const typeOptions: { value: ItemType; label: string }[] = [
   { value: 'misc',     label: 'Overig'    },
 ]
 
-const SKILLS = [
-  'Atletiek', 'Acrobatiek', 'Vingervlugheid', 'Sluipen',
-  'Magie', 'Geschiedenis', 'Onderzoek', 'Natuur', 'Religie',
-  'Dierenverzorging', 'Inzicht', 'Geneeskunde', 'Waarneming', 'Overleven',
-  'Bedrog', 'Intimidatie', 'Optreden', 'Overtuigen',
-]
+const SKILLS = D5E_SKILLS.map(s => s.name)
 
 const WEAPON_TYPES: ItemType[] = ['weapon', 'staff', 'rod', 'wand']
 

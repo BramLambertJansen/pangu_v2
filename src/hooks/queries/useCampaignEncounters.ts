@@ -1,3 +1,4 @@
+import { STALE } from '@/lib/queryClient'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { useNavigate } from 'react-router-dom'
 import { toast } from 'sonner'
@@ -20,7 +21,7 @@ export function useCampaignEncounters(campaignId: string | undefined) {
       return data as Encounter[]
     },
     enabled: !!campaignId,
-    staleTime: 1000 * 30,
+    staleTime: STALE.list,
   })
 }
 

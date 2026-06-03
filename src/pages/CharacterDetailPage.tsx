@@ -25,72 +25,13 @@ import { useCharacterSpells, useAddCharacterSpell, useRemoveCharacterSpell, useT
 import { useSpells } from '@/hooks/queries/useSpells'
 import { spellSchoolLabel, spellSchoolColor } from '@/lib/statusMaps'
 
+import {
+  ABILITY_SCORES, D5E_SKILLS as SKILLS, D5E_SAVING_THROWS as SAVING_THROWS,
+  D5E_CONDITIONS as CONDITIONS, SPELL_LEVEL_LABELS, SPELLCASTING_ABILITY_LABELS,
+  formatModifier,
+} from '@/utils/dnd5e'
+
 type Tab = 'stats' | 'spreuken' | 'inventaris' | 'vaardigheden' | 'lore'
-
-interface Skill {
-  name: string
-  ability: 'stat_str' | 'stat_dex' | 'stat_con' | 'stat_int' | 'stat_wis' | 'stat_cha'
-  abbr: 'STR' | 'DEX' | 'CON' | 'INT' | 'WIS' | 'CHA'
-}
-
-const SAVING_THROWS: { label: string; abbr: string; statKey: 'stat_str' | 'stat_dex' | 'stat_con' | 'stat_int' | 'stat_wis' | 'stat_cha' }[] = [
-  { label: 'Sterkte',       abbr: 'STR', statKey: 'stat_str' },
-  { label: 'Behendigheid',  abbr: 'DEX', statKey: 'stat_dex' },
-  { label: 'Constitutie',   abbr: 'CON', statKey: 'stat_con' },
-  { label: 'Intelligentie', abbr: 'INT', statKey: 'stat_int' },
-  { label: 'Wijsheid',      abbr: 'WIS', statKey: 'stat_wis' },
-  { label: 'Charisma',      abbr: 'CHA', statKey: 'stat_cha' },
-]
-
-// D&D 5.5e conditions (including 3 new: Daas, Zwijgen, Vertraagd)
-const CONDITIONS = [
-  'Verblind', 'Betoverd', 'Daas', 'Doof', 'Gevallen', 'Beangstigd',
-  'Gegrepen', 'Buiten gevecht', 'Onzichtbaar', 'Verlamd', 'Versteend',
-  'Vergiftigd', 'Beperkt', 'Zwijgen', 'Vertraagd', 'Bedwelmd', 'Bewusteloos',
-]
-
-const SPELLCASTING_ABILITY_LABELS: Record<string, string> = {
-  int: 'Intelligentie',
-  wis: 'Wijsheid',
-  cha: 'Charisma',
-}
-
-const SPELL_LEVEL_LABELS = ['1e', '2e', '3e', '4e', '5e', '6e', '7e', '8e', '9e']
-
-const SKILLS: Skill[] = [
-  { name: 'Atletiek',         ability: 'stat_str', abbr: 'STR' },
-  { name: 'Acrobatiek',       ability: 'stat_dex', abbr: 'DEX' },
-  { name: 'Vingervlugheid',   ability: 'stat_dex', abbr: 'DEX' },
-  { name: 'Sluipen',          ability: 'stat_dex', abbr: 'DEX' },
-  { name: 'Magie',            ability: 'stat_int', abbr: 'INT' },
-  { name: 'Geschiedenis',     ability: 'stat_int', abbr: 'INT' },
-  { name: 'Onderzoek',        ability: 'stat_int', abbr: 'INT' },
-  { name: 'Natuur',           ability: 'stat_int', abbr: 'INT' },
-  { name: 'Religie',          ability: 'stat_int', abbr: 'INT' },
-  { name: 'Dierenverzorging', ability: 'stat_wis', abbr: 'WIS' },
-  { name: 'Inzicht',          ability: 'stat_wis', abbr: 'WIS' },
-  { name: 'Geneeskunde',      ability: 'stat_wis', abbr: 'WIS' },
-  { name: 'Waarneming',       ability: 'stat_wis', abbr: 'WIS' },
-  { name: 'Overleven',        ability: 'stat_wis', abbr: 'WIS' },
-  { name: 'Bedrog',           ability: 'stat_cha', abbr: 'CHA' },
-  { name: 'Intimidatie',      ability: 'stat_cha', abbr: 'CHA' },
-  { name: 'Optreden',         ability: 'stat_cha', abbr: 'CHA' },
-  { name: 'Overtuigen',       ability: 'stat_cha', abbr: 'CHA' },
-]
-
-const abilityScores: { key: keyof Character; abbr: string; label: string; englishLabel: string; savingThrowLabel: string }[] = [
-  { key: 'stat_str', abbr: 'STR', label: 'Sterkte',       englishLabel: 'Strength',     savingThrowLabel: 'Sterkte'       },
-  { key: 'stat_dex', abbr: 'DEX', label: 'Behendigheid',  englishLabel: 'Dexterity',    savingThrowLabel: 'Behendigheid'  },
-  { key: 'stat_con', abbr: 'CON', label: 'Constitutie',   englishLabel: 'Constitution', savingThrowLabel: 'Constitutie'   },
-  { key: 'stat_int', abbr: 'INT', label: 'Intelligentie', englishLabel: 'Intelligence', savingThrowLabel: 'Intelligentie' },
-  { key: 'stat_wis', abbr: 'WIS', label: 'Wijsheid',      englishLabel: 'Wisdom',       savingThrowLabel: 'Wijsheid'      },
-  { key: 'stat_cha', abbr: 'CHA', label: 'Charisma',      englishLabel: 'Charisma',     savingThrowLabel: 'Charisma'      },
-]
-
-function abilityModifier(score: number): string {
-  const mod = Math.floor((score - 10) / 2)
-  return mod >= 0 ? `+${mod}` : `${mod}`
-}
 
 function formatXP(n: number | null | undefined): string {
   return (n ?? 0).toLocaleString('nl-NL')
@@ -835,13 +776,13 @@ export default function CharacterDetailPage() {
 
         {/* Ability scores */}
         <div className="char-ability-grid">
-          {abilityScores.map(({ key, abbr, label, savingThrowLabel }) => {
+          {ABILITY_SCORES.map(({ key, abbr, label }) => {
             const baseScore = character[key] as number
             const effKey = key.replace('stat_', '') as 'str' | 'dex' | 'con' | 'int' | 'wis' | 'cha'
             const effectiveScore = eff[effKey]
             const bonus = effectiveScore - baseScore
-            const mod = abilityModifier(effectiveScore)
-            const isSaveProficient = (character.saving_throw_proficiencies ?? []).includes(savingThrowLabel)
+            const mod = formatModifier(effectiveScore)
+            const isSaveProficient = (character.saving_throw_proficiencies ?? []).includes(label)
             return (
               <div
                 key={key}

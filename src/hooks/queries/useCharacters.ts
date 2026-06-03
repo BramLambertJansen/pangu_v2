@@ -1,3 +1,4 @@
+import { STALE } from '@/lib/queryClient'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { useNavigate } from 'react-router-dom'
 import { toast } from 'sonner'
@@ -22,7 +23,7 @@ export function useCharacters() {
       return data as unknown as Character[]
     },
     enabled: !!user,
-    staleTime: 30_000,
+    staleTime: STALE.list,
   })
 }
 
@@ -71,6 +72,6 @@ export function useUnassignedCharacters() {
       return data as unknown as Character[]
     },
     enabled: !!user,
-    staleTime: 30_000,
+    staleTime: STALE.list,
   })
 }

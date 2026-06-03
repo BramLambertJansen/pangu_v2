@@ -11,36 +11,7 @@ import { useCharacter, useSaveCharacter, useDeleteCharacter } from '@/hooks/quer
 import { useUserCampaignNames } from '@/hooks/queries/useCampaign'
 import { useAuthStore } from '@/stores/auth.store'
 import type { CharacterStatus, HitDie, SpellcastingAbility, SpellSlots, SpellSlotLevel, ClassResources } from '@/types/character.types'
-
-const SKILLS: { name: string; ability: string; abbr: string }[] = [
-  { name: 'Atletiek',          ability: 'Sterkte',       abbr: 'STR' },
-  { name: 'Acrobatiek',        ability: 'Behendigheid',  abbr: 'DEX' },
-  { name: 'Vingervlugheid',    ability: 'Behendigheid',  abbr: 'DEX' },
-  { name: 'Sluipen',           ability: 'Behendigheid',  abbr: 'DEX' },
-  { name: 'Magie',             ability: 'Intelligentie', abbr: 'INT' },
-  { name: 'Geschiedenis',      ability: 'Intelligentie', abbr: 'INT' },
-  { name: 'Onderzoek',         ability: 'Intelligentie', abbr: 'INT' },
-  { name: 'Natuur',            ability: 'Intelligentie', abbr: 'INT' },
-  { name: 'Religie',           ability: 'Intelligentie', abbr: 'INT' },
-  { name: 'Dierenverzorging',  ability: 'Wijsheid',      abbr: 'WIS' },
-  { name: 'Inzicht',           ability: 'Wijsheid',      abbr: 'WIS' },
-  { name: 'Geneeskunde',       ability: 'Wijsheid',      abbr: 'WIS' },
-  { name: 'Waarneming',        ability: 'Wijsheid',      abbr: 'WIS' },
-  { name: 'Overleven',         ability: 'Wijsheid',      abbr: 'WIS' },
-  { name: 'Bedrog',            ability: 'Charisma',      abbr: 'CHA' },
-  { name: 'Intimidatie',       ability: 'Charisma',      abbr: 'CHA' },
-  { name: 'Optreden',          ability: 'Charisma',      abbr: 'CHA' },
-  { name: 'Overtuigen',        ability: 'Charisma',      abbr: 'CHA' },
-]
-
-const SAVING_THROWS: { label: string; abbr: string }[] = [
-  { label: 'Sterkte',       abbr: 'STR' },
-  { label: 'Behendigheid',  abbr: 'DEX' },
-  { label: 'Constitutie',   abbr: 'CON' },
-  { label: 'Intelligentie', abbr: 'INT' },
-  { label: 'Wijsheid',      abbr: 'WIS' },
-  { label: 'Charisma',      abbr: 'CHA' },
-]
+import { D5E_SKILLS as SKILLS, D5E_SAVING_THROWS as SAVING_THROWS, SPELL_LEVELS } from '@/utils/dnd5e'
 
 const LANGUAGES_PRESET = [
   'Gemeen', 'Elfisch', 'Dwergs', 'Halflings', 'Gnooms', 'Orks',
@@ -57,8 +28,6 @@ const CLASS_RESOURCE_PRESETS = [
   'Ki-punten', 'Woede', 'Bardische Inspiratie', 'Superioriteitsdob belstenen',
   'Toverijpunten', 'Goddelijke gunst', 'Wilde gedaante', 'Sluipaanval',
 ]
-
-const SPELL_LEVELS = ['1', '2', '3', '4', '5', '6', '7', '8', '9'] as const
 
 const HIT_DIE_OPTIONS: HitDie[] = ['d6', 'd8', 'd10', 'd12']
 

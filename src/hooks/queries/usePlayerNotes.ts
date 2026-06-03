@@ -1,3 +1,4 @@
+import { STALE } from '@/lib/queryClient'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { supabase } from '@/lib/supabase'
 import { queryKeys } from '@/lib/queryKeys'
@@ -19,7 +20,7 @@ export function useMySessionNote(sessionId: string | undefined) {
       return data as PlayerNote | null
     },
     enabled: !!sessionId && !!user,
-    staleTime: 1000 * 30,
+    staleTime: STALE.list,
   })
 }
 
@@ -36,7 +37,7 @@ export function useSessionPlayerNotes(sessionId: string | undefined) {
       return (data ?? []) as PlayerNoteWithCharacter[]
     },
     enabled: !!sessionId,
-    staleTime: 1000 * 30,
+    staleTime: STALE.list,
   })
 }
 

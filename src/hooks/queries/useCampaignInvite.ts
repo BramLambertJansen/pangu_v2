@@ -1,3 +1,4 @@
+import { STALE } from '@/lib/queryClient'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { toast } from 'sonner'
 import { supabase } from '@/lib/supabase'
@@ -19,7 +20,7 @@ export function useCampaignInvite(campaignId: string | undefined) {
       return data.invite_code
     },
     enabled: !!campaignId,
-    staleTime: 1000 * 60 * 5,
+    staleTime: STALE.slow,
   })
 }
 
@@ -70,7 +71,7 @@ export function useCampaignByInviteCode(code: string | undefined) {
       return data
     },
     enabled: !!code,
-    staleTime: 1000 * 60 * 2,
+    staleTime: 2 * STALE.detail,
   })
 }
 
@@ -146,6 +147,6 @@ export function useCampaignMembers(campaignId: string | undefined) {
       return data as unknown as CampaignMemberWithProfile[]
     },
     enabled: !!campaignId,
-    staleTime: 1000 * 60,
+    staleTime: STALE.detail,
   })
 }

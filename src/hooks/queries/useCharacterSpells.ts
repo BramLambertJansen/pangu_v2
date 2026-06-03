@@ -1,3 +1,4 @@
+import { STALE } from '@/lib/queryClient'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { toast } from 'sonner'
 import { supabase } from '@/lib/supabase'
@@ -17,7 +18,7 @@ export function useCharacterSpells(characterId: string | undefined) {
   return useQuery({
     queryKey: queryKeys.characters.spells(characterId ?? ''),
     enabled: !!characterId,
-    staleTime: 1000 * 60,
+    staleTime: STALE.detail,
     queryFn: async () => {
       const { data, error } = await supabase
         .from('character_spells')

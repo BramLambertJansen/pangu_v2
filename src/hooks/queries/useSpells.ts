@@ -1,3 +1,4 @@
+import { STALE } from '@/lib/queryClient'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { toast } from 'sonner'
 import { supabase } from '@/lib/supabase'
@@ -19,7 +20,7 @@ export function useSpells() {
       return data as Spell[]
     },
     enabled: !!user,
-    staleTime: 1000 * 60,
+    staleTime: STALE.detail,
   })
 }
 
