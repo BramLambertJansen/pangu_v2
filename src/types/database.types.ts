@@ -475,6 +475,7 @@ export type Database = {
           notes: string | null
           status: string
           npc_role: string | null
+          faction_id: string | null
           committed: boolean
           created_at: string
           updated_at: string
@@ -489,6 +490,7 @@ export type Database = {
           notes?: string | null
           status?: string
           npc_role?: string | null
+          faction_id?: string | null
           committed?: boolean
           created_at?: string
           updated_at?: string
@@ -503,6 +505,7 @@ export type Database = {
           notes?: string | null
           status?: string
           npc_role?: string | null
+          faction_id?: string | null
           committed?: boolean
           created_at?: string
           updated_at?: string
@@ -512,6 +515,12 @@ export type Database = {
             foreignKeyName: 'npcs_campaign_id_fkey'
             columns: ['campaign_id']
             referencedRelation: 'campaigns'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'npcs_faction_id_fkey'
+            columns: ['faction_id']
+            referencedRelation: 'factions'
             referencedColumns: ['id']
           }
         ]
@@ -1214,6 +1223,131 @@ export type Database = {
             referencedColumns: ['id']
           }
         ]
+      }
+      entity_links: {
+        Row: {
+          id: string
+          campaign_id: string
+          from_type: string
+          from_id: string
+          to_type: string
+          to_id: string
+          relation: string
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          campaign_id: string
+          from_type: string
+          from_id: string
+          to_type: string
+          to_id: string
+          relation?: string
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          campaign_id?: string
+          from_type?: string
+          from_id?: string
+          to_type?: string
+          to_id?: string
+          relation?: string
+          created_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: 'entity_links_campaign_id_fkey'
+            columns: ['campaign_id']
+            referencedRelation: 'campaigns'
+            referencedColumns: ['id']
+          }
+        ]
+      }
+      factions: {
+        Row: {
+          id: string
+          campaign_id: string
+          user_id: string
+          name: string
+          subtitle: string | null
+          type: string | null
+          reputation: string
+          status: string
+          motto: string | null
+          goals: string | null
+          description: string | null
+          notes: string | null
+          committed: boolean
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          campaign_id: string
+          user_id: string
+          name?: string
+          subtitle?: string | null
+          type?: string | null
+          reputation?: string
+          status?: string
+          motto?: string | null
+          goals?: string | null
+          description?: string | null
+          notes?: string | null
+          committed?: boolean
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          campaign_id?: string
+          user_id?: string
+          name?: string
+          subtitle?: string | null
+          type?: string | null
+          reputation?: string
+          status?: string
+          motto?: string | null
+          goals?: string | null
+          description?: string | null
+          notes?: string | null
+          committed?: boolean
+          created_at?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: 'factions_campaign_id_fkey'
+            columns: ['campaign_id']
+            referencedRelation: 'campaigns'
+            referencedColumns: ['id']
+          }
+        ]
+      }
+      user_ai_settings: {
+        Row: {
+          user_id: string
+          byok_keys: Json
+          preferred_provider: string | null
+          preferred_model: string | null
+          updated_at: string
+        }
+        Insert: {
+          user_id: string
+          byok_keys?: Json
+          preferred_provider?: string | null
+          preferred_model?: string | null
+          updated_at?: string
+        }
+        Update: {
+          user_id?: string
+          byok_keys?: Json
+          preferred_provider?: string | null
+          preferred_model?: string | null
+          updated_at?: string
+        }
+        Relationships: []
       }
     }
     Views: {

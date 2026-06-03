@@ -1,14 +1,9 @@
 import { STALE } from '@/lib/queryClient'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { toast } from 'sonner'
-import type { SupabaseClient } from '@supabase/supabase-js'
 import { supabase } from '@/lib/supabase'
 import { queryKeys } from '@/lib/queryKeys'
 import type { Npc } from '@/types/npc.types'
-
-// faction_id column on npcs is not yet in database.types.ts — migration 040 adds it but
-// types are regenerated after the migration runs on the live database.
-const db = supabase as unknown as SupabaseClient
 
 type NpcWithCampaign = Npc & {
   campaigns: { id: string; name: string; world_id: string; worlds: { id: string; name: string } | null } | null
@@ -36,7 +31,7 @@ export function useNpcFull(id: string | undefined) {
   return useQuery<NpcWithCampaign>({
     queryKey: queryKeys.campaigns.npcDetailFull(id!),
     queryFn: async () => {
-      const { data, error } = await db
+      const { data, error } = await supabase
         .from('npcs')
         .select('*, campaigns(id, name, world_id, worlds(id, name)), factions(id, name)')
         .eq('id', id!)
@@ -53,7 +48,7 @@ export function useSaveNpc(id: string) {
   const queryClient = useQueryClient()
   return useMutation({
     mutationFn: async (form: Partial<Npc> & { oldFactionId?: string | null }) => {
-      const { error } = await db
+      const { error } = await supabase
         .from('npcs')
         .update({
           name: form.name,

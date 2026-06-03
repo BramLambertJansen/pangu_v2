@@ -1,15 +1,9 @@
 import { STALE } from '@/lib/queryClient'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { toast } from 'sonner'
-import type { SupabaseClient } from '@supabase/supabase-js'
 import { supabase } from '@/lib/supabase'
 import { queryKeys } from '@/lib/queryKeys'
 import type { LinkableEntityType, LinkRelation, EntityLink, ResolvedLink } from '@/types/link.types'
-
-// entity_links is not yet in database.types.ts — migration 038 adds the table but types can only
-// be regenerated once the migration has been applied to the live database. Cast to the unparameterized
-// SupabaseClient so the typed client accepts .from('entity_links') until then.
-const db = supabase as unknown as SupabaseClient
 
 // DEV_MODE has no .or() support in the LocalQueryBuilder, so we fetch
 // from both directions separately and merge in JS. This applies in both
@@ -46,7 +40,7 @@ async function resolveNames(
   for (const [type, ids] of grouped.entries()) {
     // Items have no status column — select only id and name to avoid a column error
     const cols = type === 'item' ? 'id, name' : 'id, name, status'
-    const { data } = await db
+    const { data } = await supabase
       .from(typeToTable[type])
       .select(cols)
       .in('id', ids)
@@ -65,8 +59,8 @@ export function useEntityLinks(type: LinkableEntityType, id: string) {
     queryKey: queryKeys.entityLinks(type, id),
     queryFn: async () => {
       const [fromResult, toResult] = await Promise.all([
-        db.from('entity_links').select('*').eq('from_type', type).eq('from_id', id),
-        db.from('entity_links').select('*').eq('to_type', type).eq('to_id', id),
+        supabase.from('entity_links').select('*').eq('from_type', type).eq('from_id', id),
+        supabase.from('entity_links').select('*').eq('to_type', type).eq('to_id', id),
       ])
 
       if (fromResult.error) throw fromResult.error
@@ -134,7 +128,7 @@ export function useCreateLink() {
   const queryClient = useQueryClient()
   return useMutation({
     mutationFn: async (vars: CreateLinkVars) => {
-      const { error } = await db.from('entity_links').insert(vars)
+      const { error } = await supabase.from('entity_links').insert(vars)
       if (error) throw error
     },
     onSuccess: (_data, vars) => {
@@ -160,7 +154,7 @@ export function useDeleteLink() {
   const queryClient = useQueryClient()
   return useMutation({
     mutationFn: async ({ linkId }: DeleteLinkVars) => {
-      const { error } = await db.from('entity_links').delete().eq('id', linkId)
+      const { error } = await supabase.from('entity_links').delete().eq('id', linkId)
       if (error) throw error
     },
     onSuccess: (_data, vars) => {
