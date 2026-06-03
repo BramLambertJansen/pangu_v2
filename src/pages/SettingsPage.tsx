@@ -5,12 +5,12 @@ import { Spinner } from '@/components/ui/Spinner'
 import { Button } from '@/components/ui/Button'
 import { UserTable } from '@/components/admin/UserTable'
 import { CreateUserModal } from '@/components/admin/CreateUserModal'
-import { useMutation } from '@tanstack/react-query'
 import { toast } from 'sonner'
 import { supabase } from '@/lib/supabase'
 import { useAuthStore } from '@/stores/auth.store'
 import { usePreferencesStore, type PreferencesLanguage } from '@/stores/preferences.store'
 import { useUserAISettings, useSetByokKey } from '@/hooks/queries/useUserAISettings'
+import { useUpdateProfile } from '@/hooks/queries/useProfile'
 import { useAI } from '@/hooks/useAI'
 import type { Provider } from '@/types/ai'
 
@@ -128,36 +128,7 @@ function ProfielTab() {
     }
   }
 
-  const mutation = useMutation({
-    mutationFn: async () => {
-      if (!profile) throw new Error('no_profile')
-      const newErrors: Partial<Record<keyof ProfileForm, string>> = {}
-      if (!form.display_name.trim()) newErrors.display_name = 'Weergavenaam is verplicht'
-      if (Object.keys(newErrors).length) {
-        setErrors(newErrors)
-        throw new Error('validation')
-      }
-      const { data, error } = await supabase
-        .from('profiles')
-        .update({
-          display_name: form.display_name.trim(),
-          pronouns: form.pronouns.trim() || null,
-          bio: form.bio.trim() || null,
-        })
-        .eq('id', profile.id)
-        .select()
-        .single()
-      if (error) throw error
-      return data
-    },
-    onSuccess: (data) => {
-      setProfile({ ...profile!, ...data })
-      toast.success('Profiel opgeslagen')
-    },
-    onError: (err: Error) => {
-      if (err.message !== 'validation' && err.message !== 'no_profile') toast.error('Opslaan mislukt')
-    },
-  })
+  const updateProfile = useUpdateProfile()
 
   function handleCancel() {
     setForm({
@@ -307,10 +278,16 @@ function ProfielTab() {
         <button
           type="button"
           className="pangu-btn pangu-btn-primary"
-          onClick={() => mutation.mutate()}
-          disabled={!hasChanges || mutation.isPending}
+          onClick={() => {
+            const newErrors: Partial<Record<keyof ProfileForm, string>> = {}
+            if (!form.display_name.trim()) newErrors.display_name = 'Weergavenaam is verplicht'
+            if (Object.keys(newErrors).length) { setErrors(newErrors); return }
+            setErrors({})
+            updateProfile.mutate({ display_name: form.display_name, pronouns: form.pronouns, bio: form.bio })
+          }}
+          disabled={!hasChanges || updateProfile.isPending}
         >
-          {mutation.isPending ? 'Opslaan...' : 'Opslaan'}
+          {updateProfile.isPending ? 'Opslaan...' : 'Opslaan'}
         </button>
       </div>
     </div>

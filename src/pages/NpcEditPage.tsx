@@ -1,21 +1,14 @@
 import { useId, useState } from 'react'
 import { useParams, useNavigate, useLocation } from 'react-router-dom'
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { toast } from 'sonner'
-import type { SupabaseClient } from '@supabase/supabase-js'
-import { supabase } from '@/lib/supabase'
-
-// faction_id column on npcs is not yet in database.types.ts — migration 040 adds it but
-// types are regenerated after the migration runs on the live database.
-const db = supabase as unknown as SupabaseClient
-import { queryKeys } from '@/lib/queryKeys'
 import { Modal } from '@/components/ui/Modal'
 import { ConfirmDialog } from '@/components/ui/ConfirmDialog'
 import { Spinner } from '@/components/ui/Spinner'
 import { useEntityEdit } from '@/hooks/useEntityEdit'
 import { useAI } from '@/hooks/useAI'
+import { useNpc, useSaveNpc, useDeleteNpc } from '@/hooks/queries/useNpc'
 import { useCampaignFactions } from '@/hooks/queries/useCampaignFactions'
-import type { Npc, NpcStatus } from '@/types/npc.types'
+import type { NpcStatus } from '@/types/npc.types'
 
 const statusOptions: { value: NpcStatus; label: string }[] = [
   { value: 'draft',    label: 'Concept'        },
@@ -28,7 +21,6 @@ export default function NpcEditPage() {
   const { id } = useParams<{ id: string }>()
   const navigate = useNavigate()
   const location = useLocation()
-  const queryClient = useQueryClient()
 
   const descriptionId = useId()
   const notesId = useId()
@@ -43,20 +35,9 @@ export default function NpcEditPage() {
   const isNew = locationState?.isNew ?? false
   const campaignIdFromState = locationState?.campaignId
 
-  const { data: npcData, isLoading } = useQuery<Npc>({
-    queryKey: queryKeys.campaigns.npcDetail(id!),
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from('npcs')
-        .select('*')
-        .eq('id', id!)
-        .single()
-      if (error) throw error
-      return data as Npc
-    },
-    enabled: !!id,
-    staleTime: 1000 * 60,
-  })
+  const { data: npcData, isLoading } = useNpc(id)
+  const saveNpc = useSaveNpc(id!)
+  const deleteNpc = useDeleteNpc(id!)
 
   const {
     form, set, dirty, setDirty,
@@ -68,71 +49,12 @@ export default function NpcEditPage() {
   const campaignId = npcData?.campaign_id ?? campaignIdFromState
   const { data: factions } = useCampaignFactions(npcData?.campaign_id ?? campaignIdFromState)
 
-  const saveNpc = useMutation({
-    mutationFn: async () => {
-      const { error } = await db
-        .from('npcs')
-        .update({
-          name: form.name,
-          subtitle: form.subtitle,
-          description: form.description,
-          notes: form.notes,
-          status: form.status,
-          npc_role: form.npc_role ?? null,
-          faction_id: form.faction_id ?? null,
-          committed: true,
-          updated_at: new Date().toISOString(),
-        })
-        .eq('id', id!)
-      if (error) throw error
-    },
-    onSuccess: () => {
-      if (campaignId) {
-        queryClient.invalidateQueries({ queryKey: queryKeys.campaigns.npcs(campaignId) })
-      }
-      queryClient.invalidateQueries({ queryKey: queryKeys.campaigns.npcDetail(id!) })
-      // Invalidate faction member lists for old and new faction (faction_id may have changed)
-      const oldFactionId = npcData?.faction_id
-      const newFactionId = form.faction_id
-      if (oldFactionId) queryClient.invalidateQueries({ queryKey: queryKeys.campaigns.factionMembers(oldFactionId) })
-      if (newFactionId && newFactionId !== oldFactionId) queryClient.invalidateQueries({ queryKey: queryKeys.campaigns.factionMembers(newFactionId) })
-      setCommitted(true)
-      setDirty(false)
-    },
-    onError: () => {
-      toast.error('Opslaan mislukt')
-    },
-  })
-
-  const deleteNpc = useMutation({
-    mutationFn: async () => {
-      const { error } = await supabase.from('npcs').delete().eq('id', id!)
-      if (error) throw error
-    },
-    onSuccess: () => {
-      queryClient.removeQueries({ queryKey: queryKeys.campaigns.npcDetail(id!) })
-      // NPC removed from faction — invalidate that faction's member list
-      const factionId = npcData?.faction_id
-      if (factionId) queryClient.invalidateQueries({ queryKey: queryKeys.campaigns.factionMembers(factionId) })
-      if (campaignId) {
-        queryClient.invalidateQueries({ queryKey: queryKeys.campaigns.npcs(campaignId) })
-        navigate(`/campaigns/${campaignId}/npcs`)
-      } else {
-        navigate('/dashboard')
-      }
-    },
-    onError: () => {
-      toast.error('Verwijderen mislukt')
-    },
-  })
-
   async function handleDiscardConfirm() {
     if (guard.isDraftDiscard) {
-      const { error } = await supabase.from('npcs').delete().eq('id', id!)
-      if (error) { toast.error('Verwijderen mislukt'); return }
-      queryClient.removeQueries({ queryKey: queryKeys.campaigns.npcDetail(id!) })
-      if (campaignId) {
-        queryClient.invalidateQueries({ queryKey: queryKeys.campaigns.npcs(campaignId) })
+      try {
+        await deleteNpc.mutateAsync({ campaignId, factionId: npcData?.faction_id })
+      } catch {
+        return
       }
     }
     const handled = guard.confirmLeave()
@@ -200,19 +122,23 @@ export default function NpcEditPage() {
   }
 
   function handleSave() {
-    toast.promise(saveNpc.mutateAsync(), {
-      loading: 'Opslaan...',
-      success: 'NPC opgeslagen',
-      error: 'Opslaan mislukt',
-    })
+    toast.promise(
+      saveNpc.mutateAsync({ ...form, oldFactionId: npcData?.faction_id }).then(() => {
+        setCommitted(true)
+        setDirty(false)
+      }),
+      { loading: 'Opslaan...', success: 'NPC opgeslagen', error: 'Opslaan mislukt' },
+    )
   }
 
   function handleDelete() {
-    toast.promise(deleteNpc.mutateAsync(), {
-      loading: 'Verwijderen...',
-      success: 'NPC verwijderd',
-      error: 'Verwijderen mislukt',
-    })
+    toast.promise(
+      deleteNpc.mutateAsync({ campaignId, factionId: npcData?.faction_id }).then(() => {
+        if (campaignId) navigate(`/campaigns/${campaignId}/npcs`)
+        else navigate('/dashboard')
+      }),
+      { loading: 'Verwijderen...', success: 'NPC verwijderd', error: 'Verwijderen mislukt' },
+    )
     setDeleteOpen(false)
   }
 

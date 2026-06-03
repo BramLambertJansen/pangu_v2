@@ -1,57 +1,25 @@
 import { useState, useMemo } from 'react'
-import { useQuery } from '@tanstack/react-query'
 import { Spinner } from '@/components/ui/Spinner'
 import { EmptyState } from '@/components/ui/EmptyState'
 import { Modal } from '@/components/ui/Modal'
 import { CompendiumBrowser } from '@/components/compendium/CompendiumBrowser'
-import { supabase } from '@/lib/supabase'
-import { queryKeys } from '@/lib/queryKeys'
 import { useImportMagicItem } from '@/hooks/queries/useSrdSearch'
-import { useAuthStore } from '@/stores/auth.store'
+import { useUserCampaignsWithWorld } from '@/hooks/queries/useCampaign'
+import { useCampaignItems } from '@/hooks/queries/useCampaignItems'
 import type { Open5eMagicItem } from '@/types/open5e.types'
-import type { CampaignWithWorld } from '@/hooks/queries/useCampaign'
 import { itemRarityLabel, itemRarityColor, itemTypeLabel } from '@/lib/statusMaps'
 import type { Item } from '@/types/item.types'
 
 export default function ItemsPage() {
-  const user = useAuthStore(s => s.user)
   const [srdOpen, setSrdOpen] = useState(false)
   const [selectedCampaignId, setSelectedCampaignId] = useState<string | null>(null)
   const [detailItem, setDetailItem] = useState<Item | null>(null)
 
-  // All user campaigns (across all worlds)
-  const { data: campaigns, isLoading: campaignsLoading } = useQuery<CampaignWithWorld[]>({
-    queryKey: [...queryKeys.campaigns.all, 'my-with-world'],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from('campaigns')
-        .select('*, worlds(name)')
-        .eq('user_id', user!.id)
-        .order('created_at', { ascending: false })
-      if (error) throw error
-      return data as CampaignWithWorld[]
-    },
-    enabled: !!user,
-    staleTime: 1000 * 60,
-  })
+  const { data: campaigns, isLoading: campaignsLoading } = useUserCampaignsWithWorld()
 
   const activeCampaignId = selectedCampaignId ?? campaigns?.[0]?.id ?? null
 
-  // Items for the selected campaign
-  const { data: items, isLoading: itemsLoading } = useQuery<Item[]>({
-    queryKey: queryKeys.items.byCampaign(activeCampaignId!),
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from('items')
-        .select('*')
-        .eq('campaign_id', activeCampaignId!)
-        .order('created_at', { ascending: false })
-      if (error) throw error
-      return data as Item[]
-    },
-    enabled: !!activeCampaignId,
-    staleTime: 1000 * 30,
-  })
+  const { data: items, isLoading: itemsLoading } = useCampaignItems(activeCampaignId ?? undefined)
 
   const importMutation = useImportMagicItem(activeCampaignId ?? '')
 

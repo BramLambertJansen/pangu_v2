@@ -1,19 +1,16 @@
-import { useState, useEffect, useMemo, useRef } from 'react'
+import { useState, useMemo, useRef } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
-import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { toast } from 'sonner'
-import { supabase } from '@/lib/supabase'
-import { queryKeys } from '@/lib/queryKeys'
-import { useAuthStore } from '@/stores/auth.store'
 import { useAI } from '@/hooks/useAI'
 import { Spinner } from '@/components/ui/Spinner'
 import { Modal } from '@/components/ui/Modal'
 import { ItemCard, ForgeItemCard } from '@/components/item/ItemCard'
 import { CompendiumBrowser } from '@/components/compendium/CompendiumBrowser'
 import { useCampaignWithWorld } from '@/hooks/queries/useCampaign'
-import { useCampaignItems } from '@/hooks/queries/useCampaignItems'
+import { useCampaignItems, useForgeCampaignItem, useCreateCampaignItem } from '@/hooks/queries/useCampaignItems'
 import { useCampaignCharacters } from '@/hooks/queries/useCampaignCharacters'
 import { useImportMagicItem } from '@/hooks/queries/useSrdSearch'
+import { useDraftGC } from '@/hooks/useDraftGC'
 import { Breadcrumb } from '@/components/ui/Breadcrumb'
 import { itemTypeLabel, itemRarityLabel } from '@/lib/statusMaps'
 import type { Item, ItemType, ItemRarity } from '@/types/item.types'
@@ -27,8 +24,6 @@ type FilterTab = 'all' | 'unassigned' | string  // string = character id
 export default function CampaignItemsPage() {
   const { id } = useParams<{ id: string }>()
   const navigate = useNavigate()
-  const queryClient = useQueryClient()
-  const user = useAuthStore(s => s.user)
 
   const [activeTab, setActiveTab] = useState<FilterTab>('all')
   const [srdOpen, setSrdOpen] = useState(false)
@@ -40,52 +35,15 @@ export default function CampaignItemsPage() {
   const { data: campaign, isLoading: isLoadingCampaign } = useCampaignWithWorld(id)
   const { data: items, isLoading: isLoadingItems } = useCampaignItems(id)
   const { data: characters, isLoading: isLoadingCharacters } = useCampaignCharacters(id)
+  const createItem = useForgeCampaignItem(id!)
+  const createAIItem = useCreateCampaignItem(id!)
   const importItem = useImportMagicItem(id ?? '')
   const importedSlugs = useMemo(
     () => (items ?? []).map(it => it.source_slug).filter((s): s is string => s !== null),
     [items],
   )
 
-  // Garbage-collect uncommitted drafts older than 30 minutes
-  useEffect(() => {
-    if (!id) return
-    const cutoff = new Date(Date.now() - 30 * 60 * 1000).toISOString()
-    void (async () => {
-      try {
-      const { data } = await supabase
-        .from('items')
-        .select('id')
-        .eq('campaign_id', id)
-        .eq('committed', false)
-        .lt('created_at', cutoff)
-      if (data?.length) {
-        await supabase.from('items').delete().in('id', data.map((r) => r.id))
-      }
-      } catch (err) {
-        console.warn("[GC] draft cleanup failed:", err)
-      }
-    })()
-  }, [id])
-
-  const createItem = useMutation({
-    mutationFn: async () => {
-      if (!user) throw new Error('Niet ingelogd')
-      const { data, error } = await supabase
-        .from('items')
-        .insert({ campaign_id: id!, name: 'Nieuw item', item_type: 'misc', rarity: 'common', is_magical: false, quantity: 1 })
-        .select()
-        .single()
-      if (error) throw error
-      return data as Item
-    },
-    onSuccess: (newItem) => {
-      queryClient.invalidateQueries({ queryKey: queryKeys.items.byCampaign(id!) })
-      navigate(`/items/${newItem.id}/edit`, { state: { isNew: true, campaignId: id } })
-    },
-    onError: () => {
-      toast.error('Item aanmaken mislukt')
-    },
-  })
+  useDraftGC('items', 'campaign_id', id)
 
   async function handleAIGenerate() {
     if (!campaign) return
@@ -108,28 +66,19 @@ Return ONLY a raw JSON array with one item — no markdown, no explanation:
       const itemType = ITEM_TYPES.includes(obj['item_type'] as ItemType) ? (obj['item_type'] as ItemType) : 'misc'
       const rarity = ITEM_RARITIES.includes(obj['rarity'] as ItemRarity) ? (obj['rarity'] as ItemRarity) : 'common'
 
-      const { data, error } = await supabase
-        .from('items')
-        .insert({
-          campaign_id: id!,
-          name: String(obj['name'] ?? 'Gegenereerd item'),
-          description: obj['description'] ? String(obj['description']) : null,
-          item_type: itemType,
-          rarity,
-          is_magical: Boolean(obj['is_magical']),
-          weight: obj['weight'] != null ? Number(obj['weight']) : null,
-          quantity: 1,
-          properties: (obj['properties'] && typeof obj['properties'] === 'object' ? obj['properties'] : {}) as Record<string, unknown>,
-          committed: true,
-        })
-        .select()
-        .single()
-      if (error) throw error
+      const newItem = await createAIItem.mutateAsync({
+        name: String(obj['name'] ?? 'Gegenereerd item'),
+        description: obj['description'] ? String(obj['description']) : null,
+        item_type: itemType,
+        rarity,
+        is_magical: Boolean(obj['is_magical']),
+        weight: obj['weight'] != null ? Number(obj['weight']) : null,
+        properties: (obj['properties'] && typeof obj['properties'] === 'object' ? obj['properties'] : {}) as Record<string, unknown>,
+      })
 
-      queryClient.invalidateQueries({ queryKey: queryKeys.items.byCampaign(id!) })
       setAiOpen(false)
       setAiContext('')
-      navigate(`/items/${(data as Item).id}/edit`, { state: { isNew: true, campaignId: id } })
+      navigate(`/items/${newItem.id}/edit`, { state: { isNew: true, campaignId: id } })
     } catch (err) {
       toast.error(err instanceof Error ? err.message : 'Genereren mislukt')
     }

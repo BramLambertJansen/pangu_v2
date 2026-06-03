@@ -1,16 +1,13 @@
 import { useState, useEffect, useRef } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
-import { useQuery } from '@tanstack/react-query'
-import { supabase } from '@/lib/supabase'
-import { queryKeys } from '@/lib/queryKeys'
 import { useCampaignCharacters } from '@/hooks/queries/useCampaignCharacters'
 import { useEncounterMonsters } from '@/hooks/queries/useEncounterMonsters'
+import { useEncounterFull } from '@/hooks/queries/useEncounter'
 import { Modal } from '@/components/ui/Modal'
 import { Button } from '@/components/ui/Button'
 import { Spinner } from '@/components/ui/Spinner'
 import type { Character } from '@/types/character.types'
 import type { Bestiary } from '@/types/bestiary.types'
-import type { Encounter } from '@/types/encounter.types'
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 
@@ -486,20 +483,7 @@ export default function EncounterRunPage() {
   const navigate = useNavigate()
 
   // Data queries
-  const { data: encounter, isLoading: encLoading } = useQuery<Encounter>({
-    queryKey: queryKeys.campaigns.encounterDetailFull(id!),
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from('encounters')
-        .select('*, campaigns(id, name, world_id, worlds(id, name))')
-        .eq('id', id!)
-        .single()
-      if (error) throw error
-      return data as Encounter
-    },
-    enabled: !!id,
-    staleTime: 1000 * 60,
-  })
+  const { data: encounter, isLoading: encLoading } = useEncounterFull(id)
 
   const { data: monsterData, isLoading: monstersLoading } = useEncounterMonsters(id)
 

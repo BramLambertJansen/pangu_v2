@@ -1,76 +1,23 @@
 import { useParams, useNavigate, Link } from 'react-router-dom'
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { toast } from 'sonner'
-import { supabase } from '@/lib/supabase'
-import { queryKeys } from '@/lib/queryKeys'
-import { useAuthStore } from '@/stores/auth.store'
 import { Spinner } from '@/components/ui/Spinner'
 import { Breadcrumb } from '@/components/ui/Breadcrumb'
 import { WorldDetailHeader } from '@/components/world/WorldDetailHeader'
 import { WorldDetailDivider } from '@/components/world/WorldDetailDivider'
 import { CampaignCard, ForgeCampaignCard } from '@/components/campaign/CampaignCard'
-import type { World } from '@/types/world.types'
-import type { Campaign } from '@/types/campaign.types'
+import { useWorld } from '@/hooks/queries/useWorld'
+import { useCampaignsByWorld, useCreateCampaign } from '@/hooks/queries/useCampaign'
 
 export default function WorldDetailPage() {
   const { id } = useParams<{ id: string }>()
   const navigate = useNavigate()
-  const queryClient = useQueryClient()
-  const user = useAuthStore(s => s.user)
 
-  const { data: world, isLoading } = useQuery<World>({
-    queryKey: queryKeys.worlds.detail(id!),
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from('worlds')
-        .select('*')
-        .eq('id', id!)
-        .single()
-      if (error) throw error
-      return data as World
-    },
-    enabled: !!id,
-    staleTime: 1000 * 60,
-  })
-
-  const { data: campaigns, isLoading: isLoadingCampaigns } = useQuery<Campaign[]>({
-    queryKey: queryKeys.campaigns.byWorld(id!),
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from('campaigns')
-        .select('*')
-        .eq('world_id', id!)
-        .eq('committed', true)
-        .order('created_at', { ascending: false })
-      if (error) throw error
-      return data as Campaign[]
-    },
-    enabled: !!id,
-    staleTime: 1000 * 60,
-  })
-
-  const createCampaign = useMutation({
-    mutationFn: async () => {
-      if (!user) throw new Error('Niet ingelogd')
-      const { data, error } = await supabase
-        .from('campaigns')
-        .insert({ world_id: id!, user_id: user.id })
-        .select('id')
-        .single()
-      if (error) throw error
-      return data.id as string
-    },
-    onSuccess: (campaignId) => {
-      queryClient.invalidateQueries({ queryKey: queryKeys.campaigns.byWorld(id!) })
-      navigate(`/campaigns/${campaignId}/edit`, { state: { isNew: true, worldId: id } })
-    },
-    onError: () => {
-      toast.error('Kroniek aanmaken mislukt')
-    },
-  })
+  const { data: world, isLoading } = useWorld(id)
+  const { data: campaigns, isLoading: isLoadingCampaigns } = useCampaignsByWorld(id)
+  const createCampaign = useCreateCampaign()
 
   function handleCreateCampaign() {
-    toast.promise(createCampaign.mutateAsync(), {
+    toast.promise(createCampaign.mutateAsync(id!), {
       loading: 'Kroniek aanmaken...',
       success: 'Kroniek aangemaakt',
       error: 'Aanmaken mislukt',

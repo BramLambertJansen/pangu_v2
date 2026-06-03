@@ -1,4 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
+import { useNavigate } from 'react-router-dom'
+import { toast } from 'sonner'
 import { supabase } from '@/lib/supabase'
 import { queryKeys } from '@/lib/queryKeys'
 import type { Item, ItemType, ItemRarity, ItemStatBonuses } from '@/types/item.types'
@@ -18,6 +20,28 @@ export function useCampaignItems(campaignId: string | undefined) {
     },
     enabled: !!campaignId,
     staleTime: 1000 * 30,
+  })
+}
+
+export function useForgeCampaignItem(campaignId: string) {
+  const navigate = useNavigate()
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: async () => {
+      const { data, error } = await supabase
+        .from('items')
+        .insert({ campaign_id: campaignId, name: 'Nieuw item', item_type: 'misc', rarity: 'common', is_magical: false, quantity: 1 })
+        .select()
+        .single()
+      if (error) throw error
+      return data as Item
+    },
+    onSuccess: (newItem) => {
+      queryClient.invalidateQueries({ queryKey: queryKeys.items.byCampaign(campaignId) })
+      navigate(`/items/${newItem.id}/edit`, { state: { isNew: true, campaignId } })
+    },
+    onError: () => toast.error('Item aanmaken mislukt'),
   })
 }
 
