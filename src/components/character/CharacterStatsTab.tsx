@@ -25,7 +25,6 @@ export function CharacterStatsTab({ character, eff }: Props) {
   const deathSuccesses = character.death_save_successes ?? 0
   const deathFailures  = character.death_save_failures ?? 0
   const hpCurrent      = character.hp_current ?? 0
-  const hpMax          = character.hp_max ?? 0
   const activeConditions = character.active_conditions ?? []
   const classResources   = (character.class_resources ?? {}) as ClassResources
 

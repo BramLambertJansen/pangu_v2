@@ -9,7 +9,7 @@ import type { Location } from '@/types/location.types'
 
 export function useCampaignLocations(campaignId: string | undefined) {
   return useQuery<Location[]>({
-    queryKey: queryKeys.campaigns.locations(campaignId!),
+    queryKey: queryKeys.locations.byCampaign(campaignId!),
     queryFn: async () => {
       const { data, error } = await supabase
         .from('locations')
@@ -47,7 +47,7 @@ export function useCreateCampaignLocation(campaignId: string) {
       return data as Location
     },
     onSuccess: (newLocation) => {
-      queryClient.invalidateQueries({ queryKey: queryKeys.campaigns.locations(campaignId) })
+      queryClient.invalidateQueries({ queryKey: queryKeys.locations.byCampaign(campaignId) })
       navigate(`/locations/${newLocation.id}/edit`, { state: { isNew: true, campaignId } })
     },
     onError: () => toast.error('Locatie aanmaken mislukt'),

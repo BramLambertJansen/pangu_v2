@@ -65,7 +65,7 @@ export function useSaveLocation(id: string) {
     },
     onSuccess: (form) => {
       if (form.campaign_id) {
-        queryClient.invalidateQueries({ queryKey: queryKeys.campaigns.locations(form.campaign_id) })
+        queryClient.invalidateQueries({ queryKey: queryKeys.locations.byCampaign(form.campaign_id) })
       }
       queryClient.invalidateQueries({ queryKey: queryKeys.locations.detail(id) })
     },
@@ -82,7 +82,7 @@ export function useDeleteLocation(id: string) {
     },
     onSuccess: (_, { campaignId }) => {
       queryClient.removeQueries({ queryKey: queryKeys.locations.detail(id) })
-      if (campaignId) queryClient.invalidateQueries({ queryKey: queryKeys.campaigns.locations(campaignId) })
+      if (campaignId) queryClient.invalidateQueries({ queryKey: queryKeys.locations.byCampaign(campaignId) })
     },
     onError: () => toast.error('Verwijderen mislukt'),
   })

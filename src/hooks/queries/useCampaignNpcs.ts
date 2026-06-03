@@ -9,7 +9,7 @@ import type { Npc } from '@/types/npc.types'
 
 export function useCampaignNpcs(campaignId: string | undefined) {
   return useQuery<Npc[]>({
-    queryKey: queryKeys.campaigns.npcs(campaignId!),
+    queryKey: queryKeys.npcs.byCampaign(campaignId!),
     queryFn: async () => {
       const { data, error } = await supabase
         .from('npcs')
@@ -47,7 +47,7 @@ export function useCreateCampaignNpc(campaignId: string) {
       return data as Npc
     },
     onSuccess: (newNpc) => {
-      queryClient.invalidateQueries({ queryKey: queryKeys.campaigns.npcs(campaignId) })
+      queryClient.invalidateQueries({ queryKey: queryKeys.npcs.byCampaign(campaignId) })
       navigate(`/npcs/${newNpc.id}/edit`, { state: { isNew: true, campaignId } })
     },
     onError: () => toast.error('NPC aanmaken mislukt'),

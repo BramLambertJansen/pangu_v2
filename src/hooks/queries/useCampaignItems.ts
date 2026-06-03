@@ -72,7 +72,8 @@ export function useCreateCampaignItem(campaignId: string) {
           is_magical: input.is_magical,
           weight: input.weight,
           quantity: 1,
-          properties: (input.properties ?? {}) as Record<string, unknown>,
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          properties: (input.properties ?? {}) as any,
           image_url: input.image_url ?? null,
           committed: true,
         })

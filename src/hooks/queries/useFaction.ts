@@ -92,7 +92,7 @@ export function useSaveFaction(id: string) {
     },
     onSuccess: (form) => {
       if (form.campaign_id) {
-        queryClient.invalidateQueries({ queryKey: queryKeys.campaigns.factions(form.campaign_id) })
+        queryClient.invalidateQueries({ queryKey: queryKeys.factions.byCampaign(form.campaign_id) })
       }
       queryClient.invalidateQueries({ queryKey: queryKeys.factions.detail(id) })
       queryClient.invalidateQueries({ queryKey: queryKeys.factions.detailFull(id) })
@@ -111,7 +111,7 @@ export function useDeleteFaction(id: string) {
     onSuccess: (_, { campaignId }) => {
       queryClient.removeQueries({ queryKey: queryKeys.factions.detail(id) })
       queryClient.removeQueries({ queryKey: queryKeys.factions.detailFull(id) })
-      if (campaignId) queryClient.invalidateQueries({ queryKey: queryKeys.campaigns.factions(campaignId) })
+      if (campaignId) queryClient.invalidateQueries({ queryKey: queryKeys.factions.byCampaign(campaignId) })
     },
     onError: () => toast.error('Verwijderen mislukt'),
   })

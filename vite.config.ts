@@ -43,6 +43,7 @@ export default defineConfig({
     environment: 'jsdom',
     globals: true,
     setupFiles: ['./src/test/setup.ts'],
+    exclude: ['node_modules', '.claude/worktrees/**'],
     coverage: {
       provider: 'v8',
       reporter: ['text', 'lcov'],

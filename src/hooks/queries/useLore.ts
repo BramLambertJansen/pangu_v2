@@ -65,7 +65,7 @@ export function useSaveLore(id: string) {
     },
     onSuccess: (form) => {
       if (form.campaign_id) {
-        queryClient.invalidateQueries({ queryKey: queryKeys.campaigns.lore(form.campaign_id) })
+        queryClient.invalidateQueries({ queryKey: queryKeys.lore.byCampaign(form.campaign_id) })
       }
       queryClient.invalidateQueries({ queryKey: queryKeys.lore.detail(id) })
     },
@@ -82,7 +82,7 @@ export function useDeleteLore(id: string) {
     },
     onSuccess: (_, { campaignId }) => {
       queryClient.removeQueries({ queryKey: queryKeys.lore.detail(id) })
-      if (campaignId) queryClient.invalidateQueries({ queryKey: queryKeys.campaigns.lore(campaignId) })
+      if (campaignId) queryClient.invalidateQueries({ queryKey: queryKeys.lore.byCampaign(campaignId) })
     },
     onError: () => toast.error('Verwijderen mislukt'),
   })

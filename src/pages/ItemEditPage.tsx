@@ -95,7 +95,7 @@ export default function ItemEditPage() {
   const [imageGenerating, setImageGenerating] = useState(false)
   const [imagePromptExtra, setImagePromptExtra] = useState('')
 
-  const { data: aiSettings } = useUserAISettings()
+  const { data: aiSettings } = useUserAISettings(user?.id)
   const hasOpenAIKey = !!(aiSettings?.byok_keys?.['openai'])
 
   async function handleGenerateImage() {

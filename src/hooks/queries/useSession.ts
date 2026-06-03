@@ -85,7 +85,7 @@ export function useSaveSession(id: string) {
     },
     onSuccess: (form) => {
       if (form.campaign_id) {
-        queryClient.invalidateQueries({ queryKey: queryKeys.campaigns.sessions(form.campaign_id) })
+        queryClient.invalidateQueries({ queryKey: queryKeys.sessions.byCampaign(form.campaign_id) })
       }
       queryClient.invalidateQueries({ queryKey: queryKeys.sessions.detail(id) })
     },
@@ -102,7 +102,7 @@ export function useDeleteSession(id: string) {
     },
     onSuccess: (_, { campaignId }) => {
       queryClient.removeQueries({ queryKey: queryKeys.sessions.detail(id) })
-      if (campaignId) queryClient.invalidateQueries({ queryKey: queryKeys.campaigns.sessions(campaignId) })
+      if (campaignId) queryClient.invalidateQueries({ queryKey: queryKeys.sessions.byCampaign(campaignId) })
     },
     onError: () => toast.error('Verwijderen mislukt'),
   })

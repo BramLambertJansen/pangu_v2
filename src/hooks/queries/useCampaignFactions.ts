@@ -9,7 +9,7 @@ import type { Faction } from '@/types/faction.types'
 
 export function useCampaignFactions(campaignId: string | undefined) {
   return useQuery<Faction[]>({
-    queryKey: queryKeys.campaigns.factions(campaignId!),
+    queryKey: queryKeys.factions.byCampaign(campaignId!),
     queryFn: async () => {
       const { data, error } = await supabase
         .from('factions')
@@ -48,7 +48,7 @@ export function useCreateCampaignFaction(campaignId: string) {
       return data as Faction
     },
     onSuccess: (newFaction) => {
-      queryClient.invalidateQueries({ queryKey: queryKeys.campaigns.factions(campaignId) })
+      queryClient.invalidateQueries({ queryKey: queryKeys.factions.byCampaign(campaignId) })
       navigate(`/factions/${newFaction.id}/edit`, { state: { isNew: true, campaignId } })
     },
     onError: () => {
