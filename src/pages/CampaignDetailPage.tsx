@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { Breadcrumb } from '@/components/ui/Breadcrumb'
+import { Button } from '@/components/ui/Button'
 import { Spinner } from '@/components/ui/Spinner'
 import { PartyTab } from '@/components/campaign/PartyTab'
 import { SessionsTab } from '@/components/campaign/SessionsTab'
@@ -86,9 +87,9 @@ export default function CampaignDetailPage() {
     return (
       <div>
         <p style={{ color: 'var(--muted)' }}>Kroniek niet gevonden.</p>
-        <button type="button" className="pangu-btn pangu-btn-ghost" onClick={() => navigate('/dashboard')} style={{ marginTop: 16 }}>
+        <Button variant="ghost" onClick={() => navigate('/dashboard')} style={{ marginTop: 16 }}>
           ← Terug naar dashboard
-        </button>
+        </Button>
       </div>
     )
   }
@@ -198,21 +199,19 @@ export default function CampaignDetailPage() {
               </p>
             )}
             <div className="wdh-btns">
-              <button
-                type="button"
-                className="pangu-btn pangu-btn-primary"
+              <Button
+                variant="primary"
                 aria-label="Sessie starten"
                 onClick={() => navigate(`/campaigns/${id}/sessions`)}
               >
                 ▶ Sessie starten
-              </button>
-              <button
-                type="button"
-                className="pangu-btn pangu-btn-gold"
+              </Button>
+              <Button
+                variant="gold"
                 aria-label="Lore Forge — AI lore genereren"
               >
                 ✦ Lore Forge
-              </button>
+              </Button>
             </div>
           </div>
         </div>
@@ -287,14 +286,13 @@ export default function CampaignDetailPage() {
                 )}
               </div>
               <div style={{ flexShrink: 0, display: 'flex', gap: 10 }}>
-                <button
-                  type="button"
-                  className="pangu-btn pangu-btn-primary"
+                <Button
+                  variant="primary"
                   aria-label="Sessie starten"
                   onClick={() => navigate(`/campaigns/${id}/sessions`)}
                 >
                   ▶ Sessie starten
-                </button>
+                </Button>
               </div>
             </div>
           </div>
@@ -315,13 +313,27 @@ export default function CampaignDetailPage() {
           borderBottom: '1px solid var(--hairline)',
         }}
       >
-        {TABS.filter(tab => !tab.dmOnly || campaign.user_id === user?.id).map(tab => (
+        {TABS.filter(tab => !tab.dmOnly || campaign.user_id === user?.id).map((tab, idx, visibleTabs) => (
           <button
             key={tab.id}
+            id={`tab-${tab.id}`}
             type="button"
             role="tab"
             aria-selected={activeTab === tab.id}
+            aria-controls={`panel-${tab.id}`}
+            tabIndex={activeTab === tab.id ? 0 : -1}
             onClick={() => setActiveTab(tab.id)}
+            onKeyDown={e => {
+              if (e.key === 'ArrowRight') {
+                const next = visibleTabs[(idx + 1) % visibleTabs.length]
+                setActiveTab(next.id)
+                document.getElementById(`tab-${next.id}`)?.focus()
+              } else if (e.key === 'ArrowLeft') {
+                const prev = visibleTabs[(idx - 1 + visibleTabs.length) % visibleTabs.length]
+                setActiveTab(prev.id)
+                document.getElementById(`tab-${prev.id}`)?.focus()
+              }
+            }}
             style={{
               flexShrink: 0,
               padding: '10px 16px',
@@ -354,7 +366,12 @@ export default function CampaignDetailPage() {
       </div>
 
       {/* ── Tab panels ── */}
-      <div style={{ marginTop: 32 }}>
+      <div
+        role="tabpanel"
+        id={`panel-${activeTab}`}
+        aria-labelledby={`tab-${activeTab}`}
+        style={{ marginTop: 32 }}
+      >
         {activeTab === 'party' && (
           <PartyTab
             characters={characters ?? []}
