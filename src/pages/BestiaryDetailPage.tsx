@@ -5,21 +5,8 @@ import { WorldDetailDivider } from '@/components/world/WorldDetailDivider'
 import { useBestiaryFull } from '@/hooks/queries/useBestiary'
 import { bestiaryStatusLabel, bestiaryStatusColor } from '@/lib/statusMaps'
 import { pickGradient, bestiaryGradients } from '@/utils/pickGradient'
-import type { BestiaryWithWorld, BestiaryAction } from '@/types/bestiary.types'
-
-const abilityScores: { key: keyof BestiaryWithWorld; abbr: string; label: string }[] = [
-  { key: 'stat_str', abbr: 'STR', label: 'Sterkte' },
-  { key: 'stat_dex', abbr: 'DEX', label: 'Behendigheid' },
-  { key: 'stat_con', abbr: 'CON', label: 'Constitutie' },
-  { key: 'stat_int', abbr: 'INT', label: 'Intelligentie' },
-  { key: 'stat_wis', abbr: 'WIS', label: 'Wijsheid' },
-  { key: 'stat_cha', abbr: 'CHA', label: 'Charisma' },
-]
-
-function abilityModifier(score: number): string {
-  const mod = Math.floor((score - 10) / 2)
-  return mod >= 0 ? `+${mod}` : `${mod}`
-}
+import type { BestiaryAction } from '@/types/bestiary.types'
+import { ABILITY_SCORES, formatModifier } from '@/utils/dnd5e'
 
 export default function BestiaryDetailPage() {
   const { id } = useParams<{ id: string }>()
@@ -237,7 +224,7 @@ export default function BestiaryDetailPage() {
             Eigenschappen
           </p>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(6, 1fr)', gap: 8 }}>
-            {abilityScores.map(({ key, abbr, label }) => {
+            {ABILITY_SCORES.map(({ key, abbr, label }) => {
               const score = bestiary[key] as number
               return (
                 <div
@@ -260,7 +247,7 @@ export default function BestiaryDetailPage() {
                     {score}
                   </p>
                   <p style={{ fontSize: 12, color: 'var(--ink-soft)', margin: 0 }}>
-                    {abilityModifier(score)}
+                    {formatModifier(score)}
                   </p>
                 </div>
               )

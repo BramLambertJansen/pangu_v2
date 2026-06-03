@@ -6,32 +6,17 @@ import { pickCharacterAccent } from '@/utils/pickGradient'
 import { sanitizeImageUrl } from '@/utils/sanitizeUrl'
 import { EQUIPMENT_SLOT_LABELS } from '@/utils/equipmentUtils'
 import type { EquipmentSlot } from '@/types/item.types'
+import { ABILITY_SCORES, SPELL_LEVELS, formatModifier } from '@/utils/dnd5e'
 
 interface Props {
   character: Character
   items: Item[]
 }
 
-const ABILITY_SCORES = [
-  { key: 'stat_str', abbr: 'STR' },
-  { key: 'stat_dex', abbr: 'DEX' },
-  { key: 'stat_con', abbr: 'CON' },
-  { key: 'stat_int', abbr: 'INT' },
-  { key: 'stat_wis', abbr: 'WIS' },
-  { key: 'stat_cha', abbr: 'CHA' },
-] as const
+const SAVING_THROW_KEYS: Record<string, string> = Object.fromEntries(
+  ABILITY_SCORES.map(a => [a.key, a.abbr])
+)
 
-const SAVING_THROW_KEYS: Record<string, string> = {
-  stat_str: 'STR', stat_dex: 'DEX', stat_con: 'CON',
-  stat_int: 'INT', stat_wis: 'WIS', stat_cha: 'CHA',
-}
-
-const SPELL_LEVELS = ['1', '2', '3', '4', '5', '6', '7', '8', '9'] as const
-
-function mod(score: number) {
-  const m = Math.floor((score - 10) / 2)
-  return m >= 0 ? `+${m}` : `${m}`
-}
 
 function SectionHeading({ children }: { children: React.ReactNode }) {
   return (
@@ -407,7 +392,7 @@ export const DmCharacterPanel = memo(function DmCharacterPanel({ character, item
                   {score}
                 </p>
                 <p style={{ margin: 0, fontSize: 10, fontWeight: 600, color: accent, fontFamily: 'var(--font-body)' }}>
-                  {mod(score)}
+                  {formatModifier(score)}
                 </p>
               </div>
             )

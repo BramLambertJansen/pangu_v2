@@ -3,23 +3,10 @@ import { useNavigate } from 'react-router-dom'
 import type { Bestiary } from '@/types/bestiary.types'
 import { bestiaryStatusLabel, bestiaryStatusColor } from '@/lib/statusMaps'
 import { pickGradient, bestiaryGradients } from '@/utils/pickGradient'
+import { ABILITY_SCORES, formatModifier } from '@/utils/dnd5e'
 
 interface Props {
   bestiary: Bestiary
-}
-
-const ABILITY_SCORES = [
-  { key: 'stat_str', abbr: 'STR' },
-  { key: 'stat_dex', abbr: 'DEX' },
-  { key: 'stat_con', abbr: 'CON' },
-  { key: 'stat_int', abbr: 'INT' },
-  { key: 'stat_wis', abbr: 'WIS' },
-  { key: 'stat_cha', abbr: 'CHA' },
-] as const
-
-function mod(score: number): string {
-  const m = Math.floor((score - 10) / 2)
-  return m >= 0 ? `+${m}` : `${m}`
 }
 
 function SectionHeading({ children }: { children: React.ReactNode }) {
@@ -221,7 +208,7 @@ export const DmBestiaryPanel = memo(function DmBestiaryPanel({ bestiary }: Props
                   {score}
                 </p>
                 <p style={{ margin: 0, fontSize: 10, fontWeight: 600, color: 'var(--teal)', fontFamily: 'var(--font-body)' }}>
-                  {mod(score)}
+                  {formatModifier(score)}
                 </p>
               </div>
             )

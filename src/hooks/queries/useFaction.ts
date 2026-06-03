@@ -1,3 +1,4 @@
+import { STALE } from '@/lib/queryClient'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { toast } from 'sonner'
 import type { SupabaseClient } from '@supabase/supabase-js'
@@ -23,7 +24,7 @@ export function useFaction(id: string | undefined) {
       return data as Faction
     },
     enabled: !!id,
-    staleTime: 1000 * 60,
+    staleTime: STALE.detail,
   })
 }
 
@@ -49,7 +50,7 @@ export function useFactionFull(id: string | undefined) {
       return data as FactionWithCampaign
     },
     enabled: !!id,
-    staleTime: 1000 * 60,
+    staleTime: STALE.detail,
   })
 }
 
@@ -67,7 +68,7 @@ export function useFactionMembers(factionId: string | undefined) {
       return data as Pick<Npc, 'id' | 'name' | 'npc_role' | 'status'>[]
     },
     enabled: !!factionId,
-    staleTime: 1000 * 30,
+    staleTime: STALE.list,
   })
 }
 

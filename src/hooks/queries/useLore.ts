@@ -1,3 +1,4 @@
+import { STALE } from '@/lib/queryClient'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { toast } from 'sonner'
 import { supabase } from '@/lib/supabase'
@@ -21,7 +22,7 @@ export function useLore(id: string | undefined) {
       return data as Lore
     },
     enabled: !!id,
-    staleTime: 1000 * 60,
+    staleTime: STALE.detail,
   })
 }
 
@@ -38,7 +39,7 @@ export function useLoreFull(id: string | undefined) {
       return data as LoreWithCampaign
     },
     enabled: !!id,
-    staleTime: 1000 * 60,
+    staleTime: STALE.detail,
   })
 }
 

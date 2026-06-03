@@ -12,6 +12,7 @@ import { Spinner } from '@/components/ui/Spinner'
 import { EditUserModal } from './EditUserModal'
 import { DeleteUserModal } from './DeleteUserModal'
 import type { Profile } from '@/types/database.types'
+import { formatDate } from '@/utils/format'
 
 async function fetchUsers(): Promise<Profile[]> {
   const { data: { session } } = await supabase.auth.getSession()
@@ -33,9 +34,6 @@ async function deleteUser(id: string): Promise<void> {
   }
 }
 
-function formatDate(iso: string) {
-  return new Intl.DateTimeFormat('nl-NL', { dateStyle: 'medium' }).format(new Date(iso))
-}
 
 function getInitials(profile: Profile) {
   if (profile.display_name) {

@@ -1,3 +1,4 @@
+import { STALE } from '@/lib/queryClient'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { toast } from 'sonner'
 import { supabase } from '@/lib/supabase'
@@ -19,7 +20,7 @@ export function usePlannedSessions() {
       if (error) throw error
       return data as Session[]
     },
-    staleTime: 1000 * 30,
+    staleTime: STALE.list,
   })
 }
 
@@ -40,7 +41,7 @@ export function useSession(id: string | undefined) {
       return data as Session
     },
     enabled: !!id,
-    staleTime: 1000 * 60,
+    staleTime: STALE.detail,
   })
 }
 
@@ -57,7 +58,7 @@ export function useSessionFull(id: string | undefined) {
       return data as SessionWithCampaign
     },
     enabled: !!id,
-    staleTime: 1000 * 60,
+    staleTime: STALE.detail,
   })
 }
 

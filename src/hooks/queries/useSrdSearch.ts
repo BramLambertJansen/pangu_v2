@@ -1,3 +1,4 @@
+import { STALE } from '@/lib/queryClient'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { toast } from 'sonner'
 import { supabase } from '@/lib/supabase'
@@ -15,7 +16,7 @@ export function useSrdMonsterSearch(query: string, edition: SrdEdition = '2014')
     queryKey: queryKeys.srd.monsters(query, edition),
     queryFn: () => searchMonsters(query, edition),
     enabled: query.length >= 2,
-    staleTime: 1000 * 60 * 60,
+    staleTime: STALE.external,
   })
 }
 
@@ -24,7 +25,7 @@ export function useSrdItemSearch(query: string, edition: SrdEdition = '2014') {
     queryKey: queryKeys.srd.items(query, edition),
     queryFn: () => searchMagicItems(query, edition),
     enabled: query.length >= 2,
-    staleTime: 1000 * 60 * 60,
+    staleTime: STALE.external,
   })
 }
 
@@ -33,7 +34,7 @@ export function useSrdSpellSearch(query: string, edition: SrdEdition = '2014') {
     queryKey: queryKeys.srd.spells(query, edition),
     queryFn: () => searchSpells(query, edition),
     enabled: query.length >= 2,
-    staleTime: 1000 * 60 * 60,
+    staleTime: STALE.external,
   })
 }
 

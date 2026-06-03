@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/Button'
 import { Spinner } from '@/components/ui/Spinner'
 import type { Character } from '@/types/character.types'
 import type { Bestiary } from '@/types/bestiary.types'
+import { abilityModifier, formatModifier, formatSign } from '@/utils/dnd5e'
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 
@@ -37,9 +38,6 @@ interface SetupEntry {
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
-function dexMod(statDex: number): number {
-  return Math.floor((statDex - 10) / 2)
-}
 
 function rollD20(): number {
   return Math.floor(Math.random() * 20) + 1
@@ -53,13 +51,6 @@ function hpBarColor(current: number, max: number): string {
   return 'var(--crimson)'
 }
 
-function modStr(mod: number): string {
-  return mod >= 0 ? `+${mod}` : String(mod)
-}
-
-function abilityModifier(score: number): number {
-  return Math.floor((score - 10) / 2)
-}
 
 const MONSTER_ICONS: Record<string, string> = {
   humanoid: '✚',
@@ -119,7 +110,7 @@ function AbilityGrid({ scores }: { scores: { label: string; score: number }[]; }
             {s.label}
           </p>
           <p style={{ fontSize: 15, fontWeight: 700, color: 'var(--gold)', margin: '0 0 2px', fontFamily: 'var(--font-display)', lineHeight: 1 }}>
-            {modStr(abilityModifier(s.score))}
+            {formatModifier(s.score)}
           </p>
           <p style={{ fontSize: 10, color: 'var(--ink-soft)', margin: 0 }}>{s.score}</p>
         </div>
@@ -214,7 +205,7 @@ function CharacterStatPopup({ character, hpCurrent, onAdjustHp }: { character: C
 
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 10, marginBottom: 20 }}>
         <StatBox label="AC" value={character.armor_class} />
-        <StatBox label="Initiatief" value={modStr(character.initiative)} />
+        <StatBox label="Initiatief" value={formatSign(character.initiative ?? 0)} />
         <StatBox label="Snelheid" value={`${character.speed}ft`} />
       </div>
 
@@ -299,7 +290,7 @@ function MonsterStatPopup({ bestiary, hpCurrent, hpMax, onAdjustHp }: { bestiary
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 10, marginBottom: 20 }}>
         <StatBox label="AC" value={bestiary.ac} />
         <StatBox label="Snelheid" value={`${bestiary.speed}ft`} />
-        <StatBox label="Init Mod" value={modStr(dexMod(bestiary.stat_dex))} />
+        <StatBox label="Init Mod" value={formatModifier(bestiary.stat_dex)} />
       </div>
 
       <p style={{ fontFamily: 'var(--font-body)', fontSize: 11, fontWeight: 700, letterSpacing: '0.14em', textTransform: 'uppercase', color: 'var(--muted)', margin: '0 0 10px' }}>
@@ -369,7 +360,7 @@ function SetupSection({
             {/* Name */}
             <div>
               <p style={{ fontSize: 14, fontWeight: 600, color: 'var(--ink)', margin: '0 0 2px' }}>{entry.name}</p>
-              <p style={{ fontSize: 11, color: 'var(--muted)', margin: 0 }}>Mod: {modStr(entry.modifier)}</p>
+              <p style={{ fontSize: 11, color: 'var(--muted)', margin: 0 }}>Mod: {formatSign(entry.modifier)}</p>
             </div>
 
             {/* Initiative roll */}
@@ -539,7 +530,7 @@ export default function EncounterRunPage() {
     for (const em of monsterData ?? []) {
       const b = em.bestiary
       if (!b) continue
-      const mod = dexMod(b.stat_dex)
+      const mod = abilityModifier(b.stat_dex)
       for (let i = 0; i < em.count; i++) {
         newEntries.push({
           id: `${b.id}-${i}`,

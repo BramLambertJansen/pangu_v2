@@ -1,3 +1,4 @@
+import { STALE } from '@/lib/queryClient'
 import { useQuery } from '@tanstack/react-query'
 import { supabase } from '@/lib/supabase'
 import { queryKeys } from '@/lib/queryKeys'
@@ -24,6 +25,6 @@ export function useEncounterMonsters(encounterId: string | undefined) {
       return data as EncounterMonsterFull[]
     },
     enabled: !!encounterId,
-    staleTime: 1000 * 60,
+    staleTime: STALE.detail,
   })
 }
