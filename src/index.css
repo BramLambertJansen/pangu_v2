@@ -1130,6 +1130,8 @@ body {
   cursor: pointer;
   padding: 4px 0;
   transition: color var(--t-fast);
+  text-decoration: none;
+  display: inline-block;
 }
 
 .dashboard-link-row:hover {

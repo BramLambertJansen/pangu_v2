@@ -1,4 +1,4 @@
-import { useNavigate } from 'react-router-dom'
+import { Link } from 'react-router-dom'
 import { useAuthStore } from '@/stores/auth.store'
 import { EntityCardSkeleton } from '@/components/ui/EntityCardSkeleton'
 import { WorldCard } from '@/components/world/WorldCard'
@@ -10,16 +10,11 @@ import { useActiveCampaigns } from '@/hooks/queries/useCampaign'
 import { usePlannedSessions } from '@/hooks/queries/useSession'
 
 function LinkRow({ href, label }: { href: string; label: string }) {
-  const navigate = useNavigate()
   return (
     <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: 12 }}>
-      <button
-        type="button"
-        onClick={() => navigate(href)}
-        className="dashboard-link-row"
-      >
+      <Link to={href} className="dashboard-link-row">
         {label}
-      </button>
+      </Link>
     </div>
   )
 }
