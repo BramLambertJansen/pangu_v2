@@ -562,18 +562,36 @@ Voeg testbestanden toe als onderdeel van component-splits. Prioriteit: de nieuw 
 
 ## Gefaseerd Plan
 
-### Fase 1 — Extractie query hooks & mutations (laag risico)
-**Doel:** Alle data-logica weg uit pagina's, geen gedragsverandering.
+### Fase 1 — Extractie query hooks & mutations ✅ AFGEROND
+**Branch:** `claude/pangu-v2-refactor-kickoff-2uSRr`
+**Commits:** `refactor: extract all query hooks and mutations out of page components` + `fix: resolve all ESLint and test failures`
 
-1. Maak `src/hooks/queries/useNpc.ts`, `useLocation.ts`, `useLore.ts`, `useQuest.ts`, `useEncounter.ts`, `useBestiary.ts`, `useCharacter.ts`
-2. Voeg `useCreate*` exports toe aan bestaande `useCampaign*.ts` hooks
-3. Extraheer `useDraftGC` hook
-4. Vervang inline queries in DashboardPage, NpcDetailPage, LocationDetailPage, LoreDetailPage, SessionDetailPage, QuestDetailPage, EncounterDetailPage, en alle edit-pagina's
-5. Vervang forge-mutaties in CampaignDetailPage door de nieuwe hooks
-6. Verplaats de 8 character live-mutaties naar `useCharacter.ts`
+**Wat gedaan:**
+- Nieuwe hooks aangemaakt: `useNpc.ts`, `useLocation.ts`, `useLore.ts`, `useQuest.ts`, `useEncounter.ts`, `useBestiary.ts`, `useCharacter.ts`, `useProfile.ts`
+- `useCreate*` exports toegevoegd aan: `useWorld.ts`, `useCampaign.ts`, `useNpc.ts`, `useLocation.ts`, `useLore.ts`, `useSession.ts`, `useQuest.ts`, `useEncounter.ts`, `useBestiary.ts`
+- `useSave*` + `useDelete*` exports toegevoegd aan alle entity hooks
+- `useDraftGC` hook geëxtraheerd (was al aanwezig, verfijnd)
+- `useFactionMembers`, `useSaveFaction`, `useDeleteFaction` toegevoegd aan `useFaction.ts`
+- `useUserCampaignsWithWorld`, `useSaveCampaign`, `useDeleteCampaign` toegevoegd aan `useCampaign.ts`
+- Alle inline TanStack Query uit pagina's verwijderd — **0 `@tanstack/react-query` imports in `src/pages/`**
+- ESLint 0 errors (inclusief `_`-prefix conventie in config)
+- TypeScript 0 errors
+- Vitest 88/88 tests groen (2 pre-existing test-bugs gefixed: `auth-loaders`, `LinkEntityModal`)
 
-**Rollen:** Architect (query contract) → Implementor → Review-agent (type-check + test)
-**Risico:** Laag — puur verplaatsen, geen logica-wijziging
+**Resultaat:** `§1.1`, `§1.2`, `§2.9` volledig afgerond.
+
+---
+
+### Fase 2 — D&D 5e constanten & gedeelde utils (laag risico)
+**Doel:** Één source of truth voor spelregels-data.
+
+1. Maak `src/utils/dnd5e.ts` met abilities, skills, saving throws, conditions, spell labels, `abilityModifier`, `formatModifier`
+2. Maak `src/utils/format.ts` met `formatDate`
+3. Voeg `STALE` constanten toe in `src/lib/queryClient.ts`
+4. Vervang lokale definities in `CharacterDetailPage`, `CharacterEditPage`, `BestiaryDetailPage`, `EncounterRunPage`, `DmCharacterPanel`, `DmBestiaryPanel`, `ItemEditPage`, `SessionCard`, `SessionDetailPage`, `UserTable`
+
+**Rollen:** Implementor → Review-agent
+**Risico:** Laag — constanten-verplaatsing
 
 ---
 
@@ -653,31 +671,31 @@ Migreer inline `style={{}}` naar Tailwind-klassen per component-groep, in dezelf
 
 ## Samenvatting prioriteiten
 
-| # | Bevinding | Severity | Fase |
-|---|-----------|----------|------|
-| 1.1 | Inline queries/mutaties in pagina's | HOOG | 1 |
-| 1.2 | Draft GC 12× gedupliceerd | HOOG | 1 |
-| 1.3 | WorldEditPage/CampaignEditPage geen useEntityEdit | HOOG | 4 |
-| 1.4 | CharacterDetailPage/EditPage monolithisch | HOOG | 5 |
-| 1.5 | CampaignDetailPage monolithisch | HOOG | 5 |
-| 2.1 | `abilityModifier` 3× gedefinieerd | HOOG | 2 |
-| 2.2 | SKILLS/SAVING_THROWS 2× gedefinieerd | HOOG | 2 |
-| 2.5 | Lokale pickGradient in 5 pagina's | HOOG | 3 |
-| 2.3 | ABILITY_SCORES 2× gedefinieerd | MIDDEN | 2 |
-| 2.4 | D&D constanten verspreid | MIDDEN | 2 |
-| 2.6 | Lokale statusMaps in NpcDetailPage | MIDDEN | 3 |
-| 2.7 | `formatDate` 3× gedefinieerd | MIDDEN | 2 |
-| 2.8 | Feature-card structuur identiek | MIDDEN | 5 |
-| 2.9 | Forge-mutaties niet geëxtraheerd | MIDDEN | 1 |
-| 2.10 | `as unknown as SupabaseClient` | MIDDEN | 3 |
-| 2.11 | staleTime inconsistentie | LAAG | 4 |
-| 2.12 | Inline style domineert | MIDDEN | 7 |
-| 3.1 | pangu-btn bypast Button component | MIDDEN | 6 |
-| 3.2 | Tab-navigatie niet toegankelijk | MIDDEN | 6 |
-| 3.3 | DashboardPage LinkRow JS hover | LAAG | 6 |
-| 3.4 | queryKeys inconsistent | LAAG | 4 |
-| 4.1 | outline:none zonder focus-vervanging | MIDDEN | 6 |
-| 4.2 | EntityCard role=button op article | LAAG | 6 |
-| 4.3 | Laadstates zonder aria-live | LAAG | 6 |
-| 5.1 | CLAUDE.md structuur verouderd | LAAG | na fase 5 |
-| 5.2 | Geen tests voor pagina's/grote hooks | LAAG | per fase |
+| # | Bevinding | Severity | Fase | Status |
+|---|-----------|----------|------|--------|
+| 1.1 | Inline queries/mutaties in pagina's | HOOG | 1 | ✅ |
+| 1.2 | Draft GC 12× gedupliceerd | HOOG | 1 | ✅ |
+| 2.9 | Forge-mutaties niet geëxtraheerd | MIDDEN | 1 | ✅ |
+| 1.3 | WorldEditPage/CampaignEditPage geen useEntityEdit | HOOG | 4 | — |
+| 1.4 | CharacterDetailPage/EditPage monolithisch | HOOG | 5 | — |
+| 1.5 | CampaignDetailPage monolithisch | HOOG | 5 | — |
+| 2.1 | `abilityModifier` 3× gedefinieerd | HOOG | 2 | — |
+| 2.2 | SKILLS/SAVING_THROWS 2× gedefinieerd | HOOG | 2 | — |
+| 2.5 | Lokale pickGradient in 5 pagina's | HOOG | 3 | — |
+| 2.3 | ABILITY_SCORES 2× gedefinieerd | MIDDEN | 2 | — |
+| 2.4 | D&D constanten verspreid | MIDDEN | 2 | — |
+| 2.6 | Lokale statusMaps in NpcDetailPage | MIDDEN | 3 | — |
+| 2.7 | `formatDate` 3× gedefinieerd | MIDDEN | 2 | — |
+| 2.8 | Feature-card structuur identiek | MIDDEN | 5 | — |
+| 2.10 | `as unknown as SupabaseClient` | MIDDEN | 3 | — |
+| 2.11 | staleTime inconsistentie | LAAG | 4 | — |
+| 2.12 | Inline style domineert | MIDDEN | 7 | — |
+| 3.1 | pangu-btn bypast Button component | MIDDEN | 6 | — |
+| 3.2 | Tab-navigatie niet toegankelijk | MIDDEN | 6 | — |
+| 3.3 | DashboardPage LinkRow JS hover | LAAG | 6 | — |
+| 3.4 | queryKeys inconsistent | LAAG | 4 | — |
+| 4.1 | outline:none zonder focus-vervanging | MIDDEN | 6 | — |
+| 4.2 | EntityCard role=button op article | LAAG | 6 | — |
+| 4.3 | Laadstates zonder aria-live | LAAG | 6 | — |
+| 5.1 | CLAUDE.md structuur verouderd | LAAG | na fase 5 | — |
+| 5.2 | Geen tests voor pagina's/grote hooks | LAAG | per fase | — |
