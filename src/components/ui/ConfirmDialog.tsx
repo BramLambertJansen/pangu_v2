@@ -1,5 +1,6 @@
 import type { ReactNode } from 'react'
 import { Modal } from './Modal'
+import { Button } from './Button'
 
 export interface ConfirmDialogProps {
   open: boolean
@@ -30,22 +31,20 @@ export function ConfirmDialog({
         {children}
       </div>
       <div className="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
-        <button
-          type="button"
-          className="pangu-btn pangu-btn-ghost"
+        <Button
+          variant="ghost"
           onClick={onClose}
           disabled={loading}
         >
           {cancelLabel}
-        </button>
-        <button
-          type="button"
-          className={`pangu-btn pangu-btn-${confirmVariant}`}
+        </Button>
+        <Button
+          variant={confirmVariant === 'crimson' ? 'danger' : 'primary'}
           onClick={onConfirm}
-          disabled={loading}
+          loading={loading}
         >
           {loading ? 'Bezig...' : confirmLabel}
-        </button>
+        </Button>
       </div>
     </Modal>
   )

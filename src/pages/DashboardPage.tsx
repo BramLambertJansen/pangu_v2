@@ -16,21 +16,7 @@ function LinkRow({ href, label }: { href: string; label: string }) {
       <button
         type="button"
         onClick={() => navigate(href)}
-        style={{
-          fontFamily: 'var(--font-body)',
-          fontSize: 11,
-          fontWeight: 700,
-          letterSpacing: '0.18em',
-          textTransform: 'uppercase',
-          color: 'var(--muted)',
-          background: 'none',
-          border: 'none',
-          cursor: 'pointer',
-          padding: '4px 0',
-          transition: 'color var(--t-fast)',
-        }}
-        onMouseEnter={(e) => { e.currentTarget.style.color = 'var(--ink-soft)' }}
-        onMouseLeave={(e) => { e.currentTarget.style.color = 'var(--muted)' }}
+        className="dashboard-link-row"
       >
         {label}
       </button>

@@ -17,13 +17,25 @@ export const EntityCard = memo(function EntityCard({ children, onClick, ariaLabe
     }
   }
 
+  if (onClick) {
+    return (
+      <div
+        role="button"
+        tabIndex={0}
+        aria-label={ariaLabel}
+        onClick={onClick}
+        onKeyDown={handleKeyDown}
+        data-variant={variant}
+        className={cn('entity-card', className)}
+      >
+        {children}
+      </div>
+    )
+  }
+
   return (
     <article
-      role={onClick ? 'button' : undefined}
-      tabIndex={onClick ? 0 : undefined}
       aria-label={ariaLabel}
-      onClick={onClick}
-      onKeyDown={onClick ? handleKeyDown : undefined}
       data-variant={variant}
       className={cn('entity-card', className)}
     >

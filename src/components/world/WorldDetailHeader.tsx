@@ -1,5 +1,6 @@
 import type { World, WorldStatus } from '@/types/world.types'
 import { sanitizeImageUrl } from '@/utils/sanitizeUrl'
+import { Button } from '@/components/ui/Button'
 
 const cardGradients = [
   'radial-gradient(ellipse 70% 55% at 30% 40%, rgba(155,138,255,0.55) 0%, rgba(80,50,200,0.28) 45%, var(--void) 78%)',
@@ -148,12 +149,12 @@ export function WorldDetailHeader({ world, onCreateCampaign, isCreatingCampaign,
             </p>
           )}
           <div className="wdh-btns">
-            <button type="button" className="pangu-btn pangu-btn-primary" aria-label={`Nieuwe kroniek aanmaken in ${world.name}`} onClick={onCreateCampaign} disabled={isCreatingCampaign}>
+            <Button variant="primary" aria-label={`Nieuwe kroniek aanmaken in ${world.name}`} onClick={onCreateCampaign} disabled={isCreatingCampaign}>
               {isCreatingCampaign ? 'Aanmaken...' : '+ Nieuwe kroniek'}
-            </button>
-            <button type="button" className="pangu-btn pangu-btn-gold" aria-label="Lore Forge — AI lore genereren" onClick={onLoreForge}>
+            </Button>
+            <Button variant="gold" aria-label="Lore Forge — AI lore genereren" onClick={onLoreForge}>
               ✦ Lore Forge
-            </button>
+            </Button>
           </div>
         </div>
       </div>
@@ -232,12 +233,12 @@ export function WorldDetailHeader({ world, onCreateCampaign, isCreatingCampaign,
               )}
             </div>
             <div style={{ flexShrink: 0, display: 'flex', gap: 10 }}>
-              <button type="button" className="pangu-btn pangu-btn-primary" aria-label={`Nieuwe kroniek aanmaken in ${world.name}`} onClick={onCreateCampaign} disabled={isCreatingCampaign}>
+              <Button variant="primary" aria-label={`Nieuwe kroniek aanmaken in ${world.name}`} onClick={onCreateCampaign} disabled={isCreatingCampaign}>
                 {isCreatingCampaign ? 'Aanmaken...' : '+ Nieuwe kroniek'}
-              </button>
-              <button type="button" className="pangu-btn pangu-btn-gold" aria-label="Lore Forge — AI lore genereren" onClick={onLoreForge}>
+              </Button>
+              <Button variant="gold" aria-label="Lore Forge — AI lore genereren" onClick={onLoreForge}>
                 ✦ Lore Forge
-              </button>
+              </Button>
             </div>
           </div>
         </div>

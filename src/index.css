@@ -1116,6 +1116,32 @@ body {
   will-change: opacity, transform;
 }
 
+/* ── Dashboard ───────────────────────────────────────────── */
+
+.dashboard-link-row {
+  font-family: var(--font-body);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--muted);
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 4px 0;
+  transition: color var(--t-fast);
+}
+
+.dashboard-link-row:hover {
+  color: var(--ink-soft);
+}
+
+.dashboard-link-row:focus-visible {
+  outline: 2px solid var(--violet);
+  outline-offset: 2px;
+  border-radius: 2px;
+}
+
 /* ── Motion safety ───────────────────────────────────────── */
 
 @media (prefers-reduced-motion: reduce) {
