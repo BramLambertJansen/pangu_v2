@@ -582,29 +582,16 @@ Voeg testbestanden toe als onderdeel van component-splits. Prioriteit: de nieuw 
 
 ---
 
-### Fase 2 — D&D 5e constanten & gedeelde utils (laag risico)
-**Doel:** Één source of truth voor spelregels-data.
+### Fase 2 — D&D 5e constanten & gedeelde utils ✅ AFGEROND
+**Branch:** `claude/document-refactor-phase-EkoVq`
 
-1. Maak `src/utils/dnd5e.ts` met abilities, skills, saving throws, conditions, spell labels, `abilityModifier`, `formatModifier`
-2. Maak `src/utils/format.ts` met `formatDate`
-3. Voeg `STALE` constanten toe in `src/lib/queryClient.ts`
-4. Vervang lokale definities in `CharacterDetailPage`, `CharacterEditPage`, `BestiaryDetailPage`, `EncounterRunPage`, `DmCharacterPanel`, `DmBestiaryPanel`, `ItemEditPage`, `SessionCard`, `SessionDetailPage`, `UserTable`
+**Wat gedaan:**
+- `src/utils/dnd5e.ts` aangemaakt: `ABILITY_SCORES`, `D5E_SKILLS`, `D5E_SAVING_THROWS`, `D5E_CONDITIONS`, `SPELL_LEVELS`, `SPELL_LEVEL_LABELS`, `SPELLCASTING_ABILITY_LABELS`, `abilityModifier`, `formatModifier`, `formatSign`
+- `src/utils/format.ts` aangemaakt: `formatDate` (YYYY-MM-DD + ISO timestamp, nl-NL locale)
+- `STALE` constanten toegevoegd aan `src/lib/queryClient.ts`; alle 33 query hooks bijgewerkt
+- Lokale duplicaten verwijderd uit: `CharacterDetailPage`, `CharacterEditPage`, `BestiaryDetailPage`, `EncounterRunPage`, `DmCharacterPanel`, `DmBestiaryPanel`, `ItemEditPage`, `SessionCard`, `SessionDetailPage`, `UserTable`
 
-**Rollen:** Implementor → Review-agent
-**Risico:** Laag — constanten-verplaatsing
-
----
-
-### Fase 2 — D&D 5e constanten & gedeelde utils (laag risico)
-**Doel:** Één source of truth voor spelregels-data.
-
-1. Maak `src/utils/dnd5e.ts` met abilities, skills, saving throws, conditions, spell labels, `abilityModifier`, `formatModifier`
-2. Maak `src/utils/format.ts` met `formatDate`
-3. Voeg `STALE` constanten toe in `src/lib/queryClient.ts`
-4. Vervang lokale definities in `CharacterDetailPage`, `CharacterEditPage`, `BestiaryDetailPage`, `EncounterRunPage`, `DmCharacterPanel`, `DmBestiaryPanel`, `ItemEditPage`, `SessionCard`, `SessionDetailPage`, `UserTable`
-
-**Rollen:** Implementor → Review-agent
-**Risico:** Laag — constanten-verplaatsing
+**Resultaat:** §2.1, §2.2, §2.3, §2.4, §2.7, §2.11 volledig afgerond.
 
 ---
 
@@ -679,16 +666,16 @@ Migreer inline `style={{}}` naar Tailwind-klassen per component-groep, in dezelf
 | 1.3 | WorldEditPage/CampaignEditPage geen useEntityEdit | HOOG | 4 | — |
 | 1.4 | CharacterDetailPage/EditPage monolithisch | HOOG | 5 | — |
 | 1.5 | CampaignDetailPage monolithisch | HOOG | 5 | — |
-| 2.1 | `abilityModifier` 3× gedefinieerd | HOOG | 2 | — |
-| 2.2 | SKILLS/SAVING_THROWS 2× gedefinieerd | HOOG | 2 | — |
+| 2.1 | `abilityModifier` 3× gedefinieerd | HOOG | 2 | ✅ |
+| 2.2 | SKILLS/SAVING_THROWS 2× gedefinieerd | HOOG | 2 | ✅ |
 | 2.5 | Lokale pickGradient in 5 pagina's | HOOG | 3 | — |
-| 2.3 | ABILITY_SCORES 2× gedefinieerd | MIDDEN | 2 | — |
-| 2.4 | D&D constanten verspreid | MIDDEN | 2 | — |
+| 2.3 | ABILITY_SCORES 2× gedefinieerd | MIDDEN | 2 | ✅ |
+| 2.4 | D&D constanten verspreid | MIDDEN | 2 | ✅ |
 | 2.6 | Lokale statusMaps in NpcDetailPage | MIDDEN | 3 | — |
-| 2.7 | `formatDate` 3× gedefinieerd | MIDDEN | 2 | — |
+| 2.7 | `formatDate` 3× gedefinieerd | MIDDEN | 2 | ✅ |
 | 2.8 | Feature-card structuur identiek | MIDDEN | 5 | — |
 | 2.10 | `as unknown as SupabaseClient` | MIDDEN | 3 | — |
-| 2.11 | staleTime inconsistentie | LAAG | 4 | — |
+| 2.11 | staleTime inconsistentie | LAAG | 2 | ✅ |
 | 2.12 | Inline style domineert | MIDDEN | 7 | — |
 | 3.1 | pangu-btn bypast Button component | MIDDEN | 6 | — |
 | 3.2 | Tab-navigatie niet toegankelijk | MIDDEN | 6 | — |
