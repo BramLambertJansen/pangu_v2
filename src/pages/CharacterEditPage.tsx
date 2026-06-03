@@ -5,6 +5,7 @@ import { useQuery } from '@tanstack/react-query'
 import { toast } from 'sonner'
 import { supabase } from '@/lib/supabase'
 import { queryKeys } from '@/lib/queryKeys'
+import { Button } from '@/components/ui/Button'
 import { Modal } from '@/components/ui/Modal'
 import { ConfirmDialog } from '@/components/ui/ConfirmDialog'
 import { Spinner } from '@/components/ui/Spinner'
@@ -155,9 +156,9 @@ export default function CharacterEditPage() {
     return (
       <div>
         <p style={{ color: 'var(--muted)' }}>Karakter niet gevonden.</p>
-        <button type="button" className="pangu-btn pangu-btn-ghost" onClick={() => navigate('/characters')} style={{ marginTop: 16 }}>
+        <Button variant="ghost" onClick={() => navigate('/characters')} style={{ marginTop: 16 }}>
           ← Terug naar karakters
-        </button>
+        </Button>
       </div>
     )
   }
@@ -246,13 +247,13 @@ export default function CharacterEditPage() {
                 Dit verwijdert het karakter permanent en kan niet ongedaan worden gemaakt.
               </p>
             </div>
-            <button
-              type="button"
-              className="pangu-btn pangu-btn-crimson pangu-btn-sm"
+            <Button
+              variant="danger"
+              size="sm"
               onClick={() => setDeleteOpen(true)}
             >
               Verwijder karakter
-            </button>
+            </Button>
           </div>
         </div>
 
@@ -268,12 +269,12 @@ export default function CharacterEditPage() {
           Weet je zeker dat je <strong style={{ color: 'var(--ink)' }}>{characterData.name}</strong> wilt verwijderen? Dit kan niet ongedaan worden gemaakt.
         </p>
         <div className="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
-          <button type="button" className="pangu-btn pangu-btn-ghost" onClick={() => setDeleteOpen(false)}>
+          <Button variant="ghost" onClick={() => setDeleteOpen(false)}>
             Annuleren
-          </button>
-          <button type="button" className="pangu-btn pangu-btn-crimson" onClick={handleDelete} disabled={deleteCharacter.isPending}>
-            {deleteCharacter.isPending ? 'Verwijderen...' : 'Verwijder karakter'}
-          </button>
+          </Button>
+          <Button variant="danger" onClick={handleDelete} loading={deleteCharacter.isPending}>
+            Verwijder karakter
+          </Button>
         </div>
       </Modal>
 

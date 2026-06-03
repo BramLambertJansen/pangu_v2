@@ -2,7 +2,7 @@ import type { ComponentPropsWithoutRef } from 'react'
 import { cn } from '@/utils/cn'
 import { Spinner } from './Spinner'
 
-type Variant = 'primary' | 'secondary' | 'ghost' | 'danger'
+type Variant = 'primary' | 'secondary' | 'ghost' | 'danger' | 'gold'
 type Size = 'sm' | 'md' | 'lg'
 
 export interface ButtonProps extends ComponentPropsWithoutRef<'button'> {
@@ -17,6 +17,7 @@ const variantStyles: Record<Variant, string> = {
   secondary: 'bg-surface-2 text-ink hover:bg-surface-3 focus-visible:ring-violet',
   ghost:     'bg-transparent text-ink-soft hover:bg-surface-hover focus-visible:ring-violet',
   danger:    'bg-crimson/20 text-crimson border border-crimson/30 hover:bg-crimson/30 focus-visible:ring-crimson',
+  gold:      'bg-gold/20 text-gold border border-gold/30 hover:bg-gold/30 focus-visible:ring-gold',
 }
 
 const sizeStyles: Record<Size, string> = {

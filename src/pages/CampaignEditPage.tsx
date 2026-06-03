@@ -2,6 +2,7 @@ import { useId, useCallback } from 'react'
 import { useParams, useNavigate, useLocation } from 'react-router-dom'
 import { toast } from 'sonner'
 import { Spinner } from '@/components/ui/Spinner'
+import { Button } from '@/components/ui/Button'
 import { ConfirmDialog } from '@/components/ui/ConfirmDialog'
 import { useCampaign, useSaveCampaign, useDeleteCampaign } from '@/hooks/queries/useCampaign'
 import { useEntityEdit } from '@/hooks/useEntityEdit'
@@ -107,9 +108,9 @@ export default function CampaignEditPage() {
     return (
       <div>
         <p style={{ color: 'var(--muted)' }}>Kroniek niet gevonden.</p>
-        <button type="button" className="pangu-btn pangu-btn-ghost" onClick={() => navigate('/dashboard')} style={{ marginTop: 16 }}>
+        <Button variant="ghost" onClick={() => navigate('/dashboard')} style={{ marginTop: 16 }}>
           ← Terug naar dashboard
-        </button>
+        </Button>
       </div>
     )
   }
@@ -276,22 +277,18 @@ export default function CampaignEditPage() {
           </div>
 
           <div className="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end" style={{ marginTop: 24 }}>
-            <button
-              type="button"
-              className="pangu-btn pangu-btn-ghost"
+            <Button variant="ghost"
               onClick={handleCancel}
               disabled={committed && !dirty}
             >
               Annuleren
-            </button>
-            <button
-              type="button"
-              className="pangu-btn pangu-btn-primary"
+            </Button>
+            <Button variant="primary"
               onClick={handleSave}
               disabled={!dirty || saveCampaign.isPending}
             >
               {saveCampaign.isPending ? 'Opslaan...' : 'Opslaan'}
-            </button>
+            </Button>
           </div>
         </div>
 
@@ -308,13 +305,11 @@ export default function CampaignEditPage() {
                 Dit verwijdert de kroniek permanent en kan niet ongedaan worden gemaakt.
               </p>
             </div>
-            <button
-              type="button"
-              className="pangu-btn pangu-btn-crimson pangu-btn-sm"
+            <Button variant="danger" size="sm"
               onClick={() => setDeleteOpen(true)}
             >
               Verwijder kroniek
-            </button>
+            </Button>
           </div>
         </div>
 

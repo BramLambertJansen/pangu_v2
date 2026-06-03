@@ -1,6 +1,7 @@
 import { useMemo } from 'react'
 import { toast } from 'sonner'
 import { useAuthStore } from '@/stores/auth.store'
+import { Button } from '@/components/ui/Button'
 import { EntityCardSkeleton } from '@/components/ui/EntityCardSkeleton'
 import { WorldCard, ForgeWorldCard } from '@/components/world/WorldCard'
 import type { Campaign } from '@/types/campaign.types'
@@ -40,16 +41,15 @@ export default function WorldsPage() {
         <p className="pangu-eyebrow">De wieg van elk verhaal</p>
         <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', flexWrap: 'wrap', gap: 24 }}>
           <h1 className="pangu-display-xl">Werelden</h1>
-          <button
-            type="button"
-            className="pangu-btn pangu-btn-primary"
+          <Button
+            variant="primary"
             onClick={handleCreate}
             disabled={createWorld.isPending}
             aria-label="Creëer een nieuwe wereld"
             style={{ marginBottom: 8, flexShrink: 0 }}
           >
             {createWorld.isPending ? 'Aanmaken...' : '+ Nieuwe wereld'}
-          </button>
+          </Button>
         </div>
         <p style={{ marginTop: 16, fontSize: 15, color: 'var(--ink-soft)', maxWidth: 560, lineHeight: 1.65 }}>
           Een wereld is waar alles leeft — de steden, de verlaten wegen, de mensen en de monsters. Kies er één om te betreden.

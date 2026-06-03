@@ -2,6 +2,7 @@ import { useState, useRef, useCallback } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { toast } from 'sonner'
 import { useAI } from '@/hooks/useAI'
+import { Button } from '@/components/ui/Button'
 import { useWorld } from '@/hooks/queries/useWorld'
 import { Spinner } from '@/components/ui/Spinner'
 import { CompassRose } from '@/components/world/CompassRose'
@@ -174,9 +175,9 @@ export default function WorldBuilderPage() {
     return (
       <div>
         <p style={{ color: 'var(--muted)' }}>Wereld niet gevonden.</p>
-        <button type="button" className="pangu-btn pangu-btn-ghost" onClick={() => navigate('/worlds')} style={{ marginTop: 16 }}>
+        <Button variant="ghost" onClick={() => navigate('/worlds')} style={{ marginTop: 16 }}>
           ← Terug naar werelden
-        </button>
+        </Button>
       </div>
     )
   }

@@ -1,5 +1,6 @@
 import { useParams, useNavigate } from 'react-router-dom'
 import { Spinner } from '@/components/ui/Spinner'
+import { Button } from '@/components/ui/Button'
 import { EntityCardSkeleton } from '@/components/ui/EntityCardSkeleton'
 import { EmptyState } from '@/components/ui/EmptyState'
 import { Breadcrumbs } from '@/components/ui/Breadcrumbs'
@@ -38,9 +39,9 @@ export default function SessionsPage() {
     return (
       <div>
         <p style={{ color: 'var(--muted)' }}>Kroniek niet gevonden.</p>
-        <button type="button" className="pangu-btn pangu-btn-ghost" onClick={() => navigate('/dashboard')} style={{ marginTop: 16 }}>
+        <Button variant="ghost" onClick={() => navigate('/dashboard')} style={{ marginTop: 16 }}>
           ← Terug naar dashboard
-        </button>
+        </Button>
       </div>
     )
   }

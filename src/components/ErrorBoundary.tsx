@@ -1,5 +1,6 @@
 import { Component, type ErrorInfo, type ReactNode } from 'react'
 import { CompassRose } from '@/components/world/CompassRose'
+import { Button } from '@/components/ui/Button'
 
 interface Props {
   children: ReactNode
@@ -82,14 +83,13 @@ export class ErrorBoundary extends Component<Props, State> {
         >
           {error.message}
         </pre>
-        <button
-          type="button"
-          className="pangu-btn pangu-btn-primary"
+        <Button
+          variant="primary"
           style={{ marginTop: 28 }}
           onClick={this.handleReset}
         >
           Terug naar dashboard
-        </button>
+        </Button>
       </div>
     )
   }

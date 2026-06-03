@@ -2,6 +2,7 @@ import { useState, useCallback } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { toast } from 'sonner'
 import { useAI } from '@/hooks/useAI'
+import { Button } from '@/components/ui/Button'
 import { useCampaignWithWorld } from '@/hooks/queries/useCampaign'
 import { useCreateCampaignItem } from '@/hooks/queries/useCampaignItems'
 import { useUserAISettings } from '@/hooks/queries/useUserAISettings'
@@ -227,9 +228,9 @@ Return ONLY a raw JSON array — no markdown, no explanation, just the array:
     return (
       <div>
         <p style={{ color: 'var(--muted)' }}>Kroniek niet gevonden.</p>
-        <button type="button" className="pangu-btn pangu-btn-ghost" onClick={() => navigate('/campaigns')} style={{ marginTop: 16 }}>
+        <Button variant="ghost" onClick={() => navigate('/campaigns')} style={{ marginTop: 16 }}>
           ← Terug naar kronieken
-        </button>
+        </Button>
       </div>
     )
   }

@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect } from 'react'
 import { toast } from 'sonner'
+import { Button } from '@/components/ui/Button'
 import { Spinner } from '@/components/ui/Spinner'
 import { itemRarityLabel, itemRarityColor, itemTypeLabel } from '@/lib/statusMaps'
 import { useCharacterItems } from '@/hooks/queries/useCharacterItems'
@@ -106,9 +107,9 @@ function DiceRoller() {
   if (!visible) {
     return (
       <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
-        <button type="button" className="pangu-btn pangu-btn-ghost pangu-btn-sm" onClick={() => setVisible(true)}>
+        <Button variant="ghost" size="sm" onClick={() => setVisible(true)}>
           ⬡ Dice
-        </button>
+        </Button>
       </div>
     )
   }

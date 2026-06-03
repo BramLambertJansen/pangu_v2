@@ -1,5 +1,6 @@
 import { FactionCard, ForgeFactionCard } from '@/components/faction/FactionCard'
 import { Spinner } from '@/components/ui/Spinner'
+import { Button } from '@/components/ui/Button'
 import type { Faction } from '@/types/faction.types'
 
 export function FactionsTab({
@@ -58,13 +59,9 @@ export function FactionsTab({
           </ul>
           {factions && factions.length > 0 && (
             <div style={{ marginTop: 16, display: 'flex', justifyContent: 'flex-end' }}>
-              <button
-                type="button"
-                className="pangu-btn pangu-btn-ghost pangu-btn-sm"
-                onClick={onViewAll}
-              >
+              <Button variant="ghost" size="sm" onClick={onViewAll}>
                 Alle facties bekijken →
-              </button>
+              </Button>
             </div>
           )}
         </>

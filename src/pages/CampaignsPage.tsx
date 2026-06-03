@@ -1,6 +1,7 @@
 import { useNavigate } from 'react-router-dom'
 import { toast } from 'sonner'
 import { useAuthStore } from '@/stores/auth.store'
+import { Button } from '@/components/ui/Button'
 import { EntityCardSkeleton } from '@/components/ui/EntityCardSkeleton'
 import { EmptyState } from '@/components/ui/EmptyState'
 import { CampaignCard, ForgeCampaignCard } from '@/components/campaign/CampaignCard'
@@ -60,14 +61,13 @@ export default function CampaignsPage() {
         <p className="pangu-eyebrow">De loop der avonturen</p>
         <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', flexWrap: 'wrap', gap: 24 }}>
           <h1 className="pangu-display-xl">Kronieken</h1>
-          <button
-            type="button"
-            className="pangu-btn pangu-btn-secondary"
+          <Button
+            variant="secondary"
             onClick={() => navigate('/worlds')}
             style={{ marginBottom: 8, flexShrink: 0 }}
           >
             Werelden bekijken →
-          </button>
+          </Button>
         </div>
         <p style={{ marginTop: 16, fontSize: 15, color: 'var(--ink-soft)', maxWidth: 560, lineHeight: 1.65 }}>
           Een kroniek bundelt alle avonturen binnen een wereld — sessies, locaties, NPCs, lore en meer.
@@ -88,13 +88,12 @@ export default function CampaignsPage() {
           title="Nog geen werelden"
           description="Een kroniek leeft binnen een wereld. Maak eerst een wereld aan om avonturen te beginnen."
           action={
-            <button
-              type="button"
-              className="pangu-btn pangu-btn-primary"
+            <Button
+              variant="primary"
               onClick={() => navigate('/worlds')}
             >
               Naar werelden
-            </button>
+            </Button>
           }
         />
       ) : (
@@ -103,14 +102,13 @@ export default function CampaignsPage() {
             <section key={worldId} aria-label={worldName}>
               <WorldDetailDivider label={worldName} />
               <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: -28, marginBottom: 16 }}>
-                <button
-                  type="button"
-                  className="pangu-btn pangu-btn-ghost"
-                  style={{ fontSize: 12, padding: '4px 12px' }}
+                <Button
+                  variant="ghost"
+                  size="sm"
                   onClick={() => navigate(`/worlds/${worldId}`)}
                 >
                   Naar wereld →
-                </button>
+                </Button>
               </div>
               <ul
                 style={{

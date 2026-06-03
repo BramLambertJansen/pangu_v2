@@ -5,6 +5,7 @@ import { supabase } from '@/lib/supabase'
 import { Modal } from '@/components/ui/Modal'
 import { ConfirmDialog } from '@/components/ui/ConfirmDialog'
 import { RelatedEntities } from '@/components/link/RelatedEntities'
+import { Button } from '@/components/ui/Button'
 import { Spinner } from '@/components/ui/Spinner'
 import { useEntityEdit } from '@/hooks/useEntityEdit'
 import { useItem, useSaveItem, useDeleteItem } from '@/hooks/queries/useItem'
@@ -340,9 +341,9 @@ export default function ItemEditPage() {
     return (
       <div>
         <p style={{ color: 'var(--muted)' }}>Item niet gevonden.</p>
-        <button type="button" className="pangu-btn pangu-btn-ghost" onClick={() => navigate('/dashboard')} style={{ marginTop: 16 }}>
+        <Button variant="ghost" onClick={() => navigate('/dashboard')} style={{ marginTop: 16 }}>
           ← Terug naar dashboard
-        </button>
+        </Button>
       </div>
     )
   }
@@ -462,34 +463,28 @@ export default function ItemEditPage() {
                   placeholder="bijv. glowing blue runes, wooden handle"
                 />
               </div>
-              <button
-                type="button"
-                className="pangu-btn pangu-btn-secondary pangu-btn-sm"
+              <Button variant="secondary" size="sm"
                 disabled={imageUploading || imageGenerating}
                 onClick={() => imageInputRef.current?.click()}
               >
                 {imageUploading ? 'Uploaden...' : form.image_url ? 'Afbeelding wijzigen' : 'Afbeelding uploaden'}
-              </button>
-              <button
-                type="button"
-                className="pangu-btn pangu-btn-sm"
+              </Button>
+              <Button variant="primary" size="sm"
                 disabled={imageUploading || imageGenerating}
                 onClick={handleGenerateImage}
                 style={{ background: 'rgba(212,175,55,0.15)', color: 'var(--gold)', border: '1px solid rgba(212,175,55,0.3)' }}
                 title={hasOpenAIKey ? 'Genereer via DALL-E 3' : 'Genereer via Pollinations (gratis)'}
               >
                 {imageGenerating ? 'Genereren...' : hasOpenAIKey ? '✦ DALL-E' : '✦ Genereer'}
-              </button>
+              </Button>
               {form.image_url && (
-                <button
-                  type="button"
-                  className="pangu-btn pangu-btn-ghost pangu-btn-sm"
+                <Button variant="ghost" size="sm"
                   disabled={imageUploading || imageGenerating}
                   onClick={handleImageRemove}
                   style={{ color: 'var(--crimson)' }}
                 >
                   Afbeelding verwijderen
-                </button>
+                </Button>
               )}
             </div>
           </div>
@@ -603,22 +598,18 @@ export default function ItemEditPage() {
           </div>
 
           <div className="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end" style={{ marginTop: 24 }}>
-            <button
-              type="button"
-              className="pangu-btn pangu-btn-ghost"
+            <Button variant="ghost"
               onClick={handleCancel}
               disabled={committed && !dirty}
             >
               Annuleren
-            </button>
-            <button
-              type="button"
-              className="pangu-btn pangu-btn-primary"
+            </Button>
+            <Button variant="primary"
               onClick={handleSave}
               disabled={!dirty || saveItem.isPending}
             >
               {saveItem.isPending ? 'Opslaan...' : 'Opslaan'}
-            </button>
+            </Button>
           </div>
         </div>
 
@@ -717,15 +708,13 @@ export default function ItemEditPage() {
               <p style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.16em', textTransform: 'uppercase', color: 'var(--muted)', margin: 0 }}>
                 Vaardigheids­bonussen
               </p>
-              <button
-                type="button"
-                className="pangu-btn pangu-btn-ghost pangu-btn-sm"
+              <Button variant="ghost" size="sm"
                 onClick={addSkillBonus}
                 disabled={usedSkills.size >= SKILLS.length}
                 style={{ fontSize: 12 }}
               >
                 + Vaardigheid toevoegen
-              </button>
+              </Button>
             </div>
 
             {skillBonusEntries.length > 0 ? (
@@ -783,22 +772,18 @@ export default function ItemEditPage() {
           </div>
 
           <div className="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end" style={{ marginTop: 24 }}>
-            <button
-              type="button"
-              className="pangu-btn pangu-btn-ghost"
+            <Button variant="ghost"
               onClick={handleCancel}
               disabled={committed && !dirty}
             >
               Annuleren
-            </button>
-            <button
-              type="button"
-              className="pangu-btn pangu-btn-primary"
+            </Button>
+            <Button variant="primary"
               onClick={handleSave}
               disabled={!dirty || saveItem.isPending}
             >
               {saveItem.isPending ? 'Opslaan...' : 'Opslaan'}
-            </button>
+            </Button>
           </div>
         </div>
 
@@ -829,14 +814,12 @@ export default function ItemEditPage() {
           </div>
 
           <div style={{ marginTop: 16 }}>
-            <button
-              type="button"
-              className="pangu-btn pangu-btn-primary pangu-btn-sm"
+            <Button variant="primary" size="sm"
               onClick={handleSave}
               disabled={!dirty || saveItem.isPending}
             >
               {saveItem.isPending ? 'Opslaan...' : 'Toewijzing opslaan'}
-            </button>
+            </Button>
           </div>
         </div>
 
@@ -853,13 +836,11 @@ export default function ItemEditPage() {
                 Dit verwijdert het item permanent en kan niet ongedaan worden gemaakt.
               </p>
             </div>
-            <button
-              type="button"
-              className="pangu-btn pangu-btn-crimson pangu-btn-sm"
+            <Button variant="danger" size="sm"
               onClick={() => setDeleteOpen(true)}
             >
               Verwijder item
-            </button>
+            </Button>
           </div>
         </div>
 
@@ -879,12 +860,12 @@ export default function ItemEditPage() {
           Weet je zeker dat je <strong style={{ color: 'var(--ink)' }}>{itemData.name}</strong> wilt verwijderen? Dit kan niet ongedaan worden gemaakt.
         </p>
         <div className="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
-          <button type="button" className="pangu-btn pangu-btn-ghost" onClick={() => setDeleteOpen(false)}>
+          <Button variant="ghost" onClick={() => setDeleteOpen(false)}>
             Annuleren
-          </button>
-          <button type="button" className="pangu-btn pangu-btn-crimson" onClick={handleDelete} disabled={deleteItem.isPending}>
+          </Button>
+          <Button variant="danger" onClick={handleDelete} disabled={deleteItem.isPending}>
             {deleteItem.isPending ? 'Verwijderen...' : 'Verwijder item'}
-          </button>
+          </Button>
         </div>
       </Modal>
 

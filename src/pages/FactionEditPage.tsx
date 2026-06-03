@@ -1,6 +1,7 @@
 import { useId } from 'react'
 import { useParams, useNavigate, useLocation } from 'react-router-dom'
 import { toast } from 'sonner'
+import { Button } from '@/components/ui/Button'
 import { Modal } from '@/components/ui/Modal'
 import { ConfirmDialog } from '@/components/ui/ConfirmDialog'
 import { Spinner } from '@/components/ui/Spinner'
@@ -129,9 +130,9 @@ export default function FactionEditPage() {
     return (
       <div>
         <p style={{ color: 'var(--muted)' }}>Factie niet gevonden.</p>
-        <button type="button" className="pangu-btn pangu-btn-ghost" onClick={() => navigate('/dashboard')} style={{ marginTop: 16 }}>
+        <Button variant="ghost" onClick={() => navigate('/dashboard')} style={{ marginTop: 16 }}>
           ← Terug naar dashboard
-        </button>
+        </Button>
       </div>
     )
   }
@@ -288,22 +289,21 @@ export default function FactionEditPage() {
           </div>
 
           <div className="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end" style={{ marginTop: 24 }}>
-            <button
-              type="button"
-              className="pangu-btn pangu-btn-ghost"
+            <Button
+              variant="ghost"
               onClick={handleCancel}
               disabled={committed && !dirty}
             >
               Annuleren
-            </button>
-            <button
-              type="button"
-              className="pangu-btn pangu-btn-primary"
+            </Button>
+            <Button
+              variant="primary"
               onClick={handleSave}
-              disabled={!dirty || saveFaction.isPending}
+              disabled={!dirty}
+              loading={saveFaction.isPending}
             >
-              {saveFaction.isPending ? 'Opslaan...' : 'Opslaan'}
-            </button>
+              Opslaan
+            </Button>
           </div>
         </div>
 
@@ -319,13 +319,13 @@ export default function FactionEditPage() {
                 Dit verwijdert de organisatie permanent. NPC-koppelingen worden verwijderd.
               </p>
             </div>
-            <button
-              type="button"
-              className="pangu-btn pangu-btn-crimson pangu-btn-sm"
+            <Button
+              variant="danger"
+              size="sm"
               onClick={() => setDeleteOpen(true)}
             >
               Verwijder factie
-            </button>
+            </Button>
           </div>
         </div>
 
@@ -340,12 +340,12 @@ export default function FactionEditPage() {
           Weet je zeker dat je <strong style={{ color: 'var(--ink)' }}>{factionData.name}</strong> wilt verwijderen? Dit kan niet ongedaan worden gemaakt.
         </p>
         <div className="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
-          <button type="button" className="pangu-btn pangu-btn-ghost" onClick={() => setDeleteOpen(false)}>
+          <Button variant="ghost" onClick={() => setDeleteOpen(false)}>
             Annuleren
-          </button>
-          <button type="button" className="pangu-btn pangu-btn-crimson" onClick={handleDelete} disabled={deleteFaction.isPending}>
-            {deleteFaction.isPending ? 'Verwijderen...' : 'Verwijder factie'}
-          </button>
+          </Button>
+          <Button variant="danger" onClick={handleDelete} loading={deleteFaction.isPending}>
+            Verwijder factie
+          </Button>
         </div>
       </Modal>
 

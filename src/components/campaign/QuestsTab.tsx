@@ -1,5 +1,6 @@
 import { QuestCard, ForgeQuestCard } from '@/components/quest/QuestCard'
 import { Spinner } from '@/components/ui/Spinner'
+import { Button } from '@/components/ui/Button'
 import type { Quest } from '@/types/quest.types'
 
 export function QuestsTab({
@@ -58,13 +59,9 @@ export function QuestsTab({
           </ul>
           {quests && quests.length > 0 && (
             <div style={{ marginTop: 16, display: 'flex', justifyContent: 'flex-end' }}>
-              <button
-                type="button"
-                className="pangu-btn pangu-btn-ghost pangu-btn-sm"
-                onClick={onViewAll}
-              >
+              <Button variant="ghost" size="sm" onClick={onViewAll}>
                 Alle quests bekijken →
-              </button>
+              </Button>
             </div>
           )}
         </>

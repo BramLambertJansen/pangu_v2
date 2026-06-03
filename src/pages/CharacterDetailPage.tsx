@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { useParams, useNavigate, Link } from 'react-router-dom'
 import { Spinner } from '@/components/ui/Spinner'
+import { Button } from '@/components/ui/Button'
 import { Breadcrumb } from '@/components/ui/Breadcrumb'
 import { CharacterStatsTab } from '@/components/character/CharacterStatsTab'
 import { CharacterSpellsTab } from '@/components/character/CharacterSpellsTab'
@@ -73,9 +74,9 @@ export default function CharacterDetailPage() {
     return (
       <div>
         <p style={{ color: 'var(--muted)' }}>Karakter niet gevonden.</p>
-        <button type="button" className="pangu-btn pangu-btn-ghost" onClick={() => navigate('/characters')} style={{ marginTop: 16 }}>
+        <Button variant="ghost" onClick={() => navigate('/characters')} style={{ marginTop: 16 }}>
           ← Terug naar karakters
-        </button>
+        </Button>
       </div>
     )
   }

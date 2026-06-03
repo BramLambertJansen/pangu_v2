@@ -1,4 +1,5 @@
 import { isRouteErrorResponse, useRouteError } from 'react-router-dom'
+import { Button } from '@/components/ui/Button'
 
 export function RouteErrorPage() {
   const error = useRouteError()
@@ -30,13 +31,13 @@ export function RouteErrorPage() {
           ? 'Deze pagina bestaat niet of is verplaatst.'
           : 'Een onverwachte fout heeft de pagina onderbroken.'}
       </p>
-      <a
-        href="/dashboard"
-        className="pangu-btn pangu-btn-primary"
-        style={{ marginTop: 28, textDecoration: 'none' }}
+      <Button
+        variant="primary"
+        onClick={() => { window.location.href = '/dashboard' }}
+        style={{ marginTop: 28 }}
       >
         Terug naar dashboard
-      </a>
+      </Button>
     </div>
   )
 }

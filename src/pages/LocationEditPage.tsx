@@ -1,6 +1,7 @@
 import { useId, useState } from 'react'
 import { useParams, useNavigate, useLocation as useRouterLocation } from 'react-router-dom'
 import { toast } from 'sonner'
+import { Button } from '@/components/ui/Button'
 import { Modal } from '@/components/ui/Modal'
 import { ConfirmDialog } from '@/components/ui/ConfirmDialog'
 import { Spinner } from '@/components/ui/Spinner'
@@ -149,9 +150,9 @@ export default function LocationEditPage() {
     return (
       <div>
         <p style={{ color: 'var(--muted)' }}>Locatie niet gevonden.</p>
-        <button type="button" className="pangu-btn pangu-btn-ghost" onClick={() => navigate('/dashboard')} style={{ marginTop: 16 }}>
+        <Button variant="ghost" onClick={() => navigate('/dashboard')} style={{ marginTop: 16 }}>
           ← Terug naar dashboard
-        </button>
+        </Button>
       </div>
     )
   }
@@ -296,12 +297,12 @@ export default function LocationEditPage() {
                     {aiPreview}
                   </p>
                   <div style={{ display: 'flex', gap: 8, marginTop: 12 }}>
-                    <button type="button" className="pangu-btn pangu-btn-secondary pangu-btn-sm" onClick={handleAcceptGenerated}>
+                    <Button variant="secondary" size="sm" onClick={handleAcceptGenerated}>
                       Overnemen
-                    </button>
-                    <button type="button" className="pangu-btn pangu-btn-ghost pangu-btn-sm" onClick={() => setAiPreview(null)}>
+                    </Button>
+                    <Button variant="ghost" size="sm" onClick={() => setAiPreview(null)}>
                       Negeren
-                    </button>
+                    </Button>
                   </div>
                 </div>
               )}
@@ -322,22 +323,21 @@ export default function LocationEditPage() {
           </div>
 
           <div className="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end" style={{ marginTop: 24 }}>
-            <button
-              type="button"
-              className="pangu-btn pangu-btn-ghost"
+            <Button
+              variant="ghost"
               onClick={handleCancel}
               disabled={committed && !dirty}
             >
               Annuleren
-            </button>
-            <button
-              type="button"
-              className="pangu-btn pangu-btn-primary"
+            </Button>
+            <Button
+              variant="primary"
               onClick={handleSave}
-              disabled={!dirty || saveLocation.isPending}
+              disabled={!dirty}
+              loading={saveLocation.isPending}
             >
-              {saveLocation.isPending ? 'Opslaan...' : 'Opslaan'}
-            </button>
+              Opslaan
+            </Button>
           </div>
         </div>
 
@@ -354,13 +354,13 @@ export default function LocationEditPage() {
                 Dit verwijdert de locatie permanent en kan niet ongedaan worden gemaakt.
               </p>
             </div>
-            <button
-              type="button"
-              className="pangu-btn pangu-btn-crimson pangu-btn-sm"
+            <Button
+              variant="danger"
+              size="sm"
               onClick={() => setDeleteOpen(true)}
             >
               Verwijder locatie
-            </button>
+            </Button>
           </div>
         </div>
 
@@ -376,12 +376,12 @@ export default function LocationEditPage() {
           Weet je zeker dat je <strong style={{ color: 'var(--ink)' }}>{locationData.name}</strong> wilt verwijderen? Dit kan niet ongedaan worden gemaakt.
         </p>
         <div className="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
-          <button type="button" className="pangu-btn pangu-btn-ghost" onClick={() => setDeleteOpen(false)}>
+          <Button variant="ghost" onClick={() => setDeleteOpen(false)}>
             Annuleren
-          </button>
-          <button type="button" className="pangu-btn pangu-btn-crimson" onClick={handleDelete} disabled={deleteLocation.isPending}>
-            {deleteLocation.isPending ? 'Verwijderen...' : 'Verwijder locatie'}
-          </button>
+          </Button>
+          <Button variant="danger" onClick={handleDelete} loading={deleteLocation.isPending}>
+            Verwijder locatie
+          </Button>
         </div>
       </Modal>
 

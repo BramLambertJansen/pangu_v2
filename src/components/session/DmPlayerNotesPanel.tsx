@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { toast } from 'sonner'
 import { useSessionPlayerNotes } from '@/hooks/queries/usePlayerNotes'
+import { Button } from '@/components/ui/Button'
 import { Spinner } from '@/components/ui/Spinner'
 import type { PlayerNoteWithCharacter } from '@/types/player_note.types'
 
@@ -138,9 +139,7 @@ export function DmPlayerNotesPanel({ sessionId }: Props) {
   return (
     <div>
       <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: 12 }}>
-        <button
-          type="button"
-          className="pangu-btn pangu-btn-ghost pangu-btn-sm"
+        <Button variant="ghost" size="sm"
           onClick={handleCopyAll}
           aria-label="Alle spelernotities kopiëren naar klembord"
         >
@@ -149,7 +148,7 @@ export function DmPlayerNotesPanel({ sessionId }: Props) {
             <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" />
           </svg>
           Alles kopiëren
-        </button>
+        </Button>
       </div>
       <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
         {notes.map((note) => (

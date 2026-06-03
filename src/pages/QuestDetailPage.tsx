@@ -1,5 +1,6 @@
 import { useParams, useNavigate, Link } from 'react-router-dom'
 import { Spinner } from '@/components/ui/Spinner'
+import { Button } from '@/components/ui/Button'
 import { Breadcrumb } from '@/components/ui/Breadcrumb'
 import { WorldDetailDivider } from '@/components/world/WorldDetailDivider'
 import { RelatedEntities } from '@/components/link/RelatedEntities'
@@ -25,9 +26,9 @@ export default function QuestDetailPage() {
     return (
       <div>
         <p style={{ color: 'var(--muted)' }}>Quest niet gevonden.</p>
-        <button type="button" className="pangu-btn pangu-btn-ghost" onClick={() => navigate('/dashboard')} style={{ marginTop: 16 }}>
+        <Button variant="ghost" onClick={() => navigate('/dashboard')} style={{ marginTop: 16 }}>
           ← Terug naar dashboard
-        </button>
+        </Button>
       </div>
     )
   }

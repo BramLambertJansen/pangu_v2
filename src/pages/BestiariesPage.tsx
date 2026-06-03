@@ -1,6 +1,7 @@
 import { useState, useEffect, useMemo } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { Spinner } from '@/components/ui/Spinner'
+import { Button } from '@/components/ui/Button'
 import { EmptyState } from '@/components/ui/EmptyState'
 import { Breadcrumbs } from '@/components/ui/Breadcrumbs'
 import { Modal } from '@/components/ui/Modal'
@@ -50,9 +51,9 @@ export default function BestiariesPage() {
     return (
       <div>
         <p style={{ color: 'var(--muted)' }}>Wereld niet gevonden.</p>
-        <button type="button" className="pangu-btn pangu-btn-ghost" onClick={() => navigate('/worlds')} style={{ marginTop: 16 }}>
+        <Button variant="ghost" onClick={() => navigate('/worlds')} style={{ marginTop: 16 }}>
           ← Terug naar werelden
-        </button>
+        </Button>
       </div>
     )
   }

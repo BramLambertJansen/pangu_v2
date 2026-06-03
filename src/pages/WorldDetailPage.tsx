@@ -1,6 +1,7 @@
 import { useParams, useNavigate, Link } from 'react-router-dom'
 import { toast } from 'sonner'
 import { Spinner } from '@/components/ui/Spinner'
+import { Button } from '@/components/ui/Button'
 import { Breadcrumb } from '@/components/ui/Breadcrumb'
 import { WorldDetailHeader } from '@/components/world/WorldDetailHeader'
 import { WorldDetailDivider } from '@/components/world/WorldDetailDivider'
@@ -40,9 +41,9 @@ export default function WorldDetailPage() {
     return (
       <div>
         <p style={{ color: 'var(--muted)' }}>Wereld niet gevonden.</p>
-        <button type="button" className="pangu-btn pangu-btn-ghost" onClick={() => navigate('/worlds')} style={{ marginTop: 16 }}>
+        <Button variant="ghost" onClick={() => navigate('/worlds')} style={{ marginTop: 16 }}>
           ← Terug naar werelden
-        </button>
+        </Button>
       </div>
     )
   }

@@ -1,5 +1,6 @@
 import { useId } from 'react'
 import type { Character } from '@/types/character.types'
+import { Button } from '@/components/ui/Button'
 
 interface Props {
   form: Character
@@ -134,22 +135,18 @@ export function CharacterEditLoreSection({ form, set, onCancel, onSave, isSaving
         </div>
 
         <div className="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end" style={{ marginTop: 24 }}>
-          <button
-            type="button"
-            className="pangu-btn pangu-btn-ghost"
+          <Button variant="ghost"
             onClick={onCancel}
             disabled={committed && !dirty}
           >
             Annuleren
-          </button>
-          <button
-            type="button"
-            className="pangu-btn pangu-btn-primary"
+          </Button>
+          <Button variant="primary"
             onClick={onSave}
             disabled={!dirty || isSaving}
           >
             {isSaving ? 'Opslaan...' : 'Opslaan'}
-          </button>
+          </Button>
         </div>
       </div>
     </>

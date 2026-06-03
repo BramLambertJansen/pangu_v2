@@ -1,5 +1,6 @@
 import { useParams, useNavigate, Link } from 'react-router-dom'
 import { Spinner } from '@/components/ui/Spinner'
+import { Button } from '@/components/ui/Button'
 import { Breadcrumb } from '@/components/ui/Breadcrumb'
 import { WorldDetailDivider } from '@/components/world/WorldDetailDivider'
 import { useBestiaryFull } from '@/hooks/queries/useBestiary'
@@ -26,9 +27,9 @@ export default function BestiaryDetailPage() {
     return (
       <div>
         <p style={{ color: 'var(--muted)' }}>Wezen niet gevonden.</p>
-        <button type="button" className="pangu-btn pangu-btn-ghost" onClick={() => navigate('/worlds')} style={{ marginTop: 16 }}>
+        <Button variant="ghost" onClick={() => navigate('/worlds')} style={{ marginTop: 16 }}>
           ← Terug naar werelden
-        </button>
+        </Button>
       </div>
     )
   }

@@ -1,4 +1,5 @@
 import { ItemCard, ForgeItemCard } from '@/components/item/ItemCard'
+import { Button } from '@/components/ui/Button'
 import { Spinner } from '@/components/ui/Spinner'
 import type { Item } from '@/types/item.types'
 
@@ -60,13 +61,11 @@ export function TreasuryTab({
           </ul>
           {allItems && allItems.length > 0 && (
             <div style={{ marginTop: 16, display: 'flex', justifyContent: 'flex-end' }}>
-              <button
-                type="button"
-                className="pangu-btn pangu-btn-ghost pangu-btn-sm"
+              <Button variant="ghost" size="sm"
                 onClick={onViewAll}
               >
                 Alle items bekijken →
-              </button>
+              </Button>
             </div>
           )}
         </>
