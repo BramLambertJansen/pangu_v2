@@ -141,7 +141,7 @@ export default function ItemsPage() {
                     {item.requires_attunement && <span style={{ fontSize: 11, color: 'var(--gold)' }}>Afstemming vereist</span>}
                     {item.source?.startsWith('srd') && <span style={{ fontSize: 11, color: 'var(--azure)' }}>SRD</span>}
                   </div>
-                </Button>
+                </button>
               ))}
             </div>
           )}

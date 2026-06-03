@@ -79,7 +79,7 @@ function NoteCard({ note }: { note: PlayerNoteWithCharacter }) {
             <polyline points="6 9 12 15 18 9" />
           </svg>
         </span>
-      </Button>
+      </button>
       {open && (
         <div style={{ padding: '0 16px 16px', borderTop: '1px solid var(--hairline)' }}>
           {note.content ? (

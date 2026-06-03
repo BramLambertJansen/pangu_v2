@@ -219,7 +219,7 @@ export default function EncounterEditPage() {
             <path d="M19 12H5" /><path d="M12 19l-7-7 7-7" />
           </svg>
           Terug naar gevechten
-        </Button>
+        </button>
 
         {/* Page header */}
         <header style={{ marginBottom: 40 }}>
@@ -411,7 +411,7 @@ export default function EncounterEditPage() {
                       onMouseLeave={(e) => { e.currentTarget.style.borderColor = 'var(--hairline-strong)'; e.currentTarget.style.color = 'var(--ink-soft)' }}
                     >
                       −
-                    </Button>
+                    </button>
                     <span style={{ minWidth: 24, textAlign: 'center', fontWeight: 700, color: 'var(--ink)', fontSize: 14 }}>
                       {m.count}
                     </span>
@@ -431,7 +431,7 @@ export default function EncounterEditPage() {
                       onMouseLeave={(e) => { e.currentTarget.style.borderColor = 'var(--hairline-strong)'; e.currentTarget.style.color = 'var(--ink-soft)' }}
                     >
                       +
-                    </Button>
+                    </button>
 
                     {/* Remove */}
                     <button
@@ -454,7 +454,7 @@ export default function EncounterEditPage() {
                         <path d="M10 11v6M14 11v6" />
                         <path d="M9 6V4h6v2" />
                       </svg>
-                    </Button>
+                    </button>
                   </div>
                 </div>
               ))}
@@ -536,7 +536,7 @@ export default function EncounterEditPage() {
                         {b.hp > 0 && <span>HP {b.hp}</span>}
                         {b.ac > 0 && <span>AC {b.ac}</span>}
                       </div>
-                    </Button>
+                    </button>
                   ))
                 )}
               </div>

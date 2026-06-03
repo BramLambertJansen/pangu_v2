@@ -112,7 +112,7 @@ export function CharacterEditSpellsSection({ form, set }: Props) {
               }}
             >
               Geen
-            </Button>
+            </button>
             {SPELLCASTING_ABILITY_OPTIONS.map(opt => (
               <button
                 key={opt.value}
@@ -127,7 +127,7 @@ export function CharacterEditSpellsSection({ form, set }: Props) {
                 }}
               >
                 {opt.label}
-              </Button>
+              </button>
             ))}
           </div>
           {spellAbility && (
@@ -163,7 +163,7 @@ export function CharacterEditSpellsSection({ form, set }: Props) {
             >
               <span aria-hidden="true">{(form.concentrating ?? false) ? '◉' : '○'}</span>
               {(form.concentrating ?? false) ? 'Concentreert' : 'Geen concentratie'}
-            </Button>
+            </button>
           </div>
           {(form.concentrating ?? false) && (
             <div style={{ flex: 1, minWidth: 200 }}>
@@ -205,7 +205,7 @@ export function CharacterEditSpellsSection({ form, set }: Props) {
                 >
                   <span>+</span>
                   <span>Niveau {level} toevoegen</span>
-                </Button>
+                </button>
               )
             }
             return (
@@ -240,7 +240,7 @@ export function CharacterEditSpellsSection({ form, set }: Props) {
                     style={{ marginLeft: 'auto', background: 'none', border: 'none', cursor: 'pointer', color: 'var(--muted)', fontSize: 14, padding: '2px 6px' }}
                   >
                     ✕
-                  </Button>
+                  </button>
                 )}
               </div>
             )
@@ -273,7 +273,7 @@ export function CharacterEditSpellsSection({ form, set }: Props) {
                 }}
               >
                 {active ? '✓ ' : '+ '}{preset}
-              </Button>
+              </button>
             )
           })}
         </div>
@@ -330,7 +330,7 @@ export function CharacterEditSpellsSection({ form, set }: Props) {
                   style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--muted)', fontSize: 14, padding: '2px 6px' }}
                 >
                   ✕
-                </Button>
+                </button>
               </div>
             ))}
           </div>

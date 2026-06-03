@@ -373,7 +373,7 @@ export default function ItemEditPage() {
             <path d="M19 12H5" /><path d="M12 19l-7-7 7-7" />
           </svg>
           Terug naar items
-        </Button>
+        </button>
 
         {/* Page header */}
         <header style={{ marginBottom: 40 }}>
@@ -760,7 +760,7 @@ export default function ItemEditPage() {
                       onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.color = 'var(--muted)' }}
                     >
                       ✕
-                    </Button>
+                    </button>
                   </div>
                 ))}
               </div>

@@ -145,7 +145,7 @@ export default function QuestEditPage() {
             <path d="M19 12H5" /><path d="M12 19l-7-7 7-7" />
           </svg>
           Terug naar quests
-        </Button>
+        </button>
 
         {/* Page header */}
         <header style={{ marginBottom: 40 }}>

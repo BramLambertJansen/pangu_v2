@@ -187,7 +187,7 @@ export default function NpcEditPage() {
             <path d="M19 12H5" /><path d="M12 19l-7-7 7-7" />
           </svg>
           Terug naar NPCs
-        </Button>
+        </button>
 
         {/* Page header */}
         <header style={{ marginBottom: 40 }}>
@@ -289,7 +289,7 @@ export default function NpcEditPage() {
                     ? <><Spinner size="sm" /> Genereren...</>
                     : <>✦ Genereer</>
                   }
-                </Button>
+                </button>
               </div>
               <textarea
                 id={descriptionId}
