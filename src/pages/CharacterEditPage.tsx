@@ -2,17 +2,15 @@ import { useId, useCallback, useRef, KeyboardEvent } from 'react'
 import { sanitizeImageUrl } from '@/utils/sanitizeUrl'
 import { useImagePositioning } from '@/hooks/useImagePositioning'
 import { useParams, useNavigate, useLocation } from 'react-router-dom'
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { toast } from 'sonner'
-import { supabase } from '@/lib/supabase'
-import { queryKeys } from '@/lib/queryKeys'
 import { Modal } from '@/components/ui/Modal'
 import { ConfirmDialog } from '@/components/ui/ConfirmDialog'
 import { Spinner } from '@/components/ui/Spinner'
 import { useEntityEdit } from '@/hooks/useEntityEdit'
+import { useCharacter, useSaveCharacter, useDeleteCharacter } from '@/hooks/queries/useCharacter'
+import { useUserCampaignNames } from '@/hooks/queries/useCampaign'
 import { useAuthStore } from '@/stores/auth.store'
 import type { Character, CharacterStatus, HitDie, SpellcastingAbility, SpellSlots, SpellSlotLevel, ClassResources } from '@/types/character.types'
-import type { Campaign } from '@/types/campaign.types'
 
 const SKILLS: { name: string; ability: string; abbr: string }[] = [
   { name: 'Atletiek',          ability: 'Sterkte',       abbr: 'STR' },
@@ -263,7 +261,6 @@ export default function CharacterEditPage() {
   const { id } = useParams<{ id: string }>()
   const navigate = useNavigate()
   const location = useLocation()
-  const queryClient = useQueryClient()
   const user = useAuthStore(s => s.user)
 
   const descriptionId = useId()
@@ -297,20 +294,7 @@ export default function CharacterEditPage() {
   const isNew = locationState?.isNew ?? false
   const joinCampaignId = locationState?.joinCampaignId
 
-  const { data: characterData, isLoading } = useQuery<Character>({
-    queryKey: queryKeys.characters.detail(id!),
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from('characters')
-        .select('*')
-        .eq('id', id!)
-        .single()
-      if (error) throw error
-      return data as unknown as Character
-    },
-    enabled: !!id,
-    staleTime: 1000 * 60,
-  })
+  const { data: characterData, isLoading } = useCharacter(id)
 
   const {
     form, set, dirty, setDirty,
@@ -356,160 +340,18 @@ export default function CharacterEditPage() {
     set('saving_throw_proficiencies', updated)
   }, [form.saving_throw_proficiencies, set])
 
-  // Load campaigns the user owns or has joined as a player
-  const { data: userCampaigns } = useQuery<Pick<Campaign, 'id' | 'name'>[]>({
-    queryKey: [...queryKeys.campaigns.all, 'names'],
-    queryFn: async () => {
-      if (!user) return []
-      const [ownedRes, memberRes] = await Promise.all([
-        supabase.from('campaigns').select('id, name').eq('user_id', user.id),
-        supabase.from('campaign_members').select('campaigns!inner(id, name)').eq('user_id', user.id),
-      ])
-      if (ownedRes.error) throw ownedRes.error
-      if (memberRes.error) throw memberRes.error
+  const { data: userCampaigns } = useUserCampaignNames(user?.id)
 
-      const memberCampaigns = (memberRes.data ?? []).map(
-        (row) => (row as unknown as { campaigns: Pick<Campaign, 'id' | 'name'> }).campaigns
-      )
-      const seen = new Set<string>()
-      return [...(ownedRes.data ?? []), ...memberCampaigns]
-        .filter((c) => { if (seen.has(c.id)) return false; seen.add(c.id); return true })
-        .sort((a, b) => a.name.localeCompare(b.name)) as Pick<Campaign, 'id' | 'name'>[]
-    },
-    enabled: !!user,
-    staleTime: 1000 * 60,
-  })
-
-  const saveCharacter = useMutation({
-    mutationFn: async () => {
-      const { error } = await supabase
-        .from('characters')
-        .update({
-          name: form.name,
-          subtitle: form.subtitle ?? null,
-          character_class: form.character_class ?? null,
-          character_subclass: form.character_subclass ?? null,
-          character_race: form.character_race ?? null,
-          campaign_id: form.campaign_id ?? null,
-          level: form.level,
-          xp: form.xp,
-          xp_next: form.xp_next,
-          hp_current: form.hp_current,
-          hp_max: form.hp_max,
-          armor_class: form.armor_class,
-          speed: form.speed,
-          initiative: form.initiative,
-          proficiency_bonus: form.proficiency_bonus,
-          stat_str: form.stat_str,
-          stat_dex: form.stat_dex,
-          stat_con: form.stat_con,
-          stat_int: form.stat_int,
-          stat_wis: form.stat_wis,
-          stat_cha: form.stat_cha,
-          gold: form.gold,
-          silver: form.silver,
-          copper: form.copper,
-          description: form.description ?? null,
-          notes: form.notes ?? null,
-          status: form.status,
-          proficient_skills: form.proficient_skills ?? [],
-          // D&D 5.5e fields — proficiencies & combat state
-          saving_throw_proficiencies: form.saving_throw_proficiencies ?? [],
-          expertise_skills:           form.expertise_skills ?? [],
-          languages:                  form.languages ?? [],
-          tool_proficiencies:         form.tool_proficiencies ?? [],
-          weapon_proficiencies:       form.weapon_proficiencies ?? [],
-          armor_proficiencies:        form.armor_proficiencies ?? [],
-          inspiration:                form.inspiration ?? false,
-          hit_die:                    form.hit_die ?? 'd8',
-          hit_dice_current:           form.hit_dice_current ?? 1,
-          death_save_successes:       form.death_save_successes ?? 0,
-          death_save_failures:        form.death_save_failures ?? 0,
-          exhaustion:                 form.exhaustion ?? 0,
-          alignment:                  form.alignment ?? null,
-          // D&D 5.5e fields — spellcasting
-          temp_hp:                    form.temp_hp ?? 0,
-          spellcasting_ability:       form.spellcasting_ability ?? null,
-          spell_slots:                (form.spell_slots ?? {}) as Record<string, unknown>,
-          concentrating:              form.concentrating ?? false,
-          concentration_spell:        form.concentration_spell ?? null,
-          // D&D 5.5e fields — feats & resources
-          feats:                      form.feats ?? [],
-          weapon_masteries:           form.weapon_masteries ?? [],
-          active_conditions:          form.active_conditions ?? [],
-          class_resources:            (form.class_resources ?? {}) as Record<string, unknown>,
-          // D&D 5.5e fields — currency
-          platinum:                   form.platinum ?? 0,
-          electrum:                   form.electrum ?? 0,
-          // D&D 5.5e fields — speeds & senses
-          fly_speed:                  form.fly_speed ?? 0,
-          swim_speed:                 form.swim_speed ?? 0,
-          climb_speed:                form.climb_speed ?? 0,
-          burrow_speed:               form.burrow_speed ?? 0,
-          darkvision:                 form.darkvision ?? 0,
-          special_senses:             form.special_senses ?? null,
-          // D&D 5.5e fields — physical appearance
-          age:                        form.age ?? null,
-          height:                     form.height ?? null,
-          weight:                     form.weight ?? null,
-          appearance:                 form.appearance ?? null,
-          // D&D 5.5e fields — roleplay traits
-          personality_traits:         form.personality_traits ?? null,
-          ideals:                     form.ideals ?? null,
-          bonds:                      form.bonds ?? null,
-          flaws:                      form.flaws ?? null,
-          portrait_url:               form.portrait_url ?? null,
-          portrait_position:          form.portrait_position ?? 'center',
-          committed: true,
-          updated_at: new Date().toISOString(),
-        })
-        .eq('id', id!)
-      if (error) throw error
-
-      if (joinCampaignId && user) {
-        const { error: memberError } = await supabase
-          .from('campaign_members')
-          .insert({ campaign_id: joinCampaignId, user_id: user.id })
-        // 23505 = already a member (e.g. retry after network error), safe to ignore
-        if (memberError && memberError.code !== '23505') throw memberError
-      }
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: queryKeys.characters.all })
-      queryClient.invalidateQueries({ queryKey: queryKeys.characters.detail(id!) })
-      queryClient.invalidateQueries({ queryKey: ['characters', 'campaign'] })
-      if (joinCampaignId) {
-        queryClient.invalidateQueries({ queryKey: queryKeys.campaigns.members(joinCampaignId) })
-      }
-      setCommitted(true)
-      setDirty(false)
-    },
-    onError: () => {
-      toast.error('Opslaan mislukt')
-    },
-  })
-
-  const deleteCharacter = useMutation({
-    mutationFn: async () => {
-      const { error } = await supabase.from('characters').delete().eq('id', id!)
-      if (error) throw error
-    },
-    onSuccess: () => {
-      queryClient.removeQueries({ queryKey: queryKeys.characters.detail(id!) })
-      queryClient.invalidateQueries({ queryKey: queryKeys.characters.all })
-      navigate('/characters')
-    },
-    onError: () => {
-      toast.error('Verwijderen mislukt')
-    },
-  })
+  const saveCharacter = useSaveCharacter(id!)
+  const deleteCharacter = useDeleteCharacter(id!)
 
   async function handleDiscardConfirm() {
     if (guard.isDraftDiscard) {
-      const { error } = await supabase.from('characters').delete().eq('id', id!)
-      if (error) { toast.error('Verwijderen mislukt'); return }
-      queryClient.removeQueries({ queryKey: queryKeys.characters.detail(id!) })
-      queryClient.invalidateQueries({ queryKey: queryKeys.characters.all })
+      try {
+        await deleteCharacter.mutateAsync()
+      } catch {
+        return
+      }
     }
     const handled = guard.confirmLeave()
     if (!handled) {
@@ -536,19 +378,20 @@ export default function CharacterEditPage() {
   }
 
   function handleSave() {
-    toast.promise(saveCharacter.mutateAsync(), {
-      loading: 'Opslaan...',
-      success: 'Karakter opgeslagen',
-      error: 'Opslaan mislukt',
-    })
+    toast.promise(
+      saveCharacter.mutateAsync({ form, joinCampaignId, userId: user?.id }).then(() => {
+        setCommitted(true)
+        setDirty(false)
+      }),
+      { loading: 'Opslaan...', success: 'Karakter opgeslagen', error: 'Opslaan mislukt' },
+    )
   }
 
   function handleDelete() {
-    toast.promise(deleteCharacter.mutateAsync(), {
-      loading: 'Verwijderen...',
-      success: 'Karakter verwijderd',
-      error: 'Verwijderen mislukt',
-    })
+    toast.promise(
+      deleteCharacter.mutateAsync().then(() => navigate('/characters')),
+      { loading: 'Verwijderen...', success: 'Karakter verwijderd', error: 'Verwijderen mislukt' },
+    )
     setDeleteOpen(false)
   }
 

@@ -1,16 +1,6 @@
 import { useState } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { Breadcrumb } from '@/components/ui/Breadcrumb'
-import { useMutation, useQueryClient } from '@tanstack/react-query'
-import { toast } from 'sonner'
-import type { SupabaseClient } from '@supabase/supabase-js'
-import { supabase } from '@/lib/supabase'
-
-// factions is not yet in database.types.ts — migration 039 adds the table but types are
-// regenerated after the migration runs on the live database.
-const db = supabase as unknown as SupabaseClient
-import { queryKeys } from '@/lib/queryKeys'
-import { useAuthStore } from '@/stores/auth.store'
 import { Spinner } from '@/components/ui/Spinner'
 import { StoryArcTracker } from '@/components/session/StoryArcTracker'
 import { LocationCard, ForgeLocationCard } from '@/components/location/LocationCard'
@@ -23,29 +13,22 @@ import { PartyMemberRow } from '@/components/character/CharacterCard'
 import { DmCharacterPanel } from '@/components/character/DmCharacterPanel'
 import { ItemCard, ForgeItemCard } from '@/components/item/ItemCard'
 import { useCampaignWithWorld } from '@/hooks/queries/useCampaign'
-import { useCampaignSessions } from '@/hooks/queries/useCampaignSessions'
-import { useCampaignLocations } from '@/hooks/queries/useCampaignLocations'
-import { useCampaignNpcs } from '@/hooks/queries/useCampaignNpcs'
-import { useCampaignLore } from '@/hooks/queries/useCampaignLore'
-import { useCampaignQuests } from '@/hooks/queries/useCampaignQuests'
-import { useCampaignEncounters } from '@/hooks/queries/useCampaignEncounters'
+import { useCampaignSessions, useCreateCampaignSession } from '@/hooks/queries/useCampaignSessions'
+import { useCampaignLocations, useCreateCampaignLocation } from '@/hooks/queries/useCampaignLocations'
+import { useCampaignNpcs, useCreateCampaignNpc } from '@/hooks/queries/useCampaignNpcs'
+import { useCampaignLore, useCreateCampaignLore } from '@/hooks/queries/useCampaignLore'
+import { useCampaignQuests, useCreateCampaignQuest } from '@/hooks/queries/useCampaignQuests'
+import { useCampaignEncounters, useCreateCampaignEncounter } from '@/hooks/queries/useCampaignEncounters'
 import { useCampaignCharacters } from '@/hooks/queries/useCampaignCharacters'
-import { useCampaignItems } from '@/hooks/queries/useCampaignItems'
-import { useCampaignFactions } from '@/hooks/queries/useCampaignFactions'
+import { useCampaignItems, useCreateCampaignItem } from '@/hooks/queries/useCampaignItems'
+import { useCampaignFactions, useCreateCampaignFaction } from '@/hooks/queries/useCampaignFactions'
 import { FactionCard, ForgeFactionCard } from '@/components/faction/FactionCard'
 import { InvitePanel } from '@/components/campaign/InvitePanel'
 import { pickGradient, coverGradients } from '@/utils/pickGradient'
 import { sanitizeImageUrl } from '@/utils/sanitizeUrl'
 import { campaignStatusLabel } from '@/lib/statusMaps'
-import type { Session } from '@/types/session.types'
-import type { Location } from '@/types/location.types'
-import type { Lore } from '@/types/lore.types'
-import type { Npc } from '@/types/npc.types'
-import type { Quest } from '@/types/quest.types'
-import type { Encounter } from '@/types/encounter.types'
 import type { Item } from '@/types/item.types'
 import type { Character } from '@/types/character.types'
-import type { Faction } from '@/types/faction.types'
 
 // ── PartySection ──────────────────────────────────────────────────────────────
 // Split-screen party view: left = member list, right = DM character panel.
@@ -272,8 +255,6 @@ const TABS: { id: TabId; label: string; dmOnly?: boolean }[] = [
 export default function CampaignDetailPage() {
   const { id } = useParams<{ id: string }>()
   const navigate = useNavigate()
-  const queryClient = useQueryClient()
-  const user = useAuthStore(s => s.user)
   const [activeTab, setActiveTab] = useState<TabId>('sessions')
 
   const { data: campaign, isLoading } = useCampaignWithWorld(id)
@@ -287,152 +268,14 @@ export default function CampaignDetailPage() {
   const { data: encounters, isLoading: isLoadingEncounters } = useCampaignEncounters(id)
   const { data: factions, isLoading: isLoadingFactions } = useCampaignFactions(id)
 
-  const createSession = useMutation({
-    mutationFn: async () => {
-      if (!user) throw new Error('Niet ingelogd')
-      const nextNumber = sessions && sessions.length > 0
-        ? Math.max(...sessions.map((s) => s.session_number ?? 0)) + 1
-        : 1
-      const { data, error } = await supabase
-        .from('sessions')
-        .insert({ campaign_id: id!, user_id: user.id, name: 'Nieuwe sessie', session_number: nextNumber, status: 'planned' })
-        .select()
-        .single()
-      if (error) throw error
-      return data as Session
-    },
-    onSuccess: (newSession) => {
-      queryClient.invalidateQueries({ queryKey: queryKeys.campaigns.sessions(id!) })
-      navigate(`/sessions/${newSession.id}/edit`, { state: { isNew: true, campaignId: id } })
-    },
-    onError: () => { toast.error('Sessie aanmaken mislukt') },
-  })
-
-  const createLocation = useMutation({
-    mutationFn: async () => {
-      if (!user) throw new Error('Niet ingelogd')
-      const { data, error } = await supabase
-        .from('locations')
-        .insert({ campaign_id: id!, user_id: user.id, name: 'Nieuwe locatie', status: 'draft' })
-        .select()
-        .single()
-      if (error) throw error
-      return data as Location
-    },
-    onSuccess: (newLocation) => {
-      queryClient.invalidateQueries({ queryKey: queryKeys.campaigns.locations(id!) })
-      navigate(`/locations/${newLocation.id}/edit`, { state: { isNew: true, campaignId: id } })
-    },
-    onError: () => { toast.error('Locatie aanmaken mislukt') },
-  })
-
-  const createLore = useMutation({
-    mutationFn: async () => {
-      if (!user) throw new Error('Niet ingelogd')
-      const { data, error } = await supabase
-        .from('lore')
-        .insert({ campaign_id: id!, user_id: user.id, name: 'Nieuwe lore', status: 'draft' })
-        .select()
-        .single()
-      if (error) throw error
-      return data as Lore
-    },
-    onSuccess: (newLore) => {
-      queryClient.invalidateQueries({ queryKey: queryKeys.campaigns.lore(id!) })
-      navigate(`/lore/${newLore.id}/edit`, { state: { isNew: true, campaignId: id } })
-    },
-    onError: () => { toast.error('Lore aanmaken mislukt') },
-  })
-
-  const createNpc = useMutation({
-    mutationFn: async () => {
-      if (!user) throw new Error('Niet ingelogd')
-      const { data, error } = await supabase
-        .from('npcs')
-        .insert({ campaign_id: id!, user_id: user.id, name: 'Nieuwe NPC', status: 'draft' })
-        .select()
-        .single()
-      if (error) throw error
-      return data as Npc
-    },
-    onSuccess: (newNpc) => {
-      queryClient.invalidateQueries({ queryKey: queryKeys.campaigns.npcs(id!) })
-      navigate(`/npcs/${newNpc.id}/edit`, { state: { isNew: true, campaignId: id } })
-    },
-    onError: () => { toast.error('NPC aanmaken mislukt') },
-  })
-
-  const createQuest = useMutation({
-    mutationFn: async () => {
-      if (!user) throw new Error('Niet ingelogd')
-      const { data, error } = await supabase
-        .from('quests')
-        .insert({ campaign_id: id!, user_id: user.id, name: 'Nieuwe quest', status: 'draft' })
-        .select()
-        .single()
-      if (error) throw error
-      return data as Quest
-    },
-    onSuccess: (newQuest) => {
-      queryClient.invalidateQueries({ queryKey: queryKeys.campaigns.quests(id!) })
-      navigate(`/quests/${newQuest.id}/edit`, { state: { isNew: true, campaignId: id } })
-    },
-    onError: () => { toast.error('Quest aanmaken mislukt') },
-  })
-
-  const createEncounter = useMutation({
-    mutationFn: async () => {
-      if (!user) throw new Error('Niet ingelogd')
-      const { data, error } = await supabase
-        .from('encounters')
-        .insert({ campaign_id: id!, user_id: user.id, name: 'Nieuw gevecht', status: 'draft' })
-        .select()
-        .single()
-      if (error) throw error
-      return data as Encounter
-    },
-    onSuccess: (newEncounter) => {
-      queryClient.invalidateQueries({ queryKey: queryKeys.campaigns.encounters(id!) })
-      navigate(`/encounters/${newEncounter.id}/edit`, { state: { isNew: true, campaignId: id } })
-    },
-    onError: () => { toast.error('Gevecht aanmaken mislukt') },
-  })
-
-  const createFaction = useMutation({
-    mutationFn: async () => {
-      if (!user) throw new Error('Niet ingelogd')
-      const { data, error } = await db
-        .from('factions')
-        .insert({ campaign_id: id!, user_id: user.id, name: 'Nieuwe factie', status: 'draft', reputation: 'neutral' })
-        .select()
-        .single()
-      if (error) throw error
-      return data as Faction
-    },
-    onSuccess: (newFaction) => {
-      queryClient.invalidateQueries({ queryKey: queryKeys.campaigns.factions(id!) })
-      navigate(`/factions/${newFaction.id}/edit`, { state: { isNew: true, campaignId: id } })
-    },
-    onError: () => { toast.error('Factie aanmaken mislukt') },
-  })
-
-  const createItem = useMutation({
-    mutationFn: async () => {
-      if (!user) throw new Error('Niet ingelogd')
-      const { data, error } = await supabase
-        .from('items')
-        .insert({ campaign_id: id!, name: 'Nieuw item', item_type: 'misc', rarity: 'common', is_magical: false, quantity: 1 })
-        .select()
-        .single()
-      if (error) throw error
-      return data as Item
-    },
-    onSuccess: (newItem) => {
-      queryClient.invalidateQueries({ queryKey: queryKeys.items.byCampaign(id!) })
-      navigate(`/items/${newItem.id}/edit`, { state: { isNew: true, campaignId: id } })
-    },
-    onError: () => { toast.error('Item aanmaken mislukt') },
-  })
+  const createSession = useCreateCampaignSession(id!)
+  const createLocation = useCreateCampaignLocation(id!)
+  const createLore = useCreateCampaignLore(id!)
+  const createNpc = useCreateCampaignNpc(id!)
+  const createQuest = useCreateCampaignQuest(id!)
+  const createEncounter = useCreateCampaignEncounter(id!)
+  const createFaction = useCreateCampaignFaction(id!)
+  const createItem = useCreateCampaignItem(id!)
 
   if (isLoading) {
     return (
@@ -737,7 +580,12 @@ export default function CampaignDetailPage() {
             ) : (
               <StoryArcTracker
                 sessions={sessions ?? []}
-                onForge={() => createSession.mutate()}
+                onForge={() => {
+                  const nextNumber = sessions && sessions.length > 0
+                    ? Math.max(...sessions.map((s) => s.session_number ?? 0)) + 1
+                    : 1
+                  createSession.mutate({ sessionNumber: nextNumber })
+                }}
                 forgeLoading={createSession.isPending}
               />
             )}

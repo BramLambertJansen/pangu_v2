@@ -1,59 +1,17 @@
 import { useParams, useNavigate, Link } from 'react-router-dom'
-import { useQuery } from '@tanstack/react-query'
-import { supabase } from '@/lib/supabase'
-import { queryKeys } from '@/lib/queryKeys'
 import { Spinner } from '@/components/ui/Spinner'
 import { Breadcrumb } from '@/components/ui/Breadcrumb'
 import { WorldDetailDivider } from '@/components/world/WorldDetailDivider'
 import { RelatedEntities } from '@/components/link/RelatedEntities'
-import type { Lore, LoreStatus } from '@/types/lore.types'
-
-type LoreWithCampaign = Lore & {
-  campaigns: { id: string; name: string; world_id: string; worlds: { id: string; name: string } | null } | null
-}
-
-const statusLabel: Record<LoreStatus, string> = {
-  draft:    'Concept',
-  active:   'Actief',
-  archived: 'Gearchiveerd',
-}
-
-const statusColor: Record<LoreStatus, string> = {
-  draft:    'var(--gold)',
-  active:   'var(--violet)',
-  archived: 'var(--muted)',
-}
-
-const cardGradients = [
-  'radial-gradient(ellipse 60% 80% at 25% 35%, rgba(155,138,255,0.32) 0%, rgba(80,50,200,0.18) 45%, var(--void) 78%)',
-  'radial-gradient(ellipse 60% 80% at 28% 38%, rgba(245,180,50,0.28) 0%, rgba(155,138,255,0.18) 50%, var(--void) 78%)',
-  'radial-gradient(ellipse 60% 80% at 30% 40%, rgba(62,207,178,0.28) 0%, rgba(155,138,255,0.20) 50%, var(--void) 78%)',
-  'radial-gradient(ellipse 60% 80% at 25% 38%, rgba(155,138,255,0.26) 0%, rgba(62,207,178,0.20) 50%, var(--void) 78%)',
-]
-
-function pickGradient(id: string): string {
-  const code = (id.charCodeAt(0) || 0) + (id.charCodeAt(id.length - 1) || 0)
-  return cardGradients[code % cardGradients.length]
-}
+import { useLoreFull } from '@/hooks/queries/useLore'
+import { loreStatusLabel, loreStatusColor } from '@/lib/statusMaps'
+import { pickGradient, loreGradients } from '@/utils/pickGradient'
 
 export default function LoreDetailPage() {
   const { id } = useParams<{ id: string }>()
   const navigate = useNavigate()
 
-  const { data: lore, isLoading } = useQuery<LoreWithCampaign>({
-    queryKey: queryKeys.campaigns.loreDetailFull(id!),
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from('lore')
-        .select('*, campaigns(id, name, world_id, worlds(id, name))')
-        .eq('id', id!)
-        .single()
-      if (error) throw error
-      return data as LoreWithCampaign
-    },
-    enabled: !!id,
-    staleTime: 1000 * 60,
-  })
+  const { data: lore, isLoading } = useLoreFull(id)
 
   if (isLoading) {
     return (
@@ -76,7 +34,7 @@ export default function LoreDetailPage() {
 
   const campaign = lore.campaigns
   const world = campaign?.worlds ?? null
-  const gradient = pickGradient(lore.id)
+  const gradient = pickGradient(lore.id, loreGradients)
   const initial = lore.name.trim()[0]?.toUpperCase() ?? '?'
 
   return (
@@ -169,14 +127,14 @@ export default function LoreDetailPage() {
           <span style={{
             display: 'inline-flex', alignItems: 'center',
             padding: '4px 12px',
-            background: statusColor[lore.status],
+            background: loreStatusColor[lore.status],
             borderRadius: 'var(--r-full)',
             fontFamily: 'var(--font-body)',
             fontSize: 10, fontWeight: 700,
             letterSpacing: '0.16em', textTransform: 'uppercase',
             color: 'var(--void)',
           }}>
-            {statusLabel[lore.status]}
+            {loreStatusLabel[lore.status]}
           </span>
         </div>
 

@@ -1,35 +1,11 @@
 import { useParams, useNavigate, Link } from 'react-router-dom'
-import { useQuery } from '@tanstack/react-query'
-import { supabase } from '@/lib/supabase'
-import { queryKeys } from '@/lib/queryKeys'
 import { Spinner } from '@/components/ui/Spinner'
 import { Breadcrumb } from '@/components/ui/Breadcrumb'
 import { WorldDetailDivider } from '@/components/world/WorldDetailDivider'
-import type { BestiaryWithWorld, BestiaryStatus, BestiaryAction } from '@/types/bestiary.types'
-
-const statusLabel: Record<BestiaryStatus, string> = {
-  draft:    'Concept',
-  active:   'Actief',
-  archived: 'Gearchiveerd',
-}
-
-const statusColor: Record<BestiaryStatus, string> = {
-  draft:    'var(--gold)',
-  active:   'var(--teal)',
-  archived: 'var(--muted)',
-}
-
-const cardGradients = [
-  'radial-gradient(ellipse 60% 80% at 25% 35%, rgba(62,207,178,0.34) 0%, rgba(30,120,90,0.20) 45%, var(--void) 78%)',
-  'radial-gradient(ellipse 60% 80% at 28% 38%, rgba(62,207,178,0.28) 0%, rgba(155,138,255,0.18) 50%, var(--void) 78%)',
-  'radial-gradient(ellipse 60% 80% at 30% 40%, rgba(30,160,110,0.30) 0%, rgba(62,207,178,0.22) 50%, var(--void) 78%)',
-  'radial-gradient(ellipse 60% 80% at 25% 38%, rgba(245,180,50,0.24) 0%, rgba(62,207,178,0.22) 50%, var(--void) 78%)',
-]
-
-function pickGradient(id: string): string {
-  const code = (id.charCodeAt(0) || 0) + (id.charCodeAt(id.length - 1) || 0)
-  return cardGradients[code % cardGradients.length]
-}
+import { useBestiaryFull } from '@/hooks/queries/useBestiary'
+import { bestiaryStatusLabel, bestiaryStatusColor } from '@/lib/statusMaps'
+import { pickGradient, bestiaryGradients } from '@/utils/pickGradient'
+import type { BestiaryWithWorld, BestiaryAction } from '@/types/bestiary.types'
 
 const abilityScores: { key: keyof BestiaryWithWorld; abbr: string; label: string }[] = [
   { key: 'stat_str', abbr: 'STR', label: 'Sterkte' },
@@ -49,20 +25,7 @@ export default function BestiaryDetailPage() {
   const { id } = useParams<{ id: string }>()
   const navigate = useNavigate()
 
-  const { data: bestiary, isLoading } = useQuery<BestiaryWithWorld>({
-    queryKey: queryKeys.worlds.bestiaryDetailFull(id!),
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from('bestiaries')
-        .select('*, worlds(id, name)')
-        .eq('id', id!)
-        .single()
-      if (error) throw error
-      return data as BestiaryWithWorld
-    },
-    enabled: !!id,
-    staleTime: 1000 * 60,
-  })
+  const { data: bestiary, isLoading } = useBestiaryFull(id)
 
   if (isLoading) {
     return (
@@ -84,7 +47,7 @@ export default function BestiaryDetailPage() {
   }
 
   const world = bestiary.worlds
-  const gradient = pickGradient(bestiary.id)
+  const gradient = pickGradient(bestiary.id, bestiaryGradients)
   const initial = bestiary.name.trim()[0]?.toUpperCase() ?? '?'
 
   return (
@@ -189,14 +152,14 @@ export default function BestiaryDetailPage() {
           <span style={{
             display: 'inline-flex', alignItems: 'center',
             padding: '4px 12px',
-            background: statusColor[bestiary.status],
+            background: bestiaryStatusColor[bestiary.status],
             borderRadius: 'var(--r-full)',
             fontFamily: 'var(--font-body)',
             fontSize: 10, fontWeight: 700,
             letterSpacing: '0.16em', textTransform: 'uppercase',
             color: 'var(--void)',
           }}>
-            {statusLabel[bestiary.status]}
+            {bestiaryStatusLabel[bestiary.status]}
           </span>
         </div>
 

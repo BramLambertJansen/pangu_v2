@@ -1,48 +1,22 @@
-import { useEffect, useMemo } from 'react'
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
+import { useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { toast } from 'sonner'
-import { supabase } from '@/lib/supabase'
-import { queryKeys } from '@/lib/queryKeys'
 import { useAuthStore } from '@/stores/auth.store'
 import { EntityCardSkeleton } from '@/components/ui/EntityCardSkeleton'
 import { WorldCard, ForgeWorldCard } from '@/components/world/WorldCard'
-import type { World } from '@/types/world.types'
 import type { Campaign } from '@/types/campaign.types'
+import { useWorlds, useActiveCampaignsForWorlds, useCreateWorld } from '@/hooks/queries/useWorld'
+import { useDraftGC } from '@/hooks/useDraftGC'
 
 export default function WorldsPage() {
   const navigate = useNavigate()
-  const queryClient = useQueryClient()
   const user = useAuthStore(s => s.user)
 
-  const { data: worlds, isLoading } = useQuery<World[]>({
-    queryKey: queryKeys.worlds.all,
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from('worlds')
-        .select('*')
-        .eq('committed', true)
-        .order('created_at', { ascending: false })
-      if (error) throw error
-      return data as World[]
-    },
-    staleTime: 1000 * 60,
-  })
+  const { data: worlds, isLoading } = useWorlds()
+  const { data: activeCampaigns } = useActiveCampaignsForWorlds()
+  const createWorld = useCreateWorld()
 
-  const { data: activeCampaigns } = useQuery<Pick<Campaign, 'id' | 'name' | 'world_id'>[]>({
-    queryKey: queryKeys.campaigns.activeForWorlds,
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from('campaigns')
-        .select('id, name, world_id')
-        .eq('committed', true)
-        .eq('status', 'active')
-        .order('updated_at', { ascending: false })
-      if (error) throw error
-      return data as Pick<Campaign, 'id' | 'name' | 'world_id'>[]
-    },
-    staleTime: 1000 * 60,
-  })
+  useDraftGC('worlds', 'user_id', user?.id)
 
   const campaignsByWorld = useMemo(() => {
     const map: Record<string, Pick<Campaign, 'id' | 'name'>[]> = {}
@@ -52,50 +26,6 @@ export default function WorldsPage() {
     })
     return map
   }, [activeCampaigns])
-
-  // Garbage-collect uncommitted drafts older than 30 minutes
-  useEffect(() => {
-    if (!user?.id) return
-    const cutoff = new Date(Date.now() - 30 * 60 * 1000).toISOString()
-    void (async () => {
-      try {
-      const { data } = await supabase
-        .from('worlds')
-        .select('id')
-        .eq('user_id', user.id)
-        .eq('committed', false)
-        .lt('created_at', cutoff)
-      if (data?.length) {
-        await supabase
-          .from('worlds')
-          .delete()
-          .in('id', data.map((w) => w.id))
-      }
-      } catch (err) {
-        console.warn("[GC] draft cleanup failed:", err)
-      }
-    })()
-  }, [user?.id])
-
-  const createWorld = useMutation({
-    mutationFn: async () => {
-      if (!user) throw new Error('Niet ingelogd')
-      const { data, error } = await supabase
-        .from('worlds')
-        .insert({ user_id: user.id })
-        .select('id')
-        .single()
-      if (error) throw error
-      return data.id as string
-    },
-    onSuccess: (id) => {
-      queryClient.invalidateQueries({ queryKey: queryKeys.worlds.all })
-      navigate(`/worlds/${id}/edit`, { state: { isNew: true } })
-    },
-    onError: () => {
-      toast.error('Wereld aanmaken mislukt')
-    },
-  })
 
   function handleCreate() {
     toast.promise(createWorld.mutateAsync(), {

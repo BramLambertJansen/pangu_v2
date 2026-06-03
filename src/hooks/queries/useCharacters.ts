@@ -1,4 +1,6 @@
-import { useQuery } from '@tanstack/react-query'
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
+import { useNavigate } from 'react-router-dom'
+import { toast } from 'sonner'
 import { supabase } from '@/lib/supabase'
 import { queryKeys } from '@/lib/queryKeys'
 import { useAuthStore } from '@/stores/auth.store'
@@ -21,6 +23,34 @@ export function useCharacters() {
     },
     enabled: !!user,
     staleTime: 30_000,
+  })
+}
+
+export function useCreateCharacter() {
+  const navigate = useNavigate()
+  const queryClient = useQueryClient()
+  const user = useAuthStore(s => s.user)
+
+  return useMutation({
+    mutationFn: async () => {
+      if (!user) throw new Error('Niet ingelogd')
+      const { data, error } = await supabase
+        .from('characters')
+        .insert({
+          user_id: user.id,
+          name: 'Nieuw karakter',
+          status: 'active',
+        })
+        .select()
+        .single()
+      if (error) throw error
+      return data as unknown as Character
+    },
+    onSuccess: (newCharacter) => {
+      queryClient.invalidateQueries({ queryKey: queryKeys.characters.all })
+      navigate(`/characters/${newCharacter.id}/edit`, { state: { isNew: true } })
+    },
+    onError: () => toast.error('Karakter aanmaken mislukt'),
   })
 }
 

@@ -1,82 +1,22 @@
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { useMutation, useQueryClient } from '@tanstack/react-query'
-import { toast } from 'sonner'
-import { supabase } from '@/lib/supabase'
-import { queryKeys } from '@/lib/queryKeys'
+import { useAuthStore } from '@/stores/auth.store'
 import { EntityCardSkeleton } from '@/components/ui/EntityCardSkeleton'
 import { EmptyState } from '@/components/ui/EmptyState'
 import { WorldDetailDivider } from '@/components/world/WorldDetailDivider'
 import { CharacterCard, ForgeCharacterCard } from '@/components/character/CharacterCard'
-import { useAuthStore } from '@/stores/auth.store'
-import { useCharacters } from '@/hooks/queries/useCharacters'
-import type { Character } from '@/types/character.types'
+import { useCharacters, useCreateCharacter } from '@/hooks/queries/useCharacters'
+import { useDraftGC } from '@/hooks/useDraftGC'
 
 export default function CharactersPage() {
   const navigate = useNavigate()
-  const queryClient = useQueryClient()
   const user = useAuthStore(s => s.user)
-  const [creatingCharacter, setCreatingCharacter] = useState(false)
   const [search, setSearch] = useState('')
 
   const { data: characters, isLoading } = useCharacters()
+  const createCharacter = useCreateCharacter()
 
-  // Garbage-collect uncommitted drafts older than 30 minutes
-  useEffect(() => {
-    if (!user?.id) return
-    const cutoff = new Date(Date.now() - 30 * 60 * 1000).toISOString()
-    void (async () => {
-      try {
-      try {
-        const { data } = await supabase
-          .from('characters')
-          .select('id, created_at')
-          .eq('user_id', user.id)
-          .eq('committed', false)
-        const stale = (data ?? []).filter((r) => r.created_at < cutoff)
-        if (stale.length) {
-          await supabase.from('characters').delete().in('id', stale.map((r) => r.id))
-        }
-      } catch {
-        // Silently ignore draft cleanup errors
-      }
-      } catch (err) {
-        console.warn("[GC] draft cleanup failed:", err)
-      }
-    })()
-  }, [user?.id])
-
-  const createCharacter = useMutation({
-    mutationFn: async () => {
-      if (!user) throw new Error('Niet ingelogd')
-      const { data, error } = await supabase
-        .from('characters')
-        .insert({
-          user_id: user.id,
-          name: 'Nieuw karakter',
-          status: 'active',
-        })
-        .select()
-        .single()
-      if (error) throw error
-      return data as unknown as Character
-    },
-    onSuccess: (newCharacter) => {
-      queryClient.invalidateQueries({ queryKey: queryKeys.characters.all })
-      navigate(`/characters/${newCharacter.id}/edit`, {
-        state: { isNew: true },
-      })
-    },
-    onError: () => {
-      toast.error('Karakter aanmaken mislukt')
-      setCreatingCharacter(false)
-    },
-  })
-
-  function handleCreateCharacter() {
-    setCreatingCharacter(true)
-    createCharacter.mutate()
-  }
+  useDraftGC('characters', 'user_id', user?.id)
 
   const filtered = characters
     ? characters.filter((c) => {
@@ -136,7 +76,7 @@ export default function CharactersPage() {
                   description="Maak je eerste personage aan en begin je avontuur."
                 />
                 <div style={{ width: '100%', maxWidth: 320 }}>
-                  <ForgeCharacterCard onClick={handleCreateCharacter} loading={creatingCharacter} />
+                  <ForgeCharacterCard onClick={() => createCharacter.mutate()} loading={createCharacter.isPending} />
                 </div>
               </div>
             ) : (
@@ -160,7 +100,7 @@ export default function CharactersPage() {
                   {filtered.map((character) => (
                     <CharacterCard key={character.id} character={character} />
                   ))}
-                  <ForgeCharacterCard onClick={handleCreateCharacter} loading={creatingCharacter} />
+                  <ForgeCharacterCard onClick={() => createCharacter.mutate()} loading={createCharacter.isPending} />
                 </div>
               </>
             )}

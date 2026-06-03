@@ -1,63 +1,17 @@
 import { useParams, useNavigate, Link } from 'react-router-dom'
-import { useQuery } from '@tanstack/react-query'
-import { supabase } from '@/lib/supabase'
-import { queryKeys } from '@/lib/queryKeys'
 import { Spinner } from '@/components/ui/Spinner'
 import { Breadcrumb } from '@/components/ui/Breadcrumb'
 import { WorldDetailDivider } from '@/components/world/WorldDetailDivider'
 import { RelatedEntities } from '@/components/link/RelatedEntities'
-import type { Quest, QuestStatus } from '@/types/quest.types'
-
-type QuestWithCampaign = Quest & {
-  campaigns: { id: string; name: string; world_id: string; worlds: { id: string; name: string } | null } | null
-}
-
-const statusLabel: Record<QuestStatus, string> = {
-  draft:     'Concept',
-  active:    'Actief',
-  completed: 'Voltooid',
-  failed:    'Mislukt',
-  archived:  'Gearchiveerd',
-}
-
-const statusColor: Record<QuestStatus, string> = {
-  draft:     'var(--gold)',
-  active:    'var(--violet)',
-  completed: 'var(--teal)',
-  failed:    'var(--crimson)',
-  archived:  'var(--muted)',
-}
-
-const cardGradients = [
-  'radial-gradient(ellipse 60% 80% at 25% 35%, rgba(245,180,50,0.30) 0%, rgba(200,120,30,0.16) 45%, var(--void) 78%)',
-  'radial-gradient(ellipse 60% 80% at 28% 38%, rgba(245,180,50,0.26) 0%, rgba(155,138,255,0.16) 50%, var(--void) 78%)',
-  'radial-gradient(ellipse 60% 80% at 30% 40%, rgba(155,138,255,0.26) 0%, rgba(245,180,50,0.18) 50%, var(--void) 78%)',
-  'radial-gradient(ellipse 60% 80% at 25% 38%, rgba(245,180,50,0.24) 0%, rgba(62,207,178,0.18) 50%, var(--void) 78%)',
-]
-
-function pickGradient(id: string): string {
-  const code = (id.charCodeAt(0) || 0) + (id.charCodeAt(id.length - 1) || 0)
-  return cardGradients[code % cardGradients.length]
-}
+import { useQuestFull } from '@/hooks/queries/useQuest'
+import { questStatusLabel, questStatusColor } from '@/lib/statusMaps'
+import { pickGradient, questGradients } from '@/utils/pickGradient'
 
 export default function QuestDetailPage() {
   const { id } = useParams<{ id: string }>()
   const navigate = useNavigate()
 
-  const { data: quest, isLoading } = useQuery<QuestWithCampaign>({
-    queryKey: queryKeys.campaigns.questDetailFull(id!),
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from('quests')
-        .select('*, campaigns(id, name, world_id, worlds(id, name))')
-        .eq('id', id!)
-        .single()
-      if (error) throw error
-      return data as QuestWithCampaign
-    },
-    enabled: !!id,
-    staleTime: 1000 * 60,
-  })
+  const { data: quest, isLoading } = useQuestFull(id)
 
   if (isLoading) {
     return (
@@ -80,7 +34,7 @@ export default function QuestDetailPage() {
 
   const campaign = quest.campaigns
   const world = campaign?.worlds ?? null
-  const gradient = pickGradient(quest.id)
+  const gradient = pickGradient(quest.id, questGradients)
   const initial = quest.name.trim()[0]?.toUpperCase() ?? '?'
 
   return (
@@ -188,14 +142,14 @@ export default function QuestDetailPage() {
           <span style={{
             display: 'inline-flex', alignItems: 'center',
             padding: '4px 12px',
-            background: statusColor[quest.status],
+            background: questStatusColor[quest.status],
             borderRadius: 'var(--r-full)',
             fontFamily: 'var(--font-body)',
             fontSize: 10, fontWeight: 700,
             letterSpacing: '0.16em', textTransform: 'uppercase',
             color: 'var(--void)',
           }}>
-            {statusLabel[quest.status]}
+            {questStatusLabel[quest.status]}
           </span>
         </div>
 

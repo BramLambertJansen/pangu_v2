@@ -1,16 +1,13 @@
-import { useQuery } from '@tanstack/react-query'
 import { useNavigate } from 'react-router-dom'
-import { supabase } from '@/lib/supabase'
-import { queryKeys } from '@/lib/queryKeys'
 import { useAuthStore } from '@/stores/auth.store'
 import { EntityCardSkeleton } from '@/components/ui/EntityCardSkeleton'
 import { WorldCard } from '@/components/world/WorldCard'
 import { CampaignCard } from '@/components/campaign/CampaignCard'
 import { SessionCard } from '@/components/session/SessionCard'
 import { WorldDetailDivider } from '@/components/world/WorldDetailDivider'
-import type { World } from '@/types/world.types'
-import type { Campaign } from '@/types/campaign.types'
-import type { Session } from '@/types/session.types'
+import { useWorlds } from '@/hooks/queries/useWorld'
+import { useActiveCampaigns } from '@/hooks/queries/useCampaign'
+import { usePlannedSessions } from '@/hooks/queries/useSession'
 
 function LinkRow({ href, label }: { href: string; label: string }) {
   const navigate = useNavigate()
@@ -46,53 +43,9 @@ export default function DashboardPage() {
   const profile = useAuthStore(s => s.profile)
   const displayName = profile?.display_name ?? user?.email ?? 'Avonturier'
 
-  const { data: worlds, isLoading: worldsLoading } = useQuery<World[]>({
-    queryKey: queryKeys.worlds.all,
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from('worlds')
-        .select('*')
-        .eq('committed', true)
-        .order('created_at', { ascending: false })
-        .limit(4)
-      if (error) throw error
-      return data as World[]
-    },
-    staleTime: 1000 * 60,
-  })
-
-  const { data: activeCampaigns, isLoading: campaignsLoading } = useQuery<Campaign[]>({
-    queryKey: queryKeys.campaigns.active,
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from('campaigns')
-        .select('*')
-        .eq('committed', true)
-        .eq('status', 'active')
-        .order('created_at', { ascending: false })
-        .limit(4)
-      if (error) throw error
-      return data as Campaign[]
-    },
-    staleTime: 1000 * 60,
-  })
-
-  const { data: plannedSessions, isLoading: sessionsLoading } = useQuery<Session[]>({
-    queryKey: queryKeys.sessions.planned,
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from('sessions')
-        .select('*')
-        .eq('committed', true)
-        .eq('status', 'planned')
-        .order('session_date', { ascending: true, nullsFirst: false })
-        .order('created_at', { ascending: false })
-        .limit(6)
-      if (error) throw error
-      return data as Session[]
-    },
-    staleTime: 1000 * 30,
-  })
+  const { data: worlds, isLoading: worldsLoading } = useWorlds()
+  const { data: activeCampaigns, isLoading: campaignsLoading } = useActiveCampaigns()
+  const { data: plannedSessions, isLoading: sessionsLoading } = usePlannedSessions()
 
   return (
     <div>
@@ -119,7 +72,7 @@ export default function DashboardPage() {
       ) : (
         <>
           <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
-            {worlds!.map((world) => (
+            {worlds!.slice(0, 4).map((world) => (
               <WorldCard key={world.id} world={world} />
             ))}
           </div>

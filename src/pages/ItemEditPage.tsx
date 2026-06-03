@@ -1,14 +1,14 @@
 import { useId, useRef, useState } from 'react'
 import { useParams, useNavigate, useLocation } from 'react-router-dom'
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { toast } from 'sonner'
 import { supabase } from '@/lib/supabase'
-import { queryKeys } from '@/lib/queryKeys'
 import { Modal } from '@/components/ui/Modal'
 import { ConfirmDialog } from '@/components/ui/ConfirmDialog'
 import { RelatedEntities } from '@/components/link/RelatedEntities'
 import { Spinner } from '@/components/ui/Spinner'
 import { useEntityEdit } from '@/hooks/useEntityEdit'
+import { useItem, useSaveItem, useDeleteItem } from '@/hooks/queries/useItem'
+import { useCampaignCharacters } from '@/hooks/queries/useCampaignCharacters'
 import { useAuthStore } from '@/stores/auth.store'
 import { useUserAISettings } from '@/hooks/queries/useUserAISettings'
 
@@ -17,9 +17,7 @@ const MAX_IMAGE_BYTES = 5 * 1024 * 1024
 function pollinationsUrl(prompt: string): string {
   return `https://image.pollinations.ai/prompt/${encodeURIComponent(prompt)}?width=512&height=512&nologo=true&model=flux&seed=${Math.floor(Math.random() * 99999)}`
 }
-import type { Json } from '@/types/database.types'
 import type { Item, ItemType, ItemRarity, ItemStatBonuses } from '@/types/item.types'
-import type { Character } from '@/types/character.types'
 
 const rarityOptions: { value: ItemRarity; label: string }[] = [
   { value: 'common',    label: 'Gewoon'          },
@@ -86,7 +84,6 @@ export default function ItemEditPage() {
   const { id } = useParams<{ id: string }>()
   const navigate = useNavigate()
   const location = useLocation()
-  const queryClient = useQueryClient()
 
   const descriptionId = useId()
   const rarityId = useId()
@@ -142,20 +139,7 @@ export default function ItemEditPage() {
   const isNew = locationState?.isNew ?? false
   const campaignIdFromState = locationState?.campaignId
 
-  const { data: itemData, isLoading } = useQuery<Item>({
-    queryKey: queryKeys.items.detail(id!),
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from('items')
-        .select('*')
-        .eq('id', id!)
-        .single()
-      if (error) throw error
-      return data as Item
-    },
-    enabled: !!id,
-    staleTime: 1000 * 60,
-  })
+  const { data: itemData, isLoading } = useItem(id)
 
   const {
     form, set, dirty, setDirty,
@@ -166,89 +150,17 @@ export default function ItemEditPage() {
 
   const campaignId = itemData?.campaign_id ?? campaignIdFromState
 
-  // Load characters in this campaign for the assignment dropdown
-  const { data: campaignCharacters } = useQuery<Character[]>({
-    queryKey: queryKeys.characters.byCampaign(campaignId!),
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from('characters')
-        .select('id, name, character_class, user_id, campaign_id, subtitle, character_subclass, character_race, level, xp, xp_next, hp_current, hp_max, armor_class, speed, initiative, proficiency_bonus, stat_str, stat_dex, stat_con, stat_int, stat_wis, stat_cha, gold, silver, copper, description, notes, status, created_at, updated_at')
-        .eq('campaign_id', campaignId!)
-        .order('name', { ascending: true })
-      if (error) throw error
-      return data as Character[]
-    },
-    enabled: !!campaignId,
-    staleTime: 1000 * 30,
-  })
+  const { data: campaignCharacters } = useCampaignCharacters(campaignId)
 
-  const saveItem = useMutation({
-    mutationFn: async () => {
-      const characterChanged = (form.character_id ?? null) !== (itemData?.character_id ?? null)
-      const { error } = await supabase
-        .from('items')
-        .update({
-          name: form.name,
-          description: form.description ?? null,
-          item_type: form.item_type,
-          rarity: form.rarity,
-          is_magical: form.is_magical ?? false,
-          quantity: form.quantity ?? 1,
-          weight: form.weight ?? null,
-          character_id: form.character_id ?? null,
-          properties: (form.properties ?? {}) as unknown as Json,
-          image_url: form.image_url ?? null,
-          committed: true,
-          updated_at: new Date().toISOString(),
-          // When character_id changes (reassign or return to DM pool), clear the equipped
-          // slot so the item does not arrive pre-equipped on its new owner.
-          ...(characterChanged ? { equipped_slot: null } : {}),
-        })
-        .eq('id', id!)
-      if (error) throw error
-    },
-    onSuccess: () => {
-      if (campaignId) {
-        queryClient.invalidateQueries({ queryKey: queryKeys.items.byCampaign(campaignId) })
-      }
-      queryClient.invalidateQueries({ queryKey: queryKeys.items.detail(id!) })
-      // Invalidate all character item queries since assignment may have changed
-      queryClient.invalidateQueries({ queryKey: ['characters'] })
-      setCommitted(true)
-      setDirty(false)
-    },
-    onError: () => {
-      toast.error('Opslaan mislukt')
-    },
-  })
-
-  const deleteItem = useMutation({
-    mutationFn: async () => {
-      const { error } = await supabase.from('items').delete().eq('id', id!)
-      if (error) throw error
-    },
-    onSuccess: () => {
-      queryClient.removeQueries({ queryKey: queryKeys.items.detail(id!) })
-      if (campaignId) {
-        queryClient.invalidateQueries({ queryKey: queryKeys.items.byCampaign(campaignId) })
-        queryClient.invalidateQueries({ queryKey: ['characters'] })
-        navigate(`/campaigns/${campaignId}/items`)
-      } else {
-        navigate('/dashboard')
-      }
-    },
-    onError: () => {
-      toast.error('Verwijderen mislukt')
-    },
-  })
+  const saveItem = useSaveItem(id!)
+  const deleteItem = useDeleteItem(id!)
 
   async function handleDiscardConfirm() {
     if (guard.isDraftDiscard) {
-      const { error } = await supabase.from('items').delete().eq('id', id!)
-      if (error) { toast.error('Verwijderen mislukt'); return }
-      queryClient.removeQueries({ queryKey: queryKeys.items.detail(id!) })
-      if (campaignId) {
-        queryClient.invalidateQueries({ queryKey: queryKeys.items.byCampaign(campaignId) })
+      try {
+        await deleteItem.mutateAsync({ campaignId })
+      } catch {
+        return
       }
     }
     const handled = guard.confirmLeave()
@@ -348,19 +260,23 @@ export default function ItemEditPage() {
       toast.error('Zeldzaamheid is verplicht')
       return
     }
-    toast.promise(saveItem.mutateAsync(), {
-      loading: 'Opslaan...',
-      success: 'Item opgeslagen',
-      error: 'Opslaan mislukt',
-    })
+    toast.promise(
+      saveItem.mutateAsync({ form, originalCharacterId: itemData?.character_id }).then(() => {
+        setCommitted(true)
+        setDirty(false)
+      }),
+      { loading: 'Opslaan...', success: 'Item opgeslagen', error: 'Opslaan mislukt' },
+    )
   }
 
   function handleDelete() {
-    toast.promise(deleteItem.mutateAsync(), {
-      loading: 'Verwijderen...',
-      success: 'Item verwijderd',
-      error: 'Verwijderen mislukt',
-    })
+    toast.promise(
+      deleteItem.mutateAsync({ campaignId }).then(() => {
+        if (campaignId) navigate(`/campaigns/${campaignId}/items`)
+        else navigate('/dashboard')
+      }),
+      { loading: 'Verwijderen...', success: 'Item verwijderd', error: 'Verwijderen mislukt' },
+    )
     setDeleteOpen(false)
   }
 

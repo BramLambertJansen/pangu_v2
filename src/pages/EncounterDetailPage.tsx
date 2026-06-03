@@ -1,92 +1,19 @@
 import { useParams, useNavigate, Link } from 'react-router-dom'
-import { useQuery } from '@tanstack/react-query'
-import { supabase } from '@/lib/supabase'
-import { queryKeys } from '@/lib/queryKeys'
 import { Spinner } from '@/components/ui/Spinner'
 import { Breadcrumb } from '@/components/ui/Breadcrumb'
 import { WorldDetailDivider } from '@/components/world/WorldDetailDivider'
 import { RelatedEntities } from '@/components/link/RelatedEntities'
-import type { Encounter, EncounterStatus } from '@/types/encounter.types'
-import type { Bestiary } from '@/types/bestiary.types'
-
-type EncounterWithCampaign = Encounter & {
-  campaigns: {
-    id: string
-    name: string
-    world_id: string
-    worlds: { id: string; name: string } | null
-  } | null
-}
-
-type EncounterMonsterWithBestiary = {
-  id: string
-  encounter_id: string
-  bestiary_id: string
-  count: number
-  bestiaries: Pick<Bestiary, 'id' | 'name' | 'creature_type' | 'threat_level' | 'hp' | 'ac'> | null
-}
-
-const statusLabel: Record<EncounterStatus, string> = {
-  draft:     'Concept',
-  ready:     'Klaar',
-  active:    'Actief',
-  completed: 'Voltooid',
-  archived:  'Gearchiveerd',
-}
-
-const statusColor: Record<EncounterStatus, string> = {
-  draft:     'var(--gold)',
-  ready:     'var(--azure)',
-  active:    'var(--violet)',
-  completed: 'var(--teal)',
-  archived:  'var(--muted)',
-}
-
-const cardGradients = [
-  'radial-gradient(ellipse 60% 80% at 25% 35%, rgba(220,90,80,0.30) 0%, rgba(180,50,80,0.16) 45%, var(--void) 78%)',
-  'radial-gradient(ellipse 60% 80% at 28% 38%, rgba(220,90,80,0.26) 0%, rgba(155,138,255,0.16) 50%, var(--void) 78%)',
-  'radial-gradient(ellipse 60% 80% at 30% 40%, rgba(155,138,255,0.26) 0%, rgba(220,90,80,0.18) 50%, var(--void) 78%)',
-  'radial-gradient(ellipse 60% 80% at 25% 38%, rgba(220,90,80,0.24) 0%, rgba(62,207,178,0.18) 50%, var(--void) 78%)',
-]
-
-function pickGradient(id: string): string {
-  const code = (id.charCodeAt(0) || 0) + (id.charCodeAt(id.length - 1) || 0)
-  return cardGradients[code % cardGradients.length]
-}
+import { useEncounterFull } from '@/hooks/queries/useEncounter'
+import { useEncounterMonsters } from '@/hooks/queries/useEncounterMonsters'
+import { encounterStatusLabel, encounterStatusColor } from '@/lib/statusMaps'
+import { pickGradient, encounterGradients } from '@/utils/pickGradient'
 
 export default function EncounterDetailPage() {
   const { id } = useParams<{ id: string }>()
   const navigate = useNavigate()
 
-  const { data: encounter, isLoading } = useQuery<EncounterWithCampaign>({
-    queryKey: queryKeys.campaigns.encounterDetailFull(id!),
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from('encounters')
-        .select('*, campaigns(id, name, world_id, worlds(id, name))')
-        .eq('id', id!)
-        .single()
-      if (error) throw error
-      return data as EncounterWithCampaign
-    },
-    enabled: !!id,
-    staleTime: 1000 * 60,
-  })
-
-  const { data: monsters, isLoading: monstersLoading } = useQuery<EncounterMonsterWithBestiary[]>({
-    queryKey: queryKeys.campaigns.encounterMonsters(id!),
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from('encounter_monsters')
-        .select('*, bestiaries(id, name, creature_type, threat_level, hp, ac)')
-        .eq('encounter_id', id!)
-        .order('created_at', { ascending: true })
-      if (error) throw error
-      return data as EncounterMonsterWithBestiary[]
-    },
-    enabled: !!id,
-    staleTime: 1000 * 60,
-  })
+  const { data: encounter, isLoading } = useEncounterFull(id)
+  const { data: monsters, isLoading: monstersLoading } = useEncounterMonsters(id)
 
   if (isLoading) {
     return (
@@ -109,7 +36,7 @@ export default function EncounterDetailPage() {
 
   const campaign = encounter.campaigns
   const world = campaign?.worlds ?? null
-  const gradient = pickGradient(encounter.id)
+  const gradient = pickGradient(encounter.id, encounterGradients)
   const initial = encounter.name.trim()[0]?.toUpperCase() ?? '?'
 
   return (
@@ -238,14 +165,14 @@ export default function EncounterDetailPage() {
           <span style={{
             display: 'inline-flex', alignItems: 'center',
             padding: '4px 12px',
-            background: statusColor[encounter.status],
+            background: encounterStatusColor[encounter.status],
             borderRadius: 'var(--r-full)',
             fontFamily: 'var(--font-body)',
             fontSize: 10, fontWeight: 700,
             letterSpacing: '0.16em', textTransform: 'uppercase',
             color: 'var(--void)',
           }}>
-            {statusLabel[encounter.status]}
+            {encounterStatusLabel[encounter.status]}
           </span>
         </div>
 
@@ -302,7 +229,7 @@ export default function EncounterDetailPage() {
             </thead>
             <tbody>
               {monsters.map((m, i) => {
-                const b = m.bestiaries
+                const b = m.bestiary
                 return (
                   <tr
                     key={m.id}

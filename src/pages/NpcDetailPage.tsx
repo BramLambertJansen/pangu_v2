@@ -1,67 +1,17 @@
 import { useParams, useNavigate, Link } from 'react-router-dom'
-import { useQuery } from '@tanstack/react-query'
-import type { SupabaseClient } from '@supabase/supabase-js'
-import { supabase } from '@/lib/supabase'
-
-// factions join and faction_id column are not yet in database.types.ts — migration 039/040
-// adds them but types are regenerated after the migrations run on the live database.
-const db = supabase as unknown as SupabaseClient
-import { queryKeys } from '@/lib/queryKeys'
 import { Spinner } from '@/components/ui/Spinner'
 import { Breadcrumb } from '@/components/ui/Breadcrumb'
 import { WorldDetailDivider } from '@/components/world/WorldDetailDivider'
 import { RelatedEntities } from '@/components/link/RelatedEntities'
-import type { Npc, NpcStatus } from '@/types/npc.types'
-
-type NpcWithCampaign = Npc & {
-  campaigns: { id: string; name: string; world_id: string; worlds: { id: string; name: string } | null } | null
-  factions: { id: string; name: string } | null
-}
-
-const statusLabel: Record<NpcStatus, string> = {
-  draft:    'Concept',
-  active:   'Actief',
-  retired:  'Teruggetrokken',
-  archived: 'Gearchiveerd',
-}
-
-const statusColor: Record<NpcStatus, string> = {
-  draft:    'var(--gold)',
-  active:   'var(--violet)',
-  retired:  'var(--muted)',
-  archived: 'var(--muted)',
-}
-
-const cardGradients = [
-  'radial-gradient(ellipse 60% 80% at 25% 35%, rgba(220,90,80,0.32) 0%, rgba(180,50,80,0.18) 45%, var(--void) 78%)',
-  'radial-gradient(ellipse 60% 80% at 28% 38%, rgba(245,180,50,0.28) 0%, rgba(220,90,80,0.18) 50%, var(--void) 78%)',
-  'radial-gradient(ellipse 60% 80% at 30% 40%, rgba(155,138,255,0.28) 0%, rgba(220,90,80,0.20) 50%, var(--void) 78%)',
-  'radial-gradient(ellipse 60% 80% at 25% 38%, rgba(220,90,80,0.26) 0%, rgba(155,138,255,0.20) 50%, var(--void) 78%)',
-]
-
-function pickGradient(id: string): string {
-  const code = (id.charCodeAt(0) || 0) + (id.charCodeAt(id.length - 1) || 0)
-  return cardGradients[code % cardGradients.length]
-}
+import { useNpcFull } from '@/hooks/queries/useNpc'
+import { npcStatusLabel, npcStatusColor } from '@/lib/statusMaps'
+import { pickGradient, npcGradients } from '@/utils/pickGradient'
 
 export default function NpcDetailPage() {
   const { id } = useParams<{ id: string }>()
   const navigate = useNavigate()
 
-  const { data: npc, isLoading } = useQuery<NpcWithCampaign>({
-    queryKey: queryKeys.campaigns.npcDetailFull(id!),
-    queryFn: async () => {
-      const { data, error } = await db
-        .from('npcs')
-        .select('*, campaigns(id, name, world_id, worlds(id, name)), factions(id, name)')
-        .eq('id', id!)
-        .single()
-      if (error) throw error
-      return data as NpcWithCampaign
-    },
-    enabled: !!id,
-    staleTime: 1000 * 60,
-  })
+  const { data: npc, isLoading } = useNpcFull(id)
 
   if (isLoading) {
     return (
@@ -85,7 +35,7 @@ export default function NpcDetailPage() {
   const campaign = npc.campaigns
   const world = campaign?.worlds ?? null
   const faction = npc.factions ?? null
-  const gradient = pickGradient(npc.id)
+  const gradient = pickGradient(npc.id, npcGradients)
   const initial = npc.name.trim()[0]?.toUpperCase() ?? '?'
 
   return (
@@ -201,14 +151,14 @@ export default function NpcDetailPage() {
           <span style={{
             display: 'inline-flex', alignItems: 'center',
             padding: '4px 12px',
-            background: statusColor[npc.status],
+            background: npcStatusColor[npc.status],
             borderRadius: 'var(--r-full)',
             fontFamily: 'var(--font-body)',
             fontSize: 10, fontWeight: 700,
             letterSpacing: '0.16em', textTransform: 'uppercase',
             color: 'var(--void)',
           }}>
-            {statusLabel[npc.status]}
+            {npcStatusLabel[npc.status]}
           </span>
         </div>
 

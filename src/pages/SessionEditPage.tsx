@@ -1,14 +1,12 @@
 import { useId } from 'react'
 import { useParams, useNavigate, useLocation } from 'react-router-dom'
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { toast } from 'sonner'
-import { supabase } from '@/lib/supabase'
-import { queryKeys } from '@/lib/queryKeys'
 import { Modal } from '@/components/ui/Modal'
 import { ConfirmDialog } from '@/components/ui/ConfirmDialog'
 import { Spinner } from '@/components/ui/Spinner'
 import { useEntityEdit } from '@/hooks/useEntityEdit'
-import type { Session, SessionStatus } from '@/types/session.types'
+import { useSession, useSaveSession, useDeleteSession } from '@/hooks/queries/useSession'
+import type { SessionStatus } from '@/types/session.types'
 
 const statusOptions: { value: SessionStatus; label: string }[] = [
   { value: 'planned',   label: 'Gepland'       },
@@ -21,7 +19,6 @@ export default function SessionEditPage() {
   const { id } = useParams<{ id: string }>()
   const navigate = useNavigate()
   const location = useLocation()
-  const queryClient = useQueryClient()
 
   const descriptionId = useId()
   const notesId = useId()
@@ -33,20 +30,9 @@ export default function SessionEditPage() {
   const isNew = locationState?.isNew ?? false
   const campaignIdFromState = locationState?.campaignId
 
-  const { data: session, isLoading } = useQuery<Session>({
-    queryKey: queryKeys.campaigns.sessionDetail(id!),
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from('sessions')
-        .select('*')
-        .eq('id', id!)
-        .single()
-      if (error) throw error
-      return data as Session
-    },
-    enabled: !!id,
-    staleTime: 1000 * 60,
-  })
+  const { data: session, isLoading } = useSession(id)
+  const saveSession = useSaveSession(id!)
+  const deleteSession = useDeleteSession(id!)
 
   const {
     form, set, dirty, setDirty,
@@ -57,63 +43,12 @@ export default function SessionEditPage() {
 
   const campaignId = session?.campaign_id ?? campaignIdFromState
 
-  const saveSession = useMutation({
-    mutationFn: async () => {
-      const { error } = await supabase
-        .from('sessions')
-        .update({
-          name: form.name,
-          subtitle: form.subtitle,
-          description: form.description,
-          notes: form.notes,
-          status: form.status,
-          session_date: form.session_date ?? null,
-          session_number: form.session_number ?? null,
-          committed: true,
-          updated_at: new Date().toISOString(),
-        })
-        .eq('id', id!)
-      if (error) throw error
-    },
-    onSuccess: () => {
-      if (campaignId) {
-        queryClient.invalidateQueries({ queryKey: queryKeys.campaigns.sessions(campaignId) })
-      }
-      queryClient.invalidateQueries({ queryKey: queryKeys.campaigns.sessionDetail(id!) })
-      setCommitted(true)
-      setDirty(false)
-    },
-    onError: () => {
-      toast.error('Opslaan mislukt')
-    },
-  })
-
-  const deleteSession = useMutation({
-    mutationFn: async () => {
-      const { error } = await supabase.from('sessions').delete().eq('id', id!)
-      if (error) throw error
-    },
-    onSuccess: () => {
-      queryClient.removeQueries({ queryKey: queryKeys.campaigns.sessionDetail(id!) })
-      if (campaignId) {
-        queryClient.invalidateQueries({ queryKey: queryKeys.campaigns.sessions(campaignId) })
-        navigate(`/campaigns/${campaignId}/sessions`)
-      } else {
-        navigate('/dashboard')
-      }
-    },
-    onError: () => {
-      toast.error('Verwijderen mislukt')
-    },
-  })
-
   async function handleDiscardConfirm() {
     if (guard.isDraftDiscard) {
-      const { error } = await supabase.from('sessions').delete().eq('id', id!)
-      if (error) { toast.error('Verwijderen mislukt'); return }
-      queryClient.removeQueries({ queryKey: queryKeys.campaigns.sessionDetail(id!) })
-      if (campaignId) {
-        queryClient.invalidateQueries({ queryKey: queryKeys.campaigns.sessions(campaignId) })
+      try {
+        await deleteSession.mutateAsync({ campaignId })
+      } catch {
+        return
       }
     }
     const handled = guard.confirmLeave()
@@ -143,19 +78,23 @@ export default function SessionEditPage() {
   }
 
   function handleSave() {
-    toast.promise(saveSession.mutateAsync(), {
-      loading: 'Opslaan...',
-      success: 'Sessie opgeslagen',
-      error: 'Opslaan mislukt',
-    })
+    toast.promise(
+      saveSession.mutateAsync({ ...form }).then(() => {
+        setCommitted(true)
+        setDirty(false)
+      }),
+      { loading: 'Opslaan...', success: 'Sessie opgeslagen', error: 'Opslaan mislukt' },
+    )
   }
 
   function handleDelete() {
-    toast.promise(deleteSession.mutateAsync(), {
-      loading: 'Verwijderen...',
-      success: 'Sessie verwijderd',
-      error: 'Verwijderen mislukt',
-    })
+    toast.promise(
+      deleteSession.mutateAsync({ campaignId }).then(() => {
+        if (campaignId) navigate(`/campaigns/${campaignId}/sessions`)
+        else navigate('/dashboard')
+      }),
+      { loading: 'Verwijderen...', success: 'Sessie verwijderd', error: 'Verwijderen mislukt' },
+    )
     setDeleteOpen(false)
   }
 

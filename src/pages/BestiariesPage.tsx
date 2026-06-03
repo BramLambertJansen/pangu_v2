@@ -1,9 +1,5 @@
 import { useState, useEffect, useMemo } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
-import { useMutation, useQueryClient } from '@tanstack/react-query'
-import { toast } from 'sonner'
-import { supabase } from '@/lib/supabase'
-import { queryKeys } from '@/lib/queryKeys'
 import { Spinner } from '@/components/ui/Spinner'
 import { EmptyState } from '@/components/ui/EmptyState'
 import { Breadcrumbs } from '@/components/ui/Breadcrumbs'
@@ -12,29 +8,28 @@ import { BestiaryRow, ForgeBestiaryCard } from '@/components/bestiary/BestiaryCa
 import { DmBestiaryPanel } from '@/components/bestiary/DmBestiaryPanel'
 import { WorldDetailDivider } from '@/components/world/WorldDetailDivider'
 import { CompendiumBrowser } from '@/components/compendium/CompendiumBrowser'
-import type { Bestiary } from '@/types/bestiary.types'
 import type { Open5eMonster } from '@/types/open5e.types'
-import { useAuthStore } from '@/stores/auth.store'
 import { useWorld } from '@/hooks/queries/useWorld'
-import { useWorldBestiaries } from '@/hooks/queries/useWorldBestiaries'
+import { useWorldBestiaries, useCreateBestiary } from '@/hooks/queries/useWorldBestiaries'
 import { useImportMonster } from '@/hooks/queries/useSrdSearch'
+import { useDraftGC } from '@/hooks/useDraftGC'
 
 export default function BestiariesPage() {
   const { id: worldId } = useParams<{ id: string }>()
   const navigate = useNavigate()
-  const queryClient = useQueryClient()
-  const user = useAuthStore(s => s.user)
-  const [creatingBestiary, setCreatingBestiary] = useState(false)
   const [selectedId, setSelectedId] = useState<string | null>(null)
   const [srdOpen, setSrdOpen] = useState(false)
 
   const { data: world, isLoading: worldLoading } = useWorld(worldId)
   const { data: bestiaries, isLoading: bestiariesLoading } = useWorldBestiaries(worldId)
+  const createBestiary = useCreateBestiary(worldId!)
   const importMonster = useImportMonster(worldId ?? '')
   const importedSlugs = useMemo(
     () => (bestiaries ?? []).map(b => b.source_slug).filter((s): s is string => s !== null),
     [bestiaries],
   )
+
+  useDraftGC('bestiaries', 'world_id', worldId)
 
   // Set first bestiary as selected when data loads
   useEffect(() => {
@@ -42,60 +37,6 @@ export default function BestiariesPage() {
       setSelectedId(bestiaries[0].id)
     }
   }, [bestiaries, selectedId])
-
-  // Garbage-collect uncommitted drafts older than 30 minutes
-  useEffect(() => {
-    if (!user?.id) return
-    const cutoff = new Date(Date.now() - 30 * 60 * 1000).toISOString()
-    void (async () => {
-      try {
-        const { data } = await supabase
-          .from('bestiaries')
-          .select('id')
-          .eq('world_id', worldId!)
-          .eq('committed', false)
-          .lt('created_at', cutoff)
-        if (data?.length) {
-          await supabase.from('bestiaries').delete().in('id', data.map((r) => r.id))
-        }
-      } catch (err) {
-        console.warn('[GC] draft cleanup failed:', err)
-      }
-    })()
-  }, [user?.id])
-
-  const createBestiary = useMutation({
-    mutationFn: async () => {
-      if (!user) throw new Error('Niet ingelogd')
-      const { data, error } = await supabase
-        .from('bestiaries')
-        .insert({
-          world_id: worldId!,
-          user_id: user.id,
-          name: 'Nieuw wezen',
-          status: 'draft',
-        })
-        .select()
-        .single()
-      if (error) throw error
-      return data as Bestiary
-    },
-    onSuccess: (newBestiary) => {
-      queryClient.invalidateQueries({ queryKey: queryKeys.worlds.bestiaries(worldId!) })
-      navigate(`/bestiary/${newBestiary.id}/edit`, {
-        state: { isNew: true, worldId },
-      })
-    },
-    onError: () => {
-      toast.error('Wezen aanmaken mislukt')
-      setCreatingBestiary(false)
-    },
-  })
-
-  function handleCreateBestiary() {
-    setCreatingBestiary(true)
-    createBestiary.mutate()
-  }
 
   if (worldLoading) {
     return (
@@ -192,7 +133,7 @@ export default function BestiariesPage() {
               description="Vul het bestiarium met de gevaarlijke en mysterieuze wezens van deze wereld."
             />
             <div style={{ marginTop: 16, maxWidth: 280 }}>
-              <ForgeBestiaryCard onClick={handleCreateBestiary} loading={creatingBestiary} />
+              <ForgeBestiaryCard onClick={() => createBestiary.mutate()} loading={createBestiary.isPending} />
             </div>
           </>
         ) : (
@@ -214,7 +155,7 @@ export default function BestiariesPage() {
                   </li>
                 ))}
               </ul>
-              <ForgeBestiaryCard onClick={handleCreateBestiary} loading={creatingBestiary} />
+              <ForgeBestiaryCard onClick={() => createBestiary.mutate()} loading={createBestiary.isPending} />
             </div>
 
             {/* Right: DM stat block panel */}
