@@ -11,7 +11,7 @@ type QuestWithCampaign = Quest & {
 
 export function useQuest(id: string | undefined) {
   return useQuery<Quest>({
-    queryKey: queryKeys.campaigns.questDetail(id!),
+    queryKey: queryKeys.quests.detail(id!),
     queryFn: async () => {
       const { data, error } = await supabase
         .from('quests')
@@ -28,7 +28,7 @@ export function useQuest(id: string | undefined) {
 
 export function useQuestFull(id: string | undefined) {
   return useQuery<QuestWithCampaign>({
-    queryKey: queryKeys.campaigns.questDetailFull(id!),
+    queryKey: queryKeys.quests.detailFull(id!),
     queryFn: async () => {
       const { data, error } = await supabase
         .from('quests')
@@ -69,7 +69,7 @@ export function useSaveQuest(id: string) {
       if (form.campaign_id) {
         queryClient.invalidateQueries({ queryKey: queryKeys.campaigns.quests(form.campaign_id) })
       }
-      queryClient.invalidateQueries({ queryKey: queryKeys.campaigns.questDetail(id) })
+      queryClient.invalidateQueries({ queryKey: queryKeys.quests.detail(id) })
     },
     onError: () => toast.error('Opslaan mislukt'),
   })
@@ -83,7 +83,7 @@ export function useDeleteQuest(id: string) {
       if (error) throw error
     },
     onSuccess: (_, { campaignId }) => {
-      queryClient.removeQueries({ queryKey: queryKeys.campaigns.questDetail(id) })
+      queryClient.removeQueries({ queryKey: queryKeys.quests.detail(id) })
       if (campaignId) queryClient.invalidateQueries({ queryKey: queryKeys.campaigns.quests(campaignId) })
     },
     onError: () => toast.error('Verwijderen mislukt'),

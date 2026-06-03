@@ -8,7 +8,7 @@ import type { Npc } from '@/types/npc.types'
 
 export function useFaction(id: string | undefined) {
   return useQuery<Faction>({
-    queryKey: queryKeys.campaigns.factionDetail(id!),
+    queryKey: queryKeys.factions.detail(id!),
     queryFn: async () => {
       const { data, error } = await supabase
         .from('factions')
@@ -34,7 +34,7 @@ export type FactionWithCampaign = Faction & {
 
 export function useFactionFull(id: string | undefined) {
   return useQuery<FactionWithCampaign>({
-    queryKey: queryKeys.campaigns.factionDetailFull(id!),
+    queryKey: queryKeys.factions.detailFull(id!),
     queryFn: async () => {
       const { data, error } = await supabase
         .from('factions')
@@ -51,7 +51,7 @@ export function useFactionFull(id: string | undefined) {
 
 export function useFactionMembers(factionId: string | undefined) {
   return useQuery<Pick<Npc, 'id' | 'name' | 'npc_role' | 'status'>[]>({
-    queryKey: queryKeys.campaigns.factionMembers(factionId!),
+    queryKey: queryKeys.factions.members(factionId!),
     queryFn: async () => {
       const { data, error } = await supabase
         .from('npcs')
@@ -94,8 +94,8 @@ export function useSaveFaction(id: string) {
       if (form.campaign_id) {
         queryClient.invalidateQueries({ queryKey: queryKeys.campaigns.factions(form.campaign_id) })
       }
-      queryClient.invalidateQueries({ queryKey: queryKeys.campaigns.factionDetail(id) })
-      queryClient.invalidateQueries({ queryKey: queryKeys.campaigns.factionDetailFull(id) })
+      queryClient.invalidateQueries({ queryKey: queryKeys.factions.detail(id) })
+      queryClient.invalidateQueries({ queryKey: queryKeys.factions.detailFull(id) })
     },
     onError: () => toast.error('Opslaan mislukt'),
   })
@@ -109,8 +109,8 @@ export function useDeleteFaction(id: string) {
       if (error) throw error
     },
     onSuccess: (_, { campaignId }) => {
-      queryClient.removeQueries({ queryKey: queryKeys.campaigns.factionDetail(id) })
-      queryClient.removeQueries({ queryKey: queryKeys.campaigns.factionDetailFull(id) })
+      queryClient.removeQueries({ queryKey: queryKeys.factions.detail(id) })
+      queryClient.removeQueries({ queryKey: queryKeys.factions.detailFull(id) })
       if (campaignId) queryClient.invalidateQueries({ queryKey: queryKeys.campaigns.factions(campaignId) })
     },
     onError: () => toast.error('Verwijderen mislukt'),

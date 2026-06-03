@@ -1,11 +1,11 @@
-import { useState, useEffect, useId, useCallback } from 'react'
+import { useId, useCallback } from 'react'
 import { useParams, useNavigate, useLocation } from 'react-router-dom'
 import { toast } from 'sonner'
 import { Spinner } from '@/components/ui/Spinner'
 import { ConfirmDialog } from '@/components/ui/ConfirmDialog'
 import { useCampaign, useSaveCampaign, useDeleteCampaign } from '@/hooks/queries/useCampaign'
+import { useEntityEdit } from '@/hooks/useEntityEdit'
 import { useImagePositioning } from '@/hooks/useImagePositioning'
-import { useEditGuard } from '@/hooks/useEditGuard'
 import type { Campaign, CampaignStatus } from '@/types/campaign.types'
 
 const statusOptions: { value: CampaignStatus; label: string }[] = [
@@ -28,45 +28,29 @@ export default function CampaignEditPage() {
   const isNew = locationState?.isNew ?? false
   const worldIdFromState = locationState?.worldId
 
-  const [committed, setCommitted] = useState(!isNew)
-  const [deleteOpen, setDeleteOpen] = useState(false)
-  const [form, setForm] = useState<Partial<Campaign>>({})
-  const [dirty, setDirty] = useState(false)
-
-  const guard = useEditGuard({ committed, dirty })
-
-  const handlePositionChange = useCallback((posString: string) => {
-    setForm((prev) => ({ ...prev, header_image_position: posString }))
-    setDirty(true)
-  }, [])
-
   const { data: campaign, isLoading } = useCampaign(id)
   const saveCampaign = useSaveCampaign(id!)
   const deleteCampaign = useDeleteCampaign(id!)
+
+  const {
+    form, set, dirty, committed, setCommitted, setDirty,
+    deleteOpen, setDeleteOpen, resetForm, guard,
+  } = useEntityEdit<Campaign>({ entity: campaign, isNew })
+
+  const handlePositionChange = useCallback((posString: string) => {
+    set('header_image_position', posString)
+  }, [set])
 
   const { containerRef, posString: imagePosString, isDragging, resetPosition, handlers: imagePosHandlers } = useImagePositioning(
     campaign?.header_image_position,
     handlePositionChange,
   )
 
-  useEffect(() => {
-    if (campaign) {
-      setForm(campaign)
-      setDirty(false)
-    }
-  }, [campaign])
-
-  function set<K extends keyof Campaign>(key: K, value: Campaign[K]) {
-    setForm((prev) => ({ ...prev, [key]: value }))
-    setDirty(true)
-  }
-
   function handleCancel() {
     if (!committed) {
       guard.requestDiscard()
     } else {
-      setForm(campaign!)
-      setDirty(false)
+      resetForm()
       resetPosition(campaign!.header_image_position)
       navigate(`/campaigns/${id}`)
     }

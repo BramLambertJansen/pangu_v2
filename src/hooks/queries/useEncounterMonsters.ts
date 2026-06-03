@@ -14,7 +14,7 @@ export interface EncounterMonsterFull {
 
 export function useEncounterMonsters(encounterId: string | undefined) {
   return useQuery<EncounterMonsterFull[]>({
-    queryKey: queryKeys.campaigns.encounterMonstersFull(encounterId!),
+    queryKey: queryKeys.encounters.monstersFull(encounterId!),
     queryFn: async () => {
       const { data, error } = await supabase
         .from('encounter_monsters')

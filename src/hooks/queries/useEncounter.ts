@@ -29,7 +29,7 @@ export type MonsterInput = {
 
 export function useEncounterWithCampaign(id: string | undefined) {
   return useQuery<EncounterWithCampaignId>({
-    queryKey: queryKeys.campaigns.encounterDetail(id!),
+    queryKey: queryKeys.encounters.detail(id!),
     queryFn: async () => {
       const { data, error } = await supabase
         .from('encounters')
@@ -46,7 +46,7 @@ export function useEncounterWithCampaign(id: string | undefined) {
 
 export function useEncounterFull(id: string | undefined) {
   return useQuery<EncounterWithCampaignFull>({
-    queryKey: queryKeys.campaigns.encounterDetailFull(id!),
+    queryKey: queryKeys.encounters.detailFull(id!),
     queryFn: async () => {
       const { data, error } = await supabase
         .from('encounters')
@@ -63,7 +63,7 @@ export function useEncounterFull(id: string | undefined) {
 
 export function useEncounterMonstersEdit(id: string | undefined) {
   return useQuery<EncounterMonsterEdit[]>({
-    queryKey: queryKeys.campaigns.encounterMonsters(id!),
+    queryKey: queryKeys.encounters.monsters(id!),
     queryFn: async () => {
       const { data, error } = await supabase
         .from('encounter_monsters')
@@ -132,9 +132,9 @@ export function useSaveEncounter(id: string) {
       if (form.campaign_id) {
         queryClient.invalidateQueries({ queryKey: queryKeys.campaigns.encounters(form.campaign_id) })
       }
-      queryClient.invalidateQueries({ queryKey: queryKeys.campaigns.encounterDetail(id) })
-      queryClient.invalidateQueries({ queryKey: queryKeys.campaigns.encounterMonsters(id) })
-      queryClient.invalidateQueries({ queryKey: queryKeys.campaigns.encounterMonstersFull(id) })
+      queryClient.invalidateQueries({ queryKey: queryKeys.encounters.detail(id) })
+      queryClient.invalidateQueries({ queryKey: queryKeys.encounters.monsters(id) })
+      queryClient.invalidateQueries({ queryKey: queryKeys.encounters.monstersFull(id) })
     },
     onError: () => toast.error('Opslaan mislukt'),
   })
@@ -148,8 +148,8 @@ export function useDeleteEncounter(id: string) {
       if (error) throw error
     },
     onSuccess: (_, { campaignId }) => {
-      queryClient.removeQueries({ queryKey: queryKeys.campaigns.encounterDetail(id) })
-      queryClient.removeQueries({ queryKey: queryKeys.campaigns.encounterMonsters(id) })
+      queryClient.removeQueries({ queryKey: queryKeys.encounters.detail(id) })
+      queryClient.removeQueries({ queryKey: queryKeys.encounters.monsters(id) })
       if (campaignId) queryClient.invalidateQueries({ queryKey: queryKeys.campaigns.encounters(campaignId) })
     },
     onError: () => toast.error('Verwijderen mislukt'),

@@ -11,7 +11,7 @@ type LocationWithCampaign = Location & {
 
 export function useLocation(id: string | undefined) {
   return useQuery<Location>({
-    queryKey: queryKeys.campaigns.locationDetail(id!),
+    queryKey: queryKeys.locations.detail(id!),
     queryFn: async () => {
       const { data, error } = await supabase
         .from('locations')
@@ -28,7 +28,7 @@ export function useLocation(id: string | undefined) {
 
 export function useLocationFull(id: string | undefined) {
   return useQuery<LocationWithCampaign>({
-    queryKey: queryKeys.campaigns.locationDetailFull(id!),
+    queryKey: queryKeys.locations.detailFull(id!),
     queryFn: async () => {
       const { data, error } = await supabase
         .from('locations')
@@ -67,7 +67,7 @@ export function useSaveLocation(id: string) {
       if (form.campaign_id) {
         queryClient.invalidateQueries({ queryKey: queryKeys.campaigns.locations(form.campaign_id) })
       }
-      queryClient.invalidateQueries({ queryKey: queryKeys.campaigns.locationDetail(id) })
+      queryClient.invalidateQueries({ queryKey: queryKeys.locations.detail(id) })
     },
     onError: () => toast.error('Opslaan mislukt'),
   })
@@ -81,7 +81,7 @@ export function useDeleteLocation(id: string) {
       if (error) throw error
     },
     onSuccess: (_, { campaignId }) => {
-      queryClient.removeQueries({ queryKey: queryKeys.campaigns.locationDetail(id) })
+      queryClient.removeQueries({ queryKey: queryKeys.locations.detail(id) })
       if (campaignId) queryClient.invalidateQueries({ queryKey: queryKeys.campaigns.locations(campaignId) })
     },
     onError: () => toast.error('Verwijderen mislukt'),
