@@ -10,8 +10,13 @@ import { RelatedEntities } from '@/components/link/RelatedEntities'
 import { Spinner } from '@/components/ui/Spinner'
 import { useEntityEdit } from '@/hooks/useEntityEdit'
 import { useAuthStore } from '@/stores/auth.store'
+import { useUserAISettings } from '@/hooks/queries/useUserAISettings'
 
 const MAX_IMAGE_BYTES = 5 * 1024 * 1024
+
+function pollinationsUrl(prompt: string): string {
+  return `https://image.pollinations.ai/prompt/${encodeURIComponent(prompt)}?width=512&height=512&nologo=true&model=flux&seed=${Math.floor(Math.random() * 99999)}`
+}
 import type { Json } from '@/types/database.types'
 import type { Item, ItemType, ItemRarity, ItemStatBonuses } from '@/types/item.types'
 import type { Character } from '@/types/character.types'
@@ -94,6 +99,44 @@ export default function ItemEditPage() {
   const user = useAuthStore((s) => s.user)
   const imageInputRef = useRef<HTMLInputElement>(null)
   const [imageUploading, setImageUploading] = useState(false)
+  const [imageGenerating, setImageGenerating] = useState(false)
+  const [imagePromptExtra, setImagePromptExtra] = useState('')
+
+  const { data: aiSettings } = useUserAISettings()
+  const hasOpenAIKey = !!(aiSettings?.byok_keys?.['openai'])
+
+  async function handleGenerateImage() {
+    const name = form.name ?? itemData?.name ?? 'item'
+    const itemType = (form.item_type ?? itemData?.item_type ?? 'misc') as string
+    const extra = imagePromptExtra.trim()
+    const basePrompt = `A detailed fantasy illustration of: ${name}${extra ? `. ${extra}` : ''}. Style: medieval fantasy RPG item art, high quality`
+    const prompt = basePrompt
+    if (hasOpenAIKey) {
+      setImageGenerating(true)
+      try {
+        const { data: { session } } = await supabase.auth.getSession()
+        if (!session) { toast.error('Niet ingelogd'); return }
+        const resp = await fetch('/api/generate-image', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${session.access_token}` },
+          body: JSON.stringify({ prompt }),
+        })
+        const json = await resp.json() as { url?: string; error?: string }
+        if (!resp.ok || !json.url) { toast.error(json.error ?? 'Genereren mislukt'); return }
+        set('image_url', json.url)
+        toast.success('Afbeelding gegenereerd')
+      } catch {
+        toast.error('Genereren mislukt')
+      } finally {
+        setImageGenerating(false)
+      }
+    } else {
+      const url = pollinationsUrl(`${name}${extra ? ` ${extra}` : ` ${itemType}`} fantasy RPG item illustration`)
+      set('image_url', url)
+      toast.success('Afbeelding gegenereerd via Pollinations')
+    }
+  }
+
 
   const locationState = location.state as { isNew?: boolean; campaignId?: string } | null
   const isNew = locationState?.isNew ?? false
@@ -494,19 +537,42 @@ export default function ItemEditPage() {
               )}
             </div>
             <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+              <div>
+                <label className="pangu-label" htmlFor="image-prompt-extra" style={{ fontSize: 11 }}>
+                  Verfijn prompt <span style={{ color: 'var(--subtle)', fontWeight: 400 }}>(optioneel)</span>
+                </label>
+                <input
+                  id="image-prompt-extra"
+                  className="pangu-input"
+                  style={{ fontSize: 13 }}
+                  value={imagePromptExtra}
+                  onChange={(e) => setImagePromptExtra(e.target.value)}
+                  placeholder="bijv. glowing blue runes, wooden handle"
+                />
+              </div>
               <button
                 type="button"
                 className="pangu-btn pangu-btn-secondary pangu-btn-sm"
-                disabled={imageUploading}
+                disabled={imageUploading || imageGenerating}
                 onClick={() => imageInputRef.current?.click()}
               >
                 {imageUploading ? 'Uploaden...' : form.image_url ? 'Afbeelding wijzigen' : 'Afbeelding uploaden'}
+              </button>
+              <button
+                type="button"
+                className="pangu-btn pangu-btn-sm"
+                disabled={imageUploading || imageGenerating}
+                onClick={handleGenerateImage}
+                style={{ background: 'rgba(212,175,55,0.15)', color: 'var(--gold)', border: '1px solid rgba(212,175,55,0.3)' }}
+                title={hasOpenAIKey ? 'Genereer via DALL-E 3' : 'Genereer via Pollinations (gratis)'}
+              >
+                {imageGenerating ? 'Genereren...' : hasOpenAIKey ? '✦ DALL-E' : '✦ Genereer'}
               </button>
               {form.image_url && (
                 <button
                   type="button"
                   className="pangu-btn pangu-btn-ghost pangu-btn-sm"
-                  disabled={imageUploading}
+                  disabled={imageUploading || imageGenerating}
                   onClick={handleImageRemove}
                   style={{ color: 'var(--crimson)' }}
                 >

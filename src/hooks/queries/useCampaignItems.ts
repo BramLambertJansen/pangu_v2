@@ -1,7 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { supabase } from '@/lib/supabase'
 import { queryKeys } from '@/lib/queryKeys'
-import type { Item, ItemType, ItemRarity } from '@/types/item.types'
+import type { Item, ItemType, ItemRarity, ItemStatBonuses } from '@/types/item.types'
 
 export function useCampaignItems(campaignId: string | undefined) {
   return useQuery<Item[]>({
@@ -28,6 +28,8 @@ export interface CreateItemInput {
   rarity: ItemRarity
   is_magical: boolean
   weight: number | null
+  properties?: ItemStatBonuses
+  image_url?: string | null
 }
 
 export function useCreateCampaignItem(campaignId: string) {
@@ -45,7 +47,8 @@ export function useCreateCampaignItem(campaignId: string) {
           is_magical: input.is_magical,
           weight: input.weight,
           quantity: 1,
-          properties: {} as Record<string, never>,
+          properties: (input.properties ?? {}) as Record<string, unknown>,
+          image_url: input.image_url ?? null,
           committed: true,
         })
         .select()
