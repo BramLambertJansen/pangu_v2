@@ -27,6 +27,7 @@ import { InvitePanel } from '@/components/campaign/InvitePanel'
 import { pickGradient, coverGradients } from '@/utils/pickGradient'
 import { sanitizeImageUrl } from '@/utils/sanitizeUrl'
 import { campaignStatusLabel } from '@/lib/statusMaps'
+import { useAuthStore } from '@/stores/auth.store'
 import type { Item } from '@/types/item.types'
 import type { Character } from '@/types/character.types'
 
@@ -256,6 +257,8 @@ export default function CampaignDetailPage() {
   const { id } = useParams<{ id: string }>()
   const navigate = useNavigate()
   const [activeTab, setActiveTab] = useState<TabId>('sessions')
+
+  const user = useAuthStore(s => s.user)
 
   const { data: campaign, isLoading } = useCampaignWithWorld(id)
   const { data: sessions, isLoading: isLoadingSessions } = useCampaignSessions(id)
