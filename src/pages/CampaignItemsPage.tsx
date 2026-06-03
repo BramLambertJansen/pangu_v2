@@ -12,8 +12,7 @@ import { useCampaignCharacters } from '@/hooks/queries/useCampaignCharacters'
 import { useImportMagicItem } from '@/hooks/queries/useSrdSearch'
 import { useDraftGC } from '@/hooks/useDraftGC'
 import { Breadcrumb } from '@/components/ui/Breadcrumb'
-import { itemTypeLabel, itemRarityLabel } from '@/lib/statusMaps'
-import type { Item, ItemType, ItemRarity } from '@/types/item.types'
+import type { ItemType, ItemRarity } from '@/types/item.types'
 import type { Open5eMagicItem } from '@/types/open5e.types'
 
 const ITEM_TYPES: ItemType[] = ['weapon', 'armor', 'potion', 'ring', 'rod', 'scroll', 'staff', 'wand', 'wondrous', 'misc']

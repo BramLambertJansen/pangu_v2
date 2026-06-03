@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest'
+import { describe, it, expect, vi } from 'vitest'
 
 // Test the merge and name-resolution logic in isolation from the Supabase client.
 // We verify:

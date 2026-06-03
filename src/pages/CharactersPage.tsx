@@ -1,5 +1,4 @@
 import { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
 import { useAuthStore } from '@/stores/auth.store'
 import { EntityCardSkeleton } from '@/components/ui/EntityCardSkeleton'
 import { EmptyState } from '@/components/ui/EmptyState'
@@ -9,7 +8,6 @@ import { useCharacters, useCreateCharacter } from '@/hooks/queries/useCharacters
 import { useDraftGC } from '@/hooks/useDraftGC'
 
 export default function CharactersPage() {
-  const navigate = useNavigate()
   const user = useAuthStore(s => s.user)
   const [search, setSearch] = useState('')
 

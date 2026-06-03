@@ -10,7 +10,7 @@ import { useEntityEdit } from '@/hooks/useEntityEdit'
 import { useCharacter, useSaveCharacter, useDeleteCharacter } from '@/hooks/queries/useCharacter'
 import { useUserCampaignNames } from '@/hooks/queries/useCampaign'
 import { useAuthStore } from '@/stores/auth.store'
-import type { Character, CharacterStatus, HitDie, SpellcastingAbility, SpellSlots, SpellSlotLevel, ClassResources } from '@/types/character.types'
+import type { CharacterStatus, HitDie, SpellcastingAbility, SpellSlots, SpellSlotLevel, ClassResources } from '@/types/character.types'
 
 const SKILLS: { name: string; ability: string; abbr: string }[] = [
   { name: 'Atletiek',          ability: 'Sterkte',       abbr: 'STR' },

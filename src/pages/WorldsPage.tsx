@@ -1,5 +1,4 @@
 import { useMemo } from 'react'
-import { useNavigate } from 'react-router-dom'
 import { toast } from 'sonner'
 import { useAuthStore } from '@/stores/auth.store'
 import { EntityCardSkeleton } from '@/components/ui/EntityCardSkeleton'
@@ -9,7 +8,6 @@ import { useWorlds, useActiveCampaignsForWorlds, useCreateWorld } from '@/hooks/
 import { useDraftGC } from '@/hooks/useDraftGC'
 
 export default function WorldsPage() {
-  const navigate = useNavigate()
   const user = useAuthStore(s => s.user)
 
   const { data: worlds, isLoading } = useWorlds()

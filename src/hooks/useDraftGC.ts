@@ -34,5 +34,5 @@ export function useDraftGC(
         console.warn('[GC] draft cleanup failed:', err)
       }
     })()
-  }, [user?.id, filterValue])
+  }, [user?.id, filterValue, filterKey, table])
 }

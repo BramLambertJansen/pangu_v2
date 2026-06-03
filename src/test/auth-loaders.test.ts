@@ -66,16 +66,28 @@ describe('requireAdmin', () => {
     expect(result).toMatchObject({ status: 302 })
   })
 
-  it('returns null when stored profile has role=admin', async () => {
+  it('returns null when DB confirms role=admin', async () => {
     mockGetSession.mockResolvedValue(sessionOf('admin'))
     mockGetState.mockReturnValue({ profile: { role: 'admin' } })
+
+    const mockSingle = vi.fn().mockResolvedValue({ data: { role: 'admin' } })
+    const mockEq = vi.fn().mockReturnValue({ single: mockSingle })
+    const mockSelect = vi.fn().mockReturnValue({ eq: mockEq })
+    mockFrom.mockReturnValue({ select: mockSelect })
+
     const result = await requireAdmin()
     expect(result).toBeNull()
   })
 
-  it('redirects to /dashboard when stored profile has role=user', async () => {
+  it('redirects to /dashboard when DB confirms role=user', async () => {
     mockGetSession.mockResolvedValue(sessionOf('user'))
     mockGetState.mockReturnValue({ profile: { role: 'user' } })
+
+    const mockSingle = vi.fn().mockResolvedValue({ data: { role: 'user' } })
+    const mockEq = vi.fn().mockReturnValue({ single: mockSingle })
+    const mockSelect = vi.fn().mockReturnValue({ eq: mockEq })
+    mockFrom.mockReturnValue({ select: mockSelect })
+
     const result = await requireAdmin()
     expect(redirect).toHaveBeenCalledWith('/dashboard')
     expect(result).toMatchObject({ status: 302 })

@@ -17,7 +17,7 @@ const MAX_IMAGE_BYTES = 5 * 1024 * 1024
 function pollinationsUrl(prompt: string): string {
   return `https://image.pollinations.ai/prompt/${encodeURIComponent(prompt)}?width=512&height=512&nologo=true&model=flux&seed=${Math.floor(Math.random() * 99999)}`
 }
-import type { Item, ItemType, ItemRarity, ItemStatBonuses } from '@/types/item.types'
+import type { ItemType, ItemRarity, ItemStatBonuses } from '@/types/item.types'
 
 const rarityOptions: { value: ItemRarity; label: string }[] = [
   { value: 'common',    label: 'Gewoon'          },
