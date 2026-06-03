@@ -1,12 +1,9 @@
 import { useState, useEffect, useId, useCallback } from 'react'
 import { useParams, useNavigate, useLocation } from 'react-router-dom'
-import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { toast } from 'sonner'
-import { supabase } from '@/lib/supabase'
-import { queryKeys } from '@/lib/queryKeys'
 import { Spinner } from '@/components/ui/Spinner'
 import { ConfirmDialog } from '@/components/ui/ConfirmDialog'
-import { useCampaign } from '@/hooks/queries/useCampaign'
+import { useCampaign, useSaveCampaign, useDeleteCampaign } from '@/hooks/queries/useCampaign'
 import { useImagePositioning } from '@/hooks/useImagePositioning'
 import { useEditGuard } from '@/hooks/useEditGuard'
 import type { Campaign, CampaignStatus } from '@/types/campaign.types'
@@ -22,7 +19,6 @@ export default function CampaignEditPage() {
   const { id } = useParams<{ id: string }>()
   const navigate = useNavigate()
   const location = useLocation()
-  const queryClient = useQueryClient()
   const descriptionId = useId()
   const notesId = useId()
   const statusId = useId()
@@ -45,6 +41,8 @@ export default function CampaignEditPage() {
   }, [])
 
   const { data: campaign, isLoading } = useCampaign(id)
+  const saveCampaign = useSaveCampaign(id!)
+  const deleteCampaign = useDeleteCampaign(id!)
 
   const { containerRef, posString: imagePosString, isDragging, resetPosition, handlers: imagePosHandlers } = useImagePositioning(
     campaign?.header_image_position,
@@ -57,60 +55,6 @@ export default function CampaignEditPage() {
       setDirty(false)
     }
   }, [campaign])
-
-  const saveCampaign = useMutation({
-    mutationFn: async () => {
-      const { error } = await supabase
-        .from('campaigns')
-        .update({
-          name: form.name,
-          subtitle: form.subtitle,
-          description: form.description,
-          header_image: form.header_image,
-          header_image_position: form.header_image_position ?? 'center',
-          status: form.status,
-          notes: form.notes ?? null,
-          committed: true,
-          updated_at: new Date().toISOString(),
-        })
-        .eq('id', id!)
-      if (error) throw error
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: queryKeys.campaigns.all })
-      queryClient.invalidateQueries({ queryKey: queryKeys.campaigns.detail(id!) })
-      queryClient.invalidateQueries({ queryKey: queryKeys.campaigns.detailWithWorld(id!) })
-      const worldId = campaign?.world_id ?? worldIdFromState
-      if (worldId) {
-        queryClient.invalidateQueries({ queryKey: queryKeys.campaigns.byWorld(worldId) })
-      }
-      setCommitted(true)
-      setDirty(false)
-    },
-    onError: () => {
-      toast.error('Opslaan mislukt')
-    },
-  })
-
-  const deleteCampaign = useMutation({
-    mutationFn: async () => {
-      const { error } = await supabase.from('campaigns').delete().eq('id', id!)
-      if (error) throw error
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: queryKeys.campaigns.all })
-      const worldId = campaign?.world_id ?? worldIdFromState
-      if (worldId) {
-        queryClient.invalidateQueries({ queryKey: queryKeys.campaigns.byWorld(worldId) })
-        navigate(`/worlds/${worldId}`)
-      } else {
-        navigate('/dashboard')
-      }
-    },
-    onError: () => {
-      toast.error('Verwijderen mislukt')
-    },
-  })
 
   function set<K extends keyof Campaign>(key: K, value: Campaign[K]) {
     setForm((prev) => ({ ...prev, [key]: value }))
@@ -137,34 +81,33 @@ export default function CampaignEditPage() {
   }
 
   async function handleDiscardConfirm() {
+    const worldId = campaign?.world_id ?? worldIdFromState
     if (guard.isDraftDiscard) {
-      const { error } = await supabase.from('campaigns').delete().eq('id', id!)
-      if (error) { toast.error('Verwijderen mislukt'); return }
-      const worldId = campaign?.world_id ?? worldIdFromState
-      queryClient.invalidateQueries({ queryKey: queryKeys.campaigns.all })
-      if (worldId) queryClient.invalidateQueries({ queryKey: queryKeys.campaigns.byWorld(worldId) })
+      try { await deleteCampaign.mutateAsync({ worldId }) } catch { return }
     }
     const blockerHandled = guard.confirmLeave()
-    if (!blockerHandled) {
-      const worldId = campaign?.world_id ?? worldIdFromState
-      navigate(worldId ? `/worlds/${worldId}` : '/dashboard')
-    }
+    if (!blockerHandled) navigate(worldId ? `/worlds/${worldId}` : '/dashboard')
   }
 
   function handleSave() {
-    toast.promise(saveCampaign.mutateAsync(), {
-      loading: 'Opslaan...',
-      success: 'Kroniek opgeslagen',
-      error: 'Opslaan mislukt',
-    })
+    const worldId = campaign?.world_id ?? worldIdFromState
+    toast.promise(
+      saveCampaign.mutateAsync({ ...form, worldId }).then(() => {
+        setCommitted(true)
+        setDirty(false)
+      }),
+      { loading: 'Opslaan...', success: 'Kroniek opgeslagen', error: 'Opslaan mislukt' },
+    )
   }
 
   function handleDelete() {
-    toast.promise(deleteCampaign.mutateAsync(), {
-      loading: 'Verwijderen...',
-      success: 'Kroniek verwijderd',
-      error: 'Verwijderen mislukt',
-    })
+    const worldId = campaign?.world_id ?? worldIdFromState
+    toast.promise(
+      deleteCampaign.mutateAsync({ worldId }).then(() => {
+        navigate(worldId ? `/worlds/${worldId}` : '/dashboard')
+      }),
+      { loading: 'Verwijderen...', success: 'Kroniek verwijderd', error: 'Verwijderen mislukt' },
+    )
     setDeleteOpen(false)
   }
 

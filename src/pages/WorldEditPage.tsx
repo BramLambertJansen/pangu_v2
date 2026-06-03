@@ -1,12 +1,9 @@
 import { useState, useEffect, useId, useCallback } from 'react'
 import { useParams, useNavigate, useLocation } from 'react-router-dom'
-import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { toast } from 'sonner'
-import { supabase } from '@/lib/supabase'
-import { queryKeys } from '@/lib/queryKeys'
 import { Spinner } from '@/components/ui/Spinner'
 import { ConfirmDialog } from '@/components/ui/ConfirmDialog'
-import { useWorld } from '@/hooks/queries/useWorld'
+import { useWorld, useSaveWorld, useDeleteWorld } from '@/hooks/queries/useWorld'
 import { useImagePositioning } from '@/hooks/useImagePositioning'
 import { useEditGuard } from '@/hooks/useEditGuard'
 import type { World, WorldStatus } from '@/types/world.types'
@@ -21,7 +18,6 @@ export default function WorldEditPage() {
   const { id } = useParams<{ id: string }>()
   const navigate = useNavigate()
   const location = useLocation()
-  const queryClient = useQueryClient()
   const descriptionId = useId()
   const notesId = useId()
   const quoteId = useId()
@@ -42,6 +38,8 @@ export default function WorldEditPage() {
   }, [])
 
   const { data: world, isLoading } = useWorld(id)
+  const saveWorld = useSaveWorld(id!)
+  const deleteWorld = useDeleteWorld(id!)
 
   const { containerRef, posString: imagePosString, isDragging, resetPosition, handlers: imagePosHandlers } = useImagePositioning(
     world?.header_image_position,
@@ -54,50 +52,6 @@ export default function WorldEditPage() {
       setDirty(false)
     }
   }, [world])
-
-  const saveWorld = useMutation({
-    mutationFn: async () => {
-      const { error } = await supabase
-        .from('worlds')
-        .update({
-          name: form.name,
-          subtitle: form.subtitle,
-          quote: form.quote,
-          description: form.description,
-          header_image: form.header_image,
-          header_image_position: form.header_image_position ?? 'center',
-          status: form.status,
-          notes: form.notes ?? null,
-          committed: true,
-          updated_at: new Date().toISOString(),
-        })
-        .eq('id', id!)
-      if (error) throw error
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: queryKeys.worlds.all })
-      queryClient.invalidateQueries({ queryKey: queryKeys.worlds.detail(id!) })
-      setCommitted(true)
-      setDirty(false)
-    },
-    onError: () => {
-      toast.error('Opslaan mislukt')
-    },
-  })
-
-  const deleteWorld = useMutation({
-    mutationFn: async () => {
-      const { error } = await supabase.from('worlds').delete().eq('id', id!)
-      if (error) throw error
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: queryKeys.worlds.all })
-      navigate('/worlds')
-    },
-    onError: () => {
-      toast.error('Verwijderen mislukt')
-    },
-  })
 
   function set<K extends keyof World>(key: K, value: World[K]) {
     setForm((prev) => ({ ...prev, [key]: value }))
@@ -125,30 +79,27 @@ export default function WorldEditPage() {
 
   async function handleDiscardConfirm() {
     if (guard.isDraftDiscard) {
-      const { error } = await supabase.from('worlds').delete().eq('id', id!)
-      if (error) { toast.error('Verwijderen mislukt'); return }
-      queryClient.invalidateQueries({ queryKey: queryKeys.worlds.all })
+      try { await deleteWorld.mutateAsync() } catch { return }
     }
     const blockerHandled = guard.confirmLeave()
-    if (!blockerHandled) {
-      navigate('/worlds')
-    }
+    if (!blockerHandled) navigate('/worlds')
   }
 
   function handleSave() {
-    toast.promise(saveWorld.mutateAsync(), {
-      loading: 'Opslaan...',
-      success: 'Wereld opgeslagen',
-      error: 'Opslaan mislukt',
-    })
+    toast.promise(
+      saveWorld.mutateAsync(form).then(() => {
+        setCommitted(true)
+        setDirty(false)
+      }),
+      { loading: 'Opslaan...', success: 'Wereld opgeslagen', error: 'Opslaan mislukt' },
+    )
   }
 
   function handleDelete() {
-    toast.promise(deleteWorld.mutateAsync(), {
-      loading: 'Verwijderen...',
-      success: 'Wereld verwijderd',
-      error: 'Verwijderen mislukt',
-    })
+    toast.promise(
+      deleteWorld.mutateAsync().then(() => navigate('/worlds')),
+      { loading: 'Verwijderen...', success: 'Wereld verwijderd', error: 'Verwijderen mislukt' },
+    )
     setDeleteOpen(false)
   }
 

@@ -1,22 +1,16 @@
 import { useId, useState, useEffect } from 'react'
 import { useParams, useNavigate, useLocation } from 'react-router-dom'
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { toast } from 'sonner'
-import { supabase } from '@/lib/supabase'
-import { queryKeys } from '@/lib/queryKeys'
 import { Modal } from '@/components/ui/Modal'
 import { ConfirmDialog } from '@/components/ui/ConfirmDialog'
 import { Spinner } from '@/components/ui/Spinner'
 import { useEntityEdit } from '@/hooks/useEntityEdit'
+import { useEncounterWithCampaign, useEncounterMonstersEdit, useSaveEncounter, useDeleteEncounter } from '@/hooks/queries/useEncounter'
 import { useWorldBestiaries } from '@/hooks/queries/useWorldBestiaries'
 import { useCampaignSessions } from '@/hooks/queries/useCampaignSessions'
 import { useAuthStore } from '@/stores/auth.store'
-import type { Encounter, EncounterStatus } from '@/types/encounter.types'
+import type { EncounterStatus } from '@/types/encounter.types'
 import type { Bestiary } from '@/types/bestiary.types'
-
-type EncounterWithWorld = Encounter & {
-  campaigns: { id: string; name: string; world_id: string } | null
-}
 
 type MonsterRow = {
   bestiary_id: string
@@ -24,14 +18,6 @@ type MonsterRow = {
   creature_type: string | null
   threat_level: string | null
   count: number
-}
-
-type MonsterWithBestiary = {
-  id: string
-  encounter_id: string
-  bestiary_id: string
-  count: number
-  bestiaries: Pick<Bestiary, 'id' | 'name' | 'creature_type' | 'threat_level'> | null
 }
 
 const statusOptions: { value: EncounterStatus; label: string }[] = [
@@ -46,7 +32,6 @@ export default function EncounterEditPage() {
   const { id } = useParams<{ id: string }>()
   const navigate = useNavigate()
   const location = useLocation()
-  const queryClient = useQueryClient()
   const user = useAuthStore(s => s.user)
 
   const subtitleId = useId()
@@ -68,38 +53,11 @@ export default function EncounterEditPage() {
   const [pickerOpen, setPickerOpen] = useState(false)
   const [search, setSearch] = useState('')
 
-  const { data: encounterData, isLoading } = useQuery<EncounterWithWorld>({
-    queryKey: queryKeys.campaigns.encounterDetail(id!),
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from('encounters')
-        .select('*, campaigns(id, name, world_id)')
-        .eq('id', id!)
-        .single()
-      if (error) throw error
-      return data as EncounterWithWorld
-    },
-    enabled: !!id,
-    staleTime: 1000 * 60,
-  })
+  const { data: encounterData, isLoading } = useEncounterWithCampaign(id)
+  const { data: existingMonsters } = useEncounterMonstersEdit(id)
 
   const campaignId = encounterData?.campaign_id ?? campaignIdFromState
   const worldId = encounterData?.campaigns?.world_id
-
-  const { data: existingMonsters } = useQuery<MonsterWithBestiary[]>({
-    queryKey: queryKeys.campaigns.encounterMonsters(id!),
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from('encounter_monsters')
-        .select('*, bestiaries(id, name, creature_type, threat_level)')
-        .eq('encounter_id', id!)
-        .order('created_at', { ascending: true })
-      if (error) throw error
-      return data as MonsterWithBestiary[]
-    },
-    enabled: !!id,
-    staleTime: 1000 * 60,
-  })
 
   // Initialise monster list from fetched data (only once)
   useEffect(() => {
@@ -126,89 +84,15 @@ export default function EncounterEditPage() {
 
   const isDirtyOverall = dirty || monstersDirty
 
-  const saveEncounter = useMutation({
-    mutationFn: async () => {
-      // 1. Save encounter fields
-      const { error: updateError } = await supabase
-        .from('encounters')
-        .update({
-          name: form.name,
-          subtitle: form.subtitle ?? null,
-          description: form.description ?? null,
-          notes: form.notes ?? null,
-          status: form.status,
-          environment: form.environment ?? null,
-          difficulty: form.difficulty ?? null,
-          session_id: form.session_id ?? null,
-          committed: true,
-          updated_at: new Date().toISOString(),
-        })
-        .eq('id', id!)
-      if (updateError) throw updateError
-
-      // 2. Full-replace encounter_monsters
-      const { error: deleteError } = await supabase
-        .from('encounter_monsters')
-        .delete()
-        .eq('encounter_id', id!)
-      if (deleteError) throw deleteError
-
-      if (monsters.length > 0) {
-        const rows = monsters.map((m) => ({
-          encounter_id: id!,
-          bestiary_id: m.bestiary_id,
-          user_id: user!.id,
-          count: m.count,
-        }))
-        const { error: insertError } = await supabase
-          .from('encounter_monsters')
-          .insert(rows)
-        if (insertError) throw insertError
-      }
-    },
-    onSuccess: () => {
-      if (campaignId) {
-        queryClient.invalidateQueries({ queryKey: queryKeys.campaigns.encounters(campaignId) })
-      }
-      queryClient.invalidateQueries({ queryKey: queryKeys.campaigns.encounterDetail(id!) })
-      queryClient.invalidateQueries({ queryKey: queryKeys.campaigns.encounterMonsters(id!) })
-      queryClient.invalidateQueries({ queryKey: queryKeys.campaigns.encounterMonstersFull(id!) })
-      setCommitted(true)
-      setDirty(false)
-      setMonstersDirty(false)
-    },
-    onError: () => {
-      toast.error('Opslaan mislukt')
-    },
-  })
-
-  const deleteEncounter = useMutation({
-    mutationFn: async () => {
-      const { error } = await supabase.from('encounters').delete().eq('id', id!)
-      if (error) throw error
-    },
-    onSuccess: () => {
-      queryClient.removeQueries({ queryKey: queryKeys.campaigns.encounterDetail(id!) })
-      if (campaignId) {
-        queryClient.invalidateQueries({ queryKey: queryKeys.campaigns.encounters(campaignId) })
-        navigate(`/campaigns/${campaignId}/encounters`)
-      } else {
-        navigate('/dashboard')
-      }
-    },
-    onError: () => {
-      toast.error('Verwijderen mislukt')
-    },
-  })
+  const saveEncounter = useSaveEncounter(id!)
+  const deleteEncounter = useDeleteEncounter(id!)
 
   async function handleDiscardConfirm() {
     if (guard.isDraftDiscard) {
-      const { error } = await supabase.from('encounters').delete().eq('id', id!)
-      if (error) { toast.error('Verwijderen mislukt'); return }
-      queryClient.removeQueries({ queryKey: queryKeys.campaigns.encounterDetail(id!) })
-      queryClient.removeQueries({ queryKey: queryKeys.campaigns.encounterMonsters(id!) })
-      if (campaignId) {
-        queryClient.invalidateQueries({ queryKey: queryKeys.campaigns.encounters(campaignId) })
+      try {
+        await deleteEncounter.mutateAsync({ campaignId })
+      } catch {
+        return
       }
     }
     const handled = guard.confirmLeave()
@@ -238,19 +122,24 @@ export default function EncounterEditPage() {
   }
 
   function handleSave() {
-    toast.promise(saveEncounter.mutateAsync(), {
-      loading: 'Opslaan...',
-      success: 'Gevecht opgeslagen',
-      error: 'Opslaan mislukt',
-    })
+    toast.promise(
+      saveEncounter.mutateAsync({
+        form,
+        monsters: monsters.map((m) => ({ bestiary_id: m.bestiary_id, count: m.count })),
+        userId: user!.id,
+      }).then(() => { setCommitted(true); setDirty(false); setMonstersDirty(false) }),
+      { loading: 'Opslaan...', success: 'Gevecht opgeslagen', error: 'Opslaan mislukt' },
+    )
   }
 
   function handleDelete() {
-    toast.promise(deleteEncounter.mutateAsync(), {
-      loading: 'Verwijderen...',
-      success: 'Gevecht verwijderd',
-      error: 'Verwijderen mislukt',
-    })
+    toast.promise(
+      deleteEncounter.mutateAsync({ campaignId }).then(() => {
+        if (campaignId) navigate(`/campaigns/${campaignId}/encounters`)
+        else navigate('/dashboard')
+      }),
+      { loading: 'Verwijderen...', success: 'Gevecht verwijderd', error: 'Verwijderen mislukt' },
+    )
     setDeleteOpen(false)
   }
 

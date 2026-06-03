@@ -29,6 +29,9 @@ vi.mock('@/hooks/queries/useCampaignEncounters', () => ({
 vi.mock('@/hooks/queries/useCampaignCharacters', () => ({
   useCampaignCharacters: () => ({ data: [] }),
 }))
+vi.mock('@/hooks/queries/useCampaignFactions', () => ({
+  useCampaignFactions: () => ({ data: [] }),
+}))
 
 const mockMutateAsync = vi.fn().mockResolvedValue(undefined)
 vi.mock('@/hooks/queries/useEntityLinks', () => ({

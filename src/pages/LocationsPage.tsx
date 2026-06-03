@@ -1,83 +1,23 @@
-import { useState, useEffect } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
-import { useMutation, useQueryClient } from '@tanstack/react-query'
-import { toast } from 'sonner'
-import { supabase } from '@/lib/supabase'
-import { queryKeys } from '@/lib/queryKeys'
 import { Spinner } from '@/components/ui/Spinner'
 import { EntityCardSkeleton } from '@/components/ui/EntityCardSkeleton'
 import { EmptyState } from '@/components/ui/EmptyState'
 import { Breadcrumbs } from '@/components/ui/Breadcrumbs'
 import { LocationCard, ForgeLocationCard } from '@/components/location/LocationCard'
 import { WorldDetailDivider } from '@/components/world/WorldDetailDivider'
-import type { Location } from '@/types/location.types'
-import { useAuthStore } from '@/stores/auth.store'
 import { useCampaign } from '@/hooks/queries/useCampaign'
-import { useCampaignLocations } from '@/hooks/queries/useCampaignLocations'
+import { useCampaignLocations, useCreateCampaignLocation } from '@/hooks/queries/useCampaignLocations'
+import { useDraftGC } from '@/hooks/useDraftGC'
 
 export default function LocationsPage() {
   const { id: campaignId } = useParams<{ id: string }>()
   const navigate = useNavigate()
-  const queryClient = useQueryClient()
-  const user = useAuthStore(s => s.user)
-  const [creatingLocation, setCreatingLocation] = useState(false)
 
   const { data: campaign, isLoading: campaignLoading } = useCampaign(campaignId)
   const { data: locations, isLoading: locationsLoading } = useCampaignLocations(campaignId)
+  const createLocation = useCreateCampaignLocation(campaignId!)
 
-  // Garbage-collect uncommitted drafts older than 30 minutes
-  useEffect(() => {
-    if (!user?.id) return
-    const cutoff = new Date(Date.now() - 30 * 60 * 1000).toISOString()
-    void (async () => {
-      try {
-      const { data } = await supabase
-        .from('locations')
-        .select('id')
-        .eq('campaign_id', campaignId!)
-        .eq('committed', false)
-        .lt('created_at', cutoff)
-      if (data?.length) {
-        await supabase.from('locations').delete().in('id', data.map((r) => r.id))
-      }
-      } catch (err) {
-        console.warn("[GC] draft cleanup failed:", err)
-      }
-    })()
-  }, [user?.id])
-
-  const createLocation = useMutation({
-    mutationFn: async () => {
-      if (!user) throw new Error('Niet ingelogd')
-      const { data, error } = await supabase
-        .from('locations')
-        .insert({
-          campaign_id: campaignId!,
-          user_id: user.id,
-          name: 'Nieuwe locatie',
-          status: 'draft',
-        })
-        .select()
-        .single()
-      if (error) throw error
-      return data as Location
-    },
-    onSuccess: (newLocation) => {
-      queryClient.invalidateQueries({ queryKey: queryKeys.campaigns.locations(campaignId!) })
-      navigate(`/locations/${newLocation.id}/edit`, {
-        state: { isNew: true, campaignId },
-      })
-    },
-    onError: () => {
-      toast.error('Locatie aanmaken mislukt')
-      setCreatingLocation(false)
-    },
-  })
-
-  function handleCreateLocation() {
-    setCreatingLocation(true)
-    createLocation.mutate()
-  }
+  useDraftGC('locations', 'campaign_id', campaignId)
 
   if (campaignLoading) {
     return (
@@ -138,7 +78,7 @@ export default function LocationsPage() {
               {locations?.map((location) => (
                 <LocationCard key={location.id} location={location} />
               ))}
-              <ForgeLocationCard onClick={handleCreateLocation} loading={creatingLocation} />
+              <ForgeLocationCard onClick={() => createLocation.mutate()} loading={createLocation.isPending} />
             </div>
           </>
         )}

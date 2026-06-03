@@ -285,7 +285,7 @@ export const PartyMemberRow = memo(function PartyMemberRow({ character, selected
       tabIndex={0}
       aria-label={`Karakter: ${character.name}`}
       onClick={() => onSelect ? onSelect() : navigate(`/characters/${character.id}`)}
-      onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onSelect ? onSelect() : navigate(`/characters/${character.id}`) } }}
+      onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); if (onSelect) { onSelect() } else { navigate(`/characters/${character.id}`) } } }}
       style={{
         position: 'relative',
         overflow: 'hidden',

@@ -1,61 +1,17 @@
 import { useParams, useNavigate, Link } from 'react-router-dom'
-import { useQuery } from '@tanstack/react-query'
-import { supabase } from '@/lib/supabase'
-import { queryKeys } from '@/lib/queryKeys'
 import { Spinner } from '@/components/ui/Spinner'
 import { Breadcrumb } from '@/components/ui/Breadcrumb'
 import { WorldDetailDivider } from '@/components/world/WorldDetailDivider'
 import { RelatedEntities } from '@/components/link/RelatedEntities'
-import type { Location, LocationStatus } from '@/types/location.types'
-
-type LocationWithCampaign = Location & {
-  campaigns: { id: string; name: string; world_id: string; worlds: { id: string; name: string } | null } | null
-}
-
-const statusLabel: Record<LocationStatus, string> = {
-  draft:      'Concept',
-  active:     'Actief',
-  discovered: 'Ontdekt',
-  archived:   'Gearchiveerd',
-}
-
-const statusColor: Record<LocationStatus, string> = {
-  draft:      'var(--gold)',
-  active:     'var(--violet)',
-  discovered: 'var(--emerald, #3ecfb2)',
-  archived:   'var(--muted)',
-}
-
-const cardGradients = [
-  'radial-gradient(ellipse 60% 80% at 25% 35%, rgba(62,207,178,0.32) 0%, rgba(60,120,80,0.18) 45%, var(--void) 78%)',
-  'radial-gradient(ellipse 60% 80% at 28% 38%, rgba(245,180,50,0.28) 0%, rgba(62,207,178,0.18) 50%, var(--void) 78%)',
-  'radial-gradient(ellipse 60% 80% at 30% 40%, rgba(155,138,255,0.28) 0%, rgba(62,207,178,0.20) 50%, var(--void) 78%)',
-  'radial-gradient(ellipse 60% 80% at 25% 38%, rgba(220,90,80,0.26) 0%, rgba(62,207,178,0.20) 50%, var(--void) 78%)',
-]
-
-function pickGradient(id: string): string {
-  const code = (id.charCodeAt(0) || 0) + (id.charCodeAt(id.length - 1) || 0)
-  return cardGradients[code % cardGradients.length]
-}
+import { useLocationFull } from '@/hooks/queries/useLocation'
+import { locationStatusLabel, locationStatusColor } from '@/lib/statusMaps'
+import { pickGradient, locationGradients } from '@/utils/pickGradient'
 
 export default function LocationDetailPage() {
   const { id } = useParams<{ id: string }>()
   const navigate = useNavigate()
 
-  const { data: location, isLoading } = useQuery<LocationWithCampaign>({
-    queryKey: queryKeys.campaigns.locationDetailFull(id!),
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from('locations')
-        .select('*, campaigns(id, name, world_id, worlds(id, name))')
-        .eq('id', id!)
-        .single()
-      if (error) throw error
-      return data as LocationWithCampaign
-    },
-    enabled: !!id,
-    staleTime: 1000 * 60,
-  })
+  const { data: location, isLoading } = useLocationFull(id)
 
   if (isLoading) {
     return (
@@ -78,7 +34,7 @@ export default function LocationDetailPage() {
 
   const campaign = location.campaigns
   const world = campaign?.worlds ?? null
-  const gradient = pickGradient(location.id)
+  const gradient = pickGradient(location.id, locationGradients)
   const initial = location.name.trim()[0]?.toUpperCase() ?? '?'
 
   return (
@@ -171,14 +127,14 @@ export default function LocationDetailPage() {
           <span style={{
             display: 'inline-flex', alignItems: 'center',
             padding: '4px 12px',
-            background: statusColor[location.status],
+            background: locationStatusColor[location.status],
             borderRadius: 'var(--r-full)',
             fontFamily: 'var(--font-body)',
             fontSize: 10, fontWeight: 700,
             letterSpacing: '0.16em', textTransform: 'uppercase',
             color: 'var(--void)',
           }}>
-            {statusLabel[location.status]}
+            {locationStatusLabel[location.status]}
           </span>
         </div>
 

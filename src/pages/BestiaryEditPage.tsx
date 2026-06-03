@@ -1,15 +1,14 @@
 import { useId, useRef, useState } from 'react'
 import { useParams, useNavigate, useLocation } from 'react-router-dom'
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { toast } from 'sonner'
 import { supabase } from '@/lib/supabase'
-import { queryKeys } from '@/lib/queryKeys'
 import { Modal } from '@/components/ui/Modal'
 import { ConfirmDialog } from '@/components/ui/ConfirmDialog'
 import { Spinner } from '@/components/ui/Spinner'
 import { useEntityEdit } from '@/hooks/useEntityEdit'
 import { useAuthStore } from '@/stores/auth.store'
-import type { Bestiary, BestiaryStatus } from '@/types/bestiary.types'
+import { useBestiary, useSaveBestiary, useDeleteBestiary } from '@/hooks/queries/useBestiary'
+import type { BestiaryStatus } from '@/types/bestiary.types'
 
 const MAX_IMAGE_BYTES = 5 * 1024 * 1024
 
@@ -50,7 +49,6 @@ export default function BestiaryEditPage() {
   const { id } = useParams<{ id: string }>()
   const navigate = useNavigate()
   const location = useLocation()
-  const queryClient = useQueryClient()
   const user = useAuthStore((s) => s.user)
   const imageInputRef = useRef<HTMLInputElement>(null)
   const [imageUploading, setImageUploading] = useState(false)
@@ -66,20 +64,9 @@ export default function BestiaryEditPage() {
   const isNew = locationState?.isNew ?? false
   const worldIdFromState = locationState?.worldId
 
-  const { data: bestiaryData, isLoading } = useQuery<Bestiary>({
-    queryKey: queryKeys.worlds.bestiaryDetail(id!),
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from('bestiaries')
-        .select('*')
-        .eq('id', id!)
-        .single()
-      if (error) throw error
-      return data as Bestiary
-    },
-    enabled: !!id,
-    staleTime: 1000 * 60,
-  })
+  const { data: bestiaryData, isLoading } = useBestiary(id)
+  const saveBestiary = useSaveBestiary(id!)
+  const deleteBestiary = useDeleteBestiary(id!)
 
   const {
     form, set, dirty, setDirty,
@@ -90,77 +77,12 @@ export default function BestiaryEditPage() {
 
   const worldId = bestiaryData?.world_id ?? worldIdFromState
 
-  const saveBestiary = useMutation({
-    mutationFn: async () => {
-      const { error } = await supabase
-        .from('bestiaries')
-        .update({
-          name: form.name,
-          subtitle: form.subtitle ?? null,
-          creature_type: form.creature_type ?? null,
-          threat_level: form.threat_level ?? null,
-          habitat: form.habitat ?? null,
-          description: form.description ?? null,
-          notes: form.notes ?? null,
-          status: form.status,
-          hp: form.hp,
-          ac: form.ac,
-          speed: form.speed,
-          stat_str: form.stat_str,
-          stat_dex: form.stat_dex,
-          stat_con: form.stat_con,
-          stat_int: form.stat_int,
-          stat_wis: form.stat_wis,
-          stat_cha: form.stat_cha,
-          image_url: form.image_url ?? null,
-          committed: true,
-          updated_at: new Date().toISOString(),
-        })
-        .eq('id', id!)
-      if (error) throw error
-    },
-    onSuccess: () => {
-      if (worldId) {
-        queryClient.invalidateQueries({ queryKey: queryKeys.worlds.bestiaries(worldId) })
-      }
-      queryClient.invalidateQueries({ queryKey: queryKeys.worlds.bestiaryDetail(id!) })
-      queryClient.invalidateQueries({ queryKey: queryKeys.worlds.bestiaryDetailFull(id!) })
-      setCommitted(true)
-      setDirty(false)
-    },
-    onError: () => {
-      toast.error('Opslaan mislukt')
-    },
-  })
-
-  const deleteBestiary = useMutation({
-    mutationFn: async () => {
-      const { error } = await supabase.from('bestiaries').delete().eq('id', id!)
-      if (error) throw error
-    },
-    onSuccess: () => {
-      queryClient.removeQueries({ queryKey: queryKeys.worlds.bestiaryDetail(id!) })
-      queryClient.removeQueries({ queryKey: queryKeys.worlds.bestiaryDetailFull(id!) })
-      if (worldId) {
-        queryClient.invalidateQueries({ queryKey: queryKeys.worlds.bestiaries(worldId) })
-        navigate(`/worlds/${worldId}/bestiary`)
-      } else {
-        navigate('/worlds')
-      }
-    },
-    onError: () => {
-      toast.error('Verwijderen mislukt')
-    },
-  })
-
   async function handleDiscardConfirm() {
     if (guard.isDraftDiscard) {
-      const { error } = await supabase.from('bestiaries').delete().eq('id', id!)
-      if (error) { toast.error('Verwijderen mislukt'); return }
-      queryClient.removeQueries({ queryKey: queryKeys.worlds.bestiaryDetail(id!) })
-      queryClient.removeQueries({ queryKey: queryKeys.worlds.bestiaryDetailFull(id!) })
-      if (worldId) {
-        queryClient.invalidateQueries({ queryKey: queryKeys.worlds.bestiaries(worldId) })
+      try {
+        await deleteBestiary.mutateAsync({ worldId })
+      } catch {
+        return
       }
     }
     const handled = guard.confirmLeave()
@@ -250,19 +172,23 @@ export default function BestiaryEditPage() {
   }
 
   function handleSave() {
-    toast.promise(saveBestiary.mutateAsync(), {
-      loading: 'Opslaan...',
-      success: 'Wezen opgeslagen',
-      error: 'Opslaan mislukt',
-    })
+    toast.promise(
+      saveBestiary.mutateAsync({ ...form }).then(() => {
+        setCommitted(true)
+        setDirty(false)
+      }),
+      { loading: 'Opslaan...', success: 'Wezen opgeslagen', error: 'Opslaan mislukt' },
+    )
   }
 
   function handleDelete() {
-    toast.promise(deleteBestiary.mutateAsync(), {
-      loading: 'Verwijderen...',
-      success: 'Wezen verwijderd',
-      error: 'Verwijderen mislukt',
-    })
+    toast.promise(
+      deleteBestiary.mutateAsync({ worldId }).then(() => {
+        if (worldId) navigate(`/worlds/${worldId}/bestiary`)
+        else navigate('/worlds')
+      }),
+      { loading: 'Verwijderen...', success: 'Wezen verwijderd', error: 'Verwijderen mislukt' },
+    )
     setDeleteOpen(false)
   }
 

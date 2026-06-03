@@ -1,13 +1,10 @@
 import { useState, useRef, useCallback } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
-import { useQuery } from '@tanstack/react-query'
 import { toast } from 'sonner'
-import { supabase } from '@/lib/supabase'
-import { queryKeys } from '@/lib/queryKeys'
 import { useAI } from '@/hooks/useAI'
+import { useWorld } from '@/hooks/queries/useWorld'
 import { Spinner } from '@/components/ui/Spinner'
 import { CompassRose } from '@/components/world/CompassRose'
-import type { World } from '@/types/world.types'
 
 interface Shortcut {
   id: string
@@ -108,20 +105,7 @@ export default function WorldBuilderPage() {
   const textareaRef = useRef<HTMLTextAreaElement>(null)
   const forgeCardRef = useRef<HTMLDivElement>(null)
 
-  const { data: world, isLoading } = useQuery<World>({
-    queryKey: queryKeys.worlds.detail(id!),
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from('worlds')
-        .select('*')
-        .eq('id', id!)
-        .single()
-      if (error) throw error
-      return data as World
-    },
-    enabled: !!id,
-    staleTime: 1000 * 60,
-  })
+  const { data: world, isLoading } = useWorld(id)
 
   const handleShortcut = useCallback((shortcut: Shortcut) => {
     if (!world) return

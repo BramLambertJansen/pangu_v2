@@ -1,83 +1,23 @@
-import { useState, useEffect } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
-import { useMutation, useQueryClient } from '@tanstack/react-query'
-import { toast } from 'sonner'
-import { supabase } from '@/lib/supabase'
-import { queryKeys } from '@/lib/queryKeys'
 import { Spinner } from '@/components/ui/Spinner'
 import { EntityCardSkeleton } from '@/components/ui/EntityCardSkeleton'
 import { EmptyState } from '@/components/ui/EmptyState'
 import { Breadcrumbs } from '@/components/ui/Breadcrumbs'
 import { NpcCard, ForgeNpcCard } from '@/components/npc/NpcCard'
 import { WorldDetailDivider } from '@/components/world/WorldDetailDivider'
-import type { Npc } from '@/types/npc.types'
-import { useAuthStore } from '@/stores/auth.store'
 import { useCampaign } from '@/hooks/queries/useCampaign'
-import { useCampaignNpcs } from '@/hooks/queries/useCampaignNpcs'
+import { useCampaignNpcs, useCreateCampaignNpc } from '@/hooks/queries/useCampaignNpcs'
+import { useDraftGC } from '@/hooks/useDraftGC'
 
 export default function NpcsPage() {
   const { id: campaignId } = useParams<{ id: string }>()
   const navigate = useNavigate()
-  const queryClient = useQueryClient()
-  const user = useAuthStore(s => s.user)
-  const [creatingNpc, setCreatingNpc] = useState(false)
 
   const { data: campaign, isLoading: campaignLoading } = useCampaign(campaignId)
   const { data: npcs, isLoading: npcsLoading } = useCampaignNpcs(campaignId)
+  const createNpc = useCreateCampaignNpc(campaignId!)
 
-  // Garbage-collect uncommitted drafts older than 30 minutes
-  useEffect(() => {
-    if (!user?.id) return
-    const cutoff = new Date(Date.now() - 30 * 60 * 1000).toISOString()
-    void (async () => {
-      try {
-      const { data } = await supabase
-        .from('npcs')
-        .select('id')
-        .eq('campaign_id', campaignId!)
-        .eq('committed', false)
-        .lt('created_at', cutoff)
-      if (data?.length) {
-        await supabase.from('npcs').delete().in('id', data.map((r) => r.id))
-      }
-      } catch (err) {
-        console.warn("[GC] draft cleanup failed:", err)
-      }
-    })()
-  }, [user?.id])
-
-  const createNpc = useMutation({
-    mutationFn: async () => {
-      if (!user) throw new Error('Niet ingelogd')
-      const { data, error } = await supabase
-        .from('npcs')
-        .insert({
-          campaign_id: campaignId!,
-          user_id: user.id,
-          name: 'Nieuwe NPC',
-          status: 'draft',
-        })
-        .select()
-        .single()
-      if (error) throw error
-      return data as Npc
-    },
-    onSuccess: (newNpc) => {
-      queryClient.invalidateQueries({ queryKey: queryKeys.campaigns.npcs(campaignId!) })
-      navigate(`/npcs/${newNpc.id}/edit`, {
-        state: { isNew: true, campaignId },
-      })
-    },
-    onError: () => {
-      toast.error('NPC aanmaken mislukt')
-      setCreatingNpc(false)
-    },
-  })
-
-  function handleCreateNpc() {
-    setCreatingNpc(true)
-    createNpc.mutate()
-  }
+  useDraftGC('npcs', 'campaign_id', campaignId)
 
   if (campaignLoading) {
     return (
@@ -138,7 +78,7 @@ export default function NpcsPage() {
               {npcs?.map((npc) => (
                 <NpcCard key={npc.id} npc={npc} />
               ))}
-              <ForgeNpcCard onClick={handleCreateNpc} loading={creatingNpc} />
+              <ForgeNpcCard onClick={() => createNpc.mutate()} loading={createNpc.isPending} />
             </div>
           </>
         )}

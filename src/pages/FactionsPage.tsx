@@ -1,55 +1,23 @@
-import { useEffect } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
-import { toast } from 'sonner'
-import type { SupabaseClient } from '@supabase/supabase-js'
-import { supabase } from '@/lib/supabase'
-
-const db = supabase as unknown as SupabaseClient
 import { Spinner } from '@/components/ui/Spinner'
 import { EntityCardSkeleton } from '@/components/ui/EntityCardSkeleton'
 import { EmptyState } from '@/components/ui/EmptyState'
 import { Breadcrumbs } from '@/components/ui/Breadcrumbs'
 import { FactionCard, ForgeFactionCard } from '@/components/faction/FactionCard'
 import { WorldDetailDivider } from '@/components/world/WorldDetailDivider'
-import { useAuthStore } from '@/stores/auth.store'
 import { useCampaign } from '@/hooks/queries/useCampaign'
 import { useCampaignFactions, useCreateCampaignFaction } from '@/hooks/queries/useCampaignFactions'
+import { useDraftGC } from '@/hooks/useDraftGC'
 
 export default function FactionsPage() {
   const { id: campaignId } = useParams<{ id: string }>()
   const navigate = useNavigate()
-  const user = useAuthStore(s => s.user)
 
   const { data: campaign, isLoading: campaignLoading } = useCampaign(campaignId)
   const { data: factions, isLoading: factionsLoading } = useCampaignFactions(campaignId)
   const createFaction = useCreateCampaignFaction(campaignId!)
 
-  // Garbage-collect uncommitted drafts older than 30 minutes
-  useEffect(() => {
-    if (!user?.id || !campaignId) return
-    const cutoff = new Date(Date.now() - 30 * 60 * 1000).toISOString()
-    void (async () => {
-      try {
-        const { data } = await db
-          .from('factions')
-          .select('id')
-          .eq('campaign_id', campaignId)
-          .eq('committed', false)
-          .lt('created_at', cutoff)
-        if (data?.length) {
-          await db.from('factions').delete().in('id', data.map((r: { id: string }) => r.id))
-        }
-      } catch (err) {
-        console.warn('[GC] faction draft cleanup failed:', err)
-      }
-    })()
-  }, [user?.id, campaignId])
-
-  function handleCreate() {
-    createFaction.mutate(undefined, {
-      onError: () => toast.error('Factie aanmaken mislukt'),
-    })
-  }
+  useDraftGC('factions', 'campaign_id', campaignId)
 
   if (campaignLoading) {
     return (
@@ -111,7 +79,7 @@ export default function FactionsPage() {
               {factions?.map((faction) => (
                 <FactionCard key={faction.id} faction={faction} />
               ))}
-              <ForgeFactionCard onClick={handleCreate} loading={createFaction.isPending} />
+              <ForgeFactionCard onClick={() => createFaction.mutate()} loading={createFaction.isPending} />
             </div>
           </>
         )}

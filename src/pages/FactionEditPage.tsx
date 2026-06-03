@@ -1,17 +1,11 @@
 import { useId } from 'react'
 import { useParams, useNavigate, useLocation } from 'react-router-dom'
-import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { toast } from 'sonner'
-import type { SupabaseClient } from '@supabase/supabase-js'
-import { supabase } from '@/lib/supabase'
-
-const db = supabase as unknown as SupabaseClient
-import { queryKeys } from '@/lib/queryKeys'
 import { Modal } from '@/components/ui/Modal'
 import { ConfirmDialog } from '@/components/ui/ConfirmDialog'
 import { Spinner } from '@/components/ui/Spinner'
 import { useEntityEdit } from '@/hooks/useEntityEdit'
-import { useFaction } from '@/hooks/queries/useFaction'
+import { useFaction, useSaveFaction, useDeleteFaction } from '@/hooks/queries/useFaction'
 import type { FactionStatus, FactionType, FactionReputation } from '@/types/faction.types'
 
 const statusOptions: { value: FactionStatus; label: string }[] = [
@@ -44,7 +38,6 @@ export default function FactionEditPage() {
   const { id } = useParams<{ id: string }>()
   const navigate = useNavigate()
   const location = useLocation()
-  const queryClient = useQueryClient()
 
   const nameId = useId()
   const subtitleId = useId()
@@ -61,6 +54,8 @@ export default function FactionEditPage() {
   const campaignIdFromState = locationState?.campaignId
 
   const { data: factionData, isLoading } = useFaction(id)
+  const saveFaction = useSaveFaction(id!)
+  const deleteFaction = useDeleteFaction(id!)
 
   const {
     form, set, dirty, setDirty,
@@ -71,70 +66,9 @@ export default function FactionEditPage() {
 
   const campaignId = factionData?.campaign_id ?? campaignIdFromState
 
-  const saveFaction = useMutation({
-    mutationFn: async () => {
-      const { error } = await db
-        .from('factions')
-        .update({
-          name: form.name,
-          subtitle: form.subtitle ?? null,
-          type: form.type ?? null,
-          reputation: form.reputation ?? 'neutral',
-          status: form.status,
-          motto: form.motto ?? null,
-          goals: form.goals ?? null,
-          description: form.description ?? null,
-          notes: form.notes ?? null,
-          committed: true,
-          updated_at: new Date().toISOString(),
-        })
-        .eq('id', id!)
-      if (error) throw error
-    },
-    onSuccess: () => {
-      if (campaignId) {
-        queryClient.invalidateQueries({ queryKey: queryKeys.campaigns.factions(campaignId) })
-      }
-      queryClient.invalidateQueries({ queryKey: queryKeys.campaigns.factionDetail(id!) })
-      queryClient.invalidateQueries({ queryKey: queryKeys.campaigns.factionDetailFull(id!) })
-      setCommitted(true)
-      setDirty(false)
-    },
-    onError: () => {
-      toast.error('Opslaan mislukt')
-    },
-  })
-
-  const deleteFaction = useMutation({
-    mutationFn: async () => {
-      const { error } = await db.from('factions').delete().eq('id', id!)
-      if (error) throw error
-    },
-    onSuccess: () => {
-      setDeleteOpen(false)
-      queryClient.removeQueries({ queryKey: queryKeys.campaigns.factionDetail(id!) })
-      queryClient.removeQueries({ queryKey: queryKeys.campaigns.factionDetailFull(id!) })
-      if (campaignId) {
-        queryClient.invalidateQueries({ queryKey: queryKeys.campaigns.factions(campaignId) })
-        navigate(`/campaigns/${campaignId}/factions`)
-      } else {
-        navigate('/dashboard')
-      }
-    },
-    onError: () => {
-      toast.error('Verwijderen mislukt')
-    },
-  })
-
   async function handleDiscardConfirm() {
     if (guard.isDraftDiscard) {
-      const { error } = await db.from('factions').delete().eq('id', id!)
-      if (error) { toast.error('Verwijderen mislukt'); return }
-      queryClient.removeQueries({ queryKey: queryKeys.campaigns.factionDetail(id!) })
-      queryClient.removeQueries({ queryKey: queryKeys.campaigns.factionDetailFull(id!) })
-      if (campaignId) {
-        queryClient.invalidateQueries({ queryKey: queryKeys.campaigns.factions(campaignId) })
-      }
+      try { await deleteFaction.mutateAsync({ campaignId }) } catch { return }
     }
     const handled = guard.confirmLeave()
     if (!handled) {
@@ -163,19 +97,24 @@ export default function FactionEditPage() {
   }
 
   function handleSave() {
-    toast.promise(saveFaction.mutateAsync(), {
-      loading: 'Opslaan...',
-      success: 'Factie opgeslagen',
-      error: 'Opslaan mislukt',
-    })
+    toast.promise(
+      saveFaction.mutateAsync(form).then(() => {
+        setCommitted(true)
+        setDirty(false)
+      }),
+      { loading: 'Opslaan...', success: 'Factie opgeslagen', error: 'Opslaan mislukt' },
+    )
   }
 
   function handleDelete() {
-    toast.promise(deleteFaction.mutateAsync(), {
-      loading: 'Verwijderen...',
-      success: 'Factie verwijderd',
-      error: 'Verwijderen mislukt',
-    })
+    toast.promise(
+      deleteFaction.mutateAsync({ campaignId }).then(() => {
+        if (campaignId) navigate(`/campaigns/${campaignId}/factions`)
+        else navigate('/dashboard')
+      }),
+      { loading: 'Verwijderen...', success: 'Factie verwijderd', error: 'Verwijderen mislukt' },
+    )
+    setDeleteOpen(false)
   }
 
   if (isLoading) {

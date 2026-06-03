@@ -1,83 +1,23 @@
-import { useState, useEffect } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
-import { useMutation, useQueryClient } from '@tanstack/react-query'
-import { toast } from 'sonner'
-import { supabase } from '@/lib/supabase'
-import { queryKeys } from '@/lib/queryKeys'
 import { Spinner } from '@/components/ui/Spinner'
 import { EntityCardSkeleton } from '@/components/ui/EntityCardSkeleton'
 import { EmptyState } from '@/components/ui/EmptyState'
 import { Breadcrumbs } from '@/components/ui/Breadcrumbs'
 import { EncounterCard, ForgeEncounterCard } from '@/components/encounter/EncounterCard'
 import { WorldDetailDivider } from '@/components/world/WorldDetailDivider'
-import type { Encounter } from '@/types/encounter.types'
-import { useAuthStore } from '@/stores/auth.store'
 import { useCampaign } from '@/hooks/queries/useCampaign'
-import { useCampaignEncounters } from '@/hooks/queries/useCampaignEncounters'
+import { useCampaignEncounters, useCreateCampaignEncounter } from '@/hooks/queries/useCampaignEncounters'
+import { useDraftGC } from '@/hooks/useDraftGC'
 
 export default function EncountersPage() {
   const { id: campaignId } = useParams<{ id: string }>()
   const navigate = useNavigate()
-  const queryClient = useQueryClient()
-  const user = useAuthStore(s => s.user)
-  const [creatingEncounter, setCreatingEncounter] = useState(false)
 
   const { data: campaign, isLoading: campaignLoading } = useCampaign(campaignId)
   const { data: encounters, isLoading: encountersLoading } = useCampaignEncounters(campaignId)
+  const createEncounter = useCreateCampaignEncounter(campaignId!)
 
-  // Garbage-collect uncommitted drafts older than 30 minutes
-  useEffect(() => {
-    if (!user?.id) return
-    const cutoff = new Date(Date.now() - 30 * 60 * 1000).toISOString()
-    void (async () => {
-      try {
-      const { data } = await supabase
-        .from('encounters')
-        .select('id')
-        .eq('campaign_id', campaignId!)
-        .eq('committed', false)
-        .lt('created_at', cutoff)
-      if (data?.length) {
-        await supabase.from('encounters').delete().in('id', data.map((r) => r.id))
-      }
-      } catch (err) {
-        console.warn("[GC] draft cleanup failed:", err)
-      }
-    })()
-  }, [user?.id])
-
-  const createEncounter = useMutation({
-    mutationFn: async () => {
-      if (!user) throw new Error('Niet ingelogd')
-      const { data, error } = await supabase
-        .from('encounters')
-        .insert({
-          campaign_id: campaignId!,
-          user_id: user.id,
-          name: 'Nieuw gevecht',
-          status: 'draft',
-        })
-        .select()
-        .single()
-      if (error) throw error
-      return data as Encounter
-    },
-    onSuccess: (newEncounter) => {
-      queryClient.invalidateQueries({ queryKey: queryKeys.campaigns.encounters(campaignId!) })
-      navigate(`/encounters/${newEncounter.id}/edit`, {
-        state: { isNew: true, campaignId },
-      })
-    },
-    onError: () => {
-      toast.error('Gevecht aanmaken mislukt')
-      setCreatingEncounter(false)
-    },
-  })
-
-  function handleCreateEncounter() {
-    setCreatingEncounter(true)
-    createEncounter.mutate()
-  }
+  useDraftGC('encounters', 'campaign_id', campaignId)
 
   if (campaignLoading) {
     return (
@@ -138,7 +78,7 @@ export default function EncountersPage() {
               {encounters?.map((encounter) => (
                 <EncounterCard key={encounter.id} encounter={encounter} />
               ))}
-              <ForgeEncounterCard onClick={handleCreateEncounter} loading={creatingEncounter} />
+              <ForgeEncounterCard onClick={() => createEncounter.mutate()} loading={createEncounter.isPending} />
             </div>
           </>
         )}

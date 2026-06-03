@@ -1,114 +1,29 @@
-import { useState, useEffect } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
-import { toast } from 'sonner'
-import { supabase } from '@/lib/supabase'
-import { queryKeys } from '@/lib/queryKeys'
 import { Spinner } from '@/components/ui/Spinner'
 import { EntityCardSkeleton } from '@/components/ui/EntityCardSkeleton'
 import { EmptyState } from '@/components/ui/EmptyState'
 import { Breadcrumbs } from '@/components/ui/Breadcrumbs'
 import { SessionCard, ForgeSessionCard } from '@/components/session/SessionCard'
 import { WorldDetailDivider } from '@/components/world/WorldDetailDivider'
-import type { Campaign } from '@/types/campaign.types'
-import type { Session } from '@/types/session.types'
-import { useAuthStore } from '@/stores/auth.store'
+import { useCampaign } from '@/hooks/queries/useCampaign'
+import { useCampaignSessions, useCreateCampaignSession } from '@/hooks/queries/useCampaignSessions'
+import { useDraftGC } from '@/hooks/useDraftGC'
 
 export default function SessionsPage() {
   const { id: campaignId } = useParams<{ id: string }>()
   const navigate = useNavigate()
-  const queryClient = useQueryClient()
-  const user = useAuthStore(s => s.user)
-  const [creatingSession, setCreatingSession] = useState(false)
 
-  const { data: campaign, isLoading: campaignLoading } = useQuery<Campaign>({
-    queryKey: queryKeys.campaigns.detail(campaignId!),
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from('campaigns')
-        .select('*')
-        .eq('id', campaignId!)
-        .single()
-      if (error) throw error
-      return data as Campaign
-    },
-    enabled: !!campaignId,
-    staleTime: 1000 * 60,
-  })
+  const { data: campaign, isLoading: campaignLoading } = useCampaign(campaignId)
+  const { data: sessions, isLoading: sessionsLoading } = useCampaignSessions(campaignId)
+  const createSession = useCreateCampaignSession(campaignId!)
 
-  const { data: sessions, isLoading: sessionsLoading } = useQuery<Session[]>({
-    queryKey: queryKeys.campaigns.sessions(campaignId!),
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from('sessions')
-        .select('*')
-        .eq('campaign_id', campaignId!)
-        .eq('committed', true)
-        .order('session_number', { ascending: true, nullsFirst: false })
-        .order('created_at', { ascending: false })
-      if (error) throw error
-      return data as Session[]
-    },
-    enabled: !!campaignId,
-    staleTime: 1000 * 30,
-  })
-
-  // Garbage-collect uncommitted drafts older than 30 minutes
-  useEffect(() => {
-    if (!user?.id) return
-    const cutoff = new Date(Date.now() - 30 * 60 * 1000).toISOString()
-    void (async () => {
-      try {
-      const { data } = await supabase
-        .from('sessions')
-        .select('id')
-        .eq('campaign_id', campaignId!)
-        .eq('committed', false)
-        .lt('created_at', cutoff)
-      if (data?.length) {
-        await supabase.from('sessions').delete().in('id', data.map((r) => r.id))
-      }
-      } catch (err) {
-        console.warn("[GC] draft cleanup failed:", err)
-      }
-    })()
-  }, [user?.id])
-
-  const createSession = useMutation({
-    mutationFn: async () => {
-      if (!user) throw new Error('Niet ingelogd')
-      const nextNumber = sessions && sessions.length > 0
-        ? Math.max(...sessions.map((s) => s.session_number ?? 0)) + 1
-        : 1
-      const { data, error } = await supabase
-        .from('sessions')
-        .insert({
-          campaign_id: campaignId!,
-          user_id: user.id,
-          name: 'Nieuwe sessie',
-          session_number: nextNumber,
-          status: 'planned',
-        })
-        .select()
-        .single()
-      if (error) throw error
-      return data as Session
-    },
-    onSuccess: (newSession) => {
-      queryClient.invalidateQueries({ queryKey: queryKeys.campaigns.sessions(campaignId!) })
-      navigate(`/sessions/${newSession.id}/edit`, {
-        state: { isNew: true, campaignId },
-      })
-    },
-    onError: () => {
-      toast.error('Sessie aanmaken mislukt')
-      setCreatingSession(false)
-    },
-  })
+  useDraftGC('sessions', 'campaign_id', campaignId)
 
   function handleCreateSession() {
-    setCreatingSession(true)
-    createSession.mutate()
+    const nextNumber = sessions && sessions.length > 0
+      ? Math.max(...sessions.map((s) => s.session_number ?? 0)) + 1
+      : 1
+    createSession.mutate({ sessionNumber: nextNumber })
   }
 
   if (campaignLoading) {
@@ -170,7 +85,7 @@ export default function SessionsPage() {
               {sessions?.map((session) => (
                 <SessionCard key={session.id} session={session} />
               ))}
-              <ForgeSessionCard onClick={handleCreateSession} loading={creatingSession} />
+              <ForgeSessionCard onClick={handleCreateSession} loading={createSession.isPending} />
             </div>
           </>
         )}

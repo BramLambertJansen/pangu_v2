@@ -1,10 +1,4 @@
 import { useParams, useNavigate, Link } from 'react-router-dom'
-import { useQuery } from '@tanstack/react-query'
-import type { SupabaseClient } from '@supabase/supabase-js'
-import { supabase } from '@/lib/supabase'
-
-const db = supabase as unknown as SupabaseClient
-import { queryKeys } from '@/lib/queryKeys'
 import { Spinner } from '@/components/ui/Spinner'
 import { Breadcrumb } from '@/components/ui/Breadcrumb'
 import { WorldDetailDivider } from '@/components/world/WorldDetailDivider'
@@ -15,43 +9,14 @@ import {
   factionTypeLabel,
   factionReputationLabel, factionReputationColor,
 } from '@/lib/statusMaps'
-import type { FactionWithCampaign } from '@/hooks/queries/useFaction'
-import type { Npc } from '@/types/npc.types'
+import { useFactionFull, useFactionMembers } from '@/hooks/queries/useFaction'
 
 export default function FactionDetailPage() {
   const { id } = useParams<{ id: string }>()
   const navigate = useNavigate()
 
-  const { data: faction, isLoading } = useQuery<FactionWithCampaign>({
-    queryKey: queryKeys.campaigns.factionDetailFull(id!),
-    queryFn: async () => {
-      const { data, error } = await db
-        .from('factions')
-        .select('*, campaigns(id, name, world_id, worlds(id, name))')
-        .eq('id', id!)
-        .single()
-      if (error) throw error
-      return data as FactionWithCampaign
-    },
-    enabled: !!id,
-    staleTime: 1000 * 60,
-  })
-
-  const { data: members } = useQuery<Pick<Npc, 'id' | 'name' | 'npc_role' | 'status'>[]>({
-    queryKey: queryKeys.campaigns.factionMembers(id!),
-    queryFn: async () => {
-      const { data, error } = await db
-        .from('npcs')
-        .select('id, name, npc_role, status')
-        .eq('faction_id', id!)
-        .eq('committed', true)
-        .order('name', { ascending: true })
-      if (error) throw error
-      return data as Pick<Npc, 'id' | 'name' | 'npc_role' | 'status'>[]
-    },
-    enabled: !!id,
-    staleTime: 1000 * 30,
-  })
+  const { data: faction, isLoading } = useFactionFull(id)
+  const { data: members } = useFactionMembers(id)
 
   if (isLoading) {
     return (

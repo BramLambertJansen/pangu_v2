@@ -1,14 +1,12 @@
 import { useId } from 'react'
 import { useParams, useNavigate, useLocation } from 'react-router-dom'
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { toast } from 'sonner'
-import { supabase } from '@/lib/supabase'
-import { queryKeys } from '@/lib/queryKeys'
 import { Modal } from '@/components/ui/Modal'
 import { ConfirmDialog } from '@/components/ui/ConfirmDialog'
 import { Spinner } from '@/components/ui/Spinner'
 import { useEntityEdit } from '@/hooks/useEntityEdit'
-import type { Quest, QuestStatus } from '@/types/quest.types'
+import { useQuest, useSaveQuest, useDeleteQuest } from '@/hooks/queries/useQuest'
+import type { QuestStatus } from '@/types/quest.types'
 
 const statusOptions: { value: QuestStatus; label: string }[] = [
   { value: 'draft',     label: 'Concept'      },
@@ -22,7 +20,6 @@ export default function QuestEditPage() {
   const { id } = useParams<{ id: string }>()
   const navigate = useNavigate()
   const location = useLocation()
-  const queryClient = useQueryClient()
 
   const descriptionId = useId()
   const notesId = useId()
@@ -35,20 +32,9 @@ export default function QuestEditPage() {
   const isNew = locationState?.isNew ?? false
   const campaignIdFromState = locationState?.campaignId
 
-  const { data: questData, isLoading } = useQuery<Quest>({
-    queryKey: queryKeys.campaigns.questDetail(id!),
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from('quests')
-        .select('*')
-        .eq('id', id!)
-        .single()
-      if (error) throw error
-      return data as Quest
-    },
-    enabled: !!id,
-    staleTime: 1000 * 60,
-  })
+  const { data: questData, isLoading } = useQuest(id)
+  const saveQuest = useSaveQuest(id!)
+  const deleteQuest = useDeleteQuest(id!)
 
   const {
     form, set, dirty, setDirty,
@@ -59,64 +45,12 @@ export default function QuestEditPage() {
 
   const campaignId = questData?.campaign_id ?? campaignIdFromState
 
-  const saveQuest = useMutation({
-    mutationFn: async () => {
-      const { error } = await supabase
-        .from('quests')
-        .update({
-          name: form.name,
-          subtitle: form.subtitle,
-          description: form.description,
-          notes: form.notes,
-          status: form.status,
-          quest_type: form.quest_type ?? null,
-          difficulty: form.difficulty ?? null,
-          reward: form.reward ?? null,
-          committed: true,
-          updated_at: new Date().toISOString(),
-        })
-        .eq('id', id!)
-      if (error) throw error
-    },
-    onSuccess: () => {
-      if (campaignId) {
-        queryClient.invalidateQueries({ queryKey: queryKeys.campaigns.quests(campaignId) })
-      }
-      queryClient.invalidateQueries({ queryKey: queryKeys.campaigns.questDetail(id!) })
-      setCommitted(true)
-      setDirty(false)
-    },
-    onError: () => {
-      toast.error('Opslaan mislukt')
-    },
-  })
-
-  const deleteQuest = useMutation({
-    mutationFn: async () => {
-      const { error } = await supabase.from('quests').delete().eq('id', id!)
-      if (error) throw error
-    },
-    onSuccess: () => {
-      queryClient.removeQueries({ queryKey: queryKeys.campaigns.questDetail(id!) })
-      if (campaignId) {
-        queryClient.invalidateQueries({ queryKey: queryKeys.campaigns.quests(campaignId) })
-        navigate(`/campaigns/${campaignId}/quests`)
-      } else {
-        navigate('/dashboard')
-      }
-    },
-    onError: () => {
-      toast.error('Verwijderen mislukt')
-    },
-  })
-
   async function handleDiscardConfirm() {
     if (guard.isDraftDiscard) {
-      const { error } = await supabase.from('quests').delete().eq('id', id!)
-      if (error) { toast.error('Verwijderen mislukt'); return }
-      queryClient.removeQueries({ queryKey: queryKeys.campaigns.questDetail(id!) })
-      if (campaignId) {
-        queryClient.invalidateQueries({ queryKey: queryKeys.campaigns.quests(campaignId) })
+      try {
+        await deleteQuest.mutateAsync({ campaignId })
+      } catch {
+        return
       }
     }
     const handled = guard.confirmLeave()
@@ -146,19 +80,23 @@ export default function QuestEditPage() {
   }
 
   function handleSave() {
-    toast.promise(saveQuest.mutateAsync(), {
-      loading: 'Opslaan...',
-      success: 'Quest opgeslagen',
-      error: 'Opslaan mislukt',
-    })
+    toast.promise(
+      saveQuest.mutateAsync({ ...form }).then(() => {
+        setCommitted(true)
+        setDirty(false)
+      }),
+      { loading: 'Opslaan...', success: 'Quest opgeslagen', error: 'Opslaan mislukt' },
+    )
   }
 
   function handleDelete() {
-    toast.promise(deleteQuest.mutateAsync(), {
-      loading: 'Verwijderen...',
-      success: 'Quest verwijderd',
-      error: 'Verwijderen mislukt',
-    })
+    toast.promise(
+      deleteQuest.mutateAsync({ campaignId }).then(() => {
+        if (campaignId) navigate(`/campaigns/${campaignId}/quests`)
+        else navigate('/dashboard')
+      }),
+      { loading: 'Verwijderen...', success: 'Quest verwijderd', error: 'Verwijderen mislukt' },
+    )
     setDeleteOpen(false)
   }
 

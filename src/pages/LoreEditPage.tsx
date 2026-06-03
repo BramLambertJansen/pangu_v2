@@ -1,15 +1,13 @@
 import { useId, useState } from 'react'
 import { useParams, useNavigate, useLocation } from 'react-router-dom'
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { toast } from 'sonner'
-import { supabase } from '@/lib/supabase'
-import { queryKeys } from '@/lib/queryKeys'
 import { Modal } from '@/components/ui/Modal'
 import { ConfirmDialog } from '@/components/ui/ConfirmDialog'
 import { Spinner } from '@/components/ui/Spinner'
 import { useEntityEdit } from '@/hooks/useEntityEdit'
 import { useAI } from '@/hooks/useAI'
-import type { Lore, LoreStatus } from '@/types/lore.types'
+import { useLore, useSaveLore, useDeleteLore } from '@/hooks/queries/useLore'
+import type { LoreStatus } from '@/types/lore.types'
 
 const statusOptions: { value: LoreStatus; label: string }[] = [
   { value: 'draft',    label: 'Concept'      },
@@ -21,7 +19,6 @@ export default function LoreEditPage() {
   const { id } = useParams<{ id: string }>()
   const navigate = useNavigate()
   const location = useLocation()
-  const queryClient = useQueryClient()
 
   const descriptionId = useId()
   const notesId = useId()
@@ -35,20 +32,9 @@ export default function LoreEditPage() {
   const isNew = locationState?.isNew ?? false
   const campaignIdFromState = locationState?.campaignId
 
-  const { data: loreData, isLoading } = useQuery<Lore>({
-    queryKey: queryKeys.campaigns.loreDetail(id!),
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from('lore')
-        .select('*')
-        .eq('id', id!)
-        .single()
-      if (error) throw error
-      return data as Lore
-    },
-    enabled: !!id,
-    staleTime: 1000 * 60,
-  })
+  const { data: loreData, isLoading } = useLore(id)
+  const saveLore = useSaveLore(id!)
+  const deleteLore = useDeleteLore(id!)
 
   const {
     form, set, dirty, setDirty,
@@ -59,62 +45,12 @@ export default function LoreEditPage() {
 
   const campaignId = loreData?.campaign_id ?? campaignIdFromState
 
-  const saveLore = useMutation({
-    mutationFn: async () => {
-      const { error } = await supabase
-        .from('lore')
-        .update({
-          name: form.name,
-          subtitle: form.subtitle,
-          description: form.description,
-          notes: form.notes,
-          status: form.status,
-          lore_category: form.lore_category ?? null,
-          committed: true,
-          updated_at: new Date().toISOString(),
-        })
-        .eq('id', id!)
-      if (error) throw error
-    },
-    onSuccess: () => {
-      if (campaignId) {
-        queryClient.invalidateQueries({ queryKey: queryKeys.campaigns.lore(campaignId) })
-      }
-      queryClient.invalidateQueries({ queryKey: queryKeys.campaigns.loreDetail(id!) })
-      setCommitted(true)
-      setDirty(false)
-    },
-    onError: () => {
-      toast.error('Opslaan mislukt')
-    },
-  })
-
-  const deleteLore = useMutation({
-    mutationFn: async () => {
-      const { error } = await supabase.from('lore').delete().eq('id', id!)
-      if (error) throw error
-    },
-    onSuccess: () => {
-      queryClient.removeQueries({ queryKey: queryKeys.campaigns.loreDetail(id!) })
-      if (campaignId) {
-        queryClient.invalidateQueries({ queryKey: queryKeys.campaigns.lore(campaignId) })
-        navigate(`/campaigns/${campaignId}/lore`)
-      } else {
-        navigate('/dashboard')
-      }
-    },
-    onError: () => {
-      toast.error('Verwijderen mislukt')
-    },
-  })
-
   async function handleDiscardConfirm() {
     if (guard.isDraftDiscard) {
-      const { error } = await supabase.from('lore').delete().eq('id', id!)
-      if (error) { toast.error('Verwijderen mislukt'); return }
-      queryClient.removeQueries({ queryKey: queryKeys.campaigns.loreDetail(id!) })
-      if (campaignId) {
-        queryClient.invalidateQueries({ queryKey: queryKeys.campaigns.lore(campaignId) })
+      try {
+        await deleteLore.mutateAsync({ campaignId })
+      } catch {
+        return
       }
     }
     const handled = guard.confirmLeave()
@@ -182,19 +118,23 @@ export default function LoreEditPage() {
   }
 
   function handleSave() {
-    toast.promise(saveLore.mutateAsync(), {
-      loading: 'Opslaan...',
-      success: 'Lore opgeslagen',
-      error: 'Opslaan mislukt',
-    })
+    toast.promise(
+      saveLore.mutateAsync({ ...form }).then(() => {
+        setCommitted(true)
+        setDirty(false)
+      }),
+      { loading: 'Opslaan...', success: 'Lore opgeslagen', error: 'Opslaan mislukt' },
+    )
   }
 
   function handleDelete() {
-    toast.promise(deleteLore.mutateAsync(), {
-      loading: 'Verwijderen...',
-      success: 'Lore verwijderd',
-      error: 'Verwijderen mislukt',
-    })
+    toast.promise(
+      deleteLore.mutateAsync({ campaignId }).then(() => {
+        if (campaignId) navigate(`/campaigns/${campaignId}/lore`)
+        else navigate('/dashboard')
+      }),
+      { loading: 'Verwijderen...', success: 'Lore verwijderd', error: 'Verwijderen mislukt' },
+    )
     setDeleteOpen(false)
   }
 
