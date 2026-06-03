@@ -130,7 +130,7 @@ export function useSaveEncounter(id: string) {
     },
     onSuccess: (form) => {
       if (form.campaign_id) {
-        queryClient.invalidateQueries({ queryKey: queryKeys.campaigns.encounters(form.campaign_id) })
+        queryClient.invalidateQueries({ queryKey: queryKeys.encounters.byCampaign(form.campaign_id) })
       }
       queryClient.invalidateQueries({ queryKey: queryKeys.encounters.detail(id) })
       queryClient.invalidateQueries({ queryKey: queryKeys.encounters.monsters(id) })
@@ -150,7 +150,7 @@ export function useDeleteEncounter(id: string) {
     onSuccess: (_, { campaignId }) => {
       queryClient.removeQueries({ queryKey: queryKeys.encounters.detail(id) })
       queryClient.removeQueries({ queryKey: queryKeys.encounters.monsters(id) })
-      if (campaignId) queryClient.invalidateQueries({ queryKey: queryKeys.campaigns.encounters(campaignId) })
+      if (campaignId) queryClient.invalidateQueries({ queryKey: queryKeys.encounters.byCampaign(campaignId) })
     },
     onError: () => toast.error('Verwijderen mislukt'),
   })

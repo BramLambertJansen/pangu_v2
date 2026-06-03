@@ -67,7 +67,7 @@ export function useSaveQuest(id: string) {
     },
     onSuccess: (form) => {
       if (form.campaign_id) {
-        queryClient.invalidateQueries({ queryKey: queryKeys.campaigns.quests(form.campaign_id) })
+        queryClient.invalidateQueries({ queryKey: queryKeys.quests.byCampaign(form.campaign_id) })
       }
       queryClient.invalidateQueries({ queryKey: queryKeys.quests.detail(id) })
     },
@@ -84,7 +84,7 @@ export function useDeleteQuest(id: string) {
     },
     onSuccess: (_, { campaignId }) => {
       queryClient.removeQueries({ queryKey: queryKeys.quests.detail(id) })
-      if (campaignId) queryClient.invalidateQueries({ queryKey: queryKeys.campaigns.quests(campaignId) })
+      if (campaignId) queryClient.invalidateQueries({ queryKey: queryKeys.quests.byCampaign(campaignId) })
     },
     onError: () => toast.error('Verwijderen mislukt'),
   })

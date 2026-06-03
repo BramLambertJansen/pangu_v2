@@ -9,7 +9,7 @@ import type { Quest } from '@/types/quest.types'
 
 export function useCampaignQuests(campaignId: string | undefined) {
   return useQuery<Quest[]>({
-    queryKey: queryKeys.campaigns.quests(campaignId!),
+    queryKey: queryKeys.quests.byCampaign(campaignId!),
     queryFn: async () => {
       const { data, error } = await supabase
         .from('quests')
@@ -47,7 +47,7 @@ export function useCreateCampaignQuest(campaignId: string) {
       return data as Quest
     },
     onSuccess: (newQuest) => {
-      queryClient.invalidateQueries({ queryKey: queryKeys.campaigns.quests(campaignId) })
+      queryClient.invalidateQueries({ queryKey: queryKeys.quests.byCampaign(campaignId) })
       navigate(`/quests/${newQuest.id}/edit`, { state: { isNew: true, campaignId } })
     },
     onError: () => toast.error('Quest aanmaken mislukt'),

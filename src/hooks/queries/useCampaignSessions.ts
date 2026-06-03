@@ -9,7 +9,7 @@ import type { Session } from '@/types/session.types'
 
 export function useCampaignSessions(campaignId: string | undefined) {
   return useQuery<Session[]>({
-    queryKey: queryKeys.campaigns.sessions(campaignId!),
+    queryKey: queryKeys.sessions.byCampaign(campaignId!),
     queryFn: async () => {
       const { data, error } = await supabase
         .from('sessions')
@@ -49,7 +49,7 @@ export function useCreateCampaignSession(campaignId: string) {
       return data as Session
     },
     onSuccess: (newSession) => {
-      queryClient.invalidateQueries({ queryKey: queryKeys.campaigns.sessions(campaignId) })
+      queryClient.invalidateQueries({ queryKey: queryKeys.sessions.byCampaign(campaignId) })
       navigate(`/sessions/${newSession.id}/edit`, { state: { isNew: true, campaignId } })
     },
     onError: () => toast.error('Sessie aanmaken mislukt'),

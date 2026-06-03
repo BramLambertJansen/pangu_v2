@@ -9,7 +9,7 @@ import type { Lore } from '@/types/lore.types'
 
 export function useCampaignLore(campaignId: string | undefined) {
   return useQuery<Lore[]>({
-    queryKey: queryKeys.campaigns.lore(campaignId!),
+    queryKey: queryKeys.lore.byCampaign(campaignId!),
     queryFn: async () => {
       const { data, error } = await supabase
         .from('lore')
@@ -47,7 +47,7 @@ export function useCreateCampaignLore(campaignId: string) {
       return data as Lore
     },
     onSuccess: (newLore) => {
-      queryClient.invalidateQueries({ queryKey: queryKeys.campaigns.lore(campaignId) })
+      queryClient.invalidateQueries({ queryKey: queryKeys.lore.byCampaign(campaignId) })
       navigate(`/lore/${newLore.id}/edit`, { state: { isNew: true, campaignId } })
     },
     onError: () => toast.error('Lore aanmaken mislukt'),

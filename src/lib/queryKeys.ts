@@ -7,15 +7,8 @@ export const queryKeys = {
     // Separate key for the variant that joins worlds — avoids cache shape collision with detail()
     detailWithWorld: (id: string) => ['campaigns', id, 'with-world'] as const,
     byWorld: (worldId: string) => ['campaigns', 'world', worldId] as const,
-    locations: (id: string) => ['campaigns', id, 'locations'] as const,
-    npcs: (id: string) => ['campaigns', id, 'npcs'] as const,
-    lore: (id: string) => ['campaigns', id, 'lore'] as const,
-    sessions: (campaignId: string) => ['campaigns', campaignId, 'sessions'] as const,
-    quests: (id: string) => ['campaigns', id, 'quests'] as const,
-    encounters: (id: string) => ['campaigns', id, 'encounters'] as const,
     invite: (id: string) => ['campaigns', id, 'invite'] as const,
     members: (id: string) => ['campaigns', id, 'members'] as const,
-    factions: (id: string) => ['campaigns', id, 'factions'] as const,
   },
   invites: {
     byCode: (code: string) => ['invites', 'code', code] as const,
@@ -37,6 +30,7 @@ export const queryKeys = {
     bestiaries: (worldId: string) => ['worlds', worldId, 'bestiaries'] as const,
   },
   sessions: {
+    byCampaign: (campaignId: string) => ['sessions', 'campaign', campaignId] as const,
     planned: ['sessions', 'planned'] as const,
     detail: (id: string) => ['sessions', id] as const,
     detailFull: (id: string) => ['sessions', id, 'full'] as const,
@@ -44,28 +38,34 @@ export const queryKeys = {
     playerNotes: (sessionId: string) => ['sessions', sessionId, 'player-notes'] as const,
   },
   npcs: {
+    byCampaign: (campaignId: string) => ['npcs', 'campaign', campaignId] as const,
     detail: (id: string) => ['npcs', id] as const,
     detailFull: (id: string) => ['npcs', id, 'full'] as const,
   },
   locations: {
+    byCampaign: (campaignId: string) => ['locations', 'campaign', campaignId] as const,
     detail: (id: string) => ['locations', id] as const,
     detailFull: (id: string) => ['locations', id, 'full'] as const,
   },
   lore: {
+    byCampaign: (campaignId: string) => ['lore', 'campaign', campaignId] as const,
     detail: (id: string) => ['lore', id] as const,
     detailFull: (id: string) => ['lore', id, 'full'] as const,
   },
   quests: {
+    byCampaign: (campaignId: string) => ['quests', 'campaign', campaignId] as const,
     detail: (id: string) => ['quests', id] as const,
     detailFull: (id: string) => ['quests', id, 'full'] as const,
   },
   encounters: {
+    byCampaign: (campaignId: string) => ['encounters', 'campaign', campaignId] as const,
     detail: (id: string) => ['encounters', id] as const,
     detailFull: (id: string) => ['encounters', id, 'full'] as const,
     monsters: (id: string) => ['encounters', id, 'monsters'] as const,
     monstersFull: (id: string) => ['encounters', id, 'monsters-full'] as const,
   },
   factions: {
+    byCampaign: (campaignId: string) => ['factions', 'campaign', campaignId] as const,
     detail: (id: string) => ['factions', id] as const,
     detailFull: (id: string) => ['factions', id, 'full'] as const,
     members: (id: string) => ['factions', id, 'members'] as const,

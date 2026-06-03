@@ -67,7 +67,7 @@ export function useSaveNpc(id: string) {
     },
     onSuccess: (form) => {
       if (form.campaign_id) {
-        queryClient.invalidateQueries({ queryKey: queryKeys.campaigns.npcs(form.campaign_id) })
+        queryClient.invalidateQueries({ queryKey: queryKeys.npcs.byCampaign(form.campaign_id) })
       }
       queryClient.invalidateQueries({ queryKey: queryKeys.npcs.detail(id) })
       const oldFactionId = form.oldFactionId
@@ -91,7 +91,7 @@ export function useDeleteNpc(id: string) {
     onSuccess: (_, { campaignId, factionId }) => {
       queryClient.removeQueries({ queryKey: queryKeys.npcs.detail(id) })
       if (factionId) queryClient.invalidateQueries({ queryKey: queryKeys.factions.members(factionId) })
-      if (campaignId) queryClient.invalidateQueries({ queryKey: queryKeys.campaigns.npcs(campaignId) })
+      if (campaignId) queryClient.invalidateQueries({ queryKey: queryKeys.npcs.byCampaign(campaignId) })
     },
     onError: () => toast.error('Verwijderen mislukt'),
   })

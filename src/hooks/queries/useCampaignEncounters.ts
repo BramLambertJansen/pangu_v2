@@ -9,7 +9,7 @@ import type { Encounter } from '@/types/encounter.types'
 
 export function useCampaignEncounters(campaignId: string | undefined) {
   return useQuery<Encounter[]>({
-    queryKey: queryKeys.campaigns.encounters(campaignId ?? ''),
+    queryKey: queryKeys.encounters.byCampaign(campaignId ?? ''),
     queryFn: async () => {
       const { data, error } = await supabase
         .from('encounters')
@@ -47,7 +47,7 @@ export function useCreateCampaignEncounter(campaignId: string) {
       return data as Encounter
     },
     onSuccess: (newEncounter) => {
-      queryClient.invalidateQueries({ queryKey: queryKeys.campaigns.encounters(campaignId) })
+      queryClient.invalidateQueries({ queryKey: queryKeys.encounters.byCampaign(campaignId) })
       navigate(`/encounters/${newEncounter.id}/edit`, { state: { isNew: true, campaignId } })
     },
     onError: () => toast.error('Gevecht aanmaken mislukt'),
