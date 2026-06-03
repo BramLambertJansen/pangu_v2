@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { PartyMemberRow } from '@/components/character/CharacterCard'
 import { DmCharacterPanel } from '@/components/character/DmCharacterPanel'
+import { Button } from '@/components/ui/Button'
 import { Spinner } from '@/components/ui/Spinner'
 import type { Character } from '@/types/character.types'
 import type { Item } from '@/types/item.types'
@@ -40,14 +41,12 @@ export function PartyTab({
         >
           The Party
         </h2>
-        <button
-          type="button"
-          className="pangu-btn pangu-btn-ghost pangu-btn-sm"
+        <Button variant="ghost" size="sm"
           onClick={onAddHero}
           aria-label="Held toevoegen — ga naar karakters"
         >
           + Held toevoegen
-        </button>
+        </Button>
       </div>
 
       {isLoading ? (

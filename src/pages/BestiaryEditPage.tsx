@@ -2,6 +2,7 @@ import { useId, useRef, useState } from 'react'
 import { useParams, useNavigate, useLocation } from 'react-router-dom'
 import { toast } from 'sonner'
 import { supabase } from '@/lib/supabase'
+import { Button } from '@/components/ui/Button'
 import { Modal } from '@/components/ui/Modal'
 import { ConfirmDialog } from '@/components/ui/ConfirmDialog'
 import { Spinner } from '@/components/ui/Spinner'
@@ -204,9 +205,9 @@ export default function BestiaryEditPage() {
     return (
       <div>
         <p style={{ color: 'var(--muted)' }}>Wezen niet gevonden.</p>
-        <button type="button" className="pangu-btn pangu-btn-ghost" onClick={() => navigate('/worlds')} style={{ marginTop: 16 }}>
+        <Button variant="ghost" onClick={() => navigate('/worlds')} style={{ marginTop: 16 }}>
           ← Terug naar werelden
-        </button>
+        </Button>
       </div>
     )
   }
@@ -310,24 +311,24 @@ export default function BestiaryEditPage() {
               )}
             </div>
             <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-              <button
-                type="button"
-                className="pangu-btn pangu-btn-secondary pangu-btn-sm"
+              <Button
+                variant="secondary"
+                size="sm"
                 disabled={imageUploading}
                 onClick={() => imageInputRef.current?.click()}
               >
                 {imageUploading ? 'Uploaden...' : form.image_url ? 'Afbeelding wijzigen' : 'Afbeelding uploaden'}
-              </button>
+              </Button>
               {form.image_url && (
-                <button
-                  type="button"
-                  className="pangu-btn pangu-btn-ghost pangu-btn-sm"
+                <Button
+                  variant="ghost"
+                  size="sm"
                   disabled={imageUploading}
                   onClick={handleImageRemove}
                   style={{ color: 'var(--crimson)' }}
                 >
                   Afbeelding verwijderen
-                </button>
+                </Button>
               )}
             </div>
           </div>
@@ -465,22 +466,21 @@ export default function BestiaryEditPage() {
           </div>
 
           <div className="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end" style={{ marginTop: 24 }}>
-            <button
-              type="button"
-              className="pangu-btn pangu-btn-ghost"
+            <Button
+              variant="ghost"
               onClick={handleCancel}
               disabled={committed && !dirty}
             >
               Annuleren
-            </button>
-            <button
-              type="button"
-              className="pangu-btn pangu-btn-primary"
+            </Button>
+            <Button
+              variant="primary"
               onClick={handleSave}
-              disabled={!dirty || saveBestiary.isPending}
+              disabled={!dirty}
+              loading={saveBestiary.isPending}
             >
-              {saveBestiary.isPending ? 'Opslaan...' : 'Opslaan'}
-            </button>
+              Opslaan
+            </Button>
           </div>
         </div>
 
@@ -497,13 +497,13 @@ export default function BestiaryEditPage() {
                 Dit verwijdert het wezen permanent en kan niet ongedaan worden gemaakt.
               </p>
             </div>
-            <button
-              type="button"
-              className="pangu-btn pangu-btn-crimson pangu-btn-sm"
+            <Button
+              variant="danger"
+              size="sm"
               onClick={() => setDeleteOpen(true)}
             >
               Verwijder wezen
-            </button>
+            </Button>
           </div>
         </div>
 
@@ -519,12 +519,12 @@ export default function BestiaryEditPage() {
           Weet je zeker dat je <strong style={{ color: 'var(--ink)' }}>{bestiaryData.name}</strong> wilt verwijderen? Dit kan niet ongedaan worden gemaakt.
         </p>
         <div className="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
-          <button type="button" className="pangu-btn pangu-btn-ghost" onClick={() => setDeleteOpen(false)}>
+          <Button variant="ghost" onClick={() => setDeleteOpen(false)}>
             Annuleren
-          </button>
-          <button type="button" className="pangu-btn pangu-btn-crimson" onClick={handleDelete} disabled={deleteBestiary.isPending}>
-            {deleteBestiary.isPending ? 'Verwijderen...' : 'Verwijder wezen'}
-          </button>
+          </Button>
+          <Button variant="danger" onClick={handleDelete} loading={deleteBestiary.isPending}>
+            Verwijder wezen
+          </Button>
         </div>
       </Modal>
 

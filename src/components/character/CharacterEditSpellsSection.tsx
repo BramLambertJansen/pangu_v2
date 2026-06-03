@@ -2,6 +2,7 @@ import { useId } from 'react'
 import { NumericField, TagInput } from '@/components/character/CharacterEditHelpers'
 import { SPELL_LEVELS } from '@/utils/dnd5e'
 import type { Character, SpellcastingAbility, SpellSlots, SpellSlotLevel, ClassResources } from '@/types/character.types'
+import { Button } from '@/components/ui/Button'
 
 const SPELLCASTING_ABILITY_OPTIONS: { value: SpellcastingAbility; label: string }[] = [
   { value: 'int', label: 'Intelligentie (INT)' },
@@ -111,7 +112,7 @@ export function CharacterEditSpellsSection({ form, set }: Props) {
               }}
             >
               Geen
-            </button>
+            </Button>
             {SPELLCASTING_ABILITY_OPTIONS.map(opt => (
               <button
                 key={opt.value}
@@ -126,7 +127,7 @@ export function CharacterEditSpellsSection({ form, set }: Props) {
                 }}
               >
                 {opt.label}
-              </button>
+              </Button>
             ))}
           </div>
           {spellAbility && (
@@ -162,7 +163,7 @@ export function CharacterEditSpellsSection({ form, set }: Props) {
             >
               <span aria-hidden="true">{(form.concentrating ?? false) ? '◉' : '○'}</span>
               {(form.concentrating ?? false) ? 'Concentreert' : 'Geen concentratie'}
-            </button>
+            </Button>
           </div>
           {(form.concentrating ?? false) && (
             <div style={{ flex: 1, minWidth: 200 }}>
@@ -204,7 +205,7 @@ export function CharacterEditSpellsSection({ form, set }: Props) {
                 >
                   <span>+</span>
                   <span>Niveau {level} toevoegen</span>
-                </button>
+                </Button>
               )
             }
             return (
@@ -239,7 +240,7 @@ export function CharacterEditSpellsSection({ form, set }: Props) {
                     style={{ marginLeft: 'auto', background: 'none', border: 'none', cursor: 'pointer', color: 'var(--muted)', fontSize: 14, padding: '2px 6px' }}
                   >
                     ✕
-                  </button>
+                  </Button>
                 )}
               </div>
             )
@@ -272,7 +273,7 @@ export function CharacterEditSpellsSection({ form, set }: Props) {
                 }}
               >
                 {active ? '✓ ' : '+ '}{preset}
-              </button>
+              </Button>
             )
           })}
         </div>
@@ -290,16 +291,14 @@ export function CharacterEditSpellsSection({ form, set }: Props) {
               }
             }}
           />
-          <button
-            type="button"
-            className="pangu-btn pangu-btn-ghost pangu-btn-sm"
+          <Button variant="ghost" size="sm"
             onClick={() => {
               const inp = document.getElementById('custom-resource-input') as HTMLInputElement
               if (inp) { addResource(inp.value); inp.value = '' }
             }}
           >
             Toevoegen
-          </button>
+          </Button>
         </div>
         {/* Resource rows */}
         {Object.entries(getClassResources()).length > 0 && (
@@ -331,7 +330,7 @@ export function CharacterEditSpellsSection({ form, set }: Props) {
                   style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--muted)', fontSize: 14, padding: '2px 6px' }}
                 >
                   ✕
-                </button>
+                </Button>
               </div>
             ))}
           </div>

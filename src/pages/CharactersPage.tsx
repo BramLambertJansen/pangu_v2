@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { useAuthStore } from '@/stores/auth.store'
 import { EntityCardSkeleton } from '@/components/ui/EntityCardSkeleton'
+import { Button } from '@/components/ui/Button'
 import { EmptyState } from '@/components/ui/EmptyState'
 import { WorldDetailDivider } from '@/components/world/WorldDetailDivider'
 import { CharacterCard, ForgeCharacterCard } from '@/components/character/CharacterCard'
@@ -84,14 +85,12 @@ export default function CharactersPage() {
                     <p style={{ color: 'var(--muted)', fontSize: 14 }}>
                       Geen resultaten voor <strong style={{ color: 'var(--ink-soft)' }}>"{search}"</strong>.
                     </p>
-                    <button
-                      type="button"
-                      className="pangu-btn pangu-btn-ghost pangu-btn-sm"
+                    <Button variant="ghost" size="sm"
                       onClick={() => setSearch('')}
                       style={{ marginTop: 12 }}
                     >
                       Wis zoekopdracht
-                    </button>
+                    </Button>
                   </div>
                 )}
                 <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">

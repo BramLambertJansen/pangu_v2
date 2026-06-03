@@ -1,6 +1,7 @@
 import { useState, useMemo } from 'react'
 import { Spinner } from '@/components/ui/Spinner'
 import { EmptyState } from '@/components/ui/EmptyState'
+import { Button } from '@/components/ui/Button'
 import { Modal } from '@/components/ui/Modal'
 import { CompendiumBrowser } from '@/components/compendium/CompendiumBrowser'
 import { useImportMagicItem } from '@/hooks/queries/useSrdSearch'
@@ -41,15 +42,13 @@ export default function ItemsPage() {
             Importeer magische items uit de SRD naar een kroniek.
           </p>
         </div>
-        <button
-          type="button"
-          className="pangu-btn pangu-btn-secondary"
+        <Button variant="secondary"
           disabled={!activeCampaignId}
           onClick={() => setSrdOpen(true)}
           style={{ flexShrink: 0 }}
         >
           + Importeer uit SRD
-        </button>
+        </Button>
       </div>
 
       {/* Campaign selector */}
@@ -106,7 +105,7 @@ export default function ItemsPage() {
               }
               title="Nog geen items"
               description="Importeer magische items uit de SRD om te beginnen."
-              action={<button type="button" className="pangu-btn pangu-btn-primary" onClick={() => setSrdOpen(true)}>Importeer uit SRD</button>}
+              action={<Button variant="primary" onClick={() => setSrdOpen(true)}>Importeer uit SRD</Button>}
             />
           ) : (
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(260px, 1fr))', gap: 12 }}>
@@ -142,7 +141,7 @@ export default function ItemsPage() {
                     {item.requires_attunement && <span style={{ fontSize: 11, color: 'var(--gold)' }}>Afstemming vereist</span>}
                     {item.source?.startsWith('srd') && <span style={{ fontSize: 11, color: 'var(--azure)' }}>SRD</span>}
                   </div>
-                </button>
+                </Button>
               ))}
             </div>
           )}

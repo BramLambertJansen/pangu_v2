@@ -2,6 +2,7 @@ import { useId, useCallback } from 'react'
 import { useParams, useNavigate, useLocation } from 'react-router-dom'
 import { toast } from 'sonner'
 import { Spinner } from '@/components/ui/Spinner'
+import { Button } from '@/components/ui/Button'
 import { ConfirmDialog } from '@/components/ui/ConfirmDialog'
 import { useWorld, useSaveWorld, useDeleteWorld } from '@/hooks/queries/useWorld'
 import { useEntityEdit } from '@/hooks/useEntityEdit'
@@ -100,9 +101,9 @@ export default function WorldEditPage() {
     return (
       <div>
         <p style={{ color: 'var(--muted)' }}>Wereld niet gevonden.</p>
-        <button type="button" className="pangu-btn pangu-btn-ghost" onClick={() => navigate('/worlds')} style={{ marginTop: 16 }}>
+        <Button variant="ghost" onClick={() => navigate('/worlds')} style={{ marginTop: 16 }}>
           ← Terug naar werelden
-        </button>
+        </Button>
       </div>
     )
   }
@@ -132,7 +133,7 @@ export default function WorldEditPage() {
             <path d="M19 12H5" /><path d="M12 19l-7-7 7-7" />
           </svg>
           Terug naar wereld
-        </button>
+        </Button>
 
         {/* Page header */}
         <header style={{ marginBottom: 40 }}>
@@ -282,22 +283,18 @@ export default function WorldEditPage() {
           </div>
 
           <div className="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end" style={{ marginTop: 24 }}>
-            <button
-              type="button"
-              className="pangu-btn pangu-btn-ghost"
+            <Button variant="ghost"
               onClick={handleCancel}
               disabled={committed && !dirty}
             >
               Annuleren
-            </button>
-            <button
-              type="button"
-              className="pangu-btn pangu-btn-primary"
+            </Button>
+            <Button variant="primary"
               onClick={handleSave}
               disabled={!dirty || saveWorld.isPending}
             >
               {saveWorld.isPending ? 'Opslaan...' : 'Opslaan'}
-            </button>
+            </Button>
           </div>
         </div>
 
@@ -314,13 +311,11 @@ export default function WorldEditPage() {
                 Dit verwijdert de wereld permanent en kan niet ongedaan worden gemaakt.
               </p>
             </div>
-            <button
-              type="button"
-              className="pangu-btn pangu-btn-crimson pangu-btn-sm"
+            <Button variant="danger" size="sm"
               onClick={() => setDeleteOpen(true)}
             >
               Verwijder wereld
-            </button>
+            </Button>
           </div>
         </div>
 

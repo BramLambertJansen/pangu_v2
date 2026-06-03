@@ -3,6 +3,7 @@ import { useParams, useNavigate, useLocation } from 'react-router-dom'
 import { toast } from 'sonner'
 import { Modal } from '@/components/ui/Modal'
 import { ConfirmDialog } from '@/components/ui/ConfirmDialog'
+import { Button } from '@/components/ui/Button'
 import { Spinner } from '@/components/ui/Spinner'
 import { useEntityEdit } from '@/hooks/useEntityEdit'
 import { useSession, useSaveSession, useDeleteSession } from '@/hooks/queries/useSession'
@@ -110,9 +111,9 @@ export default function SessionEditPage() {
     return (
       <div>
         <p style={{ color: 'var(--muted)' }}>Sessie niet gevonden.</p>
-        <button type="button" className="pangu-btn pangu-btn-ghost" onClick={() => navigate('/dashboard')} style={{ marginTop: 16 }}>
+        <Button variant="ghost" onClick={() => navigate('/dashboard')} style={{ marginTop: 16 }}>
           ← Terug naar dashboard
-        </button>
+        </Button>
       </div>
     )
   }
@@ -142,7 +143,7 @@ export default function SessionEditPage() {
             <path d="M19 12H5" /><path d="M12 19l-7-7 7-7" />
           </svg>
           Terug naar sessies
-        </button>
+        </Button>
 
         {/* Page header */}
         <header style={{ marginBottom: 40 }}>
@@ -244,22 +245,18 @@ export default function SessionEditPage() {
           </div>
 
           <div className="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end" style={{ marginTop: 24 }}>
-            <button
-              type="button"
-              className="pangu-btn pangu-btn-ghost"
+            <Button variant="ghost"
               onClick={handleCancel}
               disabled={committed && !dirty}
             >
               Annuleren
-            </button>
-            <button
-              type="button"
-              className="pangu-btn pangu-btn-primary"
+            </Button>
+            <Button variant="primary"
               onClick={handleSave}
               disabled={!dirty || saveSession.isPending}
             >
               {saveSession.isPending ? 'Opslaan...' : 'Opslaan'}
-            </button>
+            </Button>
           </div>
         </div>
 
@@ -276,13 +273,11 @@ export default function SessionEditPage() {
                 Dit verwijdert de sessie permanent en kan niet ongedaan worden gemaakt.
               </p>
             </div>
-            <button
-              type="button"
-              className="pangu-btn pangu-btn-crimson pangu-btn-sm"
+            <Button variant="danger" size="sm"
               onClick={() => setDeleteOpen(true)}
             >
               Verwijder sessie
-            </button>
+            </Button>
           </div>
         </div>
 
@@ -298,12 +293,12 @@ export default function SessionEditPage() {
           Weet je zeker dat je <strong style={{ color: 'var(--ink)' }}>{session.name}</strong> wilt verwijderen? Dit kan niet ongedaan worden gemaakt.
         </p>
         <div className="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
-          <button type="button" className="pangu-btn pangu-btn-ghost" onClick={() => setDeleteOpen(false)}>
+          <Button variant="ghost" onClick={() => setDeleteOpen(false)}>
             Annuleren
-          </button>
-          <button type="button" className="pangu-btn pangu-btn-crimson" onClick={handleDelete} disabled={deleteSession.isPending}>
+          </Button>
+          <Button variant="danger" onClick={handleDelete} disabled={deleteSession.isPending}>
             {deleteSession.isPending ? 'Verwijderen...' : 'Verwijder sessie'}
-          </button>
+          </Button>
         </div>
       </Modal>
 

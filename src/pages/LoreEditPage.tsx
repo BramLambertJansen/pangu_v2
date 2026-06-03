@@ -1,6 +1,7 @@
 import { useId, useState } from 'react'
 import { useParams, useNavigate, useLocation } from 'react-router-dom'
 import { toast } from 'sonner'
+import { Button } from '@/components/ui/Button'
 import { Modal } from '@/components/ui/Modal'
 import { ConfirmDialog } from '@/components/ui/ConfirmDialog'
 import { Spinner } from '@/components/ui/Spinner'
@@ -150,9 +151,9 @@ export default function LoreEditPage() {
     return (
       <div>
         <p style={{ color: 'var(--muted)' }}>Lore niet gevonden.</p>
-        <button type="button" className="pangu-btn pangu-btn-ghost" onClick={() => navigate('/dashboard')} style={{ marginTop: 16 }}>
+        <Button variant="ghost" onClick={() => navigate('/dashboard')} style={{ marginTop: 16 }}>
           ← Terug naar dashboard
-        </button>
+        </Button>
       </div>
     )
   }
@@ -297,12 +298,12 @@ export default function LoreEditPage() {
                     {aiPreview}
                   </p>
                   <div style={{ display: 'flex', gap: 8, marginTop: 12 }}>
-                    <button type="button" className="pangu-btn pangu-btn-secondary pangu-btn-sm" onClick={handleAcceptGenerated}>
+                    <Button variant="secondary" size="sm" onClick={handleAcceptGenerated}>
                       Overnemen
-                    </button>
-                    <button type="button" className="pangu-btn pangu-btn-ghost pangu-btn-sm" onClick={() => setAiPreview(null)}>
+                    </Button>
+                    <Button variant="ghost" size="sm" onClick={() => setAiPreview(null)}>
                       Negeren
-                    </button>
+                    </Button>
                   </div>
                 </div>
               )}
@@ -323,22 +324,21 @@ export default function LoreEditPage() {
           </div>
 
           <div className="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end" style={{ marginTop: 24 }}>
-            <button
-              type="button"
-              className="pangu-btn pangu-btn-ghost"
+            <Button
+              variant="ghost"
               onClick={handleCancel}
               disabled={committed && !dirty}
             >
               Annuleren
-            </button>
-            <button
-              type="button"
-              className="pangu-btn pangu-btn-primary"
+            </Button>
+            <Button
+              variant="primary"
               onClick={handleSave}
-              disabled={!dirty || saveLore.isPending}
+              disabled={!dirty}
+              loading={saveLore.isPending}
             >
-              {saveLore.isPending ? 'Opslaan...' : 'Opslaan'}
-            </button>
+              Opslaan
+            </Button>
           </div>
         </div>
 
@@ -355,13 +355,13 @@ export default function LoreEditPage() {
                 Dit verwijdert het lore-item permanent en kan niet ongedaan worden gemaakt.
               </p>
             </div>
-            <button
-              type="button"
-              className="pangu-btn pangu-btn-crimson pangu-btn-sm"
+            <Button
+              variant="danger"
+              size="sm"
               onClick={() => setDeleteOpen(true)}
             >
               Verwijder lore
-            </button>
+            </Button>
           </div>
         </div>
 
@@ -377,12 +377,12 @@ export default function LoreEditPage() {
           Weet je zeker dat je <strong style={{ color: 'var(--ink)' }}>{loreData.name}</strong> wilt verwijderen? Dit kan niet ongedaan worden gemaakt.
         </p>
         <div className="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
-          <button type="button" className="pangu-btn pangu-btn-ghost" onClick={() => setDeleteOpen(false)}>
+          <Button variant="ghost" onClick={() => setDeleteOpen(false)}>
             Annuleren
-          </button>
-          <button type="button" className="pangu-btn pangu-btn-crimson" onClick={handleDelete} disabled={deleteLore.isPending}>
-            {deleteLore.isPending ? 'Verwijderen...' : 'Verwijder lore'}
-          </button>
+          </Button>
+          <Button variant="danger" onClick={handleDelete} loading={deleteLore.isPending}>
+            Verwijder lore
+          </Button>
         </div>
       </Modal>
 

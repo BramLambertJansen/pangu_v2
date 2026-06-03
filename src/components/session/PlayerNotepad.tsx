@@ -4,6 +4,7 @@ import { useAuthStore } from '@/stores/auth.store'
 import { usePreferencesStore } from '@/stores/preferences.store'
 import { useCampaignCharacters } from '@/hooks/queries/useCampaignCharacters'
 import { useMySessionNote, useSavePlayerNote } from '@/hooks/queries/usePlayerNotes'
+import { Button } from '@/components/ui/Button'
 import { Spinner } from '@/components/ui/Spinner'
 
 interface Props {
@@ -109,15 +110,13 @@ export function PlayerNotepad({ sessionId, campaignId }: Props) {
             </span>
           )}
           {!autosave && (
-            <button
-              type="button"
-              className="pangu-btn pangu-btn-secondary pangu-btn-sm"
+            <Button variant="secondary" size="sm"
               onClick={() => save(content)}
               disabled={saveStatus === 'saving'}
               aria-label="Notitie opslaan"
             >
               Opslaan
-            </button>
+            </Button>
           )}
         </div>
       </div>

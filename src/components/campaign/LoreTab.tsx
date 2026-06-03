@@ -1,5 +1,6 @@
 import { LoreCard, ForgeLoreCard } from '@/components/lore/LoreCard'
 import { Spinner } from '@/components/ui/Spinner'
+import { Button } from '@/components/ui/Button'
 import type { Lore } from '@/types/lore.types'
 
 export function LoreTab({
@@ -58,13 +59,9 @@ export function LoreTab({
           </ul>
           {loreItems && loreItems.length > 0 && (
             <div style={{ marginTop: 16, display: 'flex', justifyContent: 'flex-end' }}>
-              <button
-                type="button"
-                className="pangu-btn pangu-btn-ghost pangu-btn-sm"
-                onClick={onViewAll}
-              >
+              <Button variant="ghost" size="sm" onClick={onViewAll}>
                 Alle lore bekijken →
-              </button>
+              </Button>
             </div>
           )}
         </>

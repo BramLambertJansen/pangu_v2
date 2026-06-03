@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { NpcRow } from '@/components/npc/NpcCard'
 import { DmNpcPanel } from '@/components/npc/DmNpcPanel'
+import { Button } from '@/components/ui/Button'
 import { Spinner } from '@/components/ui/Spinner'
 import type { Npc } from '@/types/npc.types'
 
@@ -44,23 +45,19 @@ export function NpcsTab({
           NPC's
         </h2>
         <div style={{ display: 'flex', gap: 8 }}>
-          <button
-            type="button"
-            className="pangu-btn pangu-btn-ghost pangu-btn-sm"
+          <Button variant="ghost" size="sm"
             onClick={onForge}
             disabled={forging}
             aria-busy={forging}
           >
             {forging ? 'Aanmaken…' : '+ NPC toevoegen'}
-          </button>
+          </Button>
           {npcs.length > 0 && (
-            <button
-              type="button"
-              className="pangu-btn pangu-btn-ghost pangu-btn-sm"
+            <Button variant="ghost" size="sm"
               onClick={onViewAll}
             >
               Alle NPCs →
-            </button>
+            </Button>
           )}
         </div>
       </div>

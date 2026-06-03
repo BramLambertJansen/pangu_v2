@@ -187,14 +187,15 @@ function ProfielTab() {
           <p className="mt-1" style={{ fontSize: 13, color: 'var(--muted)' }}>
             Lid sinds ster-jaar {new Date(profile?.created_at ?? '').getFullYear()}
           </p>
-          <button
-            className="pangu-btn pangu-btn-violet-soft pangu-btn-sm mt-3"
-            type="button"
+          <Button
+            variant="ghost"
+            size="sm"
+            className="mt-3"
             disabled={avatarUploading}
             onClick={() => fileInputRef.current?.click()}
           >
             {avatarUploading ? 'Uploaden...' : 'Foto wijzigen'}
-          </button>
+          </Button>
         </div>
       </div>
 
@@ -267,17 +268,15 @@ function ProfielTab() {
 
       {/* Action row */}
       <div className="flex items-center justify-end gap-3" style={{ marginTop: 24 }}>
-        <button
-          type="button"
-          className="pangu-btn pangu-btn-ghost"
+        <Button
+          variant="ghost"
           onClick={handleCancel}
           disabled={!hasChanges}
         >
           Annuleren
-        </button>
-        <button
-          type="button"
-          className="pangu-btn pangu-btn-primary"
+        </Button>
+        <Button
+          variant="primary"
           onClick={() => {
             const newErrors: Partial<Record<keyof ProfileForm, string>> = {}
             if (!form.display_name.trim()) newErrors.display_name = 'Weergavenaam is verplicht'
@@ -285,10 +284,11 @@ function ProfielTab() {
             setErrors({})
             updateProfile.mutate({ display_name: form.display_name, pronouns: form.pronouns, bio: form.bio })
           }}
-          disabled={!hasChanges || updateProfile.isPending}
+          loading={updateProfile.isPending}
+          disabled={!hasChanges}
         >
-          {updateProfile.isPending ? 'Opslaan...' : 'Opslaan'}
-        </button>
+          Opslaan
+        </Button>
       </div>
     </div>
   )
@@ -468,25 +468,25 @@ function ProviderKeyCard({
 
       <div className="flex items-center justify-end gap-3" style={{ marginTop: 16 }}>
         {isSet && (
-          <button
-            type="button"
-            className="pangu-btn pangu-btn-ghost"
+          <Button
+            variant="ghost"
             onClick={onClear}
-            disabled={isClearPending || isSavePending}
+            loading={isClearPending}
+            disabled={isSavePending}
           >
-            {isClearPending ? 'Wissen...' : 'Wissen'}
-          </button>
+            Wissen
+          </Button>
         )}
-        <button
-          type="button"
-          className="pangu-btn pangu-btn-primary"
+        <Button
+          variant="primary"
           onClick={() => {
             if (keyInput.trim()) onSave(keyInput.trim())
           }}
-          disabled={!keyInput.trim() || isSavePending || isClearPending}
+          loading={isSavePending}
+          disabled={!keyInput.trim() || isClearPending}
         >
-          {isSavePending ? 'Opslaan...' : 'Opslaan'}
-        </button>
+          Opslaan
+        </Button>
       </div>
     </div>
   )

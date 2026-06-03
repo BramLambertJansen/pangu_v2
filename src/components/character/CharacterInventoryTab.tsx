@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect } from 'react'
 import { toast } from 'sonner'
+import { Button } from '@/components/ui/Button'
 import { Spinner } from '@/components/ui/Spinner'
 import { itemRarityLabel, itemRarityColor, itemTypeLabel } from '@/lib/statusMaps'
 import { useCharacterItems } from '@/hooks/queries/useCharacterItems'
@@ -85,7 +86,7 @@ function SlotPicker({
             {EQUIPMENT_SLOT_ICONS[slot]}
           </span>
           <span>{EQUIPMENT_SLOT_LABELS[slot]}</span>
-        </button>
+        </Button>
       ))}
     </div>
   )
@@ -106,9 +107,9 @@ function DiceRoller() {
   if (!visible) {
     return (
       <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
-        <button type="button" className="pangu-btn pangu-btn-ghost pangu-btn-sm" onClick={() => setVisible(true)}>
+        <Button variant="ghost" size="sm" onClick={() => setVisible(true)}>
           ⬡ Dice
-        </button>
+        </Button>
       </div>
     )
   }
@@ -128,7 +129,7 @@ function DiceRoller() {
           onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.color = 'var(--muted)' }}
         >
           ✕
-        </button>
+        </Button>
       </div>
 
       <button
@@ -156,7 +157,7 @@ function DiceRoller() {
           ? <span style={{ fontSize: 11, color: 'var(--subtle)', fontFamily: 'var(--font-body)' }}>Klik om te gooien</span>
           : <span style={{ fontSize: 10, color: 'var(--muted)', fontFamily: 'var(--font-body)', letterSpacing: '0.12em', textTransform: 'uppercase' }}>D{selectedDie}</span>
         }
-      </button>
+      </Button>
 
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 6 }}>
         {dice.map((d) => (
@@ -178,7 +179,7 @@ function DiceRoller() {
             onMouseLeave={(e) => { if (selectedDie !== d) (e.currentTarget as HTMLElement).style.borderColor = 'var(--hairline)' }}
           >
             d{d}
-          </button>
+          </Button>
         ))}
       </div>
     </div>
@@ -318,7 +319,7 @@ function ItemRow({
                 }}
               >
                 Equippen
-              </button>
+              </Button>
               {pickerOpen && (
                 <SlotPicker item={item} onEquip={onEquip} onClose={onClosePicker} />
               )}
@@ -350,7 +351,7 @@ function ItemRow({
               }}
             >
               Uitrusten
-            </button>
+            </Button>
           )}
         </div>
 
@@ -382,7 +383,7 @@ function ItemRow({
         >
           <span aria-hidden="true">↩</span>
           <span>DM</span>
-        </button>
+        </Button>
       </div>
     </div>
   )

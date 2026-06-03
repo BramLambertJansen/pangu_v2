@@ -3,6 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom'
 import { toast } from 'sonner'
 import { useAI } from '@/hooks/useAI'
 import { Spinner } from '@/components/ui/Spinner'
+import { Button } from '@/components/ui/Button'
 import { Modal } from '@/components/ui/Modal'
 import { ItemCard, ForgeItemCard } from '@/components/item/ItemCard'
 import { CompendiumBrowser } from '@/components/compendium/CompendiumBrowser'
@@ -95,9 +96,9 @@ Return ONLY a raw JSON array with one item — no markdown, no explanation:
     return (
       <div>
         <p style={{ color: 'var(--muted)' }}>Kroniek niet gevonden.</p>
-        <button type="button" className="pangu-btn pangu-btn-ghost" onClick={() => navigate('/dashboard')} style={{ marginTop: 16 }}>
+        <Button variant="ghost" onClick={() => navigate('/dashboard')} style={{ marginTop: 16 }}>
           ← Terug naar dashboard
-        </button>
+        </Button>
       </div>
     )
   }
