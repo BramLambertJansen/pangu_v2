@@ -2,16 +2,17 @@ import { useState } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { Breadcrumb } from '@/components/ui/Breadcrumb'
 import { Spinner } from '@/components/ui/Spinner'
-import { StoryArcTracker } from '@/components/session/StoryArcTracker'
-import { LocationCard, ForgeLocationCard } from '@/components/location/LocationCard'
-import { LoreCard, ForgeLoreCard } from '@/components/lore/LoreCard'
-import { NpcRow } from '@/components/npc/NpcCard'
-import { DmNpcPanel } from '@/components/npc/DmNpcPanel'
-import { QuestCard, ForgeQuestCard } from '@/components/quest/QuestCard'
-import { EncounterCard, ForgeEncounterCard } from '@/components/encounter/EncounterCard'
-import { PartyMemberRow } from '@/components/character/CharacterCard'
-import { DmCharacterPanel } from '@/components/character/DmCharacterPanel'
-import { ItemCard, ForgeItemCard } from '@/components/item/ItemCard'
+import { PartyTab } from '@/components/campaign/PartyTab'
+import { SessionsTab } from '@/components/campaign/SessionsTab'
+import { LocationsTab } from '@/components/campaign/LocationsTab'
+import { LoreTab } from '@/components/campaign/LoreTab'
+import { NpcsTab } from '@/components/campaign/NpcsTab'
+import { FactionsTab } from '@/components/campaign/FactionsTab'
+import { QuestsTab } from '@/components/campaign/QuestsTab'
+import { EncountersTab } from '@/components/campaign/EncountersTab'
+import { TreasuryTab } from '@/components/campaign/TreasuryTab'
+import { NotesTab } from '@/components/campaign/NotesTab'
+import { InvitePanel } from '@/components/campaign/InvitePanel'
 import { useCampaignWithWorld } from '@/hooks/queries/useCampaign'
 import { useCampaignSessions, useCreateCampaignSession } from '@/hooks/queries/useCampaignSessions'
 import { useCampaignLocations, useCreateCampaignLocation } from '@/hooks/queries/useCampaignLocations'
@@ -22,217 +23,10 @@ import { useCampaignEncounters, useCreateCampaignEncounter } from '@/hooks/queri
 import { useCampaignCharacters } from '@/hooks/queries/useCampaignCharacters'
 import { useCampaignItems, useCreateCampaignItem } from '@/hooks/queries/useCampaignItems'
 import { useCampaignFactions, useCreateCampaignFaction } from '@/hooks/queries/useCampaignFactions'
-import { FactionCard, ForgeFactionCard } from '@/components/faction/FactionCard'
-import { InvitePanel } from '@/components/campaign/InvitePanel'
 import { pickGradient, coverGradients } from '@/utils/pickGradient'
 import { sanitizeImageUrl } from '@/utils/sanitizeUrl'
 import { campaignStatusLabel } from '@/lib/statusMaps'
 import { useAuthStore } from '@/stores/auth.store'
-import type { Item } from '@/types/item.types'
-import type { Character } from '@/types/character.types'
-
-// ── PartySection ──────────────────────────────────────────────────────────────
-// Split-screen party view: left = member list, right = DM character panel.
-function PartySection({
-  characters,
-  isLoading,
-  allItems,
-  onAddHero,
-}: {
-  characters: Character[]
-  isLoading: boolean
-  allItems: Item[]
-  onAddHero: () => void
-}) {
-  const [selectedId, setSelectedId] = useState<string | null>(
-    () => characters[0]?.id ?? null
-  )
-
-  const selected = characters.find(c => c.id === selectedId) ?? characters[0] ?? null
-  const characterItems = selected ? allItems.filter(i => i.character_id === selected.id) : []
-
-  return (
-    <section aria-labelledby="tab-party-heading">
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
-        <h2
-          id="tab-party-heading"
-          style={{
-            fontFamily: 'var(--font-display)',
-            fontSize: 'clamp(22px, 4vw, 30px)',
-            fontWeight: 600,
-            letterSpacing: '0.06em',
-            textTransform: 'uppercase',
-            color: 'var(--ink)',
-            margin: 0,
-          }}
-        >
-          The Party
-        </h2>
-        <button
-          type="button"
-          className="pangu-btn pangu-btn-ghost pangu-btn-sm"
-          onClick={onAddHero}
-          aria-label="Held toevoegen — ga naar karakters"
-        >
-          + Held toevoegen
-        </button>
-      </div>
-
-      {isLoading ? (
-        <div style={{ display: 'flex', justifyContent: 'center', padding: '40px 0' }} aria-live="polite" aria-busy="true">
-          <Spinner size="md" />
-        </div>
-      ) : characters.length > 0 ? (
-        <div style={{
-          display: 'grid',
-          gridTemplateColumns: 'minmax(280px, 2fr) minmax(320px, 3fr)',
-          gap: 20,
-          alignItems: 'start',
-        }}>
-          {/* Left: party member list */}
-          <ul
-            style={{ display: 'flex', flexDirection: 'column', gap: 10, listStyle: 'none', padding: 0, margin: 0 }}
-            role="list"
-            aria-label="Karakters in deze kroniek"
-          >
-            {characters.map((character) => (
-              <li key={character.id}>
-                <PartyMemberRow
-                  character={character}
-                  selected={character.id === (selected?.id)}
-                  onSelect={() => setSelectedId(character.id)}
-                />
-              </li>
-            ))}
-          </ul>
-
-          {/* Right: DM detail panel */}
-          {selected && (
-            <div style={{ position: 'sticky', top: 20, maxHeight: 'calc(100vh - 180px)' }}>
-              <DmCharacterPanel character={selected} items={characterItems} />
-            </div>
-          )}
-        </div>
-      ) : (
-        <div className="pangu-surface" style={{ padding: 24, textAlign: 'center', borderStyle: 'dashed' }}>
-          <p style={{ fontSize: 14, color: 'var(--muted)', margin: '0 0 6px', fontStyle: 'italic' }}>
-            Nog geen helden in deze kroniek.
-          </p>
-          <p style={{ fontSize: 12, color: 'var(--subtle)', margin: 0 }}>
-            Spelers kunnen hun karakter koppelen via het karakterscherm (Karakters → Bewerken → Kampagne).
-          </p>
-        </div>
-      )}
-    </section>
-  )
-}
-
-// ── NpcSection ────────────────────────────────────────────────────────────────
-// Split-screen NPC view: left = clickable NPC list, right = DM info panel.
-function NpcSection({
-  npcs,
-  isLoading,
-  forging,
-  onForge,
-  onViewAll,
-}: {
-  npcs: import('@/types/npc.types').Npc[]
-  isLoading: boolean
-  forging: boolean
-  onForge: () => void
-  onViewAll: () => void
-}) {
-  const [selectedId, setSelectedId] = useState<string | null>(
-    () => npcs[0]?.id ?? null
-  )
-  const selected = npcs.find(n => n.id === selectedId) ?? npcs[0] ?? null
-
-  return (
-    <section aria-labelledby="tab-npcs-heading">
-      <style>{`
-        .npc-split { display: grid; grid-template-columns: minmax(240px, 2fr) minmax(300px, 3fr); gap: 20px; align-items: start; }
-        @media (max-width: 700px) { .npc-split { grid-template-columns: 1fr; } }
-      `}</style>
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
-        <h2
-          id="tab-npcs-heading"
-          style={{
-            fontFamily: 'var(--font-display)',
-            fontSize: 'clamp(22px, 4vw, 30px)',
-            fontWeight: 600,
-            letterSpacing: '0.06em',
-            textTransform: 'uppercase',
-            color: 'var(--ink)',
-            margin: 0,
-          }}
-        >
-          NPC's
-        </h2>
-        <div style={{ display: 'flex', gap: 8 }}>
-          <button
-            type="button"
-            className="pangu-btn pangu-btn-ghost pangu-btn-sm"
-            onClick={onForge}
-            disabled={forging}
-            aria-busy={forging}
-          >
-            {forging ? 'Aanmaken…' : '+ NPC toevoegen'}
-          </button>
-          {npcs.length > 0 && (
-            <button
-              type="button"
-              className="pangu-btn pangu-btn-ghost pangu-btn-sm"
-              onClick={onViewAll}
-            >
-              Alle NPCs →
-            </button>
-          )}
-        </div>
-      </div>
-
-      {isLoading ? (
-        <div style={{ display: 'flex', justifyContent: 'center', padding: '40px 0' }} aria-live="polite" aria-busy="true">
-          <Spinner size="md" />
-        </div>
-      ) : npcs.length > 0 ? (
-        <div className="npc-split">
-          {/* Left: NPC list */}
-          <ul
-            style={{ display: 'flex', flexDirection: 'column', gap: 8, listStyle: 'none', padding: 0, margin: 0 }}
-            role="list"
-            aria-label="NPC's in deze kroniek"
-          >
-            {npcs.map((npc) => (
-              <li key={npc.id}>
-                <NpcRow
-                  npc={npc}
-                  selected={npc.id === (selected?.id)}
-                  onSelect={() => setSelectedId(npc.id)}
-                />
-              </li>
-            ))}
-          </ul>
-
-          {/* Right: DM detail panel */}
-          {selected && (
-            <div style={{ position: 'sticky', top: 20, maxHeight: 'calc(100vh - 180px)' }}>
-              <DmNpcPanel npc={selected} />
-            </div>
-          )}
-        </div>
-      ) : (
-        <div className="pangu-surface" style={{ padding: 24, textAlign: 'center', borderStyle: 'dashed' }}>
-          <p style={{ fontSize: 14, color: 'var(--muted)', margin: '0 0 6px', fontStyle: 'italic' }}>
-            Nog geen NPC's in deze kroniek.
-          </p>
-          <p style={{ fontSize: 12, color: 'var(--subtle)', margin: 0 }}>
-            Voeg een NPC toe om personages bij te houden.
-          </p>
-        </div>
-      )}
-    </section>
-  )
-}
 
 const scrimGradient =
   'linear-gradient(to top, var(--void) 0%, rgba(10,10,22,0.97) 20%, rgba(10,10,22,0.72) 40%, rgba(10,10,22,0.18) 62%, transparent 82%)'
@@ -301,7 +95,6 @@ export default function CampaignDetailPage() {
 
   const initial = campaign.name.trim()[0]?.toUpperCase() ?? '?'
   const gradient = campaign.header_image ? undefined : pickGradient(campaign.id, coverGradients)
-  const dmPoolItems = allItems?.filter(i => !i.character_id) ?? []
 
   return (
     <div>
@@ -562,10 +355,8 @@ export default function CampaignDetailPage() {
 
       {/* ── Tab panels ── */}
       <div style={{ marginTop: 32 }}>
-
-        {/* The Party */}
         {activeTab === 'party' && (
-          <PartySection
+          <PartyTab
             characters={characters ?? []}
             isLoading={isLoadingCharacters}
             allItems={allItems ?? []}
@@ -573,147 +364,37 @@ export default function CampaignDetailPage() {
           />
         )}
 
-        {/* Sessies — Story Arc */}
         {activeTab === 'sessions' && (
-          <section aria-labelledby="tab-sessions-heading">
-            {isLoadingSessions ? (
-              <div style={{ display: 'flex', justifyContent: 'center', padding: '60px 0' }} aria-live="polite" aria-busy="true">
-                <Spinner size="lg" />
-              </div>
-            ) : (
-              <StoryArcTracker
-                sessions={sessions ?? []}
-                onForge={() => {
-                  const nextNumber = sessions && sessions.length > 0
-                    ? Math.max(...sessions.map((s) => s.session_number ?? 0)) + 1
-                    : 1
-                  createSession.mutate({ sessionNumber: nextNumber })
-                }}
-                forgeLoading={createSession.isPending}
-              />
-            )}
-          </section>
+          <SessionsTab
+            sessions={sessions ?? []}
+            isLoading={isLoadingSessions}
+            forging={createSession.isPending}
+            onForge={(nextNumber) => createSession.mutate({ sessionNumber: nextNumber })}
+          />
         )}
 
-        {/* Locaties */}
         {activeTab === 'locations' && (
-          <section aria-labelledby="tab-locations-heading">
-            <h2
-              id="tab-locations-heading"
-              style={{
-                fontFamily: 'var(--font-display)',
-                fontSize: 'clamp(22px, 4vw, 30px)',
-                fontWeight: 600,
-                letterSpacing: '0.06em',
-                textTransform: 'uppercase',
-                color: 'var(--ink)',
-                margin: '0 0 24px',
-              }}
-            >
-              Locaties
-            </h2>
-            {isLoadingLocations ? (
-              <div style={{ display: 'flex', justifyContent: 'center', padding: '40px 0' }} aria-live="polite" aria-busy="true">
-                <Spinner size="md" />
-              </div>
-            ) : (
-              <>
-                <ul
-                  style={{
-                    display: 'grid',
-                    gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))',
-                    gap: 'var(--sp-5)',
-                    listStyle: 'none',
-                    padding: 0,
-                    margin: 0,
-                  }}
-                  role="list"
-                  aria-label="Locaties in deze kroniek"
-                >
-                  {locations?.map((loc) => (
-                    <li key={loc.id}><LocationCard location={loc} /></li>
-                  ))}
-                  <li>
-                    <ForgeLocationCard onClick={() => createLocation.mutate()} loading={createLocation.isPending} />
-                  </li>
-                </ul>
-                {locations && locations.length > 0 && (
-                  <div style={{ marginTop: 16, display: 'flex', justifyContent: 'flex-end' }}>
-                    <button
-                      type="button"
-                      className="pangu-btn pangu-btn-ghost pangu-btn-sm"
-                      onClick={() => navigate(`/campaigns/${id}/locations`)}
-                    >
-                      Alle locaties bekijken →
-                    </button>
-                  </div>
-                )}
-              </>
-            )}
-          </section>
+          <LocationsTab
+            locations={locations}
+            isLoading={isLoadingLocations}
+            forging={createLocation.isPending}
+            onForge={() => createLocation.mutate()}
+            onViewAll={() => navigate(`/campaigns/${id}/locations`)}
+          />
         )}
 
-        {/* Lore */}
         {activeTab === 'lore' && (
-          <section aria-labelledby="tab-lore-heading">
-            <h2
-              id="tab-lore-heading"
-              style={{
-                fontFamily: 'var(--font-display)',
-                fontSize: 'clamp(22px, 4vw, 30px)',
-                fontWeight: 600,
-                letterSpacing: '0.06em',
-                textTransform: 'uppercase',
-                color: 'var(--ink)',
-                margin: '0 0 24px',
-              }}
-            >
-              Lore
-            </h2>
-            {isLoadingLore ? (
-              <div style={{ display: 'flex', justifyContent: 'center', padding: '40px 0' }} aria-live="polite" aria-busy="true">
-                <Spinner size="md" />
-              </div>
-            ) : (
-              <>
-                <ul
-                  style={{
-                    display: 'grid',
-                    gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))',
-                    gap: 'var(--sp-5)',
-                    listStyle: 'none',
-                    padding: 0,
-                    margin: 0,
-                  }}
-                  role="list"
-                  aria-label="Lore in deze kroniek"
-                >
-                  {loreItems?.map((lore) => (
-                    <li key={lore.id}><LoreCard lore={lore} /></li>
-                  ))}
-                  <li>
-                    <ForgeLoreCard onClick={() => createLore.mutate()} loading={createLore.isPending} />
-                  </li>
-                </ul>
-                {loreItems && loreItems.length > 0 && (
-                  <div style={{ marginTop: 16, display: 'flex', justifyContent: 'flex-end' }}>
-                    <button
-                      type="button"
-                      className="pangu-btn pangu-btn-ghost pangu-btn-sm"
-                      onClick={() => navigate(`/campaigns/${id}/lore`)}
-                    >
-                      Alle lore bekijken →
-                    </button>
-                  </div>
-                )}
-              </>
-            )}
-          </section>
+          <LoreTab
+            loreItems={loreItems}
+            isLoading={isLoadingLore}
+            forging={createLore.isPending}
+            onForge={() => createLore.mutate()}
+            onViewAll={() => navigate(`/campaigns/${id}/lore`)}
+          />
         )}
 
-        {/* NPCs */}
         {activeTab === 'npcs' && (
-          <NpcSection
+          <NpcsTab
             npcs={npcs ?? []}
             isLoading={isLoadingNpcs}
             forging={createNpc.isPending}
@@ -722,293 +403,53 @@ export default function CampaignDetailPage() {
           />
         )}
 
-        {/* Facties */}
         {activeTab === 'factions' && (
-          <section aria-labelledby="tab-factions-heading">
-            <h2
-              id="tab-factions-heading"
-              style={{
-                fontFamily: 'var(--font-display)',
-                fontSize: 'clamp(22px, 4vw, 30px)',
-                fontWeight: 600,
-                letterSpacing: '0.06em',
-                textTransform: 'uppercase',
-                color: 'var(--ink)',
-                margin: '0 0 24px',
-              }}
-            >
-              Facties
-            </h2>
-            {isLoadingFactions ? (
-              <div style={{ display: 'flex', justifyContent: 'center', padding: '40px 0' }} aria-live="polite" aria-busy="true">
-                <Spinner size="md" />
-              </div>
-            ) : (
-              <>
-                <ul
-                  style={{
-                    display: 'grid',
-                    gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))',
-                    gap: 'var(--sp-5)',
-                    listStyle: 'none',
-                    padding: 0,
-                    margin: 0,
-                  }}
-                  role="list"
-                  aria-label="Facties in deze kroniek"
-                >
-                  {factions?.slice(0, 6).map((faction) => (
-                    <li key={faction.id}><FactionCard faction={faction} /></li>
-                  ))}
-                  <li>
-                    <ForgeFactionCard onClick={() => createFaction.mutate()} loading={createFaction.isPending} />
-                  </li>
-                </ul>
-                {factions && factions.length > 0 && (
-                  <div style={{ marginTop: 16, display: 'flex', justifyContent: 'flex-end' }}>
-                    <button
-                      type="button"
-                      className="pangu-btn pangu-btn-ghost pangu-btn-sm"
-                      onClick={() => navigate(`/campaigns/${id}/factions`)}
-                    >
-                      Alle facties bekijken →
-                    </button>
-                  </div>
-                )}
-              </>
-            )}
-          </section>
+          <FactionsTab
+            factions={factions}
+            isLoading={isLoadingFactions}
+            forging={createFaction.isPending}
+            onForge={() => createFaction.mutate()}
+            onViewAll={() => navigate(`/campaigns/${id}/factions`)}
+          />
         )}
 
-        {/* Quests */}
         {activeTab === 'quests' && (
-          <section aria-labelledby="tab-quests-heading">
-            <h2
-              id="tab-quests-heading"
-              style={{
-                fontFamily: 'var(--font-display)',
-                fontSize: 'clamp(22px, 4vw, 30px)',
-                fontWeight: 600,
-                letterSpacing: '0.06em',
-                textTransform: 'uppercase',
-                color: 'var(--ink)',
-                margin: '0 0 24px',
-              }}
-            >
-              Quests
-            </h2>
-            {isLoadingQuests ? (
-              <div style={{ display: 'flex', justifyContent: 'center', padding: '40px 0' }} aria-live="polite" aria-busy="true">
-                <Spinner size="md" />
-              </div>
-            ) : (
-              <>
-                <ul
-                  style={{
-                    display: 'grid',
-                    gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))',
-                    gap: 'var(--sp-5)',
-                    listStyle: 'none',
-                    padding: 0,
-                    margin: 0,
-                  }}
-                  role="list"
-                  aria-label="Quests in deze kroniek"
-                >
-                  {quests?.map((quest) => (
-                    <li key={quest.id}><QuestCard quest={quest} /></li>
-                  ))}
-                  <li>
-                    <ForgeQuestCard onClick={() => createQuest.mutate()} loading={createQuest.isPending} />
-                  </li>
-                </ul>
-                {quests && quests.length > 0 && (
-                  <div style={{ marginTop: 16, display: 'flex', justifyContent: 'flex-end' }}>
-                    <button
-                      type="button"
-                      className="pangu-btn pangu-btn-ghost pangu-btn-sm"
-                      onClick={() => navigate(`/campaigns/${id}/quests`)}
-                    >
-                      Alle quests bekijken →
-                    </button>
-                  </div>
-                )}
-              </>
-            )}
-          </section>
+          <QuestsTab
+            quests={quests}
+            isLoading={isLoadingQuests}
+            forging={createQuest.isPending}
+            onForge={() => createQuest.mutate()}
+            onViewAll={() => navigate(`/campaigns/${id}/quests`)}
+          />
         )}
 
-        {/* Gevechten */}
         {activeTab === 'encounters' && (
-          <section aria-labelledby="tab-encounters-heading">
-            <h2
-              id="tab-encounters-heading"
-              style={{
-                fontFamily: 'var(--font-display)',
-                fontSize: 'clamp(22px, 4vw, 30px)',
-                fontWeight: 600,
-                letterSpacing: '0.06em',
-                textTransform: 'uppercase',
-                color: 'var(--ink)',
-                margin: '0 0 24px',
-              }}
-            >
-              Gevechten
-            </h2>
-            {isLoadingEncounters ? (
-              <div style={{ display: 'flex', justifyContent: 'center', padding: '40px 0' }} aria-live="polite" aria-busy="true">
-                <Spinner size="md" />
-              </div>
-            ) : (
-              <>
-                <ul
-                  style={{
-                    display: 'grid',
-                    gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))',
-                    gap: 'var(--sp-5)',
-                    listStyle: 'none',
-                    padding: 0,
-                    margin: 0,
-                  }}
-                  role="list"
-                  aria-label="Gevechten in deze kroniek"
-                >
-                  {encounters?.slice(0, 6).map((encounter) => (
-                    <li key={encounter.id}><EncounterCard encounter={encounter} /></li>
-                  ))}
-                  <li>
-                    <ForgeEncounterCard onClick={() => createEncounter.mutate()} loading={createEncounter.isPending} />
-                  </li>
-                </ul>
-                {encounters && encounters.length > 0 && (
-                  <div style={{ marginTop: 16, display: 'flex', justifyContent: 'flex-end' }}>
-                    <button
-                      type="button"
-                      className="pangu-btn pangu-btn-ghost pangu-btn-sm"
-                      onClick={() => navigate(`/campaigns/${id}/encounters`)}
-                    >
-                      Alle gevechten bekijken →
-                    </button>
-                  </div>
-                )}
-              </>
-            )}
-          </section>
+          <EncountersTab
+            encounters={encounters}
+            isLoading={isLoadingEncounters}
+            forging={createEncounter.isPending}
+            onForge={() => createEncounter.mutate()}
+            onViewAll={() => navigate(`/campaigns/${id}/encounters`)}
+          />
         )}
 
-        {/* Schatkist */}
         {activeTab === 'treasury' && (
-          <section aria-labelledby="tab-treasury-heading">
-            <h2
-              id="tab-treasury-heading"
-              style={{
-                fontFamily: 'var(--font-display)',
-                fontSize: 'clamp(22px, 4vw, 30px)',
-                fontWeight: 600,
-                letterSpacing: '0.06em',
-                textTransform: 'uppercase',
-                color: 'var(--ink)',
-                margin: '0 0 24px',
-              }}
-            >
-              Schatkist
-            </h2>
-            {isLoadingItems ? (
-              <div style={{ display: 'flex', justifyContent: 'center', padding: '40px 0' }} aria-live="polite" aria-busy="true">
-                <Spinner size="md" />
-              </div>
-            ) : (
-              <>
-                <ul
-                  style={{
-                    display: 'grid',
-                    gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))',
-                    gap: 'var(--sp-5)',
-                    listStyle: 'none',
-                    padding: 0,
-                    margin: 0,
-                  }}
-                  role="list"
-                  aria-label="Items in DM-schatkist"
-                >
-                  {dmPoolItems.slice(0, 6).map((item) => (
-                    <li key={item.id}><ItemCard item={item} /></li>
-                  ))}
-                  <li>
-                    <ForgeItemCard onClick={() => createItem.mutate()} loading={createItem.isPending} />
-                  </li>
-                </ul>
-                {allItems && allItems.length > 0 && (
-                  <div style={{ marginTop: 16, display: 'flex', justifyContent: 'flex-end' }}>
-                    <button
-                      type="button"
-                      className="pangu-btn pangu-btn-ghost pangu-btn-sm"
-                      onClick={() => navigate(`/campaigns/${id}/items`)}
-                    >
-                      Alle items bekijken →
-                    </button>
-                  </div>
-                )}
-              </>
-            )}
-          </section>
+          <TreasuryTab
+            allItems={allItems}
+            isLoading={isLoadingItems}
+            forging={createItem.isPending}
+            onForge={() => createItem.mutate()}
+            onViewAll={() => navigate(`/campaigns/${id}/items`)}
+          />
         )}
 
-        {/* Uitnodigingen */}
+        {activeTab === 'notes' && (
+          <NotesTab notes={campaign.notes} />
+        )}
+
         {activeTab === 'invite' && campaign.user_id === user?.id && (
           <InvitePanel campaignId={id!} campaignName={campaign.name} />
         )}
-
-        {/* DM-notities */}
-        {activeTab === 'notes' && (
-          <section aria-labelledby="tab-notes-heading">
-            <h2
-              id="tab-notes-heading"
-              style={{
-                fontFamily: 'var(--font-display)',
-                fontSize: 'clamp(22px, 4vw, 30px)',
-                fontWeight: 600,
-                letterSpacing: '0.06em',
-                textTransform: 'uppercase',
-                color: 'var(--ink)',
-                margin: '0 0 24px',
-              }}
-            >
-              DM-notities
-            </h2>
-            {campaign.notes ? (
-              <div
-                className="pangu-surface"
-                style={{
-                  padding: 28,
-                  borderColor: 'rgba(245,180,50,0.22)',
-                  background: 'linear-gradient(180deg, rgba(245,180,50,0.04), transparent)',
-                }}
-              >
-                <p style={{
-                  fontFamily: 'var(--font-body)',
-                  fontSize: 10, fontWeight: 700,
-                  letterSpacing: '0.18em', textTransform: 'uppercase',
-                  color: 'var(--gold)', margin: '0 0 12px',
-                }}>
-                  ✦ Alleen zichtbaar voor de DM
-                </p>
-                <p style={{
-                  fontSize: 14, lineHeight: 1.75,
-                  color: 'var(--ink-soft)', margin: 0,
-                  whiteSpace: 'pre-wrap',
-                }}>
-                  {campaign.notes}
-                </p>
-              </div>
-            ) : (
-              <p style={{ fontSize: 14, color: 'var(--muted)', fontStyle: 'italic', margin: 0 }}>
-                Nog geen DM-notities.
-              </p>
-            )}
-          </section>
-        )}
-
       </div>
     </div>
   )
