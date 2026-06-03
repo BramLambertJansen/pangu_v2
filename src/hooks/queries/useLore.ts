@@ -11,7 +11,7 @@ type LoreWithCampaign = Lore & {
 
 export function useLore(id: string | undefined) {
   return useQuery<Lore>({
-    queryKey: queryKeys.campaigns.loreDetail(id!),
+    queryKey: queryKeys.lore.detail(id!),
     queryFn: async () => {
       const { data, error } = await supabase
         .from('lore')
@@ -28,7 +28,7 @@ export function useLore(id: string | undefined) {
 
 export function useLoreFull(id: string | undefined) {
   return useQuery<LoreWithCampaign>({
-    queryKey: queryKeys.campaigns.loreDetailFull(id!),
+    queryKey: queryKeys.lore.detailFull(id!),
     queryFn: async () => {
       const { data, error } = await supabase
         .from('lore')
@@ -67,7 +67,7 @@ export function useSaveLore(id: string) {
       if (form.campaign_id) {
         queryClient.invalidateQueries({ queryKey: queryKeys.campaigns.lore(form.campaign_id) })
       }
-      queryClient.invalidateQueries({ queryKey: queryKeys.campaigns.loreDetail(id) })
+      queryClient.invalidateQueries({ queryKey: queryKeys.lore.detail(id) })
     },
     onError: () => toast.error('Opslaan mislukt'),
   })
@@ -81,7 +81,7 @@ export function useDeleteLore(id: string) {
       if (error) throw error
     },
     onSuccess: (_, { campaignId }) => {
-      queryClient.removeQueries({ queryKey: queryKeys.campaigns.loreDetail(id) })
+      queryClient.removeQueries({ queryKey: queryKeys.lore.detail(id) })
       if (campaignId) queryClient.invalidateQueries({ queryKey: queryKeys.campaigns.lore(campaignId) })
     },
     onError: () => toast.error('Verwijderen mislukt'),

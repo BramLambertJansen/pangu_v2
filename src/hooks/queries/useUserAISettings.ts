@@ -9,17 +9,11 @@ export interface UserAISettings {
   preferred_model: string | null
 }
 
-// user_ai_settings was added in migration 021 and is not yet in the
-// auto-generated database.types.ts. Cast to any to bypass strict typing
-// until types are regenerated with `npx supabase gen types typescript`.
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-const db = supabase as any
-
 export function useUserAISettings(userId: string | undefined) {
   return useQuery<UserAISettings | null>({
     queryKey: queryKeys.userAiSettings(userId!),
     queryFn: async () => {
-      const { data, error } = await db
+      const { data, error } = await supabase
         .from('user_ai_settings')
         .select('byok_keys, preferred_provider, preferred_model')
         .eq('user_id', userId!)
@@ -51,7 +45,7 @@ export function useSetByokKey(userId: string | undefined) {
       } else {
         newKeys[provider] = key
       }
-      const { error } = await db
+      const { error } = await supabase
         .from('user_ai_settings')
         .upsert({ user_id: userId, byok_keys: newKeys }, { onConflict: 'user_id' })
       if (error) throw error

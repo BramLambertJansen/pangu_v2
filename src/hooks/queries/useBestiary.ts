@@ -7,7 +7,7 @@ import type { Bestiary, BestiaryWithWorld } from '@/types/bestiary.types'
 
 export function useBestiary(id: string | undefined) {
   return useQuery<Bestiary>({
-    queryKey: queryKeys.worlds.bestiaryDetail(id!),
+    queryKey: queryKeys.bestiaries.detail(id!),
     queryFn: async () => {
       const { data, error } = await supabase
         .from('bestiaries')
@@ -24,7 +24,7 @@ export function useBestiary(id: string | undefined) {
 
 export function useBestiaryFull(id: string | undefined) {
   return useQuery<BestiaryWithWorld>({
-    queryKey: queryKeys.worlds.bestiaryDetailFull(id!),
+    queryKey: queryKeys.bestiaries.detailFull(id!),
     queryFn: async () => {
       const { data, error } = await supabase
         .from('bestiaries')
@@ -75,8 +75,8 @@ export function useSaveBestiary(id: string) {
       if (form.world_id) {
         queryClient.invalidateQueries({ queryKey: queryKeys.worlds.bestiaries(form.world_id) })
       }
-      queryClient.invalidateQueries({ queryKey: queryKeys.worlds.bestiaryDetail(id) })
-      queryClient.invalidateQueries({ queryKey: queryKeys.worlds.bestiaryDetailFull(id) })
+      queryClient.invalidateQueries({ queryKey: queryKeys.bestiaries.detail(id) })
+      queryClient.invalidateQueries({ queryKey: queryKeys.bestiaries.detailFull(id) })
     },
     onError: () => toast.error('Opslaan mislukt'),
   })
@@ -90,8 +90,8 @@ export function useDeleteBestiary(id: string) {
       if (error) throw error
     },
     onSuccess: (_, { worldId }) => {
-      queryClient.removeQueries({ queryKey: queryKeys.worlds.bestiaryDetail(id) })
-      queryClient.removeQueries({ queryKey: queryKeys.worlds.bestiaryDetailFull(id) })
+      queryClient.removeQueries({ queryKey: queryKeys.bestiaries.detail(id) })
+      queryClient.removeQueries({ queryKey: queryKeys.bestiaries.detailFull(id) })
       if (worldId) queryClient.invalidateQueries({ queryKey: queryKeys.worlds.bestiaries(worldId) })
     },
     onError: () => toast.error('Verwijderen mislukt'),

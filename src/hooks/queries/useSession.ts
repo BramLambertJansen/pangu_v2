@@ -30,7 +30,7 @@ type SessionWithCampaign = Session & {
 
 export function useSession(id: string | undefined) {
   return useQuery<Session>({
-    queryKey: queryKeys.campaigns.sessionDetail(id!),
+    queryKey: queryKeys.sessions.detail(id!),
     queryFn: async () => {
       const { data, error } = await supabase
         .from('sessions')
@@ -47,7 +47,7 @@ export function useSession(id: string | undefined) {
 
 export function useSessionFull(id: string | undefined) {
   return useQuery<SessionWithCampaign>({
-    queryKey: queryKeys.campaigns.sessionDetailFull(id!),
+    queryKey: queryKeys.sessions.detailFull(id!),
     queryFn: async () => {
       const { data, error } = await supabase
         .from('sessions')
@@ -87,7 +87,7 @@ export function useSaveSession(id: string) {
       if (form.campaign_id) {
         queryClient.invalidateQueries({ queryKey: queryKeys.campaigns.sessions(form.campaign_id) })
       }
-      queryClient.invalidateQueries({ queryKey: queryKeys.campaigns.sessionDetail(id) })
+      queryClient.invalidateQueries({ queryKey: queryKeys.sessions.detail(id) })
     },
     onError: () => toast.error('Opslaan mislukt'),
   })
@@ -101,7 +101,7 @@ export function useDeleteSession(id: string) {
       if (error) throw error
     },
     onSuccess: (_, { campaignId }) => {
-      queryClient.removeQueries({ queryKey: queryKeys.campaigns.sessionDetail(id) })
+      queryClient.removeQueries({ queryKey: queryKeys.sessions.detail(id) })
       if (campaignId) queryClient.invalidateQueries({ queryKey: queryKeys.campaigns.sessions(campaignId) })
     },
     onError: () => toast.error('Verwijderen mislukt'),

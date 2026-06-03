@@ -1,11 +1,11 @@
-import { useState, useEffect, useId, useCallback } from 'react'
+import { useId, useCallback } from 'react'
 import { useParams, useNavigate, useLocation } from 'react-router-dom'
 import { toast } from 'sonner'
 import { Spinner } from '@/components/ui/Spinner'
 import { ConfirmDialog } from '@/components/ui/ConfirmDialog'
 import { useWorld, useSaveWorld, useDeleteWorld } from '@/hooks/queries/useWorld'
+import { useEntityEdit } from '@/hooks/useEntityEdit'
 import { useImagePositioning } from '@/hooks/useImagePositioning'
-import { useEditGuard } from '@/hooks/useEditGuard'
 import type { World, WorldStatus } from '@/types/world.types'
 
 const statusOptions: { value: WorldStatus; label: string }[] = [
@@ -25,45 +25,30 @@ export default function WorldEditPage() {
   const headerImageId = useId()
 
   const isNew = (location.state as { isNew?: boolean } | null)?.isNew ?? false
-  const [committed, setCommitted] = useState(!isNew)
-  const [deleteOpen, setDeleteOpen] = useState(false)
-  const [form, setForm] = useState<Partial<World>>({})
-  const [dirty, setDirty] = useState(false)
-
-  const guard = useEditGuard({ committed, dirty })
-
-  const handlePositionChange = useCallback((posString: string) => {
-    setForm((prev) => ({ ...prev, header_image_position: posString }))
-    setDirty(true)
-  }, [])
 
   const { data: world, isLoading } = useWorld(id)
   const saveWorld = useSaveWorld(id!)
   const deleteWorld = useDeleteWorld(id!)
+
+  const {
+    form, set, dirty, committed, setCommitted, setDirty,
+    deleteOpen, setDeleteOpen, resetForm, guard,
+  } = useEntityEdit<World>({ entity: world, isNew })
+
+  const handlePositionChange = useCallback((posString: string) => {
+    set('header_image_position', posString)
+  }, [set])
 
   const { containerRef, posString: imagePosString, isDragging, resetPosition, handlers: imagePosHandlers } = useImagePositioning(
     world?.header_image_position,
     handlePositionChange,
   )
 
-  useEffect(() => {
-    if (world) {
-      setForm(world)
-      setDirty(false)
-    }
-  }, [world])
-
-  function set<K extends keyof World>(key: K, value: World[K]) {
-    setForm((prev) => ({ ...prev, [key]: value }))
-    setDirty(true)
-  }
-
   function handleCancel() {
     if (!committed) {
       guard.requestDiscard()
     } else {
-      setForm(world!)
-      setDirty(false)
+      resetForm()
       resetPosition(world!.header_image_position)
       navigate(`/worlds/${id}`)
     }

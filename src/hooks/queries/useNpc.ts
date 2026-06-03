@@ -1,14 +1,9 @@
 import { STALE } from '@/lib/queryClient'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { toast } from 'sonner'
-import type { SupabaseClient } from '@supabase/supabase-js'
 import { supabase } from '@/lib/supabase'
 import { queryKeys } from '@/lib/queryKeys'
 import type { Npc } from '@/types/npc.types'
-
-// faction_id column on npcs is not yet in database.types.ts — migration 040 adds it but
-// types are regenerated after the migration runs on the live database.
-const db = supabase as unknown as SupabaseClient
 
 type NpcWithCampaign = Npc & {
   campaigns: { id: string; name: string; world_id: string; worlds: { id: string; name: string } | null } | null
@@ -17,7 +12,7 @@ type NpcWithCampaign = Npc & {
 
 export function useNpc(id: string | undefined) {
   return useQuery<Npc>({
-    queryKey: queryKeys.campaigns.npcDetail(id!),
+    queryKey: queryKeys.npcs.detail(id!),
     queryFn: async () => {
       const { data, error } = await supabase
         .from('npcs')
@@ -34,9 +29,9 @@ export function useNpc(id: string | undefined) {
 
 export function useNpcFull(id: string | undefined) {
   return useQuery<NpcWithCampaign>({
-    queryKey: queryKeys.campaigns.npcDetailFull(id!),
+    queryKey: queryKeys.npcs.detailFull(id!),
     queryFn: async () => {
-      const { data, error } = await db
+      const { data, error } = await supabase
         .from('npcs')
         .select('*, campaigns(id, name, world_id, worlds(id, name)), factions(id, name)')
         .eq('id', id!)
@@ -53,7 +48,7 @@ export function useSaveNpc(id: string) {
   const queryClient = useQueryClient()
   return useMutation({
     mutationFn: async (form: Partial<Npc> & { oldFactionId?: string | null }) => {
-      const { error } = await db
+      const { error } = await supabase
         .from('npcs')
         .update({
           name: form.name,
@@ -74,12 +69,12 @@ export function useSaveNpc(id: string) {
       if (form.campaign_id) {
         queryClient.invalidateQueries({ queryKey: queryKeys.campaigns.npcs(form.campaign_id) })
       }
-      queryClient.invalidateQueries({ queryKey: queryKeys.campaigns.npcDetail(id) })
+      queryClient.invalidateQueries({ queryKey: queryKeys.npcs.detail(id) })
       const oldFactionId = form.oldFactionId
       const newFactionId = form.faction_id
-      if (oldFactionId) queryClient.invalidateQueries({ queryKey: queryKeys.campaigns.factionMembers(oldFactionId) })
+      if (oldFactionId) queryClient.invalidateQueries({ queryKey: queryKeys.factions.members(oldFactionId) })
       if (newFactionId && newFactionId !== oldFactionId) {
-        queryClient.invalidateQueries({ queryKey: queryKeys.campaigns.factionMembers(newFactionId) })
+        queryClient.invalidateQueries({ queryKey: queryKeys.factions.members(newFactionId) })
       }
     },
     onError: () => toast.error('Opslaan mislukt'),
@@ -94,8 +89,8 @@ export function useDeleteNpc(id: string) {
       if (error) throw error
     },
     onSuccess: (_, { campaignId, factionId }) => {
-      queryClient.removeQueries({ queryKey: queryKeys.campaigns.npcDetail(id) })
-      if (factionId) queryClient.invalidateQueries({ queryKey: queryKeys.campaigns.factionMembers(factionId) })
+      queryClient.removeQueries({ queryKey: queryKeys.npcs.detail(id) })
+      if (factionId) queryClient.invalidateQueries({ queryKey: queryKeys.factions.members(factionId) })
       if (campaignId) queryClient.invalidateQueries({ queryKey: queryKeys.campaigns.npcs(campaignId) })
     },
     onError: () => toast.error('Verwijderen mislukt'),
