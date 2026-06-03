@@ -18,7 +18,7 @@ const WEAPON_MASTERY_PRESETS = ['Splijten', 'Schrammen', 'Kerven', 'Duwen', 'Uit
 
 interface Props {
   form: Character
-  set: (key: keyof Character, value: unknown) => void
+  set: <K extends keyof Character>(key: K, value: Character[K] | null) => void
 }
 
 export function CharacterEditSpellsSection({ form, set }: Props) {

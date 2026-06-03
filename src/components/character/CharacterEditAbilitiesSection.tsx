@@ -14,7 +14,7 @@ const ARMOR_PROF_PRESETS  = ['Lichte wapenrusting', 'Gemiddelde wapenrusting', '
 
 interface Props {
   form: Character
-  set: (key: keyof Character, value: unknown) => void
+  set: <K extends keyof Character>(key: K, value: Character[K] | null) => void
   cycleSkill: (skillName: string) => void
   toggleSavingThrow: (abilityLabel: string) => void
 }

@@ -21,7 +21,7 @@ import { useCampaignLore, useCreateCampaignLore } from '@/hooks/queries/useCampa
 import { useCampaignQuests, useCreateCampaignQuest } from '@/hooks/queries/useCampaignQuests'
 import { useCampaignEncounters, useCreateCampaignEncounter } from '@/hooks/queries/useCampaignEncounters'
 import { useCampaignCharacters } from '@/hooks/queries/useCampaignCharacters'
-import { useCampaignItems, useCreateCampaignItem } from '@/hooks/queries/useCampaignItems'
+import { useCampaignItems, useForgeCampaignItem } from '@/hooks/queries/useCampaignItems'
 import { useCampaignFactions, useCreateCampaignFaction } from '@/hooks/queries/useCampaignFactions'
 import { pickGradient, coverGradients } from '@/utils/pickGradient'
 import { sanitizeImageUrl } from '@/utils/sanitizeUrl'
@@ -72,7 +72,7 @@ export default function CampaignDetailPage() {
   const createQuest = useCreateCampaignQuest(id!)
   const createEncounter = useCreateCampaignEncounter(id!)
   const createFaction = useCreateCampaignFaction(id!)
-  const createItem = useCreateCampaignItem(id!)
+  const createItem = useForgeCampaignItem(id!)
 
   if (isLoading) {
     return (

@@ -19,7 +19,6 @@ import {
 import { useCharacterItems } from '@/hooks/queries/useCharacterItems'
 import { calculateEffectiveStats } from '@/utils/equipmentUtils'
 import type { Character } from '@/types/character.types'
-import type { SpellSlots } from '@/types/character.types'
 import { sanitizeImageUrl } from '@/utils/sanitizeUrl'
 
 type Tab = 'stats' | 'spreuken' | 'inventaris' | 'vaardigheden' | 'lore'
@@ -110,8 +109,6 @@ export default function CharacterDetailPage() {
     { label: '🧗', key: 'climb_speed',  title: 'Klimmen'  },
     { label: '⛏️', key: 'burrow_speed', title: 'Graven'   },
   ].filter(s => (character[s.key as keyof Character] as number ?? 0) > 0)
-
-  const spellSlots = (character.spell_slots ?? {}) as SpellSlots
 
   return (
     <div>

@@ -3,7 +3,7 @@ import type { Character } from '@/types/character.types'
 
 interface Props {
   form: Character
-  set: (key: keyof Character, value: unknown) => void
+  set: <K extends keyof Character>(key: K, value: Character[K] | null) => void
   onCancel: () => void
   onSave: () => void
   isSaving: boolean

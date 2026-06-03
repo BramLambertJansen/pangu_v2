@@ -99,8 +99,7 @@ export default function CharacterEditPage() {
 
   async function handleDiscardConfirm() {
     if (guard.isDraftDiscard) {
-      const { error } = await supabase.from('characters').delete().eq('id', id!)
-      if (error) { toast.error('Verwijderen mislukt'); return }
+      try { await deleteCharacter.mutateAsync() } catch { return }
     }
     const handled = guard.confirmLeave()
     if (!handled) {

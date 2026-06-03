@@ -40,7 +40,8 @@ async function resolveNames(
   for (const [type, ids] of grouped.entries()) {
     // Items have no status column — select only id and name to avoid a column error
     const cols = type === 'item' ? 'id, name' : 'id, name, status'
-    const { data } = await supabase
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const { data } = await (supabase as any)
       .from(typeToTable[type])
       .select(cols)
       .in('id', ids)
