@@ -62,6 +62,7 @@ src/
 │   │   ├── ForgeCard.tsx    # Generieke "nieuw aanmaken" placeholder-kaart
 │   │   ├── Input.tsx
 │   │   ├── Modal.tsx
+│   │   ├── NotificationCenter.tsx # Notificatie-dropdown met realtime updates, mark-read, delete
 │   │   ├── Skeleton.tsx     # Basis skeleton-loader
 │   │   ├── Spinner.tsx
 │   │   └── StatusBadge.tsx  # Badge met status-kleur via statusMaps
@@ -71,11 +72,14 @@ src/
 │   │   ├── EditUserModal.tsx
 │   │   └── UserTable.tsx
 │   ├── bestiary/
-│   │   └── BestiaryCard.tsx
+│   │   ├── BestiaryCard.tsx
+│   │   └── DmBestiaryPanel.tsx    # DM-only statblock preview panel (compact scrollable)
 │   ├── campaign/
-│   │   └── CampaignCard.tsx  # CampaignCard + ForgeCampaignCard
+│   │   ├── CampaignCard.tsx  # CampaignCard + ForgeCampaignCard
+│   │   └── InvitePanel.tsx   # Genereer/revoke/kopieer uitnodigingscode; ledenlijst
 │   ├── character/
-│   │   └── CharacterCard.tsx
+│   │   ├── CharacterCard.tsx
+│   │   └── DmCharacterPanel.tsx   # DM-only karakter-preview (portret, stats, condities)
 │   ├── encounter/
 │   │   └── EncounterCard.tsx
 │   ├── item/
@@ -85,7 +89,8 @@ src/
 │   ├── lore/
 │   │   └── LoreCard.tsx
 │   ├── npc/
-│   │   └── NpcCard.tsx
+│   │   ├── NpcCard.tsx
+│   │   └── DmNpcPanel.tsx         # DM-only NPC-preview (naam, status, beschrijving excerpt)
 │   ├── quest/
 │   │   └── QuestCard.tsx
 │   ├── session/
@@ -103,12 +108,15 @@ src/
 │   ├── useEditGuard.ts      # Voorkomt navigeren weg bij unsaved changes
 │   ├── useEntityEdit.ts     # Generieke edit form state (dirty, committed, delete)
 │   ├── useImagePositioning.ts # Drag-to-reposition voor header images
+│   ├── useNotificationRealtime.ts # Supabase realtime subscription op notifications INSERT
 │   ├── useOnlineStatus.ts   # Browser online/offline status via navigator.onLine + events
 │   ├── useUnsavedChangesPrompt.ts # Browser beforeunload dialog
 │   └── queries/             # TanStack Query custom hooks (1 per entity)
 │       ├── useCampaign.ts           # + useCampaignWithWorld export
 │       ├── useCampaignCharacters.ts
 │       ├── useCampaignEncounters.ts
+│       ├── useCampaignFactions.ts
+│       ├── useCampaignInvite.ts     # Invite codes + campaign members (join flow)
 │       ├── useCampaignItems.ts      # + useCreateCampaignItem export
 │       ├── useCampaignLocations.ts
 │       ├── useCampaignLore.ts
@@ -116,10 +124,16 @@ src/
 │       ├── useCampaignQuests.ts
 │       ├── useCampaignSessions.ts
 │       ├── useCharacterItems.ts
-│       ├── useCharacters.ts
+│       ├── useCharacterSpells.ts
+│       ├── useCharacters.ts         # + useUnassignedCharacters export
 │       ├── useEncounterMonsters.ts  # Encounter monsters + bestiary join; EncounterMonsterFull type
+│       ├── useEntityLinks.ts
+│       ├── useFaction.ts
+│       ├── useNotifications.ts      # Fetch, mark-read, delete notifications
 │       ├── usePlayerNotes.ts        # useMySessionNote, useSessionPlayerNotes, useSavePlayerNote
 │       ├── useSession.ts
+│       ├── useSpells.ts
+│       ├── useSrdSearch.ts
 │       ├── useUserAISettings.ts     # Fetch + mutate user_ai_settings; useSetByokKey
 │       ├── useWorld.ts
 │       └── useWorldBestiaries.ts
@@ -134,7 +148,7 @@ src/
 │   ├── statusMaps.ts         # Status label + kleurkaarten (alle entiteiten)
 │   ├── supabase.ts           # Supabase client (getypeerd via Database); in DEV_MODE gewrapped via adapter
 │   └── supabaseLocal.ts      # Supabase-compatible localStorage adapter voor DEV_MODE (LocalQueryBuilder)
-├── pages/                   # 40 pagina-componenten (lazy-loaded via routes)
+├── pages/                   # Pagina-componenten (lazy-loaded via routes)
 │   ├── AdminPage.tsx
 │   ├── BestiariesPage.tsx
 │   ├── BestiaryDetailPage.tsx
@@ -151,7 +165,12 @@ src/
 │   ├── EncounterEditPage.tsx
 │   ├── EncounterRunPage.tsx  # Live gevechtsrunner: initiatiefvolgorde, HP tracking, d20 rolls
 │   ├── EncountersPage.tsx
+│   ├── FactionDetailPage.tsx
+│   ├── FactionEditPage.tsx
+│   ├── FactionsPage.tsx
 │   ├── ItemEditPage.tsx
+│   ├── ItemsPage.tsx         # Globale SRD items-browser met campaign-selector + detail modal
+│   ├── JoinPage.tsx          # Campaign invite handler: code validatie → karakter kiezen → deelnemen
 │   ├── LocationDetailPage.tsx
 │   ├── LocationEditPage.tsx
 │   ├── LocationsPage.tsx
@@ -171,6 +190,7 @@ src/
 │   ├── SessionEditPage.tsx
 │   ├── SessionsPage.tsx
 │   ├── SettingsPage.tsx
+│   ├── SpellsPage.tsx        # Spreukenbibliotheek: level- en school-filters, SRD import
 │   ├── WorldBuilderPage.tsx  # AI Wereldbouwer: vrije prompt + shortcuts voor Lore Forge
 │   ├── WorldDetailPage.tsx
 │   ├── WorldEditPage.tsx
@@ -194,22 +214,29 @@ src/
 ├── types/
 │   ├── database.types.ts     # Auto-gegenereerd via Supabase CLI
 │   ├── ai.ts                 # Provider, Message, AIResponse, ErrorResponse
-│   ├── bestiary.types.ts
+│   ├── bestiary.types.ts     # BestiaryAction + uitgebreid stat block (actions, legendary, etc.)
 │   ├── campaign.types.ts
+│   ├── campaign_member.types.ts # CampaignMember + CampaignMemberWithProfile
 │   ├── character.types.ts
 │   ├── encounter.types.ts
-│   ├── item.types.ts
+│   ├── faction.types.ts
+│   ├── item.types.ts         # requires_attunement + image_url toegevoegd
+│   ├── link.types.ts
 │   ├── location.types.ts
 │   ├── lore.types.ts
+│   ├── notification.types.ts # NotificationType union + Notification interface
 │   ├── npc.types.ts
+│   ├── open5e.types.ts
 │   ├── player_note.types.ts  # PlayerNote + PlayerNoteWithCharacter
 │   ├── quest.types.ts
 │   ├── session.types.ts
+│   ├── spell.types.ts
 │   └── world.types.ts
 └── utils/
     ├── apiError.ts           # getApiError() voor serverless responses
     ├── cn.ts                 # clsx + tailwind-merge
     ├── equipmentUtils.ts     # Equipment slots: labels, icons, ALLOWED_SLOTS_BY_TYPE, calculateEffectiveStats, getEquippedItemsBySlot, formatItemBonuses
+    ├── inviteCode.ts         # generateInviteCode() — leesbare codes als WOLF-4532
     ├── pickGradient.ts       # Hash-gebaseerde gradient paletten per entity-type
     └── sanitizeUrl.ts        # sanitizeImageUrl() — valideert HTTPS URLs
 
@@ -255,6 +282,7 @@ Beschikbare componenten:
 - `Button` — varianten: `primary`, `secondary`, `ghost`, `danger`; maten: `sm`, `md`, `lg`; `loading` boolean
 - `Input` — met label, foutmelding en aria-koppeling (`htmlFor`/`id`/`aria-describedby`)
 - `Modal` — met focus trap, `role="dialog"`, `aria-modal="true"`
+- `NotificationCenter` — notificatie-dropdown; realtime via `useNotificationRealtime`; mark-read + delete; unread-teller
 - `Spinner` — laadstatus-indicator; maten: `sm`, `md`, `lg`
 - `Badge` — status-labels (semantisch neutraal)
 - `Card` — content-containers
@@ -279,11 +307,20 @@ Elk feature-domein heeft een map: `campaign/`, `session/`, `world/`, `admin/`, `
 - `PlayerNotepad` — speler-notitieblok met debounced autosave, karakter-associatie en tijdstempel van laatste opslag
 - `StoryArcTracker` — tijdlijn-visualisatie van alle sessies in een kroniek; sessienummers als Romeinse cijfers; `onForge` callback voor nieuwe sessie
 
+**DM-preview panels:**
+- `DmBestiaryPanel` (`src/components/bestiary/`) — compact scrollable stat block: initiative, AC, HP, ability scores, saving throws, skills, damage immunities, actions, legendary actions
+- `DmNpcPanel` (`src/components/npc/`) — compact NPC-preview: naam/titel/status badge, beschrijving excerpt, biografie
+- `DmCharacterPanel` (`src/components/character/`) — compact karakter-preview: portret, HP/AC/speed, ability scores, saving throws, skills, spell slots, uitrusting, condities
+
+**Campaign-specifieke componenten (`src/components/campaign/`):**
+- `InvitePanel` — genereer/revoke uitnodigingscode; toon en kopieer deelbaar link; ledenlijst met e-mailadressen
+
 ### Generieke hooks (`src/hooks/`)
 
 - **`useEntityEdit<T>`** — standaard edit-form state: `form`, `set(key, value)`, `dirty`, `committed`, `deleteOpen`, `resetForm`, `guard`. Gebruik voor alle edit-pagina's.
 - **`useEditGuard`** — blokkeert navigeren weg bij unsaved + uncommitted changes.
 - **`useImagePositioning`** — mouse/touch drag-to-reposition voor header images.
+- **`useNotificationRealtime`** — Supabase `postgres_changes` subscription op `INSERT` to `notifications` gefilterd op `user_id`; invalideert notification query on new insert.
 - **`useOnlineStatus`** — geeft `boolean` terug; luistert naar `window` `online`/`offline` events.
 - **`useUnsavedChangesPrompt`** — browser `beforeunload` dialog bij dirty forms.
 - **`useAI`** — AI chat integratie: `{ ask, loading, windowRemaining, windowResetsAt, lastProvider, lastModel }`.
@@ -298,6 +335,9 @@ import { useWorldBestiaries } from '@/hooks/queries/useWorldBestiaries'
 import { useEncounterMonsters } from '@/hooks/queries/useEncounterMonsters'
 import { useMySessionNote, useSessionPlayerNotes, useSavePlayerNote } from '@/hooks/queries/usePlayerNotes'
 import { useUserAISettings, useSetByokKey } from '@/hooks/queries/useUserAISettings'
+import { useCampaignInvite, useSetInviteCode, useCampaignByInviteCode, useJoinCampaign, useJoinWithCharacter, useJoinAndCreateCharacter, useCampaignMembers } from '@/hooks/queries/useCampaignInvite'
+import { useNotifications, useMarkNotificationRead, useMarkAllNotificationsRead, useDeleteNotification } from '@/hooks/queries/useNotifications'
+import { useUnassignedCharacters } from '@/hooks/queries/useCharacters'
 ```
 
 ---
@@ -483,6 +523,12 @@ type LoreStatus = 'draft' | 'active' | 'archived'
 
 // bestiary.types.ts
 type BestiaryStatus = 'draft' | 'active' | 'archived'
+interface BestiaryAction { name: string, desc: string }
+// Bestiary has extended stat block: alignment, hit_dice, proficiency_bonus, senses, languages,
+// saving_throws, skills, damage_immunities, damage_resistances, damage_vulnerabilities,
+// condition_immunities, speed_details (all string | null)
+// special_abilities, actions, bonus_actions, reactions, legendary_actions, lair_actions (BestiaryAction[] | null)
+// legendary_desc (string | null), image_url (string | null)
 
 // quest.types.ts
 type QuestStatus = 'draft' | 'active' | 'completed' | 'failed' | 'archived'
@@ -495,7 +541,9 @@ type ItemType = 'weapon' | 'armor' | 'potion' | 'ring' | 'rod' | 'scroll' | 'sta
 type ItemRarity = 'common' | 'uncommon' | 'rare' | 'very_rare' | 'legendary' | 'artifact'
 type EquipmentSlot = 'head' | 'neck' | 'chest' | 'cloak' | 'gloves' | 'ring1' | 'ring2' | 'boots' | 'main_hand' | 'off_hand'
 interface ItemStatBonuses { ac_bonus?, str_bonus?, dex_bonus?, con_bonus?, int_bonus?, wis_bonus?, cha_bonus?, hp_bonus?, speed_bonus?, initiative_bonus?, attack_bonus?, damage_bonus?, damage_dice?, stealth_disadvantage?, skill_bonuses? }
-// Item has: equipped_slot: EquipmentSlot | null, properties: ItemStatBonuses
+// Item has: equipped_slot: EquipmentSlot | null, properties: ItemStatBonuses,
+//           requires_attunement: boolean, image_url: string | null,
+//           source: string | null, source_slug: string | null
 
 // character.types.ts
 type CharacterStatus = 'active' | 'inactive' | 'retired' | 'archived'
@@ -508,6 +556,14 @@ interface PlayerNoteWithCharacter extends PlayerNote { character: { name, charac
 type Provider = 'groq' | 'gemini' | 'anthropic' | 'openai'
 interface AIResponse { reply, provider, model, window_remaining }
 interface ErrorResponse { error, code, window_resets_at? }
+
+// campaign_member.types.ts
+interface CampaignMember { id, campaign_id, user_id, joined_at }
+interface CampaignMemberWithProfile extends CampaignMember { profiles: { display_name, email } | null }
+
+// notification.types.ts
+type NotificationType = 'campaign_member_joined' | 'session_scheduled' | 'session_updated' | 'ai_complete' | 'system_alert'
+interface Notification { id, user_id, type: NotificationType, title, message, read, metadata: Record<string, unknown> | null, created_at }
 ```
 
 ### Database tabellen (via `database.types.ts`)
@@ -528,8 +584,20 @@ interface ErrorResponse { error, code, window_resets_at? }
 | `items` | campaign | Items/loot (DM-pool of toegewezen aan karakter) |
 | `quests` | campaign | Quests binnen een kroniek |
 | `player_notes` | session | Spelernotities per sessie (unique per session_id + user_id) |
+| `campaign_members` | campaign | Spelers die deelnemen aan een kroniek (via uitnodigingscode) |
+| `notifications` | user | Realtime notificaties (lid toegetreden, sessie gepland, AI klaar, etc.) |
+| `spells` | user | Spreukenbibliotheek (user-scoped, optioneel SRD-geïmporteerd) |
+| `character_spells` | character | Junction: gekende spreuken per karakter (prepared boolean) |
+| `factions` | campaign | Facties en organisaties binnen een kroniek |
+| `entity_links` | campaign | Generieke relaties tussen entiteiten (bidirectioneel) |
 
 Alle tabellen hebben `committed boolean DEFAULT false` — bestaande rijen zijn `true`, nieuwe forge-aanmaak start als `false` (redirect naar edit voor invulling).
+
+### Storage buckets
+
+| Bucket | Toegang | Gebruik |
+|---|---|---|
+| `entity-images` | Publiek lezen; auth upload/update/delete (pad bevat user_id) | Custom artwork voor bestiaries en items (`image_url` kolom) |
 
 ### Migraties (chronologisch)
 
@@ -570,6 +638,19 @@ Alle tabellen hebben `committed boolean DEFAULT false` — bestaande rijen zijn 
 | 033 | `033_character_portrait.sql` | `portrait_url text` kolom op characters |
 | 034 | `034_character_portrait_position.sql` | `portrait_position text DEFAULT 'center'` kolom op characters |
 | 035 | `035_player_notes.sql` | `player_notes` tabel + RLS: spelers zien eigen notities, DM ziet alle notities voor campaign-sessies; unique index op (session_id, user_id) |
+| 036 | `036_campaign_invites.sql` | `invite_code text UNIQUE` op campaigns + lookup policy; `campaign_members` tabel + RLS (eigen membership, DM-read, join via invite, DM-remove) |
+| 037 | `037_notifications.sql` | `notifications` tabel + RLS + REPLICA IDENTITY FULL (realtime); 3 triggers: `notify_campaign_member_joined`, `notify_session_scheduled`, `notify_session_status_changed` |
+| 038 | `038_entity_links.sql` | `entity_links` generieke relatietabel + RLS (campaign-eigenaarschap) + UNIQUE + CHECK tegen zelf-link |
+| 039 | `039_factions.sql` | `factions` tabel + RLS + `update_factions_updated_at` trigger + index op `(campaign_id, created_at DESC)` |
+| 040 | `040_npc_faction.sql` | `faction_id uuid` FK op `npcs` (ON DELETE SET NULL) + partial index |
+| 041 | `041_srd_source.sql` | `source` + `source_slug` op `bestiaries` + `items`; partial unique indexes |
+| 042 | `042_spells.sql` | `spells` tabel (user-scoped) + RLS + unique index op `(user_id, source_slug)` |
+| 043 | `043_character_spells.sql` | `character_spells` junction tabel (character_id, spell_id, prepared bool) + RLS + unique index |
+| 044 | `044_fix_rls_member_reads.sql` | Fix: campaign-leden kunnen `entity_links` + `factions` lezen via SELECT-only policies |
+| 045 | `045_fix_faction_member_read_committed.sql` | Fix: beperkt `member_read_factions` policy tot `committed = true`; voorkomt dat spelers concept-facties zien |
+| 046 | `046_bestiary_actions.sql` | Gestructureerde gevechtsdata op `bestiaries`: `special_abilities`, `actions`, `bonus_actions`, `reactions`, `legendary_desc`, `legendary_actions`, `lair_actions` (jsonb arrays van `{ name, desc }`) |
+| 047 | `047_bestiary_combat_stats.sql` | Volledig D&D stat block op `bestiaries`: `alignment`, `hit_dice`, `proficiency_bonus`, `senses`, `languages`, `saving_throws`, `skills`, `damage_immunities/resistances/vulnerabilities`, `condition_immunities`, `speed_details`; `requires_attunement boolean` op `items` |
+| 048 | `048_entity_image_url.sql` | `image_url text` op `bestiaries` + `items`; `entity-images` public storage bucket aanmaken met RLS policies |
 
 ---
 
@@ -649,6 +730,9 @@ Routes zijn gedefinieerd in `src/routes/index.tsx`. Lazy-loading voor alle pagin
 | `/characters/:id` | `CharacterDetailPage` | `requireAuth` |
 | `/characters/:id/edit` | `CharacterEditPage` | `requireAuth` |
 | `/items/:id/edit` | `ItemEditPage` | `requireAuth` |
+| `/items` | `ItemsPage` | `requireAuth` |
+| `/spells` | `SpellsPage` | `requireAuth` |
+| `/join/:code` | `JoinPage` | nee (geen loader) |
 
 ### Auth loaders (`src/routes/loaders.ts`)
 
@@ -863,6 +947,7 @@ npm run test         # Vitest
 - [x] `ForgeCard` (generieke "nieuw aanmaken" placeholder)
 - [x] `Skeleton` (inline skeleton-loader)
 - [x] `StatusBadge` (status-badge met kleur uit statusMaps)
+- [x] `NotificationCenter` (realtime notificatie-dropdown met unread-teller)
 
 ### Authenticatie
 - [x] Login pagina (email + wachtwoord, validatie, redirect op rol)
@@ -954,6 +1039,7 @@ npm run test         # Vitest
 - [x] Wezen-detailpagina `/bestiary/:id` — breadcrumbs (wereld · bestiarium), header met type- en dreigingsbadges, stat block met modifiers, beschrijving, DM-notities
 - [x] Wezen verwijderen — met bevestigingsdialoog
 - [x] Bestiarium-link in wereld-detailpagina
+- [x] Uitgebreid stat block (`046`/`047`): acties, bonus-acties, reacties, legendarische acties, lair-acties, alignment, hit dice, senses, talen, immuniteiten, weerstanden, `image_url` voor custom artwork
 
 ### Karakter (Spelersperspectief)
 - [x] Characters tabel + RLS (`014_characters.sql`) — global per user, full D&D stat block
@@ -985,6 +1071,9 @@ npm run test         # Vitest
 - [x] Equipment slots — `equipped_slot text` op items (`027_item_equipped_slot.sql`); 10 slots (head/neck/chest/cloak/gloves/ring1/ring2/boots/main_hand/off_hand); uniek per character via partial index
 - [x] `EquipmentSlot` type + `ItemStatBonuses` interface in `src/types/item.types.ts`
 - [x] `equipmentUtils.ts` — slot-labels (NL), slot-icons, `ALLOWED_SLOTS_BY_TYPE`, `calculateEffectiveStats`, `getEquippedItemsBySlot`, `formatItemBonuses`
+- [x] `requires_attunement boolean` op items (`047_bestiary_combat_stats.sql`)
+- [x] `image_url text` op items (`048_entity_image_url.sql`) — custom artwork
+- [x] Globale items-browser `/items` (`ItemsPage`) — campaign-selector, SRD import, detail modal
 
 ### Wereld — Quests
 - [x] Quests tabel + RLS (`018_quests.sql`) — campaign-scoped, status (draft/active/completed/failed/archived)
@@ -1098,3 +1187,47 @@ npm run test         # Vitest
 - [x] `src/lib/queryKeys.ts` — `characters.spells(characterId)` query key toegevoegd
 - [x] `src/hooks/queries/useCharacterSpells.ts` — `useCharacterSpells(characterId)` (met geneste spell-join), `useAddCharacterSpell`, `useRemoveCharacterSpell`, `useToggleSpellPrepared`
 - [x] `src/pages/CharacterDetailPage.tsx` — Spreuken-tab uitgebreid met: spreukpicker (selecteer uit bibliotheek), "Gekende Spreuken"-lijst met voorbereid-toggle (✦/○ pip), uitklapbare beschrijving + hogere-niveaus tekst, verwijderknop per spreuk
+
+### Bestiarium — Uitgebreid Stat Block
+- [x] Migratie `046_bestiary_actions.sql` — gestructureerde gevechtsdata als jsonb arrays: `special_abilities`, `actions`, `bonus_actions`, `reactions`, `legendary_desc`, `legendary_actions`, `lair_actions` (`{ name: string, desc: string }[]`)
+- [x] Migratie `047_bestiary_combat_stats.sql` — volledig D&D stat block: `alignment`, `hit_dice`, `proficiency_bonus`, `senses`, `languages`, `saving_throws`, `skills`, `damage_immunities`, `damage_resistances`, `damage_vulnerabilities`, `condition_immunities`, `speed_details`; `requires_attunement boolean` op `items`
+- [x] `src/types/bestiary.types.ts` — `BestiaryAction` interface + alle nieuwe kolommen op `Bestiary`
+- [x] `src/types/item.types.ts` — `requires_attunement: boolean` toegevoegd
+- [x] `src/components/bestiary/DmBestiaryPanel.tsx` — compact scrollable stat block preview voor DM (initiative, AC, HP, ability scores, saves, skills, immunities, actions, legendary actions)
+
+### Entity Images (Custom Artwork)
+- [x] Migratie `048_entity_image_url.sql` — `image_url text` op `bestiaries` + `items`; `entity-images` public storage bucket met RLS (auth upload, public read, owner update/delete)
+- [x] `src/types/bestiary.types.ts` — `image_url: string | null` toegevoegd
+- [x] `src/types/item.types.ts` — `image_url: string | null` toegevoegd
+
+### RLS Fixes (Campaign Member Access)
+- [x] Migratie `044_fix_rls_member_reads.sql` — campaign-leden kunnen `entity_links` + `factions` lezen via SELECT-only policies (`member_read_entity_links`, `member_read_factions`)
+- [x] Migratie `045_fix_faction_member_read_committed.sql` — beperkt `member_read_factions` tot `committed = true`; spelers zien geen concept-facties
+
+### Campaign Invite Systeem
+- [x] `src/types/campaign_member.types.ts` — `CampaignMember` + `CampaignMemberWithProfile` interfaces
+- [x] `src/utils/inviteCode.ts` — `generateInviteCode()`: leesbare codes (`WOLF-4532`) met 60 fantasy-themed woorden + 4-cijferig getal
+- [x] `src/lib/queryKeys.ts` — `campaigns.invite(id)`, `campaigns.members(id)`, `invites.byCode(code)` toegevoegd
+- [x] `src/hooks/queries/useCampaignInvite.ts` — `useCampaignInvite` (fetch invite_code), `useSetInviteCode` (genereer/revoke), `useCampaignByInviteCode` (lookup via code), `useJoinCampaign`, `useJoinWithCharacter`, `useJoinAndCreateCharacter`, `useCampaignMembers`
+- [x] `src/hooks/queries/useCharacters.ts` — `useUnassignedCharacters()` toegevoegd (karakters zonder campaign_id, voor join-flow)
+- [x] `src/components/campaign/InvitePanel.tsx` — genereer/revoke/kopieer uitnodigingscode; ledenlijst met e-mailadressen
+- [x] `src/pages/JoinPage.tsx` — twee-staps flow: valideer code → toon campaign → selecteer/maak karakter → deelnemen; redirect naar login als niet geauthenticeerd
+
+### Notificatiesysteem
+- [x] `src/types/notification.types.ts` — `NotificationType` union + `Notification` interface (id, user_id, type, title, message, read, metadata, created_at)
+- [x] `src/lib/queryKeys.ts` — `notifications.list(userId)` toegevoegd
+- [x] `src/hooks/queries/useNotifications.ts` — `useNotifications(userId)` (50 meest recent), `useMarkNotificationRead`, `useMarkAllNotificationsRead`, `useDeleteNotification`
+- [x] `src/hooks/useNotificationRealtime.ts` — Supabase `postgres_changes` subscription op INSERT naar `notifications` (gefilterd op user_id); invalideert query on event
+- [x] `src/components/ui/NotificationCenter.tsx` — dropdown: type-gebaseerde iconen, relatieve timestamps, mark-read/delete; realtime updates; unread-teller
+- [x] `src/layouts/AppLayout.tsx` — `<NotificationCenter />` geïntegreerd in sidebar/header
+- Ondersteunde typen: `campaign_member_joined`, `session_scheduled`, `session_updated`, `ai_complete`, `system_alert`
+
+### DM Preview Panels
+- [x] `src/components/bestiary/DmBestiaryPanel.tsx` — compact stat block (zie Bestiarium — Uitgebreid Stat Block hierboven)
+- [x] `src/components/npc/DmNpcPanel.tsx` — naam/titel/status badge, beschrijving excerpt, biografie; "Naar detail →" knop
+- [x] `src/components/character/DmCharacterPanel.tsx` — portret, HP/AC/speed, ability scores, saving throws, skills, spell slots summary, uitgeruste items, condities
+
+### Globale Items-browser
+- [x] `src/pages/ItemsPage.tsx` — globale SRD items-browser; campaign-selector dropdown; import modal met `CompendiumBrowser kind="item"`; detail modal per item (zeldzaamheid/type/attunement/gewicht/beschrijving)
+- [x] `src/routes/index.tsx` — `/items` route (lazy ItemsPage, requireAuth)
+- [x] `src/layouts/AppLayout.tsx` — "Items" nav-item toegevoegd (na Spreuken)
