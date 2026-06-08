@@ -15,6 +15,18 @@ import { OrnateDivider } from '@/components/ui/OrnateDivider'
 import { Tabs } from '@/components/ui/Tabs'
 import { DiceRoller } from '@/components/ui/DiceRoller'
 import { KbdHint } from '@/components/ui/KbdHint'
+import { Card } from '@/components/ui/Card'
+import { EntityCard } from '@/components/ui/EntityCard'
+import { ForgeCard } from '@/components/ui/ForgeCard'
+import { EntityCardSkeleton } from '@/components/ui/EntityCardSkeleton'
+import { Avatar } from '@/components/ui/Avatar'
+import { Badge } from '@/components/ui/Badge'
+import { StatusBadge } from '@/components/ui/StatusBadge'
+import { Spinner } from '@/components/ui/Spinner'
+import { Skeleton } from '@/components/ui/Skeleton'
+import { EmptyState } from '@/components/ui/EmptyState'
+import { Breadcrumbs } from '@/components/ui/Breadcrumbs'
+import { Modal } from '@/components/ui/Modal'
 import { SkillsPanel } from '@/components/character/SkillsPanel'
 import { SpellSlots } from '@/components/character/SpellSlots'
 import { SanctumInventory } from '@/components/character/SanctumInventory'
@@ -50,6 +62,8 @@ export default function DesignSystemPage() {
   const { theme, accent, density, setTheme, setAccent, setDensity } = useThemeStore()
   const [search, setSearch] = useState('')
   const [tab, setTab] = useState('overzicht')
+  const [modalOpen, setModalOpen] = useState(false)
+  const [toggled, setToggled] = useState(true)
 
   return (
     <div className="page-transition mx-auto max-w-5xl">
@@ -144,6 +158,112 @@ export default function DesignSystemPage() {
           <DiceRoller />
         </div>
       </Section>
+
+      <Section title="Surfaces">
+        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+          {(['surface', 'surface-2', 'surface-void', 'surface-glow'] as const).map((s) => (
+            <div key={s} className={`${s} flex h-24 items-center justify-center`}>
+              <code className="font-mono text-[11px] text-muted">.{s}</code>
+            </div>
+          ))}
+        </div>
+      </Section>
+
+      <Section title="Kaarten">
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          <Card>
+            <p className="label">Card</p>
+            <p className="text-sm text-ink-soft">Generieke container op de canonieke <code>.surface</code>-laag.</p>
+          </Card>
+
+          <EntityCard ariaLabel="Voorbeeld entiteitskaart" variant="compact" onClick={() => {}}>
+            <div className="p-5">
+              <p className="pg-section-title mb-1">EntityCard</p>
+              <p className="text-sm text-ink-soft">Klikbare entiteitskaart (compact). Basis voor alle feature-cards.</p>
+            </div>
+          </EntityCard>
+
+          <ForgeCard
+            variant="compact"
+            accent="violet"
+            title="Nieuw smeden"
+            subtitle="Een leeg kosmos wacht."
+            onClick={() => {}}
+          />
+
+          <div>
+            <EntityCardSkeleton count={1} variant="compact" />
+          </div>
+        </div>
+      </Section>
+
+      <Section title="Basis-componenten">
+        <div className="flex flex-wrap items-center gap-6">
+          <div className="flex items-center gap-3">
+            <Avatar fallback="AW" />
+            <Avatar fallback="PG" size="sm" />
+          </div>
+          <div className="flex flex-wrap items-center gap-2">
+            <Badge>Default</Badge>
+            <Badge variant="success">Actief</Badge>
+            <Badge variant="warning">Concept</Badge>
+            <Badge variant="danger">Mislukt</Badge>
+            <Badge variant="info">Gereed</Badge>
+          </div>
+          <div className="flex flex-wrap items-center gap-2">
+            <StatusBadge label="Voltooid" color="var(--teal)" />
+            <StatusBadge label="Actief" color="var(--violet)" />
+          </div>
+          <Spinner />
+          <button type="button" className="btn-icon" aria-label="Voorbeeld icoonknop">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="12" y1="5" x2="12" y2="19" /><line x1="5" y1="12" x2="19" y2="12" /></svg>
+          </button>
+          <div className="flex items-center gap-1">
+            <button type="button" className="hp-step" aria-label="HP omlaag">−</button>
+            <span className="pg-mono">24</span>
+            <button type="button" className="hp-step" aria-label="HP omhoog">+</button>
+          </div>
+          <button
+            type="button"
+            role="switch"
+            aria-checked={toggled}
+            aria-label="Voorbeeld schakelaar"
+            className="pangu-toggle"
+            onClick={() => setToggled((t) => !t)}
+          >
+            <span className="pangu-toggle-knob" />
+          </button>
+          <button type="button" className="btn btn-violet-soft btn-sm" onClick={() => setModalOpen(true)}>
+            Open modal
+          </button>
+        </div>
+
+        <div className="mt-5 max-w-md">
+          <Skeleton className="h-4 w-3/4 rounded" />
+          <Skeleton className="mt-2 h-4 w-1/2 rounded" />
+        </div>
+
+        <div className="mt-5">
+          <Breadcrumbs items={[{ label: 'Werelden', to: '/worlds' }, { label: 'Aerthos', to: '/worlds/1' }, { label: 'Bestiarium' }]} />
+        </div>
+
+        <div className="mt-5 surface">
+          <EmptyState title="Een leeg kosmos wacht." description="Begin waar je wil." />
+        </div>
+
+        <div className="mt-5 h-40 max-w-xs overflow-hidden rounded-[var(--r-lg)]">
+          <div className="placeholder-img"><span className="ph-glyph">P</span></div>
+        </div>
+      </Section>
+
+      <Modal open={modalOpen} onClose={() => setModalOpen(false)} title="Voorbeeld modal">
+        <p className="text-sm text-ink-soft">
+          Token-gedreven dialoog met focus-trap. Sluit met Escape of de knop.
+        </p>
+        <div className="mt-4 flex justify-end">
+          <button type="button" className="btn btn-primary btn-sm" onClick={() => setModalOpen(false)}>Sluiten</button>
+        </div>
+      </Modal>
 
       <OrnateDivider label="Toekomstige componenten" />
 
