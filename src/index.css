@@ -75,7 +75,66 @@
   --t-fast: 180ms;
   --t-base: 220ms;
   --t-slow: 280ms;
+
+  /* ── Elevation / shadow ──────────────────────────────────
+     Structural tokens added for the canonical component layer.
+     Values match today's hand-rolled shadows so the look is unchanged. */
+  --shadow-1: 0 2px 8px rgba(0, 0, 0, 0.3);
+  --shadow-2: 0 8px 24px rgba(0, 0, 0, 0.45);
+  --shadow-3: 0 24px 64px rgba(0, 0, 0, 0.6);
+  --shadow-card: 0 8px 32px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.03);
+  --shadow-hero: 0 12px 48px rgba(0, 0, 0, 0.5), 0 0 0 1px var(--hairline-strong);
+  --shadow-glow-violet: 0 0 40px var(--violet-glow);
+  --shadow-glow: 0 0 40px var(--violet-glow);
+  --shadow-glow-gold: 0 0 32px var(--gold-glow);
+
+  /* ── Overlay / scrim ─────────────────────────────────────
+     Replace previously-hardcoded rgba() values in cards + layout. */
+  --scrim:        rgba(10, 10, 20, 0.8);
+  --scrim-strong: rgba(10, 10, 20, 0.98);
+  --overlay-violet: rgba(155, 138, 255, 0.08);
+  --overlay-gold:   rgba(245, 200, 66, 0.04);
+  --starfield-star: var(--ink);
+  --starfield-gold: var(--gold);
+
+  /* ── Semantic type roles ─────────────────────────────────
+     Mirrors the .pangu-* type utilities; consumed by the .pg-* layer. */
+  --eyebrow-font: var(--font-body);
+  --eyebrow-size: 13px;
+  --eyebrow-weight: 700;
+  --eyebrow-tracking: 0.32em;
+  --eyebrow-color: var(--gold);
+  --display-xl-size: clamp(64px, 10vw, 108px);
+  --display-lg-size: clamp(36px, 5vw, 56px);
+  --display-size: clamp(28px, 3.5vw, 40px);
+  --display-tracking: 0.035em;
+  --section-title-size: 13px;
+  --section-title-tracking: 0.22em;
+  --body-size: 14px;
+  --body-line: 1.65;
+  --quote-size: 19px;
+  --quote-line: 1.55;
+  --label-size: 10.5px;
+  --label-tracking: 0.22em;
 }
+
+/* ============================================================================
+   THEMING AXES — scaffolds for the future multi-theme switch (step 4).
+   Components read tokens only, so setting these attributes on <html> re-skins
+   the whole app with zero component changes. Default (no attribute) = today's
+   look. The DS-v2 token swap (step 2) and extra theme bodies (step 4) fill
+   these in later; they are intentionally empty/identity here.
+   ============================================================================ */
+:root[data-density="cozy"]    { --sp-4: 20px; --sp-5: 24px; --sp-6: 32px; --sp-8: 40px; }
+:root[data-density="compact"] { --sp-4: 12px; --sp-5: 14px; --sp-6: 18px; --sp-8: 24px; }
+
+:root[data-accent="teal"]    { --violet: #3ecfb2; --violet-soft: #6ee0c8; --violet-deep: #2aa48d; --violet-glow: rgba(62,207,178,0.35); }
+:root[data-accent="gold"]    { --violet: #f5c842; --violet-soft: #ffd968; --violet-deep: #c9a02e; --violet-glow: rgba(245,200,66,0.35); }
+:root[data-accent="azure"]   { --violet: #6ba7ff; --violet-soft: #8fbfff; --violet-deep: #4f88dc; --violet-glow: rgba(107,167,255,0.35); }
+:root[data-accent="crimson"] { --violet: #ff6b6b; --violet-soft: #ff9090; --violet-deep: #d04545; --violet-glow: rgba(255,107,107,0.35); }
+
+/* data-theme="sanctum" is the default look (identity). Future themes add
+   their own :root[data-theme="..."] override blocks here. */
 
 body {
   background: var(--void);
@@ -147,12 +206,14 @@ body {
 
 /* ── Surfaces ──────────────────────────────────────────── */
 
+.surface,
 .pangu-surface {
   background: var(--surface);
   border: 1px solid var(--hairline);
   border-radius: var(--r-lg);
 }
 
+.surface-glow,
 .pangu-surface-glow {
   background: linear-gradient(180deg, var(--surface) 0%, var(--surface-2) 100%);
   border: 1px solid var(--hairline-strong);
@@ -162,6 +223,7 @@ body {
 
 /* ── Tab bar ────────────────────────────────────────────── */
 
+.tab-bar,
 .pangu-tab-bar,
 .pangu-tab-bar--line {
   display: flex;
@@ -175,11 +237,13 @@ body {
   scrollbar-width: none;
 }
 
+.tab-bar::-webkit-scrollbar,
 .pangu-tab-bar::-webkit-scrollbar,
 .pangu-tab-bar--line::-webkit-scrollbar {
   display: none;
 }
 
+.tab,
 .pangu-tab,
 .pangu-tab--line {
   flex: 1 0 auto;
@@ -202,17 +266,20 @@ body {
   justify-content: center;
 }
 
+.tab:hover,
 .pangu-tab:hover,
 .pangu-tab--line:hover {
   color: var(--ink-soft);
 }
 
+.tab[aria-selected='true'],
 .pangu-tab[aria-selected='true'],
 .pangu-tab--line[aria-selected='true'] {
   background: var(--violet);
   color: #fff;
 }
 
+.tab:focus-visible,
 .pangu-tab:focus-visible,
 .pangu-tab--line:focus-visible {
   outline: 2px solid var(--violet);
@@ -222,6 +289,7 @@ body {
 /* ── Tab bar — mobile responsive ────────────────────────── */
 
 @media (max-width: 767px) {
+  .tab,
   .pangu-tab,
   .pangu-tab--line {
     flex: 1 1 auto;
@@ -253,6 +321,7 @@ body {
 
 /* ── Form elements ──────────────────────────────────────── */
 
+.label,
 .pangu-label {
   display: block;
   font-size: 10.5px;
@@ -264,6 +333,7 @@ body {
   font-family: var(--font-body);
 }
 
+.input,
 .pangu-input {
   display: block;
   width: 100%;
@@ -278,20 +348,24 @@ body {
   transition: border-color 200ms, box-shadow 200ms;
 }
 
+.input::placeholder,
 .pangu-input::placeholder {
   color: var(--muted);
 }
 
+.input:focus,
 .pangu-input:focus {
   border-color: rgba(155, 138, 255, 0.5);
   box-shadow: 0 0 0 3px rgba(155, 138, 255, 0.12), 0 2px 16px rgba(155, 138, 255, 0.07);
 }
 
+.input:disabled,
 .pangu-input:disabled {
   opacity: 0.5;
   cursor: not-allowed;
 }
 
+.textarea,
 .pangu-textarea {
   display: block;
   width: 100%;
@@ -309,15 +383,18 @@ body {
   line-height: 1.6;
 }
 
+.textarea::placeholder,
 .pangu-textarea::placeholder {
   color: var(--muted);
 }
 
+.textarea:focus,
 .pangu-textarea:focus {
   border-color: rgba(155, 138, 255, 0.5);
   box-shadow: 0 0 0 3px rgba(155, 138, 255, 0.12), 0 2px 16px rgba(155, 138, 255, 0.07);
 }
 
+.select-trigger,
 .pangu-select {
   display: block;
   width: 100%;
@@ -338,6 +415,7 @@ body {
   padding-right: 36px;
 }
 
+.select-trigger:focus,
 .pangu-select:focus {
   border-color: rgba(155, 138, 255, 0.5);
   box-shadow: 0 0 0 3px rgba(155, 138, 255, 0.12);
@@ -345,6 +423,7 @@ body {
 
 /* ── Buttons ────────────────────────────────────────────── */
 
+.btn,
 .pangu-btn {
   display: inline-flex;
   align-items: center;
@@ -365,73 +444,86 @@ body {
   min-height: 44px;
 }
 
+.btn:disabled,
 .pangu-btn:disabled {
   opacity: 0.4;
   pointer-events: none;
 }
 
+.btn:focus-visible,
 .pangu-btn:focus-visible {
   outline: 2px solid var(--violet);
   outline-offset: 2px;
 }
 
+.btn-primary,
 .pangu-btn-primary {
   background: var(--violet);
   color: var(--void);
   box-shadow: 0 4px 20px var(--violet-glow), inset 0 1px 0 rgba(255, 255, 255, 0.2);
 }
 
+.btn-primary:hover,
 .pangu-btn-primary:hover {
   background: var(--violet-soft);
   transform: translateY(-1px);
   box-shadow: 0 6px 24px var(--violet-glow);
 }
 
+.btn-ghost,
 .pangu-btn-ghost {
   background: transparent;
   color: var(--ink-soft);
   border-color: var(--hairline);
 }
 
+.btn-ghost:hover,
 .pangu-btn-ghost:hover {
   background: rgba(155, 138, 255, 0.06);
   border-color: var(--hairline-strong);
   color: var(--ink);
 }
 
+.btn-violet-soft,
 .pangu-btn-violet-soft {
   background: rgba(155, 138, 255, 0.08);
   color: var(--violet);
   border-color: rgba(155, 138, 255, 0.25);
 }
 
+.btn-violet-soft:hover,
 .pangu-btn-violet-soft:hover {
   background: rgba(155, 138, 255, 0.14);
 }
 
+.btn-gold,
 .pangu-btn-gold {
   background: var(--gold);
   color: var(--void);
   box-shadow: 0 4px 20px var(--gold-glow), inset 0 1px 0 rgba(255, 255, 255, 0.2);
 }
 
+.btn-gold:hover,
 .pangu-btn-gold:hover {
   background: var(--gold-soft);
   transform: translateY(-1px);
   box-shadow: 0 6px 24px var(--gold-glow);
 }
 
+.btn-crimson,
 .pangu-btn-crimson {
   background: transparent;
   color: var(--crimson);
   border-color: rgba(255, 107, 107, 0.25);
 }
 
+.btn-crimson:hover,
 .pangu-btn-crimson:hover {
   background: rgba(255, 107, 107, 0.06);
   border-color: rgba(255, 107, 107, 0.4);
 }
 
+.btn-sm,
 .pangu-btn-sm {
   padding: 7px 14px;
   font-size: 11px;
@@ -482,6 +574,7 @@ body {
 
 /* ── Page header ────────────────────────────────────────── */
 
+.pg-eyebrow,
 .pangu-eyebrow {
   display: flex;
   align-items: center;
@@ -495,6 +588,7 @@ body {
   margin-bottom: 12px;
 }
 
+.pg-eyebrow::before,
 .pangu-eyebrow::before {
   content: '';
   display: block;
@@ -504,6 +598,7 @@ body {
   opacity: 0.6;
 }
 
+.pg-display,
 .pangu-display {
   font-family: var(--font-display);
   font-size: clamp(28px, 3.5vw, 40px);
@@ -513,6 +608,7 @@ body {
   color: var(--ink);
 }
 
+.pg-display-lg,
 .pangu-display-lg {
   font-family: var(--font-display);
   font-size: clamp(36px, 5vw, 56px);
@@ -522,6 +618,7 @@ body {
   color: var(--ink);
 }
 
+.pg-display-xl,
 .pangu-display-xl {
   font-family: var(--font-display);
   font-size: clamp(64px, 10vw, 108px);
@@ -531,6 +628,7 @@ body {
   color: var(--ink);
 }
 
+.pg-quote,
 .pangu-quote {
   font-family: 'Cormorant Garamond', Georgia, serif;
   font-style: italic;
@@ -539,6 +637,7 @@ body {
   color: var(--ink-soft);
 }
 
+.pg-section-title,
 .pangu-section-title {
   font-family: var(--font-display);
   font-size: 13px;
@@ -1158,8 +1257,311 @@ body {
 
   .pangu-btn-primary:hover,
   .pangu-btn-gold:hover,
+  .btn-primary:hover,
+  .btn-gold:hover,
   .entity-card:hover,
   .entity-card[data-variant="hero"]:hover {
     transform: none !important;
   }
+}
+
+/* ============================================================================
+   CANONICAL COMPONENT LAYER — additions
+   Brand-new token-driven classes ported from the PANGU Design System
+   (components.css). These did not previously exist in the app; they are the
+   target vocabulary for the consolidation. Values are token-driven so the
+   step-2 DS-v2 token swap re-skins them with no markup changes.
+   ============================================================================ */
+
+/* ─── Button extras ──────────────────────────────────────── */
+.btn:not(:disabled):active,
+.pangu-btn:not(:disabled):active {
+  transform: scale(0.96) translateY(1px);
+  transition-duration: 60ms;
+  box-shadow: none;
+}
+
+.btn-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: transparent;
+  color: var(--ink-soft);
+  border: 1px solid transparent;
+  cursor: pointer;
+  transition: all var(--t-fast);
+}
+.btn-icon:hover { background: rgba(155, 138, 255, 0.1); color: var(--violet); }
+.btn-icon:focus-visible { outline: 2px solid var(--violet); outline-offset: 2px; }
+
+.btn-lg { padding: 14px 28px; min-height: 52px; font-size: 13px; }
+
+/* Understated text link with a sliding trailing arrow ("bekijk alles →"). */
+.btn-link {
+  background: transparent;
+  border: none;
+  box-shadow: none;
+  padding: 4px 2px;
+  min-height: 0;
+  color: var(--ink-soft);
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+}
+.btn-link .icon,
+.btn-link svg { transition: transform var(--t-fast) var(--ease-out); }
+.btn-link:hover { color: var(--ink); }
+.btn-link:hover .icon,
+.btn-link:hover svg { transform: translateX(4px); }
+.btn-link:focus-visible { outline: 2px solid var(--violet); outline-offset: 2px; border-radius: 2px; }
+.btn-link-gold { color: var(--gold); }
+.btn-link-gold:hover { color: var(--gold-soft); }
+
+/* HP stepper — a sturdier tap target than a bare icon button. */
+.hp-step {
+  width: 30px;
+  height: 30px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--void-2);
+  border: 1px solid var(--hairline);
+  border-radius: var(--r-xs);
+  color: var(--ink-soft);
+  cursor: pointer;
+  transition: background var(--t-fast), border-color var(--t-fast);
+}
+.hp-step:hover { background: var(--surface); border-color: var(--hairline-strong); }
+.hp-step:focus-visible { outline: 2px solid var(--violet); outline-offset: 2px; }
+@media (max-width: 900px) { .hp-step { width: 38px; height: 38px; } }
+
+/* ─── Surface variants ───────────────────────────────────── */
+.surface-2 {
+  background: var(--surface-2);
+  border: 1px solid var(--hairline);
+  border-radius: var(--r-lg);
+}
+.surface-void {
+  background: var(--void-2);
+  border: 1px solid var(--hairline);
+  border-radius: var(--r-lg);
+}
+
+/* Hover affordance for clickable cards. */
+.clickable { cursor: pointer; transition: all var(--t-base) var(--ease-out); }
+.clickable:hover { transform: translateY(-3px); box-shadow: 0 12px 32px rgba(0, 0, 0, 0.28); }
+.clickable:active { transform: translateY(-1px) scale(0.99); transition-duration: 60ms; }
+@media (hover: none) { .clickable:hover { transform: none; box-shadow: none; } }
+
+/* ─── SearchBar ──────────────────────────────────────────── */
+.search-bar { position: relative; width: 100%; }
+.search-bar-icon {
+  position: absolute;
+  left: 20px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--muted);
+  pointer-events: none;
+  transition: color 260ms var(--ease-out), transform 260ms;
+  z-index: 1;
+}
+.search-bar:focus-within .search-bar-icon { color: var(--violet); transform: translateY(-50%) scale(1.1); }
+.search-bar-input {
+  display: block;
+  width: 100%;
+  padding: 16px 56px 16px 52px;
+  background: var(--void-2);
+  border: 1px solid rgba(155, 138, 255, 0.12);
+  border-radius: var(--r-full);
+  color: var(--ink);
+  font-family: var(--font-body);
+  font-size: 15px;
+  line-height: 1.4;
+  outline: none;
+  transition: border-color 260ms var(--ease-out), box-shadow 260ms var(--ease-out), background 260ms;
+}
+.search-bar-input::placeholder { color: var(--subtle); font-style: italic; }
+.search-bar-input:focus {
+  border-color: var(--violet);
+  background: rgba(155, 138, 255, 0.04);
+  box-shadow: 0 0 0 3px rgba(155, 138, 255, 0.12), 0 12px 40px rgba(0, 0, 0, 0.2);
+}
+.search-bar.is-compact .search-bar-input { padding: 11px 40px 11px 38px; font-size: 14px; }
+.search-bar.is-compact .search-bar-icon { left: 13px; }
+.search-bar.is-compact .search-bar-clear { right: 9px; }
+.search-bar-clear {
+  position: absolute;
+  right: 14px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--surface-3);
+  border: 1px solid var(--hairline);
+  color: var(--muted);
+  cursor: pointer;
+  transition: all 180ms var(--ease-out);
+}
+.search-bar-clear:hover { color: var(--ink); background: var(--surface-hover); border-color: var(--hairline-strong); transform: translateY(-50%) scale(1.12); }
+.search-bar-clear:focus-visible { outline: 2px solid var(--violet); outline-offset: 2px; }
+
+/* ─── Badge (DS) ─────────────────────────────────────────── */
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 3px 9px;
+  border-radius: var(--r-full);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  border: 1px solid transparent;
+}
+.badge-violet { background: rgba(155, 138, 255, 0.12); color: var(--violet); border-color: rgba(155, 138, 255, 0.3); }
+.badge-gold { background: rgba(245, 200, 66, 0.12); color: var(--gold); border-color: rgba(245, 200, 66, 0.3); }
+.badge-teal { background: rgba(62, 207, 178, 0.12); color: var(--teal); border-color: rgba(62, 207, 178, 0.3); }
+.badge-solid-gold { background: var(--gold); color: var(--void); }
+.badge-solid-violet { background: var(--violet); color: var(--void); }
+.badge-outline { background: transparent; color: var(--ink-soft); border-color: var(--hairline-strong); }
+
+/* ─── Chip ───────────────────────────────────────────────── */
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 11px;
+  background: var(--surface-2);
+  border: 1px solid var(--hairline);
+  border-radius: var(--r-full);
+  font-size: 12px;
+  color: var(--ink-soft);
+  white-space: nowrap;
+}
+
+/* ─── Stat pill / kicker ─────────────────────────────────── */
+.stat-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 14px 8px 10px;
+  background: var(--surface);
+  border: 1px solid var(--hairline);
+  border-radius: var(--r-full);
+  font-size: 13px;
+}
+.stat-pill .ic {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: var(--r-full);
+  background: rgba(155, 138, 255, 0.1);
+  color: var(--violet);
+}
+.stat-pill .val { font-weight: 700; color: var(--ink); }
+.stat-pill .lab { color: var(--muted); font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase; }
+
+.kicker {
+  font-family: var(--font-display);
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--gold);
+  letter-spacing: 0.3em;
+}
+
+/* ─── Ornamental divider ─────────────────────────────────── */
+.div-ornate { display: flex; align-items: center; gap: var(--sp-4); margin: var(--sp-10) 0; }
+.div-ornate::before,
+.div-ornate::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--hairline-strong), transparent);
+}
+.div-ornate .glyph {
+  font-family: var(--font-display);
+  font-size: 11px;
+  letter-spacing: 0.4em;
+  color: var(--gold);
+  padding: 6px 18px;
+  border: 1px solid var(--hairline);
+  border-radius: var(--r-full);
+  background: var(--surface);
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+/* ─── Tab indicator (sliding pill) ───────────────────────── */
+.tab-indicator {
+  position: absolute;
+  top: 5px;
+  bottom: 5px;
+  border-radius: var(--r-full);
+  background: var(--violet);
+  transition: left 340ms var(--ease-out), width 340ms var(--ease-out), opacity 220ms ease;
+  pointer-events: none;
+  z-index: 0;
+  box-shadow: 0 2px 24px var(--violet-glow), inset 0 1px 0 rgba(255, 255, 255, 0.15);
+}
+
+/* ─── Image placeholder ──────────────────────────────────── */
+.placeholder-img {
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(135deg, var(--surface-2) 0%, var(--surface-3) 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  overflow: hidden;
+}
+.placeholder-img::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(circle at 30% 30%, rgba(155, 138, 255, 0.15) 0%, transparent 50%),
+    radial-gradient(circle at 70% 70%, rgba(245, 200, 66, 0.08) 0%, transparent 50%);
+}
+.placeholder-img .ph-glyph {
+  position: relative;
+  font-family: var(--font-display);
+  font-size: 48px;
+  color: rgba(155, 138, 255, 0.25);
+  letter-spacing: 0.15em;
+}
+
+/* ─── Type utilities (pg-* additions) ────────────────────── */
+.pg-label {
+  display: block;
+  font-family: var(--font-body);
+  font-size: var(--label-size);
+  font-weight: 700;
+  letter-spacing: var(--label-tracking);
+  text-transform: uppercase;
+  color: var(--gold);
+}
+.pg-mono { font-family: var(--font-mono); }
+
+@media (prefers-reduced-motion: reduce) {
+  .btn-icon,
+  .clickable,
+  .search-bar-icon,
+  .search-bar-input,
+  .tab-indicator,
+  .search-bar-clear { transition-duration: 1ms !important; }
 }

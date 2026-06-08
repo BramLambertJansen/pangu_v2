@@ -52,6 +52,7 @@ const FactionDetailPage = lazy(() => import('@/pages/FactionDetailPage'))
 const FactionEditPage = lazy(() => import('@/pages/FactionEditPage'))
 const SpellsPage = lazy(() => import('@/pages/SpellsPage'))
 const ItemsPage = lazy(() => import('@/pages/ItemsPage'))
+const DesignSystemPage = lazy(() => import('@/pages/DesignSystemPage'))
 
 function wrap(Page: React.ComponentType) {
   return (
@@ -94,6 +95,11 @@ export const router = createBrowserRouter([
         path: '/settings',
         loader: requireAuth,
         element: wrap(SettingsPage),
+      },
+      {
+        path: '/design-system',
+        loader: requireAuth,
+        element: wrap(DesignSystemPage),
       },
       {
         path: '/worlds',
