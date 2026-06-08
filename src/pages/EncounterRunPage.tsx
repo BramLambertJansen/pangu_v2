@@ -139,7 +139,7 @@ function HpRow({ current, max, onAdjust }: { current: number; max: number; onAdj
               display: 'flex', alignItems: 'center', justifyContent: 'center',
               transition: 'background var(--t-fast)',
             }}
-            onMouseEnter={e => (e.currentTarget.style.background = 'rgba(220,90,80,0.15)')}
+            onMouseEnter={e => (e.currentTarget.style.background = 'rgb(var(--crimson-rgb) / 0.15)')}
             onMouseLeave={e => (e.currentTarget.style.background = 'var(--surface-2)')}
           >
             ▼
@@ -157,7 +157,7 @@ function HpRow({ current, max, onAdjust }: { current: number; max: number; onAdj
               display: 'flex', alignItems: 'center', justifyContent: 'center',
               transition: 'background var(--t-fast)',
             }}
-            onMouseEnter={e => (e.currentTarget.style.background = 'rgba(62,207,178,0.15)')}
+            onMouseEnter={e => (e.currentTarget.style.background = 'rgb(var(--teal-rgb) / 0.15)')}
             onMouseLeave={e => (e.currentTarget.style.background = 'var(--surface-2)')}
           >
             ▲
@@ -223,7 +223,7 @@ function CharacterStatPopup({ character, hpCurrent, onAdjustHp }: { character: C
           </p>
           <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
             {character.saving_throw_proficiencies.map(s => (
-              <span key={s} style={{ fontSize: 11, color: 'var(--violet)', background: 'rgba(155,138,255,0.1)', border: '1px solid rgba(155,138,255,0.25)', borderRadius: 4, padding: '2px 8px', fontWeight: 600 }}>
+              <span key={s} style={{ fontSize: 11, color: 'var(--violet)', background: 'rgb(var(--violet-rgb) / 0.1)', border: '1px solid rgb(var(--violet-rgb) / 0.25)', borderRadius: 4, padding: '2px 8px', fontWeight: 600 }}>
                 {s.toUpperCase()}
               </span>
             ))}
@@ -238,7 +238,7 @@ function CharacterStatPopup({ character, hpCurrent, onAdjustHp }: { character: C
           </p>
           <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
             {character.active_conditions.map(c => (
-              <span key={c} style={{ fontSize: 11, color: 'var(--crimson)', background: 'rgba(220,90,80,0.1)', border: '1px solid rgba(220,90,80,0.25)', borderRadius: 4, padding: '2px 8px', fontWeight: 600 }}>
+              <span key={c} style={{ fontSize: 11, color: 'var(--crimson)', background: 'rgb(var(--crimson-rgb) / 0.1)', border: '1px solid rgb(var(--crimson-rgb) / 0.25)', borderRadius: 4, padding: '2px 8px', fontWeight: 600 }}>
                 {c}
               </span>
             ))}
@@ -253,7 +253,7 @@ function CharacterStatPopup({ character, hpCurrent, onAdjustHp }: { character: C
           </p>
           <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
             {Object.entries(character.class_resources).map(([name, res]) => (
-              <span key={name} style={{ fontSize: 11, color: 'var(--teal)', background: 'rgba(62,207,178,0.1)', border: '1px solid rgba(62,207,178,0.25)', borderRadius: 4, padding: '2px 8px', fontWeight: 600 }}>
+              <span key={name} style={{ fontSize: 11, color: 'var(--teal)', background: 'rgb(var(--teal-rgb) / 0.1)', border: '1px solid rgb(var(--teal-rgb) / 0.25)', borderRadius: 4, padding: '2px 8px', fontWeight: 600 }}>
                 {name}: {res.current}/{res.max}
               </span>
             ))}
@@ -455,7 +455,7 @@ function SetupSection({
                 whiteSpace: 'nowrap',
                 transition: 'background var(--t-fast), color var(--t-fast)',
               }}
-              onMouseEnter={e => { e.currentTarget.style.background = 'rgba(155,138,255,0.12)'; e.currentTarget.style.color = 'var(--violet)' }}
+              onMouseEnter={e => { e.currentTarget.style.background = 'rgb(var(--violet-rgb) / 0.12)'; e.currentTarget.style.color = 'var(--violet)' }}
               onMouseLeave={e => { e.currentTarget.style.background = 'var(--surface-2)'; e.currentTarget.style.color = 'var(--ink-soft)' }}
             >
               🎲 Gooi
@@ -802,7 +802,7 @@ export default function EncounterRunPage() {
             const hpPct = c.hpMax > 0 ? c.hpCurrent / c.hpMax : 0
             const barColor = hpBarColor(c.hpCurrent, c.hpMax)
             const icon = c.type === 'character' ? '✦' : c.type === 'manual' ? '◈' : getMonsterIcon(c.bestiary?.creature_type)
-            const iconBg = c.type === 'character' ? 'rgba(155,138,255,0.22)' : 'rgba(220,90,80,0.22)'
+            const iconBg = c.type === 'character' ? 'rgb(var(--violet-rgb) / 0.22)' : 'rgb(var(--crimson-rgb) / 0.22)'
             const iconColor = c.type === 'character' ? 'var(--violet)' : 'var(--crimson)'
 
             return (
@@ -821,12 +821,12 @@ export default function EncounterRunPage() {
                   width: cardW,
                   padding: '8px 8px 7px',
                   borderRadius: 16,
-                  border: isActive ? '1px solid rgba(155,138,255,0.55)' : '1px solid var(--hairline)',
+                  border: isActive ? '1px solid rgb(var(--violet-rgb) / 0.55)' : '1px solid var(--hairline)',
                   background: isActive
-                    ? 'linear-gradient(175deg, rgba(155,138,255,0.18) 0%, rgba(155,138,255,0.04) 100%)'
+                    ? 'linear-gradient(175deg, rgb(var(--violet-rgb) / 0.18) 0%, rgb(var(--violet-rgb) / 0.04) 100%)'
                     : 'rgba(var(--surface-rgb, 22,22,40), 0.9)',
                   boxShadow: isActive
-                    ? '0 0 30px rgba(155,138,255,0.35), 0 0 10px rgba(155,138,255,0.18)'
+                    ? '0 0 30px rgb(var(--violet-rgb) / 0.35), 0 0 10px rgb(var(--violet-rgb) / 0.18)'
                     : 'none',
                   display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6,
                   cursor: 'pointer',
@@ -922,7 +922,7 @@ export default function EncounterRunPage() {
                     transition: 'background var(--t-fast)',
                     backdropFilter: 'blur(4px)',
                   }}
-                  onMouseEnter={e => (e.currentTarget.style.background = 'rgba(220,90,80,0.18)')}
+                  onMouseEnter={e => (e.currentTarget.style.background = 'rgb(var(--crimson-rgb) / 0.18)')}
                   onMouseLeave={e => (e.currentTarget.style.background = 'rgba(255,255,255,0.04)')}
                 >
                   ▼
@@ -939,7 +939,7 @@ export default function EncounterRunPage() {
                     transition: 'background var(--t-fast)',
                     backdropFilter: 'blur(4px)',
                   }}
-                  onMouseEnter={e => (e.currentTarget.style.background = 'rgba(62,207,178,0.18)')}
+                  onMouseEnter={e => (e.currentTarget.style.background = 'rgb(var(--teal-rgb) / 0.18)')}
                   onMouseLeave={e => (e.currentTarget.style.background = 'rgba(255,255,255,0.04)')}
                 >
                   ▲

@@ -289,7 +289,7 @@ export default function WorldBuilderPage() {
             transition: 'border-color var(--t-fast)',
             opacity: aiLoading ? 0.6 : 1,
           }}
-          onFocus={(e) => (e.currentTarget.style.borderColor = 'rgba(155,138,255,0.45)')}
+          onFocus={(e) => (e.currentTarget.style.borderColor = 'rgb(var(--violet-rgb) / 0.45)')}
           onBlur={(e) => (e.currentTarget.style.borderColor = 'var(--hairline)')}
         />
 
@@ -304,9 +304,9 @@ export default function WorldBuilderPage() {
             display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: 8,
             padding: '14px 24px',
             background: aiLoading
-              ? 'rgba(155,138,255,0.15)'
-              : 'linear-gradient(135deg, rgba(155,138,255,0.25) 0%, rgba(155,138,255,0.12) 100%)',
-            border: '1px solid rgba(155,138,255,0.35)',
+              ? 'rgb(var(--violet-rgb) / 0.15)'
+              : 'linear-gradient(135deg, rgb(var(--violet-rgb) / 0.25) 0%, rgb(var(--violet-rgb) / 0.12) 100%)',
+            border: '1px solid rgb(var(--violet-rgb) / 0.35)',
             borderRadius: 'var(--r-full)',
             color: 'var(--violet)',
             fontFamily: 'var(--font-body)', fontSize: 11, fontWeight: 700,
@@ -316,14 +316,14 @@ export default function WorldBuilderPage() {
           }}
           onMouseEnter={(e) => {
             if (!aiLoading) {
-              e.currentTarget.style.background = 'rgba(155,138,255,0.22)'
-              e.currentTarget.style.borderColor = 'rgba(155,138,255,0.55)'
+              e.currentTarget.style.background = 'rgb(var(--violet-rgb) / 0.22)'
+              e.currentTarget.style.borderColor = 'rgb(var(--violet-rgb) / 0.55)'
             }
           }}
           onMouseLeave={(e) => {
             if (!aiLoading) {
-              e.currentTarget.style.background = 'linear-gradient(135deg, rgba(155,138,255,0.25) 0%, rgba(155,138,255,0.12) 100%)'
-              e.currentTarget.style.borderColor = 'rgba(155,138,255,0.35)'
+              e.currentTarget.style.background = 'linear-gradient(135deg, rgb(var(--violet-rgb) / 0.25) 0%, rgb(var(--violet-rgb) / 0.12) 100%)'
+              e.currentTarget.style.borderColor = 'rgb(var(--violet-rgb) / 0.35)'
             }
           }}
         >
@@ -385,7 +385,7 @@ export default function WorldBuilderPage() {
             onMouseEnter={(e) => {
               if (!aiLoading) {
                 e.currentTarget.style.background = 'var(--surface-2)'
-                e.currentTarget.style.borderColor = 'rgba(155,138,255,0.3)'
+                e.currentTarget.style.borderColor = 'rgb(var(--violet-rgb) / 0.3)'
                 e.currentTarget.style.color = 'var(--ink-soft)'
               }
             }}
@@ -410,7 +410,7 @@ export default function WorldBuilderPage() {
           style={{
             padding: 28,
             background: 'color-mix(in srgb, var(--violet) 6%, var(--surface))',
-            borderColor: 'rgba(155,138,255,0.2)',
+            borderColor: 'rgb(var(--violet-rgb) / 0.2)',
           }}
         >
           {/* Response header */}
@@ -443,8 +443,8 @@ export default function WorldBuilderPage() {
                 style={{
                   display: 'inline-flex', alignItems: 'center', gap: 5,
                   padding: '5px 12px',
-                  background: copied ? 'rgba(62,207,178,0.12)' : 'var(--surface-2)',
-                  border: `1px solid ${copied ? 'rgba(62,207,178,0.35)' : 'var(--hairline)'}`,
+                  background: copied ? 'rgb(var(--teal-rgb) / 0.12)' : 'var(--surface-2)',
+                  border: `1px solid ${copied ? 'rgb(var(--teal-rgb) / 0.35)' : 'var(--hairline)'}`,
                   borderRadius: 'var(--r-full)',
                   color: copied ? 'var(--teal)' : 'var(--muted)',
                   fontFamily: 'var(--font-body)', fontSize: 10, fontWeight: 700,
@@ -546,7 +546,7 @@ export default function WorldBuilderPage() {
               marginTop: 20,
               padding: '16px 18px',
               background: 'color-mix(in srgb, var(--teal) 7%, var(--surface))',
-              border: '1px solid rgba(62,207,178,0.2)',
+              border: '1px solid rgb(var(--teal-rgb) / 0.2)',
               borderRadius: 12,
             }}>
               <p style={{

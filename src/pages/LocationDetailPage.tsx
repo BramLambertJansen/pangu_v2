@@ -114,13 +114,13 @@ export default function LocationDetailPage() {
             <span style={{
               display: 'inline-flex', alignItems: 'center',
               padding: '4px 12px',
-              border: '1px solid var(--emerald, #3ecfb2)',
+              border: '1px solid var(--teal)',
               borderRadius: 'var(--r-full)',
               fontFamily: 'var(--font-body)',
               fontSize: 10, fontWeight: 700,
               letterSpacing: '0.16em', textTransform: 'uppercase',
-              color: 'var(--emerald, #3ecfb2)',
-              background: 'rgba(62,207,178,0.08)',
+              color: 'var(--teal)',
+              background: 'rgb(var(--teal-rgb) / 0.08)',
             }}>
               {location.location_type}
             </span>
@@ -190,8 +190,8 @@ export default function LocationDetailPage() {
           className="pangu-surface"
           style={{
             padding: 28,
-            borderColor: 'rgba(245,180,50,0.22)',
-            background: 'linear-gradient(180deg, rgba(245,180,50,0.04), transparent)',
+            borderColor: 'rgb(var(--gold-rgb) / 0.22)',
+            background: 'linear-gradient(180deg, rgb(var(--gold-rgb) / 0.04), transparent)',
           }}
         >
           <p style={{

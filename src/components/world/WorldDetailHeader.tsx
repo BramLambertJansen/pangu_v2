@@ -3,10 +3,10 @@ import { sanitizeImageUrl } from '@/utils/sanitizeUrl'
 import { Button } from '@/components/ui/Button'
 
 const cardGradients = [
-  'radial-gradient(ellipse 70% 55% at 30% 40%, rgba(155,138,255,0.55) 0%, rgba(80,50,200,0.28) 45%, var(--void) 78%)',
-  'radial-gradient(ellipse 65% 52% at 28% 42%, rgba(220,90,80,0.4) 0%, rgba(155,138,255,0.22) 50%, var(--void) 78%)',
-  'radial-gradient(ellipse 65% 52% at 30% 42%, rgba(62,207,178,0.32) 0%, rgba(60,80,200,0.28) 50%, var(--void) 78%)',
-  'radial-gradient(ellipse 65% 50% at 25% 40%, rgba(245,180,50,0.28) 0%, rgba(155,138,255,0.32) 50%, var(--void) 78%)',
+  'radial-gradient(ellipse 70% 55% at 30% 40%, rgb(var(--violet-rgb) / 0.55) 0%, rgb(var(--violet-rgb) / 0.28) 45%, var(--void) 78%)',
+  'radial-gradient(ellipse 65% 52% at 28% 42%, rgb(var(--crimson-rgb) / 0.4) 0%, rgb(var(--violet-rgb) / 0.22) 50%, var(--void) 78%)',
+  'radial-gradient(ellipse 65% 52% at 30% 42%, rgb(var(--teal-rgb) / 0.32) 0%, rgb(var(--violet-rgb) / 0.28) 50%, var(--void) 78%)',
+  'radial-gradient(ellipse 65% 50% at 25% 40%, rgb(var(--gold-rgb) / 0.28) 0%, rgb(var(--violet-rgb) / 0.32) 50%, var(--void) 78%)',
 ]
 
 function pickGradient(id: string): string {
@@ -21,7 +21,7 @@ const statusLabel: Record<WorldStatus, string> = {
 }
 
 const scrimGradient =
-  'linear-gradient(to top, var(--void) 0%, rgba(10,10,22,0.97) 20%, rgba(10,10,22,0.72) 40%, rgba(10,10,22,0.18) 62%, transparent 82%)'
+  'linear-gradient(to top, var(--void) 0%, rgb(var(--void-rgb) / 0.97) 20%, rgb(var(--void-rgb) / 0.72) 40%, rgb(var(--void-rgb) / 0.18) 62%, transparent 82%)'
 
 interface Props {
   world: World

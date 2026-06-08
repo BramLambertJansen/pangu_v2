@@ -5,63 +5,12 @@ import { useOnlineStatus } from '@/hooks/useOnlineStatus'
 import { supabase } from '@/lib/supabase'
 import { queryClient } from '@/lib/queryClient'
 import { toast } from 'sonner'
-import { useMemo, useState, useEffect, useRef } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { Avatar } from '@/components/ui/Avatar'
 import { Badge } from '@/components/ui/Badge'
 import { NotificationCenter } from '@/components/ui/NotificationCenter'
+import { Starfield } from '@/components/ui/Starfield'
 import { DEV_MODE } from '@/lib/constants'
-
-interface Star {
-  id: number
-  x: number
-  y: number
-  r: number
-  opacity: number
-  isGold: boolean
-}
-
-function Starfield() {
-  const stars = useMemo<Star[]>(() => {
-    // Seeded xorshift32 for deterministic star positions (no flicker on re-render)
-    let s = 0xdeadbeef
-    const rand = () => {
-      s ^= s << 13
-      s ^= s >> 17
-      s ^= s << 5
-      return (s >>> 0) / 0x100000000
-    }
-    return Array.from({ length: 220 }, (_, id) => ({
-      id,
-      x: rand() * 1600,
-      y: rand() * 1100,
-      r: 0.25 + rand() * 1.2,
-      opacity: 0.18 + rand() * 0.55,
-      isGold: rand() < 0.06,
-    }))
-  }, [])
-
-  return (
-    <svg
-      className="fixed inset-0 h-full w-full pointer-events-none"
-      style={{ zIndex: 1 }}
-      viewBox="0 0 1600 1100"
-      preserveAspectRatio="xMidYMid slice"
-      aria-hidden="true"
-    >
-      {stars.map(({ id, x, y, r, opacity, isGold }) => (
-        <g key={id}>
-          <circle cx={x} cy={y} r={r} fill={isGold ? '#f5c842' : '#f0ecf7'} opacity={opacity} />
-          {isGold && (
-            <>
-              <line x1={x - r * 4} y1={y} x2={x + r * 4} y2={y} stroke="#f5c842" strokeWidth="0.4" opacity={opacity * 0.5} />
-              <line x1={x} y1={y - r * 4} x2={x} y2={y + r * 4} stroke="#f5c842" strokeWidth="0.4" opacity={opacity * 0.5} />
-            </>
-          )}
-        </g>
-      ))}
-    </svg>
-  )
-}
 
 const baseNavItems = [
   {
@@ -128,6 +77,19 @@ const baseNavItems = [
   },
 ]
 
+const designSystemNavItem = {
+  to: '/design-system',
+  label: 'Design System',
+  icon: (
+    <svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round">
+      <circle cx="13.5" cy="6.5" r="2.5" />
+      <circle cx="6.5" cy="11.5" r="2.5" />
+      <circle cx="17" cy="15" r="3" />
+      <path d="M4 21h16" />
+    </svg>
+  ),
+}
+
 const settingsNavItem = {
   to: '/settings',
   label: 'Instellingen',
@@ -151,6 +113,7 @@ export default function AppLayout() {
 
   const navItems = [
     ...baseNavItems,
+    ...(profile?.role === 'admin' || DEV_MODE ? [designSystemNavItem] : []),
     settingsNavItem,
   ]
 
@@ -203,8 +166,8 @@ export default function AppLayout() {
         style={{
           zIndex: 0,
           background: [
-            'radial-gradient(ellipse 80% 60% at 50% -10%, rgba(155, 138, 255, 0.08), transparent 60%)',
-            'radial-gradient(ellipse 60% 80% at 100% 100%, rgba(245, 200, 66, 0.04), transparent 60%)',
+            'radial-gradient(ellipse 80% 60% at 50% -10%, rgb(var(--violet-rgb) / 0.08), transparent 60%)',
+            'radial-gradient(ellipse 60% 80% at 100% 100%, rgb(var(--gold-rgb) / 0.04), transparent 60%)',
             'var(--void)',
           ].join(', '),
         }}

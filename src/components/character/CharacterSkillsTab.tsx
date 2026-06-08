@@ -17,7 +17,7 @@ export function CharacterSkillsTab({ character, eff }: Props) {
   return (
     <div id="tabpanel-vaardigheden" role="tabpanel" aria-labelledby="tab-vaardigheden">
       {eff.stealthDisadvantage && (
-        <div style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '10px 16px', borderRadius: 10, background: 'rgba(255,107,107,0.08)', border: '1px solid rgba(255,107,107,0.25)', marginBottom: 16 }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '10px 16px', borderRadius: 10, background: 'rgb(var(--crimson-rgb) / 0.08)', border: '1px solid rgb(var(--crimson-rgb) / 0.25)', marginBottom: 16 }}>
           <span aria-hidden="true">⚠️</span>
           <p style={{ fontSize: 13, color: 'var(--crimson)', margin: 0, fontWeight: 500 }}>
             Nadeel op Sluipen door uitgerust zwaar pantser.
@@ -46,8 +46,8 @@ export function CharacterSkillsTab({ character, eff }: Props) {
               <div key={skill.name} style={{
                 display: 'flex', alignItems: 'center', gap: 10,
                 padding: '8px 12px', borderRadius: 8,
-                background: isExpert ? 'rgba(62,207,178,0.08)' : isProficient ? 'rgba(139,92,246,0.08)' : 'var(--surface)',
-                border: isExpert ? '1px solid rgba(62,207,178,0.3)' : isProficient ? '1px solid rgba(139,92,246,0.3)' : '1px solid var(--hairline)',
+                background: isExpert ? 'rgb(var(--teal-rgb) / 0.08)' : isProficient ? 'rgb(var(--violet-rgb) / 0.08)' : 'var(--surface)',
+                border: isExpert ? '1px solid rgb(var(--teal-rgb) / 0.3)' : isProficient ? '1px solid rgb(var(--violet-rgb) / 0.3)' : '1px solid var(--hairline)',
                 transition: 'background var(--t-fast), border-color var(--t-fast)',
               }}>
                 <span
@@ -56,7 +56,7 @@ export function CharacterSkillsTab({ character, eff }: Props) {
                     width: 10, height: 10, borderRadius: '50%', flexShrink: 0,
                     background: isExpert ? 'var(--teal)' : isProficient ? 'var(--violet)' : 'transparent',
                     border: `2px solid ${isExpert ? 'var(--teal)' : isProficient ? 'var(--violet)' : 'var(--hairline-strong)'}`,
-                    boxShadow: isExpert ? '0 0 0 2px rgba(62,207,178,0.3)' : 'none',
+                    boxShadow: isExpert ? '0 0 0 2px rgb(var(--teal-rgb) / 0.3)' : 'none',
                   }}
                 />
                 <span style={{ flex: 1, fontSize: 13, color: isExpert ? 'var(--teal)' : isProficient ? 'var(--ink)' : 'var(--ink-soft)', fontWeight: (isProficient || isExpert) ? 600 : 400 }}>

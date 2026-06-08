@@ -290,8 +290,8 @@ Return ONLY a raw JSON array — no markdown, no explanation, just the array:
               disabled={aiLoading}
               style={{
                 padding: '6px 14px',
-                background: context === sc.context ? 'rgba(212,170,87,0.15)' : 'var(--surface-2)',
-                border: `1px solid ${context === sc.context ? 'rgba(212,170,87,0.4)' : 'var(--hairline)'}`,
+                background: context === sc.context ? 'rgb(var(--gold-rgb) / 0.15)' : 'var(--surface-2)',
+                border: `1px solid ${context === sc.context ? 'rgb(var(--gold-rgb) / 0.4)' : 'var(--hairline)'}`,
                 borderRadius: 'var(--r-full)',
                 color: context === sc.context ? 'var(--gold)' : 'var(--muted)',
                 fontFamily: 'var(--font-body)', fontSize: 11, fontWeight: 600,
@@ -324,8 +324,8 @@ Return ONLY a raw JSON array — no markdown, no explanation, just the array:
                 aria-pressed={count === n}
                 style={{
                   width: 44, height: 44,
-                  background: count === n ? 'rgba(212,170,87,0.15)' : 'var(--surface-2)',
-                  border: `1px solid ${count === n ? 'rgba(212,170,87,0.4)' : 'var(--hairline)'}`,
+                  background: count === n ? 'rgb(var(--gold-rgb) / 0.15)' : 'var(--surface-2)',
+                  border: `1px solid ${count === n ? 'rgb(var(--gold-rgb) / 0.4)' : 'var(--hairline)'}`,
                   borderRadius: 10,
                   color: count === n ? 'var(--gold)' : 'var(--ink-soft)',
                   fontFamily: 'var(--font-body)', fontSize: 15, fontWeight: 700,
@@ -453,7 +453,7 @@ Return ONLY a raw JSON array — no markdown, no explanation, just the array:
               transition: 'border-color var(--t-fast)',
               opacity: aiLoading ? 0.6 : 1,
             }}
-            onFocus={e => (e.currentTarget.style.borderColor = 'rgba(212,170,87,0.45)')}
+            onFocus={e => (e.currentTarget.style.borderColor = 'rgb(var(--gold-rgb) / 0.45)')}
             onBlur={e => (e.currentTarget.style.borderColor = 'var(--hairline)')}
             aria-describedby="loot-context-hint"
           />
@@ -473,9 +473,9 @@ Return ONLY a raw JSON array — no markdown, no explanation, just the array:
             display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: 8,
             padding: '14px 24px',
             background: aiLoading
-              ? 'rgba(212,170,87,0.1)'
-              : 'linear-gradient(135deg, rgba(212,170,87,0.22) 0%, rgba(212,170,87,0.1) 100%)',
-            border: '1px solid rgba(212,170,87,0.35)',
+              ? 'rgb(var(--gold-rgb) / 0.1)'
+              : 'linear-gradient(135deg, rgb(var(--gold-rgb) / 0.22) 0%, rgb(var(--gold-rgb) / 0.1) 100%)',
+            border: '1px solid rgb(var(--gold-rgb) / 0.35)',
             borderRadius: 'var(--r-full)',
             color: 'var(--gold)',
             fontFamily: 'var(--font-body)', fontSize: 11, fontWeight: 700,
@@ -485,14 +485,14 @@ Return ONLY a raw JSON array — no markdown, no explanation, just the array:
           }}
           onMouseEnter={e => {
             if (!aiLoading) {
-              e.currentTarget.style.background = 'rgba(212,170,87,0.2)'
-              e.currentTarget.style.borderColor = 'rgba(212,170,87,0.55)'
+              e.currentTarget.style.background = 'rgb(var(--gold-rgb) / 0.2)'
+              e.currentTarget.style.borderColor = 'rgb(var(--gold-rgb) / 0.55)'
             }
           }}
           onMouseLeave={e => {
             if (!aiLoading) {
-              e.currentTarget.style.background = 'linear-gradient(135deg, rgba(212,170,87,0.22) 0%, rgba(212,170,87,0.1) 100%)'
-              e.currentTarget.style.borderColor = 'rgba(212,170,87,0.35)'
+              e.currentTarget.style.background = 'linear-gradient(135deg, rgb(var(--gold-rgb) / 0.22) 0%, rgb(var(--gold-rgb) / 0.1) 100%)'
+              e.currentTarget.style.borderColor = 'rgb(var(--gold-rgb) / 0.35)'
             }
           }}
         >
@@ -549,7 +549,7 @@ Return ONLY a raw JSON array — no markdown, no explanation, just the array:
       {parseError && rawFallback && (
         <div
           className="pangu-surface"
-          style={{ padding: 24, marginBottom: 24, borderColor: 'rgba(220,80,80,0.3)' }}
+          style={{ padding: 24, marginBottom: 24, borderColor: 'rgb(var(--crimson-rgb) / 0.3)' }}
         >
           <p style={{
             fontFamily: 'var(--font-body)', fontSize: 10, fontWeight: 700,
@@ -599,8 +599,8 @@ Return ONLY a raw JSON array — no markdown, no explanation, just the array:
                   disabled={pendingKeys.length > 0}
                   style={{
                     padding: '7px 16px',
-                    background: 'rgba(212,170,87,0.12)',
-                    border: '1px solid rgba(212,170,87,0.3)',
+                    background: 'rgb(var(--gold-rgb) / 0.12)',
+                    border: '1px solid rgb(var(--gold-rgb) / 0.3)',
                     borderRadius: 'var(--r-full)',
                     color: 'var(--gold)',
                     fontFamily: 'var(--font-body)', fontSize: 10, fontWeight: 700,
@@ -717,8 +717,8 @@ Return ONLY a raw JSON array — no markdown, no explanation, just the array:
                                 letterSpacing: '0.1em', textTransform: 'uppercase',
                                 color: 'var(--teal)',
                                 padding: '3px 8px',
-                                background: 'rgba(62,207,178,0.08)',
-                                border: '1px solid rgba(62,207,178,0.2)',
+                                background: 'rgb(var(--teal-rgb) / 0.08)',
+                                border: '1px solid rgb(var(--teal-rgb) / 0.2)',
                                 borderRadius: 'var(--r-full)',
                               }}
                             >
@@ -761,7 +761,7 @@ Return ONLY a raw JSON array — no markdown, no explanation, just the array:
                                 fontFamily: 'var(--font-body)',
                                 outline: 'none',
                               }}
-                              onFocus={e => (e.currentTarget.style.borderColor = 'rgba(212,170,87,0.45)')}
+                              onFocus={e => (e.currentTarget.style.borderColor = 'rgb(var(--gold-rgb) / 0.45)')}
                               onBlur={e => (e.currentTarget.style.borderColor = 'var(--hairline)')}
                             />
                             {/* Generate button: DALL-E or Pollinations */}
@@ -786,7 +786,7 @@ Return ONLY a raw JSON array — no markdown, no explanation, just the array:
                                 transition: 'all var(--t-fast)',
                                 opacity: isImgLoading ? 0.6 : 1,
                               }}
-                              onMouseEnter={e => { if (!isImgLoading) { e.currentTarget.style.borderColor = 'rgba(212,170,87,0.4)'; e.currentTarget.style.color = 'var(--gold)' } }}
+                              onMouseEnter={e => { if (!isImgLoading) { e.currentTarget.style.borderColor = 'rgb(var(--gold-rgb) / 0.4)'; e.currentTarget.style.color = 'var(--gold)' } }}
                               onMouseLeave={e => { if (!isImgLoading) { e.currentTarget.style.borderColor = 'var(--hairline)'; e.currentTarget.style.color = 'var(--muted)' } }}
                             >
                               {isImgLoading ? (
@@ -816,8 +816,8 @@ Return ONLY a raw JSON array — no markdown, no explanation, just the array:
                     style={{
                       flexShrink: 0,
                       padding: '8px 16px',
-                      background: isAdded ? 'rgba(62,207,178,0.1)' : 'var(--surface-2)',
-                      border: `1px solid ${isAdded ? 'rgba(62,207,178,0.3)' : 'var(--hairline)'}`,
+                      background: isAdded ? 'rgb(var(--teal-rgb) / 0.1)' : 'var(--surface-2)',
+                      border: `1px solid ${isAdded ? 'rgb(var(--teal-rgb) / 0.3)' : 'var(--hairline)'}`,
                       borderRadius: 'var(--r-full)',
                       color: isAdded ? 'var(--teal)' : 'var(--ink-soft)',
                       fontFamily: 'var(--font-body)', fontSize: 10, fontWeight: 700,

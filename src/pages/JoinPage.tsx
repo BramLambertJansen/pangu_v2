@@ -250,25 +250,25 @@ export default function JoinPage() {
                   gap: 14,
                   padding: '16px 20px',
                   borderRadius: 'var(--r-xl)',
-                  border: `1px ${selectedCharacter === null ? 'solid' : 'dashed'} ${selectedCharacter === null ? 'rgba(107,167,255,0.6)' : 'rgba(107,167,255,0.35)'}`,
-                  background: selectedCharacter === null ? 'rgba(107,167,255,0.06)' : 'rgba(107,167,255,0.03)',
+                  border: `1px ${selectedCharacter === null ? 'solid' : 'dashed'} ${selectedCharacter === null ? 'rgb(var(--azure-rgb) / 0.6)' : 'rgb(var(--azure-rgb) / 0.35)'}`,
+                  background: selectedCharacter === null ? 'rgb(var(--azure-rgb) / 0.06)' : 'rgb(var(--azure-rgb) / 0.03)',
                   cursor: 'pointer',
                   textAlign: 'left',
                   transition: 'border-color var(--t-fast), background var(--t-fast)',
-                  boxShadow: selectedCharacter === null ? '0 0 0 1px rgba(107,167,255,0.2)' : undefined,
+                  boxShadow: selectedCharacter === null ? '0 0 0 1px rgb(var(--azure-rgb) / 0.2)' : undefined,
                 }}
                 onMouseEnter={e => {
                   if (selectedCharacter !== null) {
                     const el = e.currentTarget
-                    el.style.borderColor = 'rgba(107,167,255,0.6)'
-                    el.style.background = 'rgba(107,167,255,0.06)'
+                    el.style.borderColor = 'rgb(var(--azure-rgb) / 0.6)'
+                    el.style.background = 'rgb(var(--azure-rgb) / 0.06)'
                   }
                 }}
                 onMouseLeave={e => {
                   if (selectedCharacter !== null) {
                     const el = e.currentTarget
-                    el.style.borderColor = 'rgba(107,167,255,0.35)'
-                    el.style.background = 'rgba(107,167,255,0.03)'
+                    el.style.borderColor = 'rgb(var(--azure-rgb) / 0.35)'
+                    el.style.background = 'rgb(var(--azure-rgb) / 0.03)'
                   }
                 }}
               >
@@ -276,12 +276,12 @@ export default function JoinPage() {
                   width: 44,
                   height: 44,
                   borderRadius: '50%',
-                  border: '1.5px dashed rgba(107,167,255,0.5)',
+                  border: '1.5px dashed rgb(var(--azure-rgb) / 0.5)',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
                   flexShrink: 0,
-                  background: 'rgba(107,167,255,0.06)',
+                  background: 'rgb(var(--azure-rgb) / 0.06)',
                 }}>
                   <span style={{ fontSize: 22, lineHeight: 1, fontWeight: 300, color: 'var(--azure)', marginTop: -2 }}>+</span>
                 </div>

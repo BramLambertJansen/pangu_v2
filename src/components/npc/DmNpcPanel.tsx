@@ -37,7 +37,7 @@ export const DmNpcPanel = memo(function DmNpcPanel({ npc }: Props) {
       style={{
         background: 'var(--surface)',
         borderRadius: 'var(--r-xl)',
-        border: '1px solid rgba(220,90,80,0.30)',
+        border: '1px solid rgb(var(--crimson-rgb) / 0.30)',
         overflow: 'hidden',
         display: 'flex',
         flexDirection: 'column',

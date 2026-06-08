@@ -67,7 +67,7 @@ export function CompendiumBrowser({ kind, onImport, importedSlugs, isPending }: 
               color: 'var(--ink)', fontSize: 14,
               outline: 'none',
             }}
-            onFocus={e => { e.currentTarget.style.borderColor = 'rgba(155,138,255,0.5)' }}
+            onFocus={e => { e.currentTarget.style.borderColor = 'rgb(var(--violet-rgb) / 0.5)' }}
             onBlur={e => { e.currentTarget.style.borderColor = 'var(--hairline)' }}
           />
         </div>
@@ -153,8 +153,8 @@ export function CompendiumBrowser({ kind, onImport, importedSlugs, isPending }: 
                   aria-label={alreadyImported ? `${result.name} al geïmporteerd` : `Importeer ${result.name}`}
                   style={{
                     flexShrink: 0, padding: '6px 12px', borderRadius: 6,
-                    border: `1px solid ${alreadyImported ? 'var(--hairline)' : 'rgba(62,207,178,0.4)'}`,
-                    background: alreadyImported ? 'transparent' : 'rgba(62,207,178,0.08)',
+                    border: `1px solid ${alreadyImported ? 'var(--hairline)' : 'rgb(var(--teal-rgb) / 0.4)'}`,
+                    background: alreadyImported ? 'transparent' : 'rgb(var(--teal-rgb) / 0.08)',
                     color: alreadyImported ? 'var(--muted)' : 'var(--teal)',
                     fontSize: 11, fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase',
                     cursor: alreadyImported || isPending ? 'default' : 'pointer',

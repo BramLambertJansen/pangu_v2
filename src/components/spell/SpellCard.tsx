@@ -33,13 +33,13 @@ export const SpellCard = memo(function SpellCard({ spell, onDelete, onClick }: P
           {/* Badges + delete */}
           <div style={{ display: 'flex', alignItems: 'center', gap: 4, flexShrink: 0 }}>
             {spell.concentration && (
-              <span title="Concentratie vereist" aria-label="Concentratie vereist" style={{ fontSize: 9, fontWeight: 700, letterSpacing: '0.12em', textTransform: 'uppercase', color: 'var(--gold)', border: '1px solid rgba(245,180,50,0.3)', borderRadius: 4, padding: '1px 5px' }}>C</span>
+              <span title="Concentratie vereist" aria-label="Concentratie vereist" style={{ fontSize: 9, fontWeight: 700, letterSpacing: '0.12em', textTransform: 'uppercase', color: 'var(--gold)', border: '1px solid rgb(var(--gold-rgb) / 0.3)', borderRadius: 4, padding: '1px 5px' }}>C</span>
             )}
             {spell.ritual && (
-              <span title="Ritueel" aria-label="Ritueel" style={{ fontSize: 9, fontWeight: 700, letterSpacing: '0.12em', textTransform: 'uppercase', color: 'var(--teal)', border: '1px solid rgba(62,207,178,0.3)', borderRadius: 4, padding: '1px 5px' }}>R</span>
+              <span title="Ritueel" aria-label="Ritueel" style={{ fontSize: 9, fontWeight: 700, letterSpacing: '0.12em', textTransform: 'uppercase', color: 'var(--teal)', border: '1px solid rgb(var(--teal-rgb) / 0.3)', borderRadius: 4, padding: '1px 5px' }}>R</span>
             )}
             {spell.source?.startsWith('srd') && (
-              <span style={{ fontSize: 9, fontWeight: 700, letterSpacing: '0.14em', textTransform: 'uppercase', color: 'var(--azure)', border: '1px solid rgba(56,152,255,0.3)', borderRadius: 4, padding: '1px 5px' }}>{spell.source === 'srd-2024' ? 'SRD 2024' : 'SRD'}</span>
+              <span style={{ fontSize: 9, fontWeight: 700, letterSpacing: '0.14em', textTransform: 'uppercase', color: 'var(--azure)', border: '1px solid rgb(var(--azure-rgb) / 0.3)', borderRadius: 4, padding: '1px 5px' }}>{spell.source === 'srd-2024' ? 'SRD 2024' : 'SRD'}</span>
             )}
             {onDelete && (
               <button

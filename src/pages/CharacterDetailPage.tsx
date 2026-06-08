@@ -29,10 +29,10 @@ function formatXP(n: number | null | undefined): string {
 }
 
 const headerGradients = [
-  'radial-gradient(ellipse 60% 80% at 25% 35%, rgba(56,152,255,0.32) 0%, rgba(30,80,200,0.18) 45%, var(--void) 78%)',
-  'radial-gradient(ellipse 60% 80% at 28% 38%, rgba(107,167,255,0.28) 0%, rgba(56,152,255,0.18) 50%, var(--void) 78%)',
-  'radial-gradient(ellipse 60% 80% at 30% 40%, rgba(155,138,255,0.24) 0%, rgba(56,152,255,0.20) 50%, var(--void) 78%)',
-  'radial-gradient(ellipse 60% 80% at 25% 38%, rgba(56,152,255,0.26) 0%, rgba(62,207,178,0.16) 50%, var(--void) 78%)',
+  'radial-gradient(ellipse 60% 80% at 25% 35%, rgb(var(--azure-rgb) / 0.32) 0%, rgb(var(--violet-rgb) / 0.18) 45%, var(--void) 78%)',
+  'radial-gradient(ellipse 60% 80% at 28% 38%, rgb(var(--azure-rgb) / 0.28) 0%, rgb(var(--azure-rgb) / 0.18) 50%, var(--void) 78%)',
+  'radial-gradient(ellipse 60% 80% at 30% 40%, rgb(var(--violet-rgb) / 0.24) 0%, rgb(var(--azure-rgb) / 0.20) 50%, var(--void) 78%)',
+  'radial-gradient(ellipse 60% 80% at 25% 38%, rgb(var(--azure-rgb) / 0.26) 0%, rgb(var(--teal-rgb) / 0.16) 50%, var(--void) 78%)',
 ]
 
 function starfieldDots(id: string) {
@@ -168,12 +168,12 @@ export default function CharacterDetailPage() {
               ))}
               <div aria-hidden="true" style={{ position: 'absolute', left: '50%', top: '42%', transform: 'translate(-50%, -50%)', display: 'flex', alignItems: 'center', justifyContent: 'center', pointerEvents: 'none' }}>
                 <svg width="110" height="110" viewBox="0 0 100 100" fill="none" aria-hidden="true">
-                  <circle cx="50" cy="50" r="42" stroke="rgba(107,167,255,0.18)" strokeWidth="1" fill="none" />
-                  <circle cx="50" cy="50" r="30" stroke="rgba(107,167,255,0.10)" strokeWidth="1" fill="rgba(56,152,255,0.05)" />
-                  <path d="M 36 26 Q 24 50 36 74 Q 54 60 54 50 Q 54 40 36 26 Z" fill="rgba(107,167,255,0.45)" />
+                  <circle cx="50" cy="50" r="42" stroke="rgb(var(--azure-rgb) / 0.18)" strokeWidth="1" fill="none" />
+                  <circle cx="50" cy="50" r="30" stroke="rgb(var(--azure-rgb) / 0.10)" strokeWidth="1" fill="rgb(var(--azure-rgb) / 0.05)" />
+                  <path d="M 36 26 Q 24 50 36 74 Q 54 60 54 50 Q 54 40 36 26 Z" fill="rgb(var(--azure-rgb) / 0.45)" />
                 </svg>
               </div>
-              <div aria-hidden="true" style={{ position: 'absolute', bottom: '10%', left: '50%', transform: 'translateX(-50%)', fontFamily: 'var(--font-display)', fontSize: 80, fontWeight: 700, color: 'rgba(107,167,255,0.06)', lineHeight: 1, userSelect: 'none', pointerEvents: 'none' }}>
+              <div aria-hidden="true" style={{ position: 'absolute', bottom: '10%', left: '50%', transform: 'translateX(-50%)', fontFamily: 'var(--font-display)', fontSize: 80, fontWeight: 700, color: 'rgb(var(--azure-rgb) / 0.06)', lineHeight: 1, userSelect: 'none', pointerEvents: 'none' }}>
                 {character.name.charAt(0).toUpperCase()}
               </div>
             </>
@@ -220,7 +220,7 @@ export default function CharacterDetailPage() {
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                 <p style={{ fontSize: 10, fontWeight: 700, letterSpacing: '0.16em', textTransform: 'uppercase', color: hpLow ? 'var(--crimson)' : 'var(--muted)', margin: 0 }}>HP</p>
                 {tempHp > 0 && (
-                  <span style={{ fontSize: 9, fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', color: 'var(--azure)', border: '1px solid rgba(107,167,255,0.35)', borderRadius: 999, padding: '1px 6px' }}>+{tempHp}</span>
+                  <span style={{ fontSize: 9, fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', color: 'var(--azure)', border: '1px solid rgb(var(--azure-rgb) / 0.35)', borderRadius: 999, padding: '1px 6px' }}>+{tempHp}</span>
                 )}
               </div>
               <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
@@ -299,7 +299,7 @@ export default function CharacterDetailPage() {
               }}
               onMouseEnter={(e) => {
                 const el = e.currentTarget as HTMLElement
-                el.style.borderColor = 'rgba(107,167,255,0.5)'
+                el.style.borderColor = 'rgb(var(--azure-rgb) / 0.5)'
                 el.style.color = 'var(--azure)'
               }}
               onMouseLeave={(e) => {

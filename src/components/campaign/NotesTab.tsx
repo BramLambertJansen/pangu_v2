@@ -24,8 +24,8 @@ export function NotesTab({
           className="pangu-surface"
           style={{
             padding: 28,
-            borderColor: 'rgba(245,180,50,0.22)',
-            background: 'linear-gradient(180deg, rgba(245,180,50,0.04), transparent)',
+            borderColor: 'rgb(var(--gold-rgb) / 0.22)',
+            background: 'linear-gradient(180deg, rgb(var(--gold-rgb) / 0.04), transparent)',
           }}
         >
           <p style={{

@@ -30,7 +30,7 @@ import { campaignStatusLabel } from '@/lib/statusMaps'
 import { useAuthStore } from '@/stores/auth.store'
 
 const scrimGradient =
-  'linear-gradient(to top, var(--void) 0%, rgba(10,10,22,0.97) 20%, rgba(10,10,22,0.72) 40%, rgba(10,10,22,0.18) 62%, transparent 82%)'
+  'linear-gradient(to top, var(--void) 0%, rgb(var(--void-rgb) / 0.97) 20%, rgb(var(--void-rgb) / 0.72) 40%, rgb(var(--void-rgb) / 0.18) 62%, transparent 82%)'
 
 type TabId = 'party' | 'sessions' | 'locations' | 'lore' | 'npcs' | 'factions' | 'quests' | 'encounters' | 'treasury' | 'notes' | 'invite'
 

@@ -7,6 +7,7 @@ import { queryClient } from '@/lib/queryClient'
 import { router } from '@/routes'
 import { ErrorBoundary } from '@/components/ErrorBoundary'
 import { AuthInitializer } from '@/components/AuthInitializer'
+import { ThemeProvider } from '@/components/ThemeProvider'
 import { useAuthStore } from '@/stores/auth.store'
 import { DEV_MODE } from '@/lib/constants'
 import { localDb } from '@/lib/localDb'
@@ -49,7 +50,9 @@ function AppInner() {
       persistOptions={{ persister, maxAge: CACHE_MAX_AGE }}
     >
       <AuthInitializer />
-      <RouterProvider router={router} />
+      <ThemeProvider>
+        <RouterProvider router={router} />
+      </ThemeProvider>
       <Toaster richColors position="top-right" />
     </PersistQueryClientProvider>
   )

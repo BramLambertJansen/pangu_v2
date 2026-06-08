@@ -124,8 +124,8 @@ export default function WorldDetailPage() {
           className="pangu-surface"
           style={{
             padding: 28,
-            borderColor: 'rgba(245,180,50,0.22)',
-            background: 'linear-gradient(180deg, rgba(245,180,50,0.04), transparent)',
+            borderColor: 'rgb(var(--gold-rgb) / 0.22)',
+            background: 'linear-gradient(180deg, rgb(var(--gold-rgb) / 0.04), transparent)',
           }}
         >
           <p style={{
@@ -171,8 +171,8 @@ export default function WorldDetailPage() {
             transition: 'border-color var(--t-fast), background var(--t-fast)',
           }}
           onMouseEnter={(e) => {
-            e.currentTarget.style.borderColor = 'rgba(62,207,178,0.35)'
-            e.currentTarget.style.background = 'rgba(62,207,178,0.04)'
+            e.currentTarget.style.borderColor = 'rgb(var(--teal-rgb) / 0.35)'
+            e.currentTarget.style.background = 'rgb(var(--teal-rgb) / 0.04)'
           }}
           onMouseLeave={(e) => {
             e.currentTarget.style.borderColor = 'var(--hairline)'
@@ -183,8 +183,8 @@ export default function WorldDetailPage() {
             <div style={{
               width: 40, height: 40,
               borderRadius: 'var(--r-full)',
-              background: 'rgba(62,207,178,0.10)',
-              border: '1px solid rgba(62,207,178,0.25)',
+              background: 'rgb(var(--teal-rgb) / 0.10)',
+              border: '1px solid rgb(var(--teal-rgb) / 0.25)',
               display: 'flex', alignItems: 'center', justifyContent: 'center',
               flexShrink: 0,
             }}>

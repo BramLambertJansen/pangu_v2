@@ -118,18 +118,18 @@ export default function NpcDetailPage() {
               style={{
                 display: 'inline-flex', alignItems: 'center',
                 padding: '4px 12px',
-                border: '1px solid rgba(245,180,50,0.4)',
+                border: '1px solid rgb(var(--gold-rgb) / 0.4)',
                 borderRadius: 'var(--r-full)',
                 fontFamily: 'var(--font-body)',
                 fontSize: 10, fontWeight: 700,
                 letterSpacing: '0.16em', textTransform: 'uppercase',
                 color: 'var(--gold)',
-                background: 'rgba(245,180,50,0.08)',
+                background: 'rgb(var(--gold-rgb) / 0.08)',
                 textDecoration: 'none',
                 transition: 'background var(--t-fast)',
               }}
-              onMouseEnter={(e: React.MouseEvent<HTMLAnchorElement>) => (e.currentTarget.style.background = 'rgba(245,180,50,0.14)')}
-              onMouseLeave={(e: React.MouseEvent<HTMLAnchorElement>) => (e.currentTarget.style.background = 'rgba(245,180,50,0.08)')}
+              onMouseEnter={(e: React.MouseEvent<HTMLAnchorElement>) => (e.currentTarget.style.background = 'rgb(var(--gold-rgb) / 0.14)')}
+              onMouseLeave={(e: React.MouseEvent<HTMLAnchorElement>) => (e.currentTarget.style.background = 'rgb(var(--gold-rgb) / 0.08)')}
             >
               ⚑ {faction.name}
             </Link>
@@ -138,13 +138,13 @@ export default function NpcDetailPage() {
             <span style={{
               display: 'inline-flex', alignItems: 'center',
               padding: '4px 12px',
-              border: '1px solid var(--crimson, #dc5a50)',
+              border: '1px solid var(--crimson)',
               borderRadius: 'var(--r-full)',
               fontFamily: 'var(--font-body)',
               fontSize: 10, fontWeight: 700,
               letterSpacing: '0.16em', textTransform: 'uppercase',
-              color: 'var(--crimson, #dc5a50)',
-              background: 'rgba(220,90,80,0.08)',
+              color: 'var(--crimson)',
+              background: 'rgb(var(--crimson-rgb) / 0.08)',
             }}>
               {npc.npc_role}
             </span>
@@ -214,8 +214,8 @@ export default function NpcDetailPage() {
           className="pangu-surface"
           style={{
             padding: 28,
-            borderColor: 'rgba(245,180,50,0.22)',
-            background: 'linear-gradient(180deg, rgba(245,180,50,0.04), transparent)',
+            borderColor: 'rgb(var(--gold-rgb) / 0.22)',
+            background: 'linear-gradient(180deg, rgb(var(--gold-rgb) / 0.04), transparent)',
           }}
         >
           <p style={{

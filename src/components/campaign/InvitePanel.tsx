@@ -99,8 +99,8 @@ export function InvitePanel({ campaignId, campaignName }: InvitePanelProps) {
         className="pangu-surface"
         style={{
           padding: 28,
-          borderColor: 'rgba(138,92,246,0.22)',
-          background: 'linear-gradient(180deg, rgba(138,92,246,0.04), transparent)',
+          borderColor: 'rgb(var(--violet-rgb) / 0.22)',
+          background: 'linear-gradient(180deg, rgb(var(--violet-rgb) / 0.04), transparent)',
           marginBottom: 32,
         }}
       >
@@ -135,8 +135,8 @@ export function InvitePanel({ campaignId, campaignName }: InvitePanelProps) {
                 fontSize: 28, fontWeight: 700,
                 letterSpacing: '0.12em',
                 color: 'var(--ink)',
-                background: 'rgba(138,92,246,0.08)',
-                border: '1px solid rgba(138,92,246,0.2)',
+                background: 'rgb(var(--violet-rgb) / 0.08)',
+                border: '1px solid rgb(var(--violet-rgb) / 0.2)',
                 borderRadius: 8,
                 padding: '10px 20px',
               }}>
@@ -256,8 +256,8 @@ export function InvitePanel({ campaignId, campaignName }: InvitePanelProps) {
                 >
                   <div style={{
                     width: 32, height: 32, borderRadius: '50%',
-                    background: 'rgba(138,92,246,0.15)',
-                    border: '1px solid rgba(138,92,246,0.25)',
+                    background: 'rgb(var(--violet-rgb) / 0.15)',
+                    border: '1px solid rgb(var(--violet-rgb) / 0.25)',
                     display: 'flex', alignItems: 'center', justifyContent: 'center',
                     fontSize: 12, fontWeight: 700, color: 'var(--violet)',
                     flexShrink: 0,

@@ -472,7 +472,7 @@ export default function ItemEditPage() {
               <Button variant="primary" size="sm"
                 disabled={imageUploading || imageGenerating}
                 onClick={handleGenerateImage}
-                style={{ background: 'rgba(212,175,55,0.15)', color: 'var(--gold)', border: '1px solid rgba(212,175,55,0.3)' }}
+                style={{ background: 'rgb(var(--gold-rgb) / 0.15)', color: 'var(--gold)', border: '1px solid rgb(var(--gold-rgb) / 0.3)' }}
                 title={hasOpenAIKey ? 'Genereer via DALL-E 3' : 'Genereer via Pollinations (gratis)'}
               >
                 {imageGenerating ? 'Genereren...' : hasOpenAIKey ? '✦ DALL-E' : '✦ Genereer'}
@@ -621,9 +621,9 @@ export default function ItemEditPage() {
               <span style={{
                 fontSize: 10, fontWeight: 700, letterSpacing: '0.14em', textTransform: 'uppercase',
                 color: 'var(--gold)', padding: '2px 8px',
-                border: '1px solid rgba(212,175,55,0.35)',
+                border: '1px solid rgb(var(--gold-rgb) / 0.35)',
                 borderRadius: 'var(--r-full)',
-                background: 'rgba(212,175,55,0.08)',
+                background: 'rgb(var(--gold-rgb) / 0.08)',
               }}>
                 Actief
               </span>
@@ -826,7 +826,7 @@ export default function ItemEditPage() {
         {/* ── Gevarenzone ── */}
         <div
           className="pangu-surface"
-          style={{ marginTop: 8, padding: 28, borderColor: 'rgba(255,107,107,0.18)' }}
+          style={{ marginTop: 8, padding: 28, borderColor: 'rgb(var(--crimson-rgb) / 0.18)' }}
         >
           <p className="pangu-section-title" style={{ marginBottom: 4 }}>Gevarenzone</p>
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 16, paddingTop: 16, borderTop: '1px solid var(--hairline)' }}>

@@ -63,7 +63,7 @@ export function CharacterLoreTab({ character }: Props) {
           <p className="pangu-section-title" style={{ marginBottom: 12 }}>Talenten</p>
           <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
             {(character.feats ?? []).map(feat => (
-              <span key={feat} style={{ fontSize: 13, padding: '4px 12px', borderRadius: 8, background: 'rgba(139,92,246,0.08)', border: '1px solid rgba(139,92,246,0.25)', color: 'var(--ink-soft)' }}>
+              <span key={feat} style={{ fontSize: 13, padding: '4px 12px', borderRadius: 8, background: 'rgb(var(--violet-rgb) / 0.08)', border: '1px solid rgb(var(--violet-rgb) / 0.25)', color: 'var(--ink-soft)' }}>
                 {feat}
               </span>
             ))}
@@ -77,7 +77,7 @@ export function CharacterLoreTab({ character }: Props) {
           <p className="pangu-section-title" style={{ marginBottom: 12 }}>Wapenmeesters</p>
           <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
             {(character.weapon_masteries ?? []).map(m => (
-              <span key={m} style={{ fontSize: 13, padding: '4px 12px', borderRadius: 8, background: 'rgba(212,175,55,0.08)', border: '1px solid rgba(212,175,55,0.25)', color: 'var(--gold)' }}>
+              <span key={m} style={{ fontSize: 13, padding: '4px 12px', borderRadius: 8, background: 'rgb(var(--gold-rgb) / 0.08)', border: '1px solid rgb(var(--gold-rgb) / 0.25)', color: 'var(--gold)' }}>
                 {m}
               </span>
             ))}
@@ -86,7 +86,7 @@ export function CharacterLoreTab({ character }: Props) {
       )}
 
       {/* Privénotities */}
-      <div className="pangu-surface" style={{ padding: 28, borderColor: 'rgba(107,167,255,0.18)', background: 'rgba(107,167,255,0.03)' }}>
+      <div className="pangu-surface" style={{ padding: 28, borderColor: 'rgb(var(--azure-rgb) / 0.18)', background: 'rgb(var(--azure-rgb) / 0.03)' }}>
         <p className="pangu-section-title" style={{ marginBottom: 4 }}>✦ Privénotities</p>
         <p style={{ fontSize: 12, color: 'var(--azure)', marginBottom: 16, marginTop: 0 }}>Alleen zichtbaar voor jou</p>
         {character.notes

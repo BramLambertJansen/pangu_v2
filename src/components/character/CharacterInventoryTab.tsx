@@ -73,7 +73,7 @@ function SlotPicker({
           }}
           onMouseEnter={(e) => {
             const el = e.currentTarget as HTMLElement
-            el.style.background = 'rgba(139,92,246,0.12)'
+            el.style.background = 'rgb(var(--violet-rgb) / 0.12)'
             el.style.color = 'var(--ink)'
           }}
           onMouseLeave={(e) => {
@@ -170,7 +170,7 @@ function DiceRoller() {
             style={{
               padding: '8px 4px', borderRadius: 8, border: '1px solid',
               borderColor: selectedDie === d ? 'var(--violet)' : 'var(--hairline)',
-              background: selectedDie === d ? 'rgba(139,92,246,0.15)' : 'var(--surface)',
+              background: selectedDie === d ? 'rgb(var(--violet-rgb) / 0.15)' : 'var(--surface)',
               color: selectedDie === d ? 'var(--violet)' : 'var(--ink-soft)',
               fontSize: 12, fontWeight: 700, fontFamily: 'var(--font-body)',
               cursor: 'pointer', transition: 'all var(--t-fast)',
@@ -227,8 +227,8 @@ function ItemRow({
         aria-hidden="true"
         style={{
           width: 32, height: 32, borderRadius: 8, flexShrink: 0,
-          background: isEquipped ? 'rgba(212,175,55,0.10)' : 'var(--surface)',
-          border: `1px solid ${isEquipped ? 'rgba(212,175,55,0.30)' : 'var(--hairline)'}`,
+          background: isEquipped ? 'rgb(var(--gold-rgb) / 0.10)' : 'var(--surface)',
+          border: `1px solid ${isEquipped ? 'rgb(var(--gold-rgb) / 0.30)' : 'var(--hairline)'}`,
           display: 'flex', alignItems: 'center', justifyContent: 'center',
           transition: 'background var(--t-fast), border-color var(--t-fast)',
         }}
@@ -265,8 +265,8 @@ function ItemRow({
             fontSize: 9, fontWeight: 700,
             letterSpacing: '0.12em', textTransform: 'uppercase',
             color: 'var(--gold)',
-            border: '1px solid rgba(212,175,55,0.35)',
-            background: 'rgba(212,175,55,0.08)',
+            border: '1px solid rgb(var(--gold-rgb) / 0.35)',
+            background: 'rgb(var(--gold-rgb) / 0.08)',
           }}>
             <span aria-hidden="true">{EQUIPMENT_SLOT_ICONS[item.equipped_slot!]}</span>
             {EQUIPMENT_SLOT_LABELS[item.equipped_slot!]}
@@ -331,23 +331,23 @@ function ItemRow({
               aria-label={`${item.name} uitrusten`}
               onClick={onUnequip}
               style={{
-                background: 'none', border: '1px solid rgba(212,175,55,0.35)', borderRadius: 6,
+                background: 'none', border: '1px solid rgb(var(--gold-rgb) / 0.35)', borderRadius: 6,
                 padding: '4px 8px', cursor: 'pointer',
                 fontSize: 11, fontWeight: 700,
                 letterSpacing: '0.1em', textTransform: 'uppercase',
-                color: 'rgba(212,175,55,0.7)',
+                color: 'rgb(var(--gold-rgb) / 0.7)',
                 transition: 'all var(--t-fast)',
                 fontFamily: 'var(--font-body)',
               }}
               onMouseEnter={(e) => {
                 const el = e.currentTarget as HTMLElement
-                el.style.borderColor = 'rgba(255,107,107,0.4)'
+                el.style.borderColor = 'rgb(var(--crimson-rgb) / 0.4)'
                 el.style.color = 'var(--crimson)'
               }}
               onMouseLeave={(e) => {
                 const el = e.currentTarget as HTMLElement
-                el.style.borderColor = 'rgba(212,175,55,0.35)'
-                el.style.color = 'rgba(212,175,55,0.7)'
+                el.style.borderColor = 'rgb(var(--gold-rgb) / 0.35)'
+                el.style.color = 'rgb(var(--gold-rgb) / 0.7)'
               }}
             >
               Uitrusten
@@ -372,7 +372,7 @@ function ItemRow({
           }}
           onMouseEnter={(e) => {
             const el = e.currentTarget as HTMLElement
-            el.style.borderColor = 'rgba(220,38,38,0.4)'
+            el.style.borderColor = 'rgb(var(--crimson-rgb) / 0.4)'
             el.style.color = 'var(--crimson)'
           }}
           onMouseLeave={(e) => {

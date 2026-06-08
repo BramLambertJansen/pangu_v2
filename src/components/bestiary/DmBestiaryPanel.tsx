@@ -38,7 +38,7 @@ export const DmBestiaryPanel = memo(function DmBestiaryPanel({ bestiary }: Props
       style={{
         background: 'var(--surface)',
         borderRadius: 'var(--r-xl)',
-        border: '1px solid rgba(62,207,178,0.30)',
+        border: '1px solid rgb(var(--teal-rgb) / 0.30)',
         overflow: 'hidden',
         display: 'flex',
         flexDirection: 'column',

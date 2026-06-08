@@ -120,7 +120,7 @@ export default function LoreDetailPage() {
               fontSize: 10, fontWeight: 700,
               letterSpacing: '0.16em', textTransform: 'uppercase',
               color: 'var(--violet)',
-              background: 'rgba(155,138,255,0.08)',
+              background: 'rgb(var(--violet-rgb) / 0.08)',
             }}>
               {lore.lore_category}
             </span>
@@ -190,8 +190,8 @@ export default function LoreDetailPage() {
           className="pangu-surface"
           style={{
             padding: 28,
-            borderColor: 'rgba(245,180,50,0.22)',
-            background: 'linear-gradient(180deg, rgba(245,180,50,0.04), transparent)',
+            borderColor: 'rgb(var(--gold-rgb) / 0.22)',
+            background: 'linear-gradient(180deg, rgb(var(--gold-rgb) / 0.04), transparent)',
           }}
         >
           <p style={{

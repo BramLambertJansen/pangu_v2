@@ -117,7 +117,7 @@ export default function BestiaryDetailPage() {
               fontSize: 10, fontWeight: 700,
               letterSpacing: '0.16em', textTransform: 'uppercase',
               color: 'var(--teal)',
-              background: 'rgba(62,207,178,0.08)',
+              background: 'rgb(var(--teal-rgb) / 0.08)',
             }}>
               {bestiary.creature_type}
             </span>
@@ -132,7 +132,7 @@ export default function BestiaryDetailPage() {
               fontSize: 10, fontWeight: 700,
               letterSpacing: '0.16em', textTransform: 'uppercase',
               color: 'var(--gold)',
-              background: 'rgba(245,180,50,0.08)',
+              background: 'rgb(var(--gold-rgb) / 0.08)',
             }}>
               {bestiary.threat_level}
             </span>
@@ -387,8 +387,8 @@ export default function BestiaryDetailPage() {
           className="pangu-surface"
           style={{
             padding: 28,
-            borderColor: 'rgba(245,180,50,0.22)',
-            background: 'linear-gradient(180deg, rgba(245,180,50,0.04), transparent)',
+            borderColor: 'rgb(var(--gold-rgb) / 0.22)',
+            background: 'linear-gradient(180deg, rgb(var(--gold-rgb) / 0.04), transparent)',
           }}
         >
           <p style={{

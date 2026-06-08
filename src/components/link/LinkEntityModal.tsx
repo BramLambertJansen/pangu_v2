@@ -186,7 +186,7 @@ export function LinkEntityModal({ open, onClose, sourceType, sourceId, campaignI
                     minHeight: 44,
                     borderRadius: 8, border: '1px solid',
                     borderColor: selectedId === e.id ? 'var(--violet)' : 'var(--hairline)',
-                    background: selectedId === e.id ? 'rgba(107,167,255,0.08)' : 'var(--surface)',
+                    background: selectedId === e.id ? 'rgb(var(--azure-rgb) / 0.08)' : 'var(--surface)',
                     color: 'var(--ink-soft)', fontSize: 14, cursor: 'pointer',
                     transition: 'border-color var(--t-fast), background var(--t-fast)',
                   }}
