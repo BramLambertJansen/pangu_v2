@@ -237,7 +237,7 @@ export default function CharacterEditPage() {
         {/* Danger zone */}
         <div
           className="pangu-surface"
-          style={{ marginBottom: 32, padding: 28, borderColor: 'rgba(255,107,107,0.18)' }}
+          style={{ marginBottom: 32, padding: 28, borderColor: 'rgb(var(--crimson-rgb) / 0.18)' }}
         >
           <p className="pangu-section-title" style={{ marginBottom: 4 }}>Gevarenzone</p>
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 16, paddingTop: 16, borderTop: '1px solid var(--hairline)' }}>

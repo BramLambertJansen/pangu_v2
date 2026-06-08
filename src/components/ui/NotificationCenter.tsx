@@ -100,13 +100,13 @@ function NotificationItem({
         gap: 'var(--sp-2)',
         padding: 'var(--sp-3)',
         borderRadius: 'var(--r-xs)',
-        background: notification.read ? 'transparent' : 'rgba(155, 138, 255, 0.06)',
+        background: notification.read ? 'transparent' : 'rgb(var(--violet-rgb) / 0.06)',
         cursor: notification.read ? 'default' : 'pointer',
         position: 'relative',
         transition: `background var(--t-fast) var(--ease-out)`,
       }}
       onMouseEnter={(e) => { e.currentTarget.style.background = 'var(--surface-hover)' }}
-      onMouseLeave={(e) => { e.currentTarget.style.background = notification.read ? 'transparent' : 'rgba(155, 138, 255, 0.06)' }}
+      onMouseLeave={(e) => { e.currentTarget.style.background = notification.read ? 'transparent' : 'rgb(var(--violet-rgb) / 0.06)' }}
     >
       {!notification.read && (
         <div

@@ -48,6 +48,19 @@
   --subtle: #4a4565;
   --hairline: rgba(155, 138, 255, 0.14);
   --hairline-strong: rgba(155, 138, 255, 0.28);
+
+  /* ── Accent channels (R G B triplets) ────────────────────
+     Enable token-driven alpha tints: rgb(var(--violet-rgb) / 0.08). Replaces
+     hardcoded rgba() literals so a theme/accent swap re-tints the whole app.
+     Near-duplicate ad-hoc bases (e.g. several golds/purples) are normalized
+     onto these canonical families. */
+  --violet-rgb: 155 138 255;
+  --gold-rgb: 245 200 66;
+  --teal-rgb: 62 207 178;
+  --crimson-rgb: 255 107 107;
+  --azure-rgb: 107 167 255;
+  --muted-rgb: 153 153 179;
+  --void-rgb: 10 10 20;
   --sp-1: 4px;
   --sp-2: 8px;
   --sp-3: 12px;
@@ -128,10 +141,10 @@
 :root[data-density="cozy"]    { --sp-4: 20px; --sp-5: 24px; --sp-6: 32px; --sp-8: 40px; }
 :root[data-density="compact"] { --sp-4: 12px; --sp-5: 14px; --sp-6: 18px; --sp-8: 24px; }
 
-:root[data-accent="teal"]    { --violet: #3ecfb2; --violet-soft: #6ee0c8; --violet-deep: #2aa48d; --violet-glow: rgba(62,207,178,0.35); }
-:root[data-accent="gold"]    { --violet: #f5c842; --violet-soft: #ffd968; --violet-deep: #c9a02e; --violet-glow: rgba(245,200,66,0.35); }
-:root[data-accent="azure"]   { --violet: #6ba7ff; --violet-soft: #8fbfff; --violet-deep: #4f88dc; --violet-glow: rgba(107,167,255,0.35); }
-:root[data-accent="crimson"] { --violet: #ff6b6b; --violet-soft: #ff9090; --violet-deep: #d04545; --violet-glow: rgba(255,107,107,0.35); }
+:root[data-accent="teal"]    { --violet: #3ecfb2; --violet-soft: #6ee0c8; --violet-deep: #2aa48d; --violet-glow: rgba(62,207,178,0.35); --violet-rgb: 62 207 178; }
+:root[data-accent="gold"]    { --violet: #f5c842; --violet-soft: #ffd968; --violet-deep: #c9a02e; --violet-glow: rgba(245,200,66,0.35); --violet-rgb: 245 200 66; }
+:root[data-accent="azure"]   { --violet: #6ba7ff; --violet-soft: #8fbfff; --violet-deep: #4f88dc; --violet-glow: rgba(107,167,255,0.35); --violet-rgb: 107 167 255; }
+:root[data-accent="crimson"] { --violet: #ff6b6b; --violet-soft: #ff9090; --violet-deep: #d04545; --violet-glow: rgba(255,107,107,0.35); --violet-rgb: 255 107 107; }
 
 /* data-theme="sanctum" is the default look (identity). Future themes add
    their own :root[data-theme="..."] override blocks here. */
@@ -482,6 +495,16 @@ body {
   background: rgba(155, 138, 255, 0.06);
   border-color: var(--hairline-strong);
   color: var(--ink);
+}
+
+.btn-secondary {
+  background: var(--surface-2);
+  color: var(--ink);
+  border-color: var(--hairline);
+}
+.btn-secondary:hover {
+  background: var(--surface-3);
+  border-color: var(--hairline-strong);
 }
 
 .btn-violet-soft,

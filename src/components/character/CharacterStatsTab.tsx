@@ -58,7 +58,7 @@ export function CharacterStatsTab({ character, eff }: Props) {
               style={{
                 background: 'var(--surface)',
                 borderRadius: 14,
-                border: `1px solid ${isSaveProficient ? 'rgba(212,175,55,0.35)' : 'var(--hairline)'}`,
+                border: `1px solid ${isSaveProficient ? 'rgb(var(--gold-rgb) / 0.35)' : 'var(--hairline)'}`,
                 display: 'flex', flexDirection: 'column', alignItems: 'center',
                 paddingTop: 16, paddingBottom: 14,
                 position: 'relative', overflow: 'hidden',
@@ -103,10 +103,10 @@ export function CharacterStatsTab({ character, eff }: Props) {
             padding: '16px 20px',
             display: 'flex', alignItems: 'center', gap: 12,
             cursor: 'pointer', textAlign: 'left',
-            background: isInspired ? 'rgba(234,179,8,0.08)' : undefined,
-            borderColor: isInspired ? 'rgba(234,179,8,0.35)' : undefined,
+            background: isInspired ? 'rgb(var(--gold-rgb) / 0.08)' : undefined,
+            borderColor: isInspired ? 'rgb(var(--gold-rgb) / 0.35)' : undefined,
             transition: 'background var(--t-fast), border-color var(--t-fast)',
-            border: `1px solid ${isInspired ? 'rgba(234,179,8,0.35)' : 'var(--hairline)'}`,
+            border: `1px solid ${isInspired ? 'rgb(var(--gold-rgb) / 0.35)' : 'var(--hairline)'}`,
           }}
         >
           <span aria-hidden="true" style={{ fontSize: 22, color: isInspired ? 'var(--gold)' : 'var(--muted)' }}>
@@ -144,7 +144,7 @@ export function CharacterStatsTab({ character, eff }: Props) {
         </div>
 
         {exhaustion > 0 && (
-          <div className="pangu-surface" style={{ padding: '16px 20px', borderColor: exhaustion >= 5 ? 'rgba(220,38,38,0.3)' : 'rgba(234,179,8,0.25)', background: exhaustion >= 5 ? 'rgba(220,38,38,0.04)' : 'rgba(234,179,8,0.04)' }}>
+          <div className="pangu-surface" style={{ padding: '16px 20px', borderColor: exhaustion >= 5 ? 'rgb(var(--crimson-rgb) / 0.3)' : 'rgb(var(--gold-rgb) / 0.25)', background: exhaustion >= 5 ? 'rgb(var(--crimson-rgb) / 0.04)' : 'rgb(var(--gold-rgb) / 0.04)' }}>
             <p style={{ fontSize: 10, fontWeight: 700, letterSpacing: '0.16em', textTransform: 'uppercase', color: exhaustion >= 5 ? 'var(--crimson)' : 'var(--gold)', margin: '0 0 4px' }}>Uitputting</p>
             <p style={{ fontFamily: 'var(--font-display)', fontSize: 32, fontWeight: 700, color: exhaustion >= 5 ? 'var(--crimson)' : 'var(--gold)', margin: '0 0 4px', lineHeight: 1 }}>
               {exhaustion}<span style={{ fontSize: 14, color: 'var(--muted)', fontWeight: 400 }}>/10</span>
@@ -158,7 +158,7 @@ export function CharacterStatsTab({ character, eff }: Props) {
 
       {/* Stervensgooien (bij 0 HP) */}
       {hpCurrent === 0 && (
-        <div className="pangu-surface" style={{ padding: 20, marginBottom: 16, borderColor: 'rgba(220,38,38,0.3)', background: 'rgba(220,38,38,0.04)' }}>
+        <div className="pangu-surface" style={{ padding: 20, marginBottom: 16, borderColor: 'rgb(var(--crimson-rgb) / 0.3)', background: 'rgb(var(--crimson-rgb) / 0.04)' }}>
           <p style={{ fontSize: 10, fontWeight: 700, letterSpacing: '0.16em', textTransform: 'uppercase', color: 'var(--crimson)', margin: '0 0 14px' }}>
             Stervensgooien
           </p>
@@ -177,8 +177,8 @@ export function CharacterStatsTab({ character, eff }: Props) {
                       disabled={updateDeathSaves.isPending}
                       style={{
                         width: 36, height: 36, borderRadius: 8,
-                        border: filled ? '2px solid rgba(62,207,178,0.6)' : '2px solid var(--hairline-strong)',
-                        background: filled ? 'rgba(62,207,178,0.15)' : 'var(--surface)',
+                        border: filled ? '2px solid rgb(var(--teal-rgb) / 0.6)' : '2px solid var(--hairline-strong)',
+                        background: filled ? 'rgb(var(--teal-rgb) / 0.15)' : 'var(--surface)',
                         cursor: 'pointer', fontSize: 16,
                         color: filled ? 'var(--teal)' : 'var(--muted)',
                         transition: 'all var(--t-fast)',
@@ -205,8 +205,8 @@ export function CharacterStatsTab({ character, eff }: Props) {
                       disabled={updateDeathSaves.isPending}
                       style={{
                         width: 36, height: 36, borderRadius: 8,
-                        border: filled ? '2px solid rgba(220,38,38,0.5)' : '2px solid var(--hairline-strong)',
-                        background: filled ? 'rgba(220,38,38,0.12)' : 'var(--surface)',
+                        border: filled ? '2px solid rgb(var(--crimson-rgb) / 0.5)' : '2px solid var(--hairline-strong)',
+                        background: filled ? 'rgb(var(--crimson-rgb) / 0.12)' : 'var(--surface)',
                         cursor: 'pointer', fontSize: 16,
                         color: filled ? 'var(--crimson)' : 'var(--muted)',
                         transition: 'all var(--t-fast)',
@@ -265,8 +265,8 @@ export function CharacterStatsTab({ character, eff }: Props) {
                 disabled={toggleCondition.isPending}
                 style={{
                   fontSize: 11, padding: '4px 10px', borderRadius: 999, cursor: 'pointer',
-                  border: active ? '1px solid rgba(220,38,38,0.5)' : '1px solid var(--hairline)',
-                  background: active ? 'rgba(220,38,38,0.12)' : 'var(--surface)',
+                  border: active ? '1px solid rgb(var(--crimson-rgb) / 0.5)' : '1px solid var(--hairline)',
+                  background: active ? 'rgb(var(--crimson-rgb) / 0.12)' : 'var(--surface)',
                   color: active ? 'var(--crimson)' : 'var(--muted)',
                   fontWeight: active ? 700 : 400,
                   transition: 'all var(--t-fast)',
@@ -315,8 +315,8 @@ export function CharacterStatsTab({ character, eff }: Props) {
               <div key={label} style={{
                 display: 'flex', alignItems: 'center', gap: 8,
                 padding: '10px 12px', borderRadius: 8,
-                background: isProficient ? 'rgba(139,92,246,0.08)' : 'var(--surface)',
-                border: isProficient ? '1px solid rgba(139,92,246,0.25)' : '1px solid var(--hairline)',
+                background: isProficient ? 'rgb(var(--violet-rgb) / 0.08)' : 'var(--surface)',
+                border: isProficient ? '1px solid rgb(var(--violet-rgb) / 0.25)' : '1px solid var(--hairline)',
               }}>
                 <span aria-label={isProficient ? `${label}: vaardig` : `${label}: niet vaardig`} style={{
                   width: 8, height: 8, borderRadius: '50%', flexShrink: 0,

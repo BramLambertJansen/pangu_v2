@@ -99,7 +99,7 @@ export const CharacterCard = memo(function CharacterCard({ character }: Props) {
         style={{
           position: 'absolute',
           inset: 0,
-          background: 'linear-gradient(to top, rgba(6,7,18,0.92) 0%, rgba(6,7,18,0.55) 45%, rgba(6,7,18,0.10) 80%, transparent 100%)',
+          background: 'linear-gradient(to top, rgb(var(--void-rgb) / 0.92) 0%, rgb(var(--void-rgb) / 0.55) 45%, rgb(var(--void-rgb) / 0.10) 80%, transparent 100%)',
           pointerEvents: 'none',
         }}
       />
@@ -118,9 +118,9 @@ export const CharacterCard = memo(function CharacterCard({ character }: Props) {
           padding: '5px 10px',
           borderRadius: 'var(--r-full)',
           border: '1.5px solid var(--gold)',
-          background: 'rgba(10,10,20,0.80)',
+          background: 'rgb(var(--void-rgb) / 0.80)',
           backdropFilter: 'blur(6px)',
-          boxShadow: '0 0 12px rgba(245,180,50,0.25)',
+          boxShadow: '0 0 12px rgb(var(--gold-rgb) / 0.25)',
         }}
       >
         {/* Sparkle icon */}
@@ -149,7 +149,7 @@ export const CharacterCard = memo(function CharacterCard({ character }: Props) {
             letterSpacing: '0.14em', textTransform: 'uppercase',
             color: characterStatusColor[character.status],
             border: `1px solid ${characterStatusColor[character.status]}55`,
-            background: 'rgba(10,10,20,0.80)',
+            background: 'rgb(var(--void-rgb) / 0.80)',
             backdropFilter: 'blur(6px)',
           }}>
             {characterStatusLabel[character.status]}
@@ -202,8 +202,8 @@ export const CharacterCard = memo(function CharacterCard({ character }: Props) {
               display: 'inline-flex', alignItems: 'center', gap: 5,
               padding: '4px 10px',
               borderRadius: 'var(--r-full)',
-              background: 'rgba(10,10,20,0.72)',
-              border: `1px solid ${hpLow ? 'rgba(220,90,80,0.45)' : 'rgba(62,207,178,0.35)'}`,
+              background: 'rgb(var(--void-rgb) / 0.72)',
+              border: `1px solid ${hpLow ? 'rgb(var(--crimson-rgb) / 0.45)' : 'rgb(var(--teal-rgb) / 0.35)'}`,
               backdropFilter: 'blur(6px)',
               fontSize: 12,
               fontWeight: 700,
@@ -223,7 +223,7 @@ export const CharacterCard = memo(function CharacterCard({ character }: Props) {
               display: 'inline-flex', alignItems: 'center', gap: 5,
               padding: '4px 10px',
               borderRadius: 'var(--r-full)',
-              background: 'rgba(10,10,20,0.72)',
+              background: 'rgb(var(--void-rgb) / 0.72)',
               border: '1px solid rgba(255,255,255,0.15)',
               backdropFilter: 'blur(6px)',
               fontSize: 12,
@@ -404,8 +404,8 @@ export const PartyMemberRow = memo(function PartyMemberRow({ character, selected
               display: 'inline-flex', alignItems: 'center', gap: 5,
               padding: '3px 10px',
               borderRadius: 'var(--r-full)',
-              background: hpLow ? 'rgba(220,90,80,0.12)' : 'rgba(62,207,178,0.12)',
-              border: `1px solid ${hpLow ? 'rgba(220,90,80,0.35)' : 'rgba(62,207,178,0.35)'}`,
+              background: hpLow ? 'rgb(var(--crimson-rgb) / 0.12)' : 'rgb(var(--teal-rgb) / 0.12)',
+              border: `1px solid ${hpLow ? 'rgb(var(--crimson-rgb) / 0.35)' : 'rgb(var(--teal-rgb) / 0.35)'}`,
               fontSize: 12,
               fontWeight: 700,
               color: hpLow ? 'var(--crimson)' : 'var(--teal)',
@@ -480,9 +480,9 @@ export const PartyMemberRow = memo(function PartyMemberRow({ character, selected
           padding: '4px 9px',
           borderRadius: 'var(--r-full)',
           border: '1.5px solid var(--gold)',
-          background: 'rgba(10,10,20,0.85)',
+          background: 'rgb(var(--void-rgb) / 0.85)',
           backdropFilter: 'blur(4px)',
-          boxShadow: '0 0 10px rgba(245,180,50,0.20)',
+          boxShadow: '0 0 10px rgb(var(--gold-rgb) / 0.20)',
         }}
       >
         <span style={{
@@ -530,8 +530,8 @@ export const ForgeCharacterCard = memo(function ForgeCharacterCard({ onClick, lo
         gap: 16,
         height: 480,
         borderRadius: 'var(--r-xl)',
-        border: '1px dashed rgba(107,167,255,0.35)',
-        background: 'rgba(107,167,255,0.03)',
+        border: '1px dashed rgb(var(--azure-rgb) / 0.35)',
+        background: 'rgb(var(--azure-rgb) / 0.03)',
         cursor: loading ? 'wait' : 'pointer',
         outline: 'none',
         transition: 'border-color var(--t-base) var(--ease-out), background var(--t-base) var(--ease-out)',
@@ -539,13 +539,13 @@ export const ForgeCharacterCard = memo(function ForgeCharacterCard({ onClick, lo
       onMouseEnter={e => {
         if (loading) return
         const el = e.currentTarget
-        el.style.borderColor = 'rgba(107,167,255,0.6)'
-        el.style.background = 'rgba(107,167,255,0.06)'
+        el.style.borderColor = 'rgb(var(--azure-rgb) / 0.6)'
+        el.style.background = 'rgb(var(--azure-rgb) / 0.06)'
       }}
       onMouseLeave={e => {
         const el = e.currentTarget
-        el.style.borderColor = 'rgba(107,167,255,0.35)'
-        el.style.background = 'rgba(107,167,255,0.03)'
+        el.style.borderColor = 'rgb(var(--azure-rgb) / 0.35)'
+        el.style.background = 'rgb(var(--azure-rgb) / 0.03)'
       }}
     >
       {/* Dashed circle with + */}
@@ -553,7 +553,7 @@ export const ForgeCharacterCard = memo(function ForgeCharacterCard({ onClick, lo
         width: 64,
         height: 64,
         borderRadius: '50%',
-        border: '1.5px dashed rgba(107,167,255,0.5)',
+        border: '1.5px dashed rgb(var(--azure-rgb) / 0.5)',
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',

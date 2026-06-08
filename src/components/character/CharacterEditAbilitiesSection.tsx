@@ -72,8 +72,8 @@ export function CharacterEditAbilitiesSection({ form, set, cycleSkill, toggleSav
                   borderRadius: 8,
                   cursor: 'pointer',
                   textAlign: 'left',
-                  background: isProficient ? 'rgba(139,92,246,0.08)' : 'var(--surface)',
-                  border: isProficient ? '1px solid rgba(139,92,246,0.3)' : '1px solid var(--hairline)',
+                  background: isProficient ? 'rgb(var(--violet-rgb) / 0.08)' : 'var(--surface)',
+                  border: isProficient ? '1px solid rgb(var(--violet-rgb) / 0.3)' : '1px solid var(--hairline)',
                   transition: 'background var(--t-fast), border-color var(--t-fast)',
                 }}
               >
@@ -130,14 +130,14 @@ export function CharacterEditAbilitiesSection({ form, set, cycleSkill, toggleSav
                   cursor: 'pointer',
                   textAlign: 'left',
                   background: isExpert
-                    ? 'rgba(62,207,178,0.08)'
+                    ? 'rgb(var(--teal-rgb) / 0.08)'
                     : isProficient
-                      ? 'rgba(139,92,246,0.08)'
+                      ? 'rgb(var(--violet-rgb) / 0.08)'
                       : 'var(--surface)',
                   border: isExpert
-                    ? '1px solid rgba(62,207,178,0.35)'
+                    ? '1px solid rgb(var(--teal-rgb) / 0.35)'
                     : isProficient
-                      ? '1px solid rgba(139,92,246,0.3)'
+                      ? '1px solid rgb(var(--violet-rgb) / 0.3)'
                       : '1px solid var(--hairline)',
                   transition: 'background var(--t-fast), border-color var(--t-fast)',
                 }}
@@ -152,7 +152,7 @@ export function CharacterEditAbilitiesSection({ form, set, cycleSkill, toggleSav
                     flexShrink: 0,
                     background: isExpert ? 'var(--teal)' : isProficient ? 'var(--violet)' : 'transparent',
                     border: `2px solid ${isExpert ? 'var(--teal)' : isProficient ? 'var(--violet)' : 'var(--hairline-strong)'}`,
-                    boxShadow: isExpert ? '0 0 0 2px rgba(62,207,178,0.3)' : 'none',
+                    boxShadow: isExpert ? '0 0 0 2px rgb(var(--teal-rgb) / 0.3)' : 'none',
                     transition: 'background var(--t-fast), border-color var(--t-fast), box-shadow var(--t-fast)',
                   }}
                 />

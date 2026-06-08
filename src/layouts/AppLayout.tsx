@@ -166,8 +166,8 @@ export default function AppLayout() {
         style={{
           zIndex: 0,
           background: [
-            'radial-gradient(ellipse 80% 60% at 50% -10%, rgba(155, 138, 255, 0.08), transparent 60%)',
-            'radial-gradient(ellipse 60% 80% at 100% 100%, rgba(245, 200, 66, 0.04), transparent 60%)',
+            'radial-gradient(ellipse 80% 60% at 50% -10%, rgb(var(--violet-rgb) / 0.08), transparent 60%)',
+            'radial-gradient(ellipse 60% 80% at 100% 100%, rgb(var(--gold-rgb) / 0.04), transparent 60%)',
             'var(--void)',
           ].join(', '),
         }}

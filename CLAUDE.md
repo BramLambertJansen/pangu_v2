@@ -1242,6 +1242,8 @@ npm run test         # Vitest
 - [x] **Feature-stubs** (placeholders met stabiele props, logica later): `character/{SkillsPanel,SpellSlots,SanctumInventory,CharacterWizard}`, `encounter/CombatTracker`, `location/{ConstellationAtlas,PlaceAccordion}`, `campaign/{ReisgezelschapBanner,StoryArcSpine}`, `faction/FactionDisplay`
 - [x] **Design System previewpagina** `/design-system` (`src/pages/DesignSystemPage.tsx`, requireAuth, admin/dev nav-item) — token-swatches, alle canonieke componenten, primitives en stubs; live `data-theme`/`data-accent`/`data-density` togglers
 - [x] **Documenten** `docs/design-system/`: `01-component-alignment.md` (audit + migratiecontract), `02-feature-backlog.md` (ontbrekende prototype-features), `03-theming-strategy.md` (meerdere-thema's architectuur)
-- [ ] **Fase 2** — DS-v2 als nieuwe basis (alleen token-waarden: rondere radii etc.) + knop-convergentie
+- [x] **Kleurconsolidatie** — kanaal-tokens (`--violet-rgb`/`--gold-rgb`/`--teal-rgb`/`--crimson-rgb`/`--azure-rgb`/`--void-rgb`/`--muted-rgb`); alle ~355 gekleurde `rgba()`-literals omgezet naar `rgb(var(--x-rgb) / α)` (60 bestanden, 0 resterend); accent-as overschrijft `--violet-rgb`
+- [x] **Component-convergentie** — `<Button>` rendert nu canonieke `.btn` (+ `.btn-secondary`); `<Card>` rendert `.surface`; undefined-token hex-fallbacks (`--emerald`) opgeruimd. Bewuste uitzondering: muntkleuren (data, geen thema)
+- [ ] **Fase 2** — DS-v2 als nieuwe basis (alleen token-waarden: rondere radii etc.)
 - [ ] **Fase 3** — ontbrekende prototype-features bouwen (zie doc 02)
 - [ ] **Fase 4** — extra thema's + schakel-UI in Instellingen

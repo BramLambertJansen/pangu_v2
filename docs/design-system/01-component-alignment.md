@@ -49,14 +49,15 @@ doel; `.pangu-*` blijft werken tot de sweep (sectie "Resterende migratie") klaar
 
 ## React-basiscomponenten — status
 
-| Component | Stijlmethode nu | Actie |
-|---|---|---|
-| `Button` | Tailwind-utilities (`rounded-md`, `bg-violet`) — **afwijkende look** t.o.v. `.btn` (pill/uppercase) | **Convergentie-beslissing voor fase 2.** Twee knopstijlen bestaan naast elkaar; visueel samenvoegen wijzigt de look, dus uitgesteld. |
-| `Input`, `Badge`, `Card` | Tailwind semantische aliassen (`border-hairline`, `bg-surface`) — schoon | Behouden; eventueel later via `.input`/`.badge`/`.surface`. |
-| `Modal` | Tailwind + inline | Kan naar `.modal*`-klassen. |
-| `StatusBadge` | `.status-badge` + inline `style.background` | OK (dynamische kleur uit `statusMaps`). |
-| `Breadcrumbs`, `EmptyState`, `ForgeCard`, `NotificationCenter` | Zware inline `style={{}}` | **Migreren** naar klassen/aliassen (geen kleurwaarden hardcoden). |
-| `Skeleton`, `Spinner`, `Avatar`, `ConfirmDialog` | Klasse / Tailwind | OK. |
+| Component | Status |
+|---|---|
+| `Button` | ✅ **Geconvergeerd** — rendert nu de canonieke `.btn`-laag (177× usages, geen API-wijziging). Variant→`.btn-primary/-secondary/-ghost/-crimson/-gold`, size→`.btn-sm/-lg`. Look wijzigt (pill/uppercase), zoals afgesproken. |
+| `Card` | ✅ Rendert nu `.surface` i.p.v. losse Tailwind-utilities. |
+| `Input`, `Badge` | Tailwind semantische aliassen (`border-hairline`, `bg-surface`) — token-backed, theme-klaar. |
+| `Modal` | Tailwind + inline; kan optioneel naar `.modal*`-klassen (cosmetisch, niet blokkerend). |
+| `StatusBadge` | `.status-badge` + dynamische `style.background` uit `statusMaps` — OK. |
+| `Breadcrumbs`, `EmptyState`, `ForgeCard`, `NotificationCenter` | Inline `style={{}}` — gebruiken `var(--token)` (theme-klaar). Hardgecodeerde kleurliterals zijn verwijderd; markup-naar-klasse opschoning is optioneel. |
+| `Skeleton`, `Spinner`, `Avatar`, `ConfirmDialog` | Klasse / Tailwind — OK. |
 
 ## Hardgecodeerde-kleur hotlist (thema-blokkers)
 
@@ -64,25 +65,40 @@ doel; `.pangu-*` blijft werken tot de sweep (sectie "Resterende migratie") klaar
 |---|---|---|
 | `src/layouts/AppLayout.tsx` | Starfield `#f5c842` / `#f0ecf7` | **Opgelost** — geëxtraheerd naar `src/components/ui/Starfield.tsx`, leest nu `var(--starfield-gold)` / `var(--starfield-star)`. |
 | `src/layouts/AppLayout.tsx` | achtergrond-glows `rgba(155,138,255,0.08)` / `rgba(245,200,66,0.04)` | Token toegevoegd (`--overlay-violet` / `--overlay-gold`); inline-gebruik nog te vervangen. |
-| `src/components/campaign/CampaignCard.tsx` | `STATUS_BG` rgba-map + overlay rgba | **Te migreren** → `statusMaps` + tokens. |
-| `src/components/world/WorldCard.tsx` | scrim `rgba(10,10,20,0.98)` | **Te migreren** → `var(--scrim-strong)`. |
-| `src/components/session/SessionCard.tsx` | accent-rgba's | **Te migreren** → tokens/`statusMaps`. |
-| `src/pages/WorldDetailPage.tsx` | DM-notities `rgba(245,180,50,0.22/0.04)` | **Te migreren** → token. |
+| `src/components/campaign/CampaignCard.tsx` | `STATUS_BG` + overlay rgba | ✅ **Opgelost** — kanaal-tokens. |
+| `src/components/world/WorldCard.tsx` | scrim rgba | ✅ **Opgelost** — `rgb(var(--void-rgb) / α)`. |
+| `src/components/session/SessionCard.tsx` | accent-rgba's | ✅ **Opgelost** — kanaal-tokens. |
+| `src/pages/WorldDetailPage.tsx` | DM-notities rgba | ✅ **Opgelost** — `rgb(var(--gold-rgb) / α)`. |
+| `src/pages/{Npc,Location}DetailPage.tsx` | `var(--emerald, #hex)` undefined-token fallback | ✅ **Opgelost** — naar `var(--teal)` / `var(--crimson)`. |
 
-Tokens die hiervoor zijn toegevoegd aan `:root`: `--scrim`, `--scrim-strong`,
-`--overlay-violet`, `--overlay-gold`, `--starfield-star`, `--starfield-gold` (waarden komen
-overeen met het huidige beeld → geen visuele wijziging).
+### Kanaal-tokens (de kern van de oplossing)
 
-## Resterende migratie (gevolgd als checklist)
+Toegevoegd aan `:root`: `--violet-rgb`, `--gold-rgb`, `--teal-rgb`, `--crimson-rgb`,
+`--azure-rgb`, `--muted-rgb`, `--void-rgb` (R G B-triplets). Hiermee worden alle alpha-tints
+geschreven als `rgb(var(--violet-rgb) / 0.08)`. **Alle ~355 gekleurde `rgba()`-literals** in
+de app zijn hierheen omgezet, waarbij bijna-duplicaat-bases (meerdere goud-/paars-/rood-/
+blauw-varianten) zijn genormaliseerd naar hun canonieke familie. De accent-as
+(`:root[data-accent]`) overschrijft ook `--violet-rgb`, zodat accentwissel de tints meeneemt.
+Overige tokens: `--scrim`, `--scrim-strong`, `--overlay-violet`, `--overlay-gold`,
+`--starfield-star`, `--starfield-gold`.
 
-De aliaslaag houdt de app werkend en identiek; de sweep is mechanisch opruimwerk.
+## Status consolidatie
 
-- [ ] Basiscomponenten met inline styles → klassen (`Breadcrumbs`, `EmptyState`, `ForgeCard`, `NotificationCenter`).
-- [ ] Card-kleuren centraliseren via `statusMaps` + tokens (`CampaignCard`, `WorldCard`, `SessionCard`).
-- [ ] `WorldDetailPage` + overige pagina's: inline rgba/hex → tokens.
-- [ ] Pagina-sweep `src/pages/*`: ad-hoc inline-styling → canonieke klassen/componenten.
-- [ ] Fase 2: knop-convergentie (`<Button>` ↔ `.btn`) als onderdeel van de DS-v2 re-skin.
-- [ ] Acceptatie-eind­staat: repo-brede grep vindt geen hardgecodeerde hex/`rgba()` meer in `className`/`style` buiten `:root`.
+- [x] `<Button>` → canonieke `.btn` (incl. nieuwe `.btn-secondary`).
+- [x] `<Card>` → `.surface`.
+- [x] Alle gekleurde `rgba()`-literals → kanaal-tokens (355×, 60 bestanden); 0 resterend.
+- [x] Stray hex + undefined-token fallbacks opgeruimd (m.u.v. bewuste muntkleuren).
+- [x] Starfield + AppLayout-glows token-gedreven.
+
+**Bewuste uitzonderingen (géén thema-kleuren, blijven hardcoded):** muntkleuren
+platina/elektrum/koper (`#e5e7eb`/`#c0a060`/`#b87333`) in `CharacterStatsTab`/
+`CharacterInventoryTab` — datakleuren, vergelijkbaar met rariteitskleuren. Neutrale
+zwart-schaduwen (`rgba(0,0,0,…)`) en witte sheens (`rgba(255,255,255,…)`) blijven, die zijn
+thema-onafhankelijk.
+
+### Optioneel (cosmetisch, niet blokkerend voor theming)
+- [ ] Inline `style={{}}`-markup → canonieke klassen waar het de leesbaarheid helpt (functioneel al theme-klaar via `var()`).
+- [ ] `Modal` optioneel naar `.modal*`-klassen.
 
 ## Nieuwe herbruikbare primitives (toegevoegd in deze branch)
 

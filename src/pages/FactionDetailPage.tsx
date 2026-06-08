@@ -123,7 +123,7 @@ export default function FactionDetailPage() {
               fontSize: 10, fontWeight: 700,
               letterSpacing: '0.16em', textTransform: 'uppercase',
               color: 'var(--crimson)',
-              background: 'rgba(220,90,80,0.08)',
+              background: 'rgb(var(--crimson-rgb) / 0.08)',
             }}>
               {factionTypeLabel[faction.type]}
             </span>
@@ -251,7 +251,7 @@ export default function FactionDetailPage() {
                     textDecoration: 'none',
                     transition: 'background var(--t-fast), border-color var(--t-fast)',
                   }}
-                  onMouseEnter={(e) => { (e.currentTarget as HTMLAnchorElement).style.borderColor = 'rgba(220,90,80,0.3)' }}
+                  onMouseEnter={(e) => { (e.currentTarget as HTMLAnchorElement).style.borderColor = 'rgb(var(--crimson-rgb) / 0.3)' }}
                   onMouseLeave={(e) => { (e.currentTarget as HTMLAnchorElement).style.borderColor = 'var(--hairline)' }}
                 >
                   <div
@@ -309,8 +309,8 @@ export default function FactionDetailPage() {
           className="pangu-surface"
           style={{
             padding: 28,
-            borderColor: 'rgba(245,180,50,0.22)',
-            background: 'linear-gradient(180deg, rgba(245,180,50,0.04), transparent)',
+            borderColor: 'rgb(var(--gold-rgb) / 0.22)',
+            background: 'linear-gradient(180deg, rgb(var(--gold-rgb) / 0.04), transparent)',
           }}
         >
           <p style={{

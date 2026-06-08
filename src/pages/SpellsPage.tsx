@@ -57,16 +57,16 @@ export default function SpellsPage() {
           style={{
             flexShrink: 0, display: 'inline-flex', alignItems: 'center', gap: 6,
             padding: '8px 16px',
-            background: 'rgba(155,138,255,0.08)',
-            border: '1px solid rgba(155,138,255,0.3)',
+            background: 'rgb(var(--violet-rgb) / 0.08)',
+            border: '1px solid rgb(var(--violet-rgb) / 0.3)',
             borderRadius: 'var(--r-full)',
             color: 'var(--violet)',
             fontFamily: 'var(--font-body)', fontSize: 11, fontWeight: 700,
             letterSpacing: '0.14em', textTransform: 'uppercase',
             cursor: 'pointer', transition: 'all var(--t-fast)', whiteSpace: 'nowrap',
           }}
-          onMouseEnter={e => { e.currentTarget.style.background = 'rgba(155,138,255,0.15)' }}
-          onMouseLeave={e => { e.currentTarget.style.background = 'rgba(155,138,255,0.08)' }}
+          onMouseEnter={e => { e.currentTarget.style.background = 'rgb(var(--violet-rgb) / 0.15)' }}
+          onMouseLeave={e => { e.currentTarget.style.background = 'rgb(var(--violet-rgb) / 0.08)' }}
           aria-label="Spreuken importeren uit de SRD via Open5e"
         >
           <svg aria-hidden="true" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -174,7 +174,7 @@ export default function SpellsPage() {
 
             {/* At higher levels */}
             {detailSpell.higher_level && (
-              <div style={{ padding: '12px 16px', background: 'rgba(155,138,255,0.06)', borderRadius: 8, border: '1px solid rgba(155,138,255,0.18)' }}>
+              <div style={{ padding: '12px 16px', background: 'rgb(var(--violet-rgb) / 0.06)', borderRadius: 8, border: '1px solid rgb(var(--violet-rgb) / 0.18)' }}>
                 <p style={{ margin: '0 0 6px', fontSize: 10, fontWeight: 700, letterSpacing: '0.12em', textTransform: 'uppercase', color: 'var(--violet)' }}>Op hogere niveaus</p>
                 <p style={{ margin: 0, fontSize: 13, lineHeight: 1.7, color: 'var(--ink-soft)' }}>{detailSpell.higher_level}</p>
               </div>

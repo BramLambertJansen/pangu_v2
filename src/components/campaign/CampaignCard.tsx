@@ -14,10 +14,10 @@ function toRomanChapter(id: string): string {
 
 // Solid badge background per status — dark-readable
 const STATUS_BG: Record<string, string> = {
-  'var(--violet)': 'rgba(155,138,255,1)',
-  'var(--gold)':   'rgba(245,180,50,1)',
-  'var(--teal)':   'rgba(62,207,178,1)',
-  'var(--muted)':  'rgba(120,120,150,1)',
+  'var(--violet)': 'rgb(var(--violet-rgb) / 1)',
+  'var(--gold)':   'rgb(var(--gold-rgb) / 1)',
+  'var(--teal)':   'rgb(var(--teal-rgb) / 1)',
+  'var(--muted)':  'rgb(var(--muted-rgb) / 1)',
 }
 
 interface Props {
@@ -79,7 +79,7 @@ export const CampaignCard = memo(function CampaignCard({ campaign }: Props) {
           aria-hidden="true"
           style={{
             position: 'absolute', inset: 0,
-            background: 'linear-gradient(135deg, rgba(155,138,255,0.22) 0%, rgba(80,50,200,0.10) 50%, transparent 75%)',
+            background: 'linear-gradient(135deg, rgb(var(--violet-rgb) / 0.22) 0%, rgb(var(--violet-rgb) / 0.10) 50%, transparent 75%)',
             pointerEvents: 'none',
           }}
         />
@@ -90,7 +90,7 @@ export const CampaignCard = memo(function CampaignCard({ campaign }: Props) {
           style={{
             position: 'absolute', bottom: 0, left: 0, right: 0,
             height: '65%',
-            background: 'linear-gradient(to top, rgba(8,6,20,0.92) 0%, rgba(8,6,20,0.4) 55%, transparent 100%)',
+            background: 'linear-gradient(to top, rgb(var(--void-rgb) / 0.92) 0%, rgb(var(--void-rgb) / 0.4) 55%, transparent 100%)',
             pointerEvents: 'none',
           }}
         />

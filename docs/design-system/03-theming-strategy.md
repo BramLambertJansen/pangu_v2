@@ -68,11 +68,15 @@ tokens verwijzen, herstyle je de hele app door het attribuut te zetten.
 
 ## Hard contract voor nieuwe code
 
-1. Geen hex/`rgba()` in `className`/`style` — gebruik tokens (`var(--…)`), canonieke
-   klassen of semantische Tailwind-aliassen.
-2. Nieuwe semantische kleuren altijd als token in `:root` + (indien nodig) in het
+1. Geen hex/`rgba()` met vaste kleur in `className`/`style` — gebruik tokens (`var(--…)`),
+   canonieke klassen of semantische Tailwind-aliassen.
+2. **Alpha-tints via kanaal-tokens:** `rgb(var(--violet-rgb) / 0.08)` (idem `--gold-rgb`,
+   `--teal-rgb`, `--crimson-rgb`, `--azure-rgb`, `--void-rgb`, `--muted-rgb`). Zo volgt elke
+   tint automatisch een thema-/accentwissel. Geen losse `rgba(155,138,255,…)` meer.
+3. Nieuwe semantische kleuren altijd als token in `:root` + (indien nodig) in het
    `@theme inline`-blok, daarna pas gebruiken.
-3. Overlay/scrim-effecten via de bestaande overlay-tokens (`--scrim*`, `--overlay-*`),
-   niet via losse rgba's.
+4. Overlay/scrim-effecten via de overlay-tokens (`--scrim*`, `--overlay-*`).
+5. Uitzondering: betekenisdragende datakleuren (muntsoorten, rariteit) mogen vaste kleuren
+   houden — die horen niet bij de thema-skin.
 4. Componenten blijven puur presentatie; geen thema-logica buiten `theme.store` +
    `ThemeProvider`.

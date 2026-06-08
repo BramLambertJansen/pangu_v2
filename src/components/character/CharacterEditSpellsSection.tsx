@@ -105,8 +105,8 @@ export function CharacterEditSpellsSection({ form, set }: Props) {
               onClick={() => set('spellcasting_ability', null)}
               style={{
                 padding: '7px 16px', borderRadius: 8, cursor: 'pointer', fontSize: 13,
-                background: !spellAbility ? 'rgba(139,92,246,0.15)' : 'var(--surface)',
-                border: !spellAbility ? '1px solid rgba(139,92,246,0.4)' : '1px solid var(--hairline)',
+                background: !spellAbility ? 'rgb(var(--violet-rgb) / 0.15)' : 'var(--surface)',
+                border: !spellAbility ? '1px solid rgb(var(--violet-rgb) / 0.4)' : '1px solid var(--hairline)',
                 color: !spellAbility ? 'var(--violet)' : 'var(--ink-soft)',
                 fontWeight: !spellAbility ? 600 : 400,
               }}
@@ -120,8 +120,8 @@ export function CharacterEditSpellsSection({ form, set }: Props) {
                 onClick={() => set('spellcasting_ability', opt.value)}
                 style={{
                   padding: '7px 16px', borderRadius: 8, cursor: 'pointer', fontSize: 13,
-                  background: spellAbility === opt.value ? 'rgba(139,92,246,0.15)' : 'var(--surface)',
-                  border: spellAbility === opt.value ? '1px solid rgba(139,92,246,0.4)' : '1px solid var(--hairline)',
+                  background: spellAbility === opt.value ? 'rgb(var(--violet-rgb) / 0.15)' : 'var(--surface)',
+                  border: spellAbility === opt.value ? '1px solid rgb(var(--violet-rgb) / 0.4)' : '1px solid var(--hairline)',
                   color: spellAbility === opt.value ? 'var(--violet)' : 'var(--ink-soft)',
                   fontWeight: spellAbility === opt.value ? 600 : 400,
                 }}
@@ -131,7 +131,7 @@ export function CharacterEditSpellsSection({ form, set }: Props) {
             ))}
           </div>
           {spellAbility && (
-            <div style={{ display: 'flex', gap: 24, marginTop: 12, padding: '10px 16px', borderRadius: 8, background: 'rgba(139,92,246,0.06)', border: '1px solid rgba(139,92,246,0.2)' }}>
+            <div style={{ display: 'flex', gap: 24, marginTop: 12, padding: '10px 16px', borderRadius: 8, background: 'rgb(var(--violet-rgb) / 0.06)', border: '1px solid rgb(var(--violet-rgb) / 0.2)' }}>
               <div>
                 <p style={{ fontSize: 10, fontWeight: 700, letterSpacing: '0.14em', textTransform: 'uppercase', color: 'var(--muted)', margin: '0 0 2px' }}>Spreuk-DC</p>
                 <p style={{ fontFamily: 'var(--font-display)', fontSize: 22, fontWeight: 700, color: 'var(--violet)', margin: 0 }}>{spellSaveDC}</p>
@@ -155,8 +155,8 @@ export function CharacterEditSpellsSection({ form, set }: Props) {
               style={{
                 display: 'flex', alignItems: 'center', gap: 8,
                 padding: '8px 14px', borderRadius: 8, cursor: 'pointer',
-                background: (form.concentrating ?? false) ? 'rgba(62,207,178,0.1)' : 'var(--surface)',
-                border: (form.concentrating ?? false) ? '1px solid rgba(62,207,178,0.4)' : '1px solid var(--hairline)',
+                background: (form.concentrating ?? false) ? 'rgb(var(--teal-rgb) / 0.1)' : 'var(--surface)',
+                border: (form.concentrating ?? false) ? '1px solid rgb(var(--teal-rgb) / 0.4)' : '1px solid var(--hairline)',
                 color: (form.concentrating ?? false) ? 'var(--teal)' : 'var(--ink-soft)',
                 fontWeight: (form.concentrating ?? false) ? 600 : 400, fontSize: 13,
               }}
@@ -209,7 +209,7 @@ export function CharacterEditSpellsSection({ form, set }: Props) {
               )
             }
             return (
-              <div key={level} style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '8px 12px', borderRadius: 8, background: slot.max > 0 ? 'rgba(139,92,246,0.06)' : 'var(--surface)', border: slot.max > 0 ? '1px solid rgba(139,92,246,0.2)' : '1px solid var(--hairline)' }}>
+              <div key={level} style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '8px 12px', borderRadius: 8, background: slot.max > 0 ? 'rgb(var(--violet-rgb) / 0.06)' : 'var(--surface)', border: slot.max > 0 ? '1px solid rgb(var(--violet-rgb) / 0.2)' : '1px solid var(--hairline)' }}>
                 <span style={{ fontSize: 13, fontWeight: 700, color: 'var(--muted)', minWidth: 60 }}>Niv. {level}</span>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
                   <span style={{ fontSize: 11, color: 'var(--muted)' }}>Huidig</span>
@@ -266,8 +266,8 @@ export function CharacterEditSpellsSection({ form, set }: Props) {
                 onClick={() => active ? removeResource(preset) : addResource(preset)}
                 style={{
                   fontSize: 11, padding: '4px 10px', borderRadius: 999, cursor: 'pointer',
-                  border: active ? '1px solid rgba(62,207,178,0.4)' : '1px solid var(--hairline)',
-                  background: active ? 'rgba(62,207,178,0.1)' : 'var(--surface)',
+                  border: active ? '1px solid rgb(var(--teal-rgb) / 0.4)' : '1px solid var(--hairline)',
+                  background: active ? 'rgb(var(--teal-rgb) / 0.1)' : 'var(--surface)',
                   color: active ? 'var(--teal)' : 'var(--ink-soft)',
                   transition: 'all var(--t-fast)',
                 }}

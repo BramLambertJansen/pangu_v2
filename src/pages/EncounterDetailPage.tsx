@@ -137,13 +137,13 @@ export default function EncounterDetailPage() {
             <span style={{
               display: 'inline-flex', alignItems: 'center',
               padding: '4px 12px',
-              border: '1px solid rgba(220,90,80,0.4)',
+              border: '1px solid rgb(var(--crimson-rgb) / 0.4)',
               borderRadius: 'var(--r-full)',
               fontFamily: 'var(--font-body)',
               fontSize: 10, fontWeight: 700,
               letterSpacing: '0.16em', textTransform: 'uppercase',
               color: 'var(--crimson)',
-              background: 'rgba(220,90,80,0.08)',
+              background: 'rgb(var(--crimson-rgb) / 0.08)',
             }}>
               {encounter.difficulty}
             </span>
@@ -261,8 +261,8 @@ export default function EncounterDetailPage() {
                         display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
                         width: 28, height: 28,
                         borderRadius: 'var(--r-full)',
-                        background: 'rgba(220,90,80,0.12)',
-                        border: '1px solid rgba(220,90,80,0.24)',
+                        background: 'rgb(var(--crimson-rgb) / 0.12)',
+                        border: '1px solid rgb(var(--crimson-rgb) / 0.24)',
                         color: 'var(--crimson)',
                         fontWeight: 700, fontSize: 13,
                         fontFamily: 'var(--font-body)',
@@ -307,8 +307,8 @@ export default function EncounterDetailPage() {
           className="pangu-surface"
           style={{
             padding: 28,
-            borderColor: 'rgba(220,90,80,0.22)',
-            background: 'linear-gradient(180deg, rgba(220,90,80,0.04), transparent)',
+            borderColor: 'rgb(var(--crimson-rgb) / 0.22)',
+            background: 'linear-gradient(180deg, rgb(var(--crimson-rgb) / 0.04), transparent)',
           }}
         >
           <p style={{

@@ -651,7 +651,7 @@ function OverTab() {
           padding: '16px',
           borderRadius: 10,
           border: '1px solid var(--hairline)',
-          background: 'rgba(56,152,255,0.05)',
+          background: 'rgb(var(--azure-rgb) / 0.05)',
           textAlign: 'left',
         }}
       >

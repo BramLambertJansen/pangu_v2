@@ -12,18 +12,20 @@ export interface ButtonProps extends ComponentPropsWithoutRef<'button'> {
   loading?: boolean
 }
 
-const variantStyles: Record<Variant, string> = {
-  primary:   'bg-violet text-void hover:bg-violet-soft focus-visible:ring-violet',
-  secondary: 'bg-surface-2 text-ink hover:bg-surface-3 focus-visible:ring-violet',
-  ghost:     'bg-transparent text-ink-soft hover:bg-surface-hover focus-visible:ring-violet',
-  danger:    'bg-crimson/20 text-crimson border border-crimson/30 hover:bg-crimson/30 focus-visible:ring-crimson',
-  gold:      'bg-gold/20 text-gold border border-gold/30 hover:bg-gold/30 focus-visible:ring-gold',
+// Maps to the canonical token-driven .btn layer in index.css so every button
+// shares one theme-switchable look.
+const variantClass: Record<Variant, string> = {
+  primary: 'btn-primary',
+  secondary: 'btn-secondary',
+  ghost: 'btn-ghost',
+  danger: 'btn-crimson',
+  gold: 'btn-gold',
 }
 
-const sizeStyles: Record<Size, string> = {
-  sm: 'h-8 min-w-[44px] px-3 text-xs',
-  md: 'h-10 min-w-[44px] px-4 text-sm',
-  lg: 'h-12 min-w-[44px] px-6 text-base',
+const sizeClass: Record<Size, string> = {
+  sm: 'btn-sm',
+  md: '',
+  lg: 'btn-lg',
 }
 
 export function Button({
@@ -38,14 +40,7 @@ export function Button({
   return (
     <button
       disabled={disabled || loading}
-      className={cn(
-        'inline-flex items-center justify-center gap-2 rounded-md font-medium transition-colors',
-        'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-void',
-        'disabled:pointer-events-none disabled:opacity-50',
-        variantStyles[variant],
-        sizeStyles[size],
-        className,
-      )}
+      className={cn('btn', variantClass[variant], sizeClass[size], className)}
       {...props}
     >
       {loading && <Spinner size="sm" aria-hidden="true" />}

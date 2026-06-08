@@ -109,8 +109,8 @@ export const StoryArcTracker = memo(function StoryArcTracker({ sessions, onForge
                     background: isActive
                       ? 'var(--gold)'
                       : 'var(--surface-2)',
-                    border: `2px solid ${isActive ? 'rgba(245,200,66,0.5)' : 'var(--hairline-strong)'}`,
-                    boxShadow: isActive ? '0 0 20px rgba(245,200,66,0.28)' : 'none',
+                    border: `2px solid ${isActive ? 'rgb(var(--gold-rgb) / 0.5)' : 'var(--hairline-strong)'}`,
+                    boxShadow: isActive ? '0 0 20px rgb(var(--gold-rgb) / 0.28)' : 'none',
                     fontFamily: 'var(--font-display)',
                     fontSize: roman.length > 4 ? 9 : roman.length > 2 ? 11 : 14,
                     fontWeight: 700,
@@ -133,14 +133,14 @@ export const StoryArcTracker = memo(function StoryArcTracker({ sessions, onForge
                   style={{
                     display: 'block', width: '100%', textAlign: 'left',
                     padding: isActive ? '16px 20px' : '0',
-                    background: isActive ? 'rgba(245,200,66,0.05)' : 'transparent',
-                    border: isActive ? '1px solid rgba(245,200,66,0.18)' : 'none',
+                    background: isActive ? 'rgb(var(--gold-rgb) / 0.05)' : 'transparent',
+                    border: isActive ? '1px solid rgb(var(--gold-rgb) / 0.18)' : 'none',
                     borderRadius: 'var(--r-lg)',
                     cursor: 'pointer',
                     transition: 'background var(--t-base) var(--ease-out)',
                   }}
                   onMouseEnter={e => {
-                    if (!isActive) (e.currentTarget as HTMLButtonElement).style.background = 'rgba(155,138,255,0.04)'
+                    if (!isActive) (e.currentTarget as HTMLButtonElement).style.background = 'rgb(var(--violet-rgb) / 0.04)'
                   }}
                   onMouseLeave={e => {
                     if (!isActive) (e.currentTarget as HTMLButtonElement).style.background = 'transparent'

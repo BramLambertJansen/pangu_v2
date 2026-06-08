@@ -74,7 +74,7 @@ export function CharacterSpellsTab({ characterId, character, eff }: Props) {
               <div style={{ marginLeft: 'auto' }}>
                 <p style={{ fontSize: 10, fontWeight: 700, letterSpacing: '0.16em', textTransform: 'uppercase', color: 'var(--muted)', margin: '0 0 6px' }}>Concentratie</p>
                 {character.concentrating ? (
-                  <div style={{ padding: '6px 12px', borderRadius: 8, background: 'rgba(62,207,178,0.1)', border: '1px solid rgba(62,207,178,0.4)' }}>
+                  <div style={{ padding: '6px 12px', borderRadius: 8, background: 'rgb(var(--teal-rgb) / 0.1)', border: '1px solid rgb(var(--teal-rgb) / 0.4)' }}>
                     <p style={{ fontSize: 12, fontWeight: 700, color: 'var(--teal)', margin: 0 }}>
                       ◉ {character.concentration_spell ?? 'Concentreert...'}
                     </p>
@@ -125,8 +125,8 @@ export function CharacterSpellsTab({ characterId, character, eff }: Props) {
                               disabled={updateSpellSlot.isPending}
                               style={{
                                 width: 36, height: 36, borderRadius: 8, cursor: 'pointer',
-                                border: used ? '2px solid var(--hairline-strong)' : '2px solid rgba(139,92,246,0.5)',
-                                background: used ? 'var(--surface)' : 'rgba(139,92,246,0.12)',
+                                border: used ? '2px solid var(--hairline-strong)' : '2px solid rgb(var(--violet-rgb) / 0.5)',
+                                background: used ? 'var(--surface)' : 'rgb(var(--violet-rgb) / 0.12)',
                                 display: 'flex', alignItems: 'center', justifyContent: 'center',
                                 transition: 'all var(--t-fast)',
                               }}
@@ -158,16 +158,16 @@ export function CharacterSpellsTab({ characterId, character, eff }: Props) {
                 style={{
                   display: 'inline-flex', alignItems: 'center', gap: 6,
                   padding: '6px 14px',
-                  background: 'rgba(155,138,255,0.08)',
-                  border: '1px solid rgba(155,138,255,0.3)',
+                  background: 'rgb(var(--violet-rgb) / 0.08)',
+                  border: '1px solid rgb(var(--violet-rgb) / 0.3)',
                   borderRadius: 'var(--r-full)',
                   color: 'var(--violet)',
                   fontFamily: 'var(--font-body)', fontSize: 11, fontWeight: 700,
                   letterSpacing: '0.14em', textTransform: 'uppercase',
                   cursor: 'pointer', transition: 'all var(--t-fast)',
                 }}
-                onMouseEnter={e => { e.currentTarget.style.background = 'rgba(155,138,255,0.15)' }}
-                onMouseLeave={e => { e.currentTarget.style.background = 'rgba(155,138,255,0.08)' }}
+                onMouseEnter={e => { e.currentTarget.style.background = 'rgb(var(--violet-rgb) / 0.15)' }}
+                onMouseLeave={e => { e.currentTarget.style.background = 'rgb(var(--violet-rgb) / 0.08)' }}
               >
                 <span aria-hidden="true">+</span> Toevoegen
               </button>
@@ -234,7 +234,7 @@ export function CharacterSpellsTab({ characterId, character, eff }: Props) {
                                     style={{
                                       flexShrink: 0, padding: '3px 10px', fontSize: 10, fontWeight: 700,
                                       letterSpacing: '0.1em', textTransform: 'uppercase',
-                                      border: '1px solid rgba(155,138,255,0.4)',
+                                      border: '1px solid rgb(var(--violet-rgb) / 0.4)',
                                       borderRadius: 4, background: 'transparent',
                                       color: 'var(--violet)', cursor: 'pointer',
                                     }}
@@ -298,8 +298,8 @@ export function CharacterSpellsTab({ characterId, character, eff }: Props) {
                                       aria-pressed={entry.prepared}
                                       style={{
                                         width: 28, height: 28, borderRadius: 6, flexShrink: 0,
-                                        border: entry.prepared ? '2px solid rgba(139,92,246,0.6)' : '2px solid var(--hairline-strong)',
-                                        background: entry.prepared ? 'rgba(139,92,246,0.12)' : 'transparent',
+                                        border: entry.prepared ? '2px solid rgb(var(--violet-rgb) / 0.6)' : '2px solid var(--hairline-strong)',
+                                        background: entry.prepared ? 'rgb(var(--violet-rgb) / 0.12)' : 'transparent',
                                         cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center',
                                         transition: 'all var(--t-fast)',
                                       }}

@@ -127,13 +127,13 @@ export default function SessionDetailPage() {
             <span style={{
               display: 'inline-flex', alignItems: 'center',
               padding: '4px 12px',
-              border: '1px solid rgba(155,138,255,0.4)',
+              border: '1px solid rgb(var(--violet-rgb) / 0.4)',
               borderRadius: 'var(--r-full)',
               fontFamily: 'var(--font-body)',
               fontSize: 10, fontWeight: 700,
               letterSpacing: '0.16em', textTransform: 'uppercase',
               color: 'var(--violet)',
-              background: 'rgba(155,138,255,0.08)',
+              background: 'rgb(var(--violet-rgb) / 0.08)',
             }}>
               Sessie {session.session_number}
             </span>
@@ -142,13 +142,13 @@ export default function SessionDetailPage() {
             <span style={{
               display: 'inline-flex', alignItems: 'center',
               padding: '4px 12px',
-              border: '1px solid rgba(245,180,50,0.35)',
+              border: '1px solid rgb(var(--gold-rgb) / 0.35)',
               borderRadius: 'var(--r-full)',
               fontFamily: 'var(--font-body)',
               fontSize: 10, fontWeight: 700,
               letterSpacing: '0.16em', textTransform: 'uppercase',
               color: 'var(--gold)',
-              background: 'rgba(245,180,50,0.06)',
+              background: 'rgb(var(--gold-rgb) / 0.06)',
             }}>
               {formattedDate}
             </span>
@@ -220,8 +220,8 @@ export default function SessionDetailPage() {
               className="pangu-surface"
               style={{
                 padding: 28,
-                borderColor: 'rgba(245,180,50,0.22)',
-                background: 'linear-gradient(180deg, rgba(245,180,50,0.04), transparent)',
+                borderColor: 'rgb(var(--gold-rgb) / 0.22)',
+                background: 'linear-gradient(180deg, rgb(var(--gold-rgb) / 0.04), transparent)',
               }}
             >
               <p style={{

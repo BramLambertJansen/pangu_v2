@@ -136,16 +136,16 @@ Return ONLY a raw JSON array with one item — no markdown, no explanation:
             style={{
               flexShrink: 0, display: 'inline-flex', alignItems: 'center', gap: 6,
               padding: '8px 16px',
-              background: 'rgba(212,170,87,0.1)',
-              border: '1px solid rgba(212,170,87,0.3)',
+              background: 'rgb(var(--gold-rgb) / 0.1)',
+              border: '1px solid rgb(var(--gold-rgb) / 0.3)',
               borderRadius: 'var(--r-full)',
               color: 'var(--gold)',
               fontFamily: 'var(--font-body)', fontSize: 11, fontWeight: 700,
               letterSpacing: '0.14em', textTransform: 'uppercase',
               cursor: 'pointer', transition: 'all var(--t-fast)', whiteSpace: 'nowrap',
             }}
-            onMouseEnter={e => { e.currentTarget.style.background = 'rgba(212,170,87,0.18)'; e.currentTarget.style.borderColor = 'rgba(212,170,87,0.5)' }}
-            onMouseLeave={e => { e.currentTarget.style.background = 'rgba(212,170,87,0.1)'; e.currentTarget.style.borderColor = 'rgba(212,170,87,0.3)' }}
+            onMouseEnter={e => { e.currentTarget.style.background = 'rgb(var(--gold-rgb) / 0.18)'; e.currentTarget.style.borderColor = 'rgb(var(--gold-rgb) / 0.5)' }}
+            onMouseLeave={e => { e.currentTarget.style.background = 'rgb(var(--gold-rgb) / 0.1)'; e.currentTarget.style.borderColor = 'rgb(var(--gold-rgb) / 0.3)' }}
             aria-label="Genereer een item met AI"
           >
             <svg aria-hidden="true" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -159,16 +159,16 @@ Return ONLY a raw JSON array with one item — no markdown, no explanation:
             style={{
               flexShrink: 0, display: 'inline-flex', alignItems: 'center', gap: 6,
               padding: '8px 16px',
-              background: 'rgba(56,152,255,0.08)',
-              border: '1px solid rgba(56,152,255,0.3)',
+              background: 'rgb(var(--azure-rgb) / 0.08)',
+              border: '1px solid rgb(var(--azure-rgb) / 0.3)',
               borderRadius: 'var(--r-full)',
               color: 'var(--azure)',
               fontFamily: 'var(--font-body)', fontSize: 11, fontWeight: 700,
               letterSpacing: '0.14em', textTransform: 'uppercase',
               cursor: 'pointer', transition: 'all var(--t-fast)', whiteSpace: 'nowrap',
             }}
-            onMouseEnter={e => { e.currentTarget.style.background = 'rgba(56,152,255,0.15)' }}
-            onMouseLeave={e => { e.currentTarget.style.background = 'rgba(56,152,255,0.08)' }}
+            onMouseEnter={e => { e.currentTarget.style.background = 'rgb(var(--azure-rgb) / 0.15)' }}
+            onMouseLeave={e => { e.currentTarget.style.background = 'rgb(var(--azure-rgb) / 0.08)' }}
             aria-label="Magische items importeren uit de SRD via Open5e"
           >
             <svg aria-hidden="true" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -183,8 +183,8 @@ Return ONLY a raw JSON array with one item — no markdown, no explanation:
               flexShrink: 0,
               display: 'inline-flex', alignItems: 'center', gap: 6,
               padding: '8px 16px',
-              background: 'rgba(212,170,87,0.1)',
-              border: '1px solid rgba(212,170,87,0.3)',
+              background: 'rgb(var(--gold-rgb) / 0.1)',
+              border: '1px solid rgb(var(--gold-rgb) / 0.3)',
               borderRadius: 'var(--r-full)',
               color: 'var(--gold)',
               fontFamily: 'var(--font-body)', fontSize: 11, fontWeight: 700,
@@ -194,12 +194,12 @@ Return ONLY a raw JSON array with one item — no markdown, no explanation:
               whiteSpace: 'nowrap',
             }}
             onMouseEnter={e => {
-              e.currentTarget.style.background = 'rgba(212,170,87,0.18)'
-              e.currentTarget.style.borderColor = 'rgba(212,170,87,0.5)'
+              e.currentTarget.style.background = 'rgb(var(--gold-rgb) / 0.18)'
+              e.currentTarget.style.borderColor = 'rgb(var(--gold-rgb) / 0.5)'
             }}
             onMouseLeave={e => {
-              e.currentTarget.style.background = 'rgba(212,170,87,0.1)'
-              e.currentTarget.style.borderColor = 'rgba(212,170,87,0.3)'
+              e.currentTarget.style.background = 'rgb(var(--gold-rgb) / 0.1)'
+              e.currentTarget.style.borderColor = 'rgb(var(--gold-rgb) / 0.3)'
             }}
             aria-label="Open AI Buitgenerator"
           >
@@ -323,7 +323,7 @@ Return ONLY a raw JSON array with one item — no markdown, no explanation:
                 opacity: aiLoading ? 0.6 : 1,
                 boxSizing: 'border-box',
               }}
-              onFocus={e => (e.currentTarget.style.borderColor = 'rgba(212,170,87,0.45)')}
+              onFocus={e => (e.currentTarget.style.borderColor = 'rgb(var(--gold-rgb) / 0.45)')}
               onBlur={e => (e.currentTarget.style.borderColor = 'var(--hairline)')}
               aria-describedby="ai-item-hint"
             />
@@ -355,8 +355,8 @@ Return ONLY a raw JSON array with one item — no markdown, no explanation:
               style={{
                 display: 'inline-flex', alignItems: 'center', gap: 7,
                 padding: '8px 20px',
-                background: aiLoading ? 'rgba(212,170,87,0.1)' : 'linear-gradient(135deg, rgba(212,170,87,0.22), rgba(212,170,87,0.1))',
-                border: '1px solid rgba(212,170,87,0.35)',
+                background: aiLoading ? 'rgb(var(--gold-rgb) / 0.1)' : 'linear-gradient(135deg, rgb(var(--gold-rgb) / 0.22), rgb(var(--gold-rgb) / 0.1))',
+                border: '1px solid rgb(var(--gold-rgb) / 0.35)',
                 borderRadius: 'var(--r-full)', color: 'var(--gold)',
                 fontFamily: 'var(--font-body)', fontSize: 11, fontWeight: 700,
                 letterSpacing: '0.12em', textTransform: 'uppercase',

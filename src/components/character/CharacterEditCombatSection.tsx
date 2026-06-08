@@ -114,8 +114,8 @@ export function CharacterEditCombatSection({ form, set }: Props) {
                 borderRadius: 8,
                 cursor: 'pointer',
                 textAlign: 'left',
-                background: isInspired ? 'rgba(234,179,8,0.1)' : 'var(--surface)',
-                border: isInspired ? '1px solid rgba(234,179,8,0.4)' : '1px solid var(--hairline)',
+                background: isInspired ? 'rgb(var(--gold-rgb) / 0.1)' : 'var(--surface)',
+                border: isInspired ? '1px solid rgb(var(--gold-rgb) / 0.4)' : '1px solid var(--hairline)',
                 transition: 'background var(--t-fast), border-color var(--t-fast)',
               }}
             >
@@ -170,8 +170,8 @@ export function CharacterEditCombatSection({ form, set }: Props) {
                     style={{
                       width: 32, height: 32,
                       borderRadius: 8,
-                      border: filled ? '2px solid rgba(62,207,178,0.6)' : '2px solid var(--hairline-strong)',
-                      background: filled ? 'rgba(62,207,178,0.15)' : 'var(--surface)',
+                      border: filled ? '2px solid rgb(var(--teal-rgb) / 0.6)' : '2px solid var(--hairline-strong)',
+                      background: filled ? 'rgb(var(--teal-rgb) / 0.15)' : 'var(--surface)',
                       cursor: 'pointer',
                       fontSize: 14,
                       color: filled ? 'var(--teal)' : 'var(--muted)',
@@ -201,8 +201,8 @@ export function CharacterEditCombatSection({ form, set }: Props) {
                     style={{
                       width: 32, height: 32,
                       borderRadius: 8,
-                      border: filled ? '2px solid rgba(220,38,38,0.5)' : '2px solid var(--hairline-strong)',
-                      background: filled ? 'rgba(220,38,38,0.12)' : 'var(--surface)',
+                      border: filled ? '2px solid rgb(var(--crimson-rgb) / 0.5)' : '2px solid var(--hairline-strong)',
+                      background: filled ? 'rgb(var(--crimson-rgb) / 0.12)' : 'var(--surface)',
                       cursor: 'pointer',
                       fontSize: 14,
                       color: filled ? 'var(--crimson)' : 'var(--muted)',

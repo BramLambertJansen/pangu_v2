@@ -68,7 +68,7 @@ export const WorldCard = memo(function WorldCard({ world, campaigns }: Props) {
       {/* Bottom gradient overlay */}
       <div aria-hidden="true" style={{
         position: 'absolute', inset: 0,
-        background: 'linear-gradient(to top, rgba(10,10,20,0.98) 0%, rgba(10,10,20,0.92) 30%, rgba(10,10,20,0.6) 55%, transparent 80%)',
+        background: 'linear-gradient(to top, rgb(var(--void-rgb) / 0.98) 0%, rgb(var(--void-rgb) / 0.92) 30%, rgb(var(--void-rgb) / 0.6) 55%, transparent 80%)',
       }} />
 
       {/* Content */}

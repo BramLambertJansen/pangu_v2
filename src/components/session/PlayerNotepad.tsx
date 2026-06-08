@@ -79,8 +79,8 @@ export function PlayerNotepad({ sessionId, campaignId }: Props) {
       className="pangu-surface"
       style={{
         padding: 24,
-        borderColor: 'rgba(155,138,255,0.22)',
-        background: 'linear-gradient(180deg, rgba(155,138,255,0.04), transparent)',
+        borderColor: 'rgb(var(--violet-rgb) / 0.22)',
+        background: 'linear-gradient(180deg, rgb(var(--violet-rgb) / 0.04), transparent)',
       }}
     >
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 14, gap: 8, flexWrap: 'wrap' }}>
@@ -147,7 +147,7 @@ export function PlayerNotepad({ sessionId, campaignId }: Props) {
             boxSizing: 'border-box',
             transition: 'border-color var(--t-fast)',
           }}
-          onFocus={(e) => (e.target.style.borderColor = 'rgba(155,138,255,0.5)')}
+          onFocus={(e) => (e.target.style.borderColor = 'rgb(var(--violet-rgb) / 0.5)')}
           onBlur={(e) => {
             e.target.style.borderColor = 'var(--hairline)'
             if (!autosave) return

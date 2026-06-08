@@ -6,7 +6,7 @@ export type CardProps = ComponentPropsWithoutRef<'div'>
 export function Card({ className, children, ...props }: CardProps) {
   return (
     <div
-      className={cn('rounded-lg border border-hairline bg-surface p-4', className)}
+      className={cn('surface p-4', className)}
       {...props}
     >
       {children}

@@ -73,7 +73,7 @@ export const BestiaryCard = memo(function BestiaryCard({ bestiary }: Props) {
 
           <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexShrink: 0 }}>
             {bestiary.source?.startsWith('srd') && (
-              <span style={{ fontSize: 9, fontWeight: 700, letterSpacing: '0.14em', textTransform: 'uppercase', color: 'var(--azure)', border: '1px solid rgba(56,152,255,0.3)', borderRadius: 4, padding: '1px 5px' }}>
+              <span style={{ fontSize: 9, fontWeight: 700, letterSpacing: '0.14em', textTransform: 'uppercase', color: 'var(--azure)', border: '1px solid rgb(var(--azure-rgb) / 0.3)', borderRadius: 4, padding: '1px 5px' }}>
                 {bestiary.source === 'srd-2024' ? 'SRD 2024' : 'SRD'}
               </span>
             )}
@@ -145,8 +145,8 @@ export const BestiaryRow = memo(function BestiaryRow({ bestiary, selected = fals
         gap: 12,
         padding: '10px 14px',
         borderRadius: 10,
-        border: `1px solid ${selected ? 'rgba(62,207,178,0.35)' : 'var(--hairline)'}`,
-        background: selected ? 'rgba(62,207,178,0.08)' : 'var(--surface)',
+        border: `1px solid ${selected ? 'rgb(var(--teal-rgb) / 0.35)' : 'var(--hairline)'}`,
+        background: selected ? 'rgb(var(--teal-rgb) / 0.08)' : 'var(--surface)',
         cursor: 'pointer',
         textAlign: 'left',
         transition: 'background var(--t-fast), border-color var(--t-fast)',
@@ -158,8 +158,8 @@ export const BestiaryRow = memo(function BestiaryRow({ bestiary, selected = fals
         style={{
           width: 38, height: 38, borderRadius: 8, flexShrink: 0,
           display: 'flex', alignItems: 'center', justifyContent: 'center',
-          background: selected ? 'rgba(62,207,178,0.15)' : 'var(--surface-2)',
-          border: `1px solid ${selected ? 'rgba(62,207,178,0.3)' : 'var(--hairline)'}`,
+          background: selected ? 'rgb(var(--teal-rgb) / 0.15)' : 'var(--surface-2)',
+          border: `1px solid ${selected ? 'rgb(var(--teal-rgb) / 0.3)' : 'var(--hairline)'}`,
           fontFamily: 'var(--font-display)',
           fontSize: 18, fontWeight: 700,
           color: selected ? 'var(--teal)' : 'var(--muted)',
@@ -184,7 +184,7 @@ export const BestiaryRow = memo(function BestiaryRow({ bestiary, selected = fals
             {bestiary.name}
           </p>
           {bestiary.source?.startsWith('srd') && (
-            <span aria-label="Geïmporteerd uit de SRD" style={{ fontSize: 8, fontWeight: 700, letterSpacing: '0.14em', textTransform: 'uppercase', color: 'var(--azure)', border: '1px solid rgba(56,152,255,0.25)', borderRadius: 3, padding: '1px 4px', flexShrink: 0 }}>
+            <span aria-label="Geïmporteerd uit de SRD" style={{ fontSize: 8, fontWeight: 700, letterSpacing: '0.14em', textTransform: 'uppercase', color: 'var(--azure)', border: '1px solid rgb(var(--azure-rgb) / 0.25)', borderRadius: 3, padding: '1px 4px', flexShrink: 0 }}>
               {bestiary.source === 'srd-2024' ? 'SRD 2024' : 'SRD'}
             </span>
           )}

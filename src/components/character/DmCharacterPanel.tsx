@@ -189,7 +189,7 @@ export const DmCharacterPanel = memo(function DmCharacterPanel({ character, item
             {character.inspiration && (
               <span style={{
                 fontSize: 10, fontWeight: 700, color: 'var(--gold)',
-                border: '1px solid rgba(245,180,50,0.4)',
+                border: '1px solid rgb(var(--gold-rgb) / 0.4)',
                 padding: '1px 7px', borderRadius: 'var(--r-full)',
                 fontFamily: 'var(--font-body)',
               }}>
@@ -209,7 +209,7 @@ export const DmCharacterPanel = memo(function DmCharacterPanel({ character, item
             padding: '4px 9px',
             borderRadius: 'var(--r-full)',
             border: '1.5px solid var(--gold)',
-            background: 'rgba(10,10,20,0.85)',
+            background: 'rgb(var(--void-rgb) / 0.85)',
             backdropFilter: 'blur(4px)',
           }}
         >
@@ -415,8 +415,8 @@ export const DmCharacterPanel = memo(function DmCharacterPanel({ character, item
               <span style={{
                 display: 'inline-flex', alignItems: 'center', gap: 5,
                 padding: '4px 10px', borderRadius: 'var(--r-full)',
-                border: '1px solid rgba(155,138,255,0.4)',
-                background: 'rgba(155,138,255,0.08)',
+                border: '1px solid rgb(var(--violet-rgb) / 0.4)',
+                background: 'rgb(var(--violet-rgb) / 0.08)',
                 fontSize: 11, fontWeight: 700, color: 'var(--violet)',
                 fontFamily: 'var(--font-body)',
               }}>
@@ -438,8 +438,8 @@ export const DmCharacterPanel = memo(function DmCharacterPanel({ character, item
               {character.active_conditions.map(c => (
                 <span key={c} style={{
                   padding: '3px 9px', borderRadius: 'var(--r-full)',
-                  border: '1px solid rgba(220,90,80,0.4)',
-                  background: 'rgba(220,90,80,0.10)',
+                  border: '1px solid rgb(var(--crimson-rgb) / 0.4)',
+                  background: 'rgb(var(--crimson-rgb) / 0.10)',
                   fontSize: 10, fontWeight: 700, color: 'var(--crimson)',
                   fontFamily: 'var(--font-body)',
                   textTransform: 'capitalize',
