@@ -362,7 +362,7 @@ Return ONLY a raw JSON array with one item — no markdown, no explanation:
         </div>
       </Modal>
 
-      <Modal open={srdOpen} onClose={() => setSrdOpen(false)} title="Magische items importeren uit de SRD" className="max-w-xl">
+      <Modal open={srdOpen} onClose={() => setSrdOpen(false)} title="Magische items importeren uit de SRD" size="lg">
         <CompendiumBrowser
           kind="item"
           onImport={(data, edition) => importItem.mutate({ magicItem: data as Open5eMagicItem, edition })}

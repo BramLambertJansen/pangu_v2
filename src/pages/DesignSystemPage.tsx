@@ -365,13 +365,21 @@ export default function DesignSystemPage() {
         </div>
       </Section>
 
-      <Modal open={modalOpen} onClose={() => setModalOpen(false)} title="Voorbeeld modal">
+      <Modal
+        open={modalOpen}
+        onClose={() => setModalOpen(false)}
+        title="Voorbeeld modal"
+        footer={
+          <>
+            <button type="button" className="btn btn-ghost btn-sm" onClick={() => setModalOpen(false)}>Annuleren</button>
+            <button type="button" className="btn btn-primary btn-sm" onClick={() => setModalOpen(false)}>Bevestigen</button>
+          </>
+        }
+      >
         <p className="text-sm text-ink-soft">
-          Token-gedreven dialoog met focus-trap. Sluit met Escape of de knop.
+          Token-gedreven dialoog met focus-trap, gestructureerde head/body/foot
+          en violet-glow box-shadow. Sluit met Escape, de kruisknop of de annuleren-knop.
         </p>
-        <div className="mt-4 flex justify-end">
-          <button type="button" className="btn btn-primary btn-sm" onClick={() => setModalOpen(false)}>Sluiten</button>
-        </div>
       </Modal>
 
       <OrnateDivider label="Gevechts- & locatiewidgets" />

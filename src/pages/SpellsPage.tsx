@@ -130,7 +130,7 @@ export default function SpellsPage() {
       )}
 
       {/* SRD import modal */}
-      <Modal open={srdOpen} onClose={() => setSrdOpen(false)} title="Spreuken importeren uit de SRD" className="max-w-xl">
+      <Modal open={srdOpen} onClose={() => setSrdOpen(false)} title="Spreuken importeren uit de SRD" size="lg">
         <CompendiumBrowser
           kind="spell"
           onImport={(data, edition) => importSpell.mutate({ spell: data as Open5eSpell, edition })}

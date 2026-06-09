@@ -2,15 +2,35 @@ import { useEffect, useId, useRef, type ReactNode } from 'react'
 import { createPortal } from 'react-dom'
 import { cn } from '@/utils/cn'
 
+export type ModalSize = 'sm' | 'md' | 'lg' | 'xl'
+
 export interface ModalProps {
   open: boolean
   onClose: () => void
   title: string
   children: ReactNode
+  /** Optional sticky footer for action buttons (e.g. Cancel + Confirm). */
+  footer?: ReactNode
+  size?: ModalSize
   className?: string
 }
 
-export function Modal({ open, onClose, title, children, className }: ModalProps) {
+const sizeClass: Record<ModalSize, string> = {
+  sm: 'modal-sm',
+  md: '',
+  lg: 'modal-lg',
+  xl: 'modal-xl',
+}
+
+export function Modal({
+  open,
+  onClose,
+  title,
+  children,
+  footer,
+  size = 'md',
+  className,
+}: ModalProps) {
   const dialogRef = useRef<HTMLDivElement>(null)
   const previousFocusRef = useRef<HTMLElement | null>(null)
   const onCloseRef = useRef(onClose)
@@ -22,11 +42,6 @@ export function Modal({ open, onClose, title, children, className }: ModalProps)
     if (!open) return
 
     previousFocusRef.current = document.activeElement as HTMLElement
-
-    // Focus the dialog container itself (tabIndex={-1}).
-    // This is the correct a11y pattern: screen readers announce the dialog title,
-    // and the user Tabs naturally to the first form field from there.
-    // Focusing a child input here causes re-renders from form state to steal focus.
     dialogRef.current?.focus()
 
     function onKeyDown(e: KeyboardEvent) {
@@ -59,7 +74,7 @@ export function Modal({ open, onClose, title, children, className }: ModalProps)
 
   return createPortal(
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 px-4"
+      className="modal-backdrop fixed inset-0 z-50"
       onClick={(e) => { if (e.target === e.currentTarget) onCloseRef.current() }}
     >
       <div
@@ -68,26 +83,23 @@ export function Modal({ open, onClose, title, children, className }: ModalProps)
         aria-modal="true"
         aria-labelledby={titleId}
         tabIndex={-1}
-        className={cn(
-          'w-full max-w-lg rounded-lg border border-hairline bg-surface p-6 shadow-xl outline-none',
-          className,
-        )}
+        className={cn('modal', sizeClass[size], className)}
       >
-        <div className="mb-4 flex items-center justify-between">
-          <h2 id={titleId} className="text-lg font-semibold text-ink">
-            {title}
-          </h2>
+        <div className="modal-head">
+          <h2 id={titleId} className="modal-head-title">{title}</h2>
           <button
+            type="button"
             onClick={() => onCloseRef.current()}
             aria-label="Sluiten"
-            className="flex h-11 w-11 items-center justify-center rounded text-muted hover:text-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet"
+            className="modal-close"
           >
-            <svg aria-hidden="true" className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+            <svg aria-hidden="true" viewBox="0 0 24 24">
+              <path d="M6 18L18 6M6 6l12 12" />
             </svg>
           </button>
         </div>
-        {children}
+        <div className="modal-body">{children}</div>
+        {footer && <div className="modal-foot">{footer}</div>}
       </div>
     </div>,
     document.body,

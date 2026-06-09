@@ -149,7 +149,7 @@ export default function ItemsPage() {
       )}
 
       {/* SRD import modal */}
-      <Modal open={srdOpen} onClose={() => setSrdOpen(false)} title="Magische items importeren uit de SRD" className="max-w-xl">
+      <Modal open={srdOpen} onClose={() => setSrdOpen(false)} title="Magische items importeren uit de SRD" size="lg">
         <CompendiumBrowser
           kind="item"
           onImport={(data, edition) => importMutation.mutate({ magicItem: data as Open5eMagicItem, edition })}

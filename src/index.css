@@ -128,6 +128,15 @@
   --bc-arcane-glow: rgb(var(--gold-rgb) / 0.45);
   --bc-arcane-sep:  rgb(var(--gold-rgb) / 0.3);
 
+  --modal-bg:           var(--surface);
+  --modal-border:       var(--hairline-strong);
+  --modal-radius:       12px;
+  --modal-shadow:       var(--shadow-3), 0 0 80px var(--violet-glow), 0 0 160px rgb(var(--violet-rgb) / 0.08);
+  --modal-head-bg:      linear-gradient(180deg, rgb(var(--violet-rgb) / 0.05), transparent);
+  --modal-foot-bg:      var(--void-2);
+  --modal-backdrop-bg:  rgb(var(--void-rgb) / 0.8);
+  --modal-backdrop-blur: 14px;
+
   /* ── Semantic type roles ─────────────────────────────────
      Mirrors the .pangu-* type utilities; consumed by the .pg-* layer. */
   --eyebrow-font: var(--font-body);
@@ -1770,6 +1779,92 @@ body {
 .div-ornate-compact { margin: var(--sp-5) 0; }
 .div-ornate-violet .glyph { color: var(--ornate-glyph-violet); }
 .div-ornate-muted  .glyph { color: var(--ornate-glyph-muted); }
+
+/* ─── Modal (canonical) ──────────────────────────────────── */
+.modal-backdrop {
+  position: fixed; inset: 0; z-index: 100;
+  background: var(--modal-backdrop-bg);
+  backdrop-filter: blur(var(--modal-backdrop-blur));
+  display: flex; align-items: center; justify-content: center;
+  padding: var(--sp-5);
+  animation: modalBackdropIn 240ms var(--ease-out) both;
+}
+.modal {
+  width: 100%;
+  max-width: 540px;
+  max-height: calc(100vh - var(--sp-10));
+  display: flex; flex-direction: column;
+  background: var(--modal-bg);
+  border: 1px solid var(--modal-border);
+  border-radius: var(--modal-radius);
+  box-shadow: var(--modal-shadow);
+  overflow: hidden;
+  outline: none;
+  animation: modalIn 380ms cubic-bezier(.22, 1, .36, 1) 60ms both;
+}
+.modal-sm { max-width: 420px; }
+.modal-lg { max-width: 760px; }
+.modal-xl { max-width: 960px; }
+
+.modal-head {
+  flex-shrink: 0;
+  display: flex; align-items: flex-start; justify-content: space-between;
+  gap: var(--sp-4);
+  padding: var(--sp-6) var(--sp-6) var(--sp-4);
+  border-bottom: 1px solid var(--hairline);
+  background: var(--modal-head-bg);
+}
+.modal-head-title {
+  font-family: var(--font-display);
+  font-size: 18px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  color: var(--ink);
+  margin: 0;
+}
+.modal-close {
+  flex-shrink: 0;
+  width: 36px; height: 36px;
+  display: inline-flex; align-items: center; justify-content: center;
+  border-radius: var(--r-xs);
+  background: none; border: none; cursor: pointer;
+  color: var(--muted);
+  transition: color var(--t-fast) var(--ease-out),
+              background var(--t-fast) var(--ease-out);
+}
+.modal-close:hover,
+.modal-close:focus-visible {
+  color: var(--ink);
+  background: var(--surface-hover);
+}
+.modal-close svg {
+  width: 18px; height: 18px;
+  stroke: currentColor; fill: none;
+  stroke-width: 2; stroke-linecap: round; stroke-linejoin: round;
+}
+
+.modal-body {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  padding: var(--sp-6);
+}
+
+.modal-foot {
+  flex-shrink: 0;
+  padding: var(--sp-4) var(--sp-6);
+  border-top: 1px solid var(--hairline);
+  background: var(--modal-foot-bg);
+  display: flex; justify-content: flex-end; gap: var(--sp-3);
+  flex-wrap: wrap;
+}
+
+@keyframes modalBackdropIn { from { opacity: 0; } to { opacity: 1; } }
+@keyframes modalIn { from { opacity: 0; transform: scale(0.93) translateY(20px); } to { opacity: 1; transform: none; } }
+
+@media (prefers-reduced-motion: reduce) {
+  .modal-backdrop, .modal { animation: none; }
+}
 
 /* ─── Tab indicator (sliding pill) ───────────────────────── */
 .tab-indicator {

@@ -101,4 +101,28 @@ describe('Modal', () => {
     const lastFocusable = focusable[focusable.length - 1]
     expect(document.activeElement).toBe(lastFocusable)
   })
+
+  it('renders footer when provided and omits it otherwise', () => {
+    const { rerender } = render(
+      <Modal open onClose={vi.fn()} title="x" footer={<button>Confirm</button>}>
+        body
+      </Modal>,
+    )
+    expect(document.querySelector('.modal-foot')).not.toBeNull()
+    expect(screen.getByRole('button', { name: 'Confirm' })).toBeInTheDocument()
+
+    rerender(
+      <Modal open onClose={vi.fn()} title="x">body</Modal>,
+    )
+    expect(document.querySelector('.modal-foot')).toBeNull()
+  })
+
+  it('applies size modifier class', () => {
+    const { rerender } = render(
+      <Modal open onClose={vi.fn()} title="x" size="sm">body</Modal>,
+    )
+    expect(document.querySelector('.modal')).toHaveClass('modal-sm')
+    rerender(<Modal open onClose={vi.fn()} title="x" size="lg">body</Modal>)
+    expect(document.querySelector('.modal')).toHaveClass('modal-lg')
+  })
 })
