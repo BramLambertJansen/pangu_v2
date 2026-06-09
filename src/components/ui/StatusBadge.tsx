@@ -12,7 +12,11 @@ export interface StatusBadgeProps {
 export const StatusBadge = memo(function StatusBadge({ label, color, tone = 'solid', className }: StatusBadgeProps) {
   const style =
     tone === 'soft'
-      ? { color, border: `1px solid ${color}55`, background: `${color}11` }
+      ? {
+          color,
+          border: `1px solid color-mix(in srgb, ${color} 33%, transparent)`,
+          background: `color-mix(in srgb, ${color} 7%, transparent)`,
+        }
       : { background: color }
   return (
     <span
