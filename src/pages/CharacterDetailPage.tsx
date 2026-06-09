@@ -3,6 +3,8 @@ import { useParams, useNavigate, Link } from 'react-router-dom'
 import { Spinner } from '@/components/ui/Spinner'
 import { Button } from '@/components/ui/Button'
 import { Breadcrumb } from '@/components/ui/Breadcrumb'
+import { Tabs } from '@/components/ui/Tabs'
+import { StatusBadge } from '@/components/ui/StatusBadge'
 import { CharacterStatsTab } from '@/components/character/CharacterStatsTab'
 import { CharacterSpellsTab } from '@/components/character/CharacterSpellsTab'
 import { CharacterInventoryTab } from '@/components/character/CharacterInventoryTab'
@@ -179,9 +181,11 @@ export default function CharacterDetailPage() {
             </>
           )}
           <div style={{ position: 'absolute', top: 14, right: 14 }}>
-            <span style={{ display: 'inline-flex', alignItems: 'center', padding: '3px 10px', borderRadius: 'var(--r-full)', fontSize: 10, fontWeight: 700, letterSpacing: '0.14em', textTransform: 'uppercase', color: characterStatusColor[character.status], border: `1px solid ${characterStatusColor[character.status]}55`, background: `${characterStatusColor[character.status]}11`, backdropFilter: 'blur(4px)' }}>
-              {characterStatusLabel[character.status]}
-            </span>
+            <StatusBadge
+              tone="soft"
+              label={characterStatusLabel[character.status]}
+              color={characterStatusColor[character.status]}
+            />
           </div>
         </div>
 
@@ -316,18 +320,19 @@ export default function CharacterDetailPage() {
       </div>
 
       {/* ── Tabs ── */}
-      <div role="tablist" aria-label="Karakter tabs" className="pangu-tab-bar--line" style={{ marginBottom: 20, position: 'sticky', top: 0, zIndex: 20, background: 'var(--void)', paddingTop: 8, paddingBottom: 2, marginTop: -8 }}>
-        {([
-          { key: 'stats',        label: 'Stats' },
-          { key: 'spreuken',     label: 'Spreuken' },
-          { key: 'inventaris',   label: `Inventaris${items && items.length > 0 ? ` (${items.length})` : ''}` },
-          { key: 'vaardigheden', label: 'Vaardigheden' },
-          { key: 'lore',         label: 'Lore' },
-        ] as { key: Tab; label: string }[]).map(({ key, label }) => (
-          <button key={key} type="button" role="tab" aria-selected={activeTab === key} aria-controls={`tabpanel-${key}`} id={`tab-${key}`} onClick={() => setActiveTab(key)} className="pangu-tab--line">
-            {label}
-          </button>
-        ))}
+      <div style={{ marginBottom: 20, position: 'sticky', top: 0, zIndex: 20, background: 'var(--void)', paddingTop: 8, paddingBottom: 2, marginTop: -8 }}>
+        <Tabs
+          label="Karakter tabs"
+          value={activeTab}
+          onValueChange={(id) => setActiveTab(id as Tab)}
+          items={[
+            { id: 'stats',        label: 'Stats' },
+            { id: 'spreuken',     label: 'Spreuken' },
+            { id: 'inventaris',   label: `Inventaris${items && items.length > 0 ? ` (${items.length})` : ''}` },
+            { id: 'vaardigheden', label: 'Vaardigheden' },
+            { id: 'lore',         label: 'Lore' },
+          ]}
+        />
       </div>
 
       {activeTab === 'stats'        && <CharacterStatsTab character={character} eff={eff} />}

@@ -3,6 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom'
 import { Breadcrumb } from '@/components/ui/Breadcrumb'
 import { Button } from '@/components/ui/Button'
 import { Spinner } from '@/components/ui/Spinner'
+import { Tabs } from '@/components/ui/Tabs'
 import { PartyTab } from '@/components/campaign/PartyTab'
 import { SessionsTab } from '@/components/campaign/SessionsTab'
 import { LocationsTab } from '@/components/campaign/LocationsTab'
@@ -27,7 +28,8 @@ import { useCampaignItems, useForgeCampaignItem } from '@/hooks/queries/useCampa
 import { useCampaignFactions, useCreateCampaignFaction } from '@/hooks/queries/useCampaignFactions'
 import { pickGradient, coverGradients } from '@/utils/pickGradient'
 import { sanitizeImageUrl } from '@/utils/sanitizeUrl'
-import { campaignStatusLabel } from '@/lib/statusMaps'
+import { campaignStatusLabel, campaignStatusColor } from '@/lib/statusMaps'
+import { StatusBadge } from '@/components/ui/StatusBadge'
 import { useAuthStore } from '@/stores/auth.store'
 
 const scrimGradient =
@@ -153,18 +155,7 @@ export default function CampaignDetailPage() {
           </div>
 
           <div style={{ display: 'flex', justifyContent: 'flex-end', padding: '16px 20px 0' }}>
-            <span style={{
-              display: 'inline-flex', alignItems: 'center',
-              padding: '4px 12px',
-              background: 'var(--gold)',
-              borderRadius: 'var(--r-full)',
-              fontFamily: 'var(--font-body)',
-              fontSize: 10, fontWeight: 700,
-              letterSpacing: '0.16em', textTransform: 'uppercase',
-              color: 'var(--void)',
-            }}>
-              {campaignStatusLabel[campaign.status]}
-            </span>
+            <StatusBadge label={campaignStatusLabel[campaign.status]} color={campaignStatusColor[campaign.status]} />
           </div>
 
           <div style={{ flex: 1 }} />
@@ -237,18 +228,7 @@ export default function CampaignDetailPage() {
           </div>
 
           <div style={{ display: 'flex', justifyContent: 'flex-end', padding: '20px 28px 0' }}>
-            <span style={{
-              display: 'inline-flex', alignItems: 'center',
-              padding: '4px 12px',
-              background: 'var(--gold)',
-              borderRadius: 'var(--r-full)',
-              fontFamily: 'var(--font-body)',
-              fontSize: 10, fontWeight: 700,
-              letterSpacing: '0.16em', textTransform: 'uppercase',
-              color: 'var(--void)',
-            }}>
-              {campaignStatusLabel[campaign.status]}
-            </span>
+            <StatusBadge label={campaignStatusLabel[campaign.status]} color={campaignStatusColor[campaign.status]} />
           </div>
 
           <div style={{ flex: 1 }} />
@@ -316,76 +296,23 @@ export default function CampaignDetailPage() {
       )}
 
       {/* ── Tab navigation ── */}
-      <div
-        role="tablist"
-        aria-label="Kroniek secties"
-        style={{
-          display: 'flex',
-          gap: 4,
-          marginTop: 32,
-          overflowX: 'auto',
-          paddingBottom: 2,
-          scrollbarWidth: 'none',
-          borderBottom: '1px solid var(--hairline)',
-        }}
-      >
-        {TABS.filter(tab => !tab.dmOnly || campaign.user_id === user?.id).map((tab, idx, visibleTabs) => (
-          <button
-            key={tab.id}
-            id={`tab-${tab.id}`}
-            type="button"
-            role="tab"
-            aria-selected={activeTab === tab.id}
-            aria-controls={`panel-${tab.id}`}
-            tabIndex={activeTab === tab.id ? 0 : -1}
-            onClick={() => setActiveTab(tab.id)}
-            onKeyDown={e => {
-              if (e.key === 'ArrowRight') {
-                const next = visibleTabs[(idx + 1) % visibleTabs.length]
-                setActiveTab(next.id)
-                document.getElementById(`tab-${next.id}`)?.focus()
-              } else if (e.key === 'ArrowLeft') {
-                const prev = visibleTabs[(idx - 1 + visibleTabs.length) % visibleTabs.length]
-                setActiveTab(prev.id)
-                document.getElementById(`tab-${prev.id}`)?.focus()
-              }
-            }}
-            style={{
-              flexShrink: 0,
-              padding: '10px 16px',
-              background: 'none',
-              border: 'none',
-              borderBottom: activeTab === tab.id
-                ? '2px solid var(--violet)'
-                : '2px solid transparent',
-              marginBottom: -1,
-              cursor: 'pointer',
-              fontFamily: 'var(--font-body)',
-              fontSize: 13, fontWeight: activeTab === tab.id ? 700 : 500,
-              letterSpacing: '0.04em',
-              color: activeTab === tab.id ? 'var(--violet-soft)' : 'var(--muted)',
-              transition: 'color var(--t-fast) var(--ease-out), border-color var(--t-fast) var(--ease-out)',
-              whiteSpace: 'nowrap',
-            }}
-            onMouseEnter={e => {
-              if (activeTab !== tab.id)
-                (e.currentTarget as HTMLButtonElement).style.color = 'var(--ink-soft)'
-            }}
-            onMouseLeave={e => {
-              if (activeTab !== tab.id)
-                (e.currentTarget as HTMLButtonElement).style.color = 'var(--muted)'
-            }}
-          >
-            {tab.label}
-          </button>
-        ))}
+      <div style={{ marginTop: 32 }}>
+        <Tabs
+          variant="line"
+          label="Kroniek secties"
+          value={activeTab}
+          onValueChange={(id) => setActiveTab(id as TabId)}
+          items={TABS.filter(tab => !tab.dmOnly || campaign.user_id === user?.id).map(tab => ({
+            id: tab.id,
+            label: tab.label,
+          }))}
+        />
       </div>
 
       {/* ── Tab panels ── */}
       <div
         role="tabpanel"
         id={`panel-${activeTab}`}
-        aria-labelledby={`tab-${activeTab}`}
         style={{ marginTop: 32 }}
       >
         {activeTab === 'party' && (

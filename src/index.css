@@ -61,6 +61,8 @@
   --azure-rgb: 107 167 255;
   --muted-rgb: 153 153 179;
   --void-rgb: 10 10 20;
+  --surface-rgb: 21 20 42;
+  --ink-rgb: 255 255 255;
   --sp-1: 4px;
   --sp-2: 8px;
   --sp-3: 12px;
@@ -297,6 +299,40 @@ body {
 .pangu-tab--line:focus-visible {
   outline: 2px solid var(--violet);
   outline-offset: 2px;
+}
+
+/* ── Tab bar — line (underline) variant ─────────────────── */
+
+.tab-bar[data-variant='line'] {
+  background: transparent;
+  border: none;
+  border-bottom: 1px solid var(--hairline);
+  border-radius: 0;
+  padding: 0;
+  gap: 4px;
+}
+
+.tab-bar[data-variant='line'] .tab {
+  flex: 0 0 auto;
+  padding: 10px 16px;
+  border-radius: 0;
+  border-bottom: 2px solid transparent;
+  margin-bottom: -1px;
+  font-size: 13px;
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  text-transform: none;
+}
+
+.tab-bar[data-variant='line'] .tab:hover {
+  color: var(--ink-soft);
+}
+
+.tab-bar[data-variant='line'] .tab[aria-selected='true'] {
+  background: transparent;
+  border-bottom-color: var(--violet);
+  color: var(--violet-soft);
+  font-weight: 700;
 }
 
 /* ── Tab bar — mobile responsive ────────────────────────── */
@@ -1190,6 +1226,11 @@ body {
   color: var(--void);
 }
 
+.status-badge--soft {
+  color: inherit;
+  backdrop-filter: blur(4px);
+}
+
 /* ── Suppress hover effects on touch-only devices ───────── */
 
 @media (hover: none) {
@@ -1473,6 +1514,10 @@ body {
   color: var(--ink-soft);
   white-space: nowrap;
 }
+
+.chip--violet { background: rgb(var(--violet-rgb) / 0.1); border-color: rgb(var(--violet-rgb) / 0.25); color: var(--violet); }
+.chip--crimson { background: rgb(var(--crimson-rgb) / 0.1); border-color: rgb(var(--crimson-rgb) / 0.25); color: var(--crimson); }
+.chip--teal { background: rgb(var(--teal-rgb) / 0.1); border-color: rgb(var(--teal-rgb) / 0.25); color: var(--teal); }
 
 /* ─── Stat pill / kicker ─────────────────────────────────── */
 .stat-pill {

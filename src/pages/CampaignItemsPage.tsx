@@ -13,6 +13,7 @@ import { useCampaignCharacters } from '@/hooks/queries/useCampaignCharacters'
 import { useImportMagicItem } from '@/hooks/queries/useSrdSearch'
 import { useDraftGC } from '@/hooks/useDraftGC'
 import { Breadcrumb } from '@/components/ui/Breadcrumb'
+import { Tabs } from '@/components/ui/Tabs'
 import type { ItemType, ItemRarity } from '@/types/item.types'
 import type { Open5eMagicItem } from '@/types/open5e.types'
 
@@ -213,33 +214,20 @@ Return ONLY a raw JSON array with one item — no markdown, no explanation:
 
       {/* Filter tabs */}
       {!isLoadingItems && !isLoadingCharacters && (
-        <div
-          role="tablist"
-          aria-label="Items filteren"
-          className="pangu-tab-bar--line"
-          style={{ marginBottom: 24 }}
-        >
-          {(
-            [
-              { key: 'all', label: `Alles (${items?.length ?? 0})` },
-              { key: 'unassigned', label: `Schatkist (${unassignedCount})` },
+        <div style={{ marginBottom: 24 }}>
+          <Tabs
+            label="Items filteren"
+            value={activeTab}
+            onValueChange={(id) => setActiveTab(id as FilterTab)}
+            items={[
+              { id: 'all', label: `Alles (${items?.length ?? 0})` },
+              { id: 'unassigned', label: `Schatkist (${unassignedCount})` },
               ...(characters ?? []).map(char => ({
-                key: char.id,
+                id: char.id,
                 label: `${char.name}${items ? ` (${items.filter(i => i.character_id === char.id).length})` : ''}`,
               })),
-            ] as { key: FilterTab; label: string }[]
-          ).map(({ key, label }) => (
-            <button
-              key={key}
-              type="button"
-              role="tab"
-              aria-selected={activeTab === key}
-              onClick={() => setActiveTab(key)}
-              className="pangu-tab--line"
-            >
-              {label}
-            </button>
-          ))}
+            ]}
+          />
         </div>
       )}
 

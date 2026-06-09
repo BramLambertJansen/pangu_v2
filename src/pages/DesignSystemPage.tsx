@@ -131,22 +131,38 @@ export default function DesignSystemPage() {
           <span className="badge badge-teal">Teal</span>
           <span className="badge badge-outline">Outline</span>
           <Chip>Mens · Tovenaar</Chip>
+          <Chip tone="violet">Reddingsworp</Chip>
+          <Chip tone="crimson">Verdoofd</Chip>
+          <Chip tone="teal">Ki: 3/5</Chip>
           <StatPill value={42} label="HP" />
           <KbdHint>/</KbdHint>
         </div>
       </Section>
 
       <Section title="Tabs">
-        <Tabs
-          label="Voorbeeld tabs"
-          value={tab}
-          onValueChange={setTab}
-          items={[
-            { id: 'overzicht', label: 'Overzicht' },
-            { id: 'kenmerken', label: 'Kenmerken' },
-            { id: 'spreuken', label: 'Spreuken' },
-          ]}
-        />
+        <div className="flex flex-col gap-6">
+          <Tabs
+            label="Voorbeeld tabs (pill)"
+            value={tab}
+            onValueChange={setTab}
+            items={[
+              { id: 'overzicht', label: 'Overzicht' },
+              { id: 'kenmerken', label: 'Kenmerken' },
+              { id: 'spreuken', label: 'Spreuken' },
+            ]}
+          />
+          <Tabs
+            variant="line"
+            label="Voorbeeld tabs (line)"
+            value={tab}
+            onValueChange={setTab}
+            items={[
+              { id: 'overzicht', label: 'Overzicht' },
+              { id: 'kenmerken', label: 'Kenmerken' },
+              { id: 'spreuken', label: 'Spreuken' },
+            ]}
+          />
+        </div>
       </Section>
 
       <Section title="Divider">
@@ -213,6 +229,8 @@ export default function DesignSystemPage() {
           <div className="flex flex-wrap items-center gap-2">
             <StatusBadge label="Voltooid" color="var(--teal)" />
             <StatusBadge label="Actief" color="var(--violet)" />
+            <StatusBadge tone="soft" label="Concept" color="var(--gold)" />
+            <StatusBadge tone="soft" label="Gearchiveerd" color="var(--muted)" />
           </div>
           <Spinner />
           <button type="button" className="btn-icon" aria-label="Voorbeeld icoonknop">

@@ -135,7 +135,7 @@ export default function QuestDetailPage() {
               fontSize: 10, fontWeight: 700,
               letterSpacing: '0.16em', textTransform: 'uppercase',
               color: 'var(--ink-soft)',
-              background: 'rgba(255,255,255,0.04)',
+              background: 'rgb(var(--ink-rgb) / 0.04)',
             }}>
               {quest.difficulty}
             </span>
