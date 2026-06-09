@@ -265,18 +265,73 @@ export default function DesignSystemPage() {
         </div>
       </Modal>
 
+      <OrnateDivider label="Gevechts- & locatiewidgets" />
+
+      <Section title="CombatTracker">
+        <CombatTracker
+          encounterId="demo"
+          activeIndex={1}
+          combatants={[
+            { id: 'c1', name: 'Aldric de Grijze', initiative: 18, hp: 32, maxHp: 45 },
+            { id: 'c2', name: 'Sareth Schaduwvoet', initiative: 15, hp: 28, maxHp: 28 },
+            { id: 'c3', name: 'Bandiet Kapitein', initiative: 12, hp: 6, maxHp: 24 },
+            { id: 'c4', name: 'Grot Trol', initiative: 8, hp: 0, maxHp: 84 },
+          ]}
+        />
+      </Section>
+
+      <Section title="PlaceAccordion">
+        <PlaceAccordion
+          locationId="demo"
+          places={[
+            { id: 'p1', name: 'Grote Hal', type: 'Hal', npcCount: 3 },
+            { id: 'p2', name: 'Smidse', type: 'Werkplaats', npcCount: 1 },
+            { id: 'p3', name: 'Geheime Doorgang', type: 'Doorgang' },
+          ]}
+        />
+      </Section>
+
+      <Section title="ReisgezelschapBanner">
+        <ReisgezelschapBanner
+          campaignId="demo"
+          currentLocation="Havensstad Myrwater"
+          destination="Duistere Vesting"
+          partyVitals={{ avgLevel: 7, totalHp: 148, treasury: 430 }}
+          partyMembers={[
+            { id: 'm1', name: 'Aldric' },
+            { id: 'm2', name: 'Sareth' },
+            { id: 'm3', name: 'Brix' },
+            { id: 'm4', name: 'Yenna' },
+          ]}
+        />
+      </Section>
+
+      <Section title="SkillsPanel">
+        <SkillsPanel
+          proficientSkills={['athletics', 'perception', 'stealth', 'history']}
+          expertiseSkills={['perception']}
+          abilityScores={{ str: 16, dex: 14, con: 13, int: 12, wis: 15, cha: 10 }}
+          proficiencyBonus={3}
+        />
+      </Section>
+
+      <Section title="SpellSlots">
+        <SpellSlots
+          slots={[4, 3, 3, 1, 0, 0, 0, 0, 0]}
+          used={[1, 2, 0, 0, 0, 0, 0, 0, 0]}
+        />
+      </Section>
+
+      <Section title="SanctumInventory">
+        <SanctumInventory characterId="demo" items={[]} />
+      </Section>
+
       <OrnateDivider label="Toekomstige componenten" />
 
       <Section title="Stubs (in ontwikkeling)">
         <div className="grid gap-4 md:grid-cols-2">
-          <SkillsPanel />
-          <SpellSlots />
-          <SanctumInventory characterId="demo" />
           <CharacterWizard />
-          <CombatTracker encounterId="demo" />
           <ConstellationAtlas campaignId="demo" />
-          <PlaceAccordion locationId="demo" />
-          <ReisgezelschapBanner campaignId="demo" />
           <StoryArcSpine campaignId="demo" />
           <FactionDisplay campaignId="demo" />
         </div>

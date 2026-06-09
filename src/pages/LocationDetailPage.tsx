@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/Button'
 import { Breadcrumb } from '@/components/ui/Breadcrumb'
 import { WorldDetailDivider } from '@/components/world/WorldDetailDivider'
 import { RelatedEntities } from '@/components/link/RelatedEntities'
+import { PlaceAccordion } from '@/components/location/PlaceAccordion'
 import { useLocationFull } from '@/hooks/queries/useLocation'
 import { locationStatusLabel, locationStatusColor } from '@/lib/statusMaps'
 import { pickGradient, locationGradients } from '@/utils/pickGradient'
@@ -215,6 +216,10 @@ export default function LocationDetailPage() {
           Nog geen DM-notities.
         </p>
       )}
+
+      {/* Sub-locations */}
+      <WorldDetailDivider label="Sublocaties" />
+      <PlaceAccordion locationId={location.id} places={[]} />
 
       {location.campaign_id && (
         <RelatedEntities type="location" id={location.id} campaignId={location.campaign_id} />

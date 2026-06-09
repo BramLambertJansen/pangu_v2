@@ -1,4 +1,4 @@
-import { D5E_SKILLS as SKILLS } from '@/utils/dnd5e'
+import { SkillsPanel } from '@/components/character/SkillsPanel'
 import type { EffectiveStats } from '@/utils/equipmentUtils'
 import type { Character } from '@/types/character.types'
 
@@ -31,51 +31,20 @@ export function CharacterSkillsTab({ character, eff }: Props) {
           <span style={{ color: 'var(--violet)', fontWeight: 600 }}>●</span> vaardig (+{character.proficiency_bonus ?? 0}) &nbsp;·&nbsp;
           <span style={{ color: 'var(--teal)', fontWeight: 600 }}>◎</span> expertise (×2 bonus)
         </p>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))', gap: 8 }}>
-          {SKILLS.map((skill) => {
-            const isProficient = (character.proficient_skills ?? []).includes(skill.name)
-            const isExpert     = (character.expertise_skills  ?? []).includes(skill.name)
-            const baseScore    = (character[skill.ability] as number | null) ?? 10
-            const baseMod      = Math.floor((baseScore - 10) / 2)
-            const skillBonus   = isExpert ? (character.proficiency_bonus ?? 0) * 2 : isProficient ? (character.proficiency_bonus ?? 0) : 0
-            const itemBonus    = eff.skillBonuses[skill.name] ?? 0
-            const totalMod     = baseMod + skillBonus + itemBonus
-            const modLabel     = totalMod >= 0 ? `+${totalMod}` : `${totalMod}`
-            const state        = isExpert ? 'expertise' : isProficient ? 'vaardig' : 'geen'
-            return (
-              <div key={skill.name} style={{
-                display: 'flex', alignItems: 'center', gap: 10,
-                padding: '8px 12px', borderRadius: 8,
-                background: isExpert ? 'rgb(var(--teal-rgb) / 0.08)' : isProficient ? 'rgb(var(--violet-rgb) / 0.08)' : 'var(--surface)',
-                border: isExpert ? '1px solid rgb(var(--teal-rgb) / 0.3)' : isProficient ? '1px solid rgb(var(--violet-rgb) / 0.3)' : '1px solid var(--hairline)',
-                transition: 'background var(--t-fast), border-color var(--t-fast)',
-              }}>
-                <span
-                  aria-label={`${skill.name}: ${state}`}
-                  style={{
-                    width: 10, height: 10, borderRadius: '50%', flexShrink: 0,
-                    background: isExpert ? 'var(--teal)' : isProficient ? 'var(--violet)' : 'transparent',
-                    border: `2px solid ${isExpert ? 'var(--teal)' : isProficient ? 'var(--violet)' : 'var(--hairline-strong)'}`,
-                    boxShadow: isExpert ? '0 0 0 2px rgb(var(--teal-rgb) / 0.3)' : 'none',
-                  }}
-                />
-                <span style={{ flex: 1, fontSize: 13, color: isExpert ? 'var(--teal)' : isProficient ? 'var(--ink)' : 'var(--ink-soft)', fontWeight: (isProficient || isExpert) ? 600 : 400 }}>
-                  {skill.name}
-                  <span style={{ fontSize: 10, color: 'var(--muted)', marginLeft: 5, fontWeight: 400 }}>{skill.abbr}</span>
-                  {isExpert && <span style={{ fontSize: 9, color: 'var(--teal)', marginLeft: 5, fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase' }}>EXP</span>}
-                </span>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
-                  {itemBonus !== 0 && (
-                    <span style={{ fontSize: 10, fontWeight: 700, color: 'var(--teal)' }}>{itemBonus > 0 ? `+${itemBonus}` : itemBonus}</span>
-                  )}
-                  <span style={{ fontSize: 14, fontWeight: 700, fontFamily: 'var(--font-display)', color: isExpert ? 'var(--teal)' : isProficient ? 'var(--violet)' : 'var(--ink-soft)', minWidth: 28, textAlign: 'right' }}>
-                    {modLabel}
-                  </span>
-                </div>
-              </div>
-            )
-          })}
-        </div>
+        <SkillsPanel
+          proficientSkills={character.proficient_skills ?? []}
+          expertiseSkills={character.expertise_skills ?? []}
+          abilityScores={{
+            str: character.stat_str,
+            dex: character.stat_dex,
+            con: character.stat_con,
+            int: character.stat_int,
+            wis: character.stat_wis,
+            cha: character.stat_cha,
+          }}
+          proficiencyBonus={character.proficiency_bonus ?? 2}
+          skillBonuses={eff.skillBonuses}
+        />
       </div>
 
       {hasAny && (
