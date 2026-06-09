@@ -164,6 +164,26 @@
   --toggle-gold-on-glow:   var(--gold-glow);
   --toggle-gold-thumb:     var(--gold);
 
+  --check-bg:            var(--surface-2);
+  --check-border:        var(--hairline-strong);
+  --check-bg-on:         rgb(var(--violet-rgb) / 0.18);
+  --check-bg-indet:      rgb(var(--violet-rgb) / 0.10);
+  --check-border-on:     var(--violet);
+  --check-glyph-on:      var(--violet);
+  --check-glow-on:       var(--violet-glow);
+  --check-label-off:     var(--ink-soft);
+  --check-label-on:      var(--ink);
+
+  --radio-bg:            var(--surface-2);
+  --radio-border:        var(--hairline-strong);
+  --radio-bg-on:         rgb(var(--violet-rgb) / 0.15);
+  --radio-border-on:     var(--violet);
+  --radio-inner-on:      var(--violet);
+  --radio-glow-on:       var(--violet-glow);
+  --radio-row-border:    var(--hairline);
+  --radio-row-bg-on:     rgb(var(--violet-rgb) / 0.08);
+  --radio-row-border-on: rgb(var(--violet-rgb) / 0.4);
+
   /* ── Semantic type roles ─────────────────────────────────
      Mirrors the .pangu-* type utilities; consumed by the .pg-* layer. */
   --eyebrow-font: var(--font-body);
@@ -739,6 +759,148 @@ body {
 
 @media (prefers-reduced-motion: reduce) {
   .toggle, .toggle-thumb { transition: none; }
+}
+
+/* ─── Checkbox (canonical) ───────────────────────────────── */
+.check-row {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+  user-select: none;
+  background: none;
+  border: none;
+  padding: 0;
+  font: inherit;
+  color: inherit;
+  text-align: left;
+}
+.check-row:focus-visible { outline: none; }
+.check-row:focus-visible .check-box {
+  outline: 2px solid var(--check-border-on);
+  outline-offset: 2px;
+}
+.check-row:disabled,
+.check-row[aria-disabled='true'] {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.check-box {
+  width: 20px; height: 20px;
+  border-radius: var(--r-xs);
+  flex-shrink: 0;
+  border: 1.5px solid var(--check-border);
+  background: var(--check-bg);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 12px;
+  color: transparent;
+  transition: all 180ms var(--ease-out);
+}
+
+.check-row[aria-checked='true'] .check-box {
+  background: var(--check-bg-on);
+  border-color: var(--check-border-on);
+  color: var(--check-glyph-on);
+  box-shadow: 0 0 8px var(--check-glow-on);
+}
+.check-row[aria-checked='mixed'] .check-box {
+  background: var(--check-bg-indet);
+  border-color: var(--check-border-on);
+  color: var(--check-glyph-on);
+}
+
+.check-box svg { width: 14px; height: 14px; stroke: currentColor; fill: none; stroke-width: 2.5; stroke-linecap: round; stroke-linejoin: round; }
+
+.check-label {
+  font-size: 13.5px;
+  color: var(--check-label-off);
+  transition: color 180ms var(--ease-out);
+}
+.check-row[aria-checked='true'] .check-label { color: var(--check-label-on); }
+
+/* ─── Radio (canonical) ──────────────────────────────────── */
+.radio-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.radio-group[data-orientation='horizontal'] {
+  flex-direction: row;
+  flex-wrap: wrap;
+}
+
+.radio-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+  padding: 10px 12px;
+  border-radius: var(--r-sm);
+  border: 1px solid var(--radio-row-border);
+  background: none;
+  font: inherit;
+  text-align: left;
+  color: inherit;
+  transition: all 150ms var(--ease-out);
+}
+.radio-row:hover:not([aria-disabled='true']) {
+  background: var(--surface-2);
+  border-color: var(--hairline-strong);
+}
+.radio-row[aria-checked='true'] {
+  background: var(--radio-row-bg-on);
+  border-color: var(--radio-row-border-on);
+}
+.radio-row:focus-visible { outline: none; }
+.radio-row:focus-visible .radio-dot {
+  outline: 2px solid var(--radio-border-on);
+  outline-offset: 2px;
+}
+.radio-row[aria-disabled='true'] {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.radio-dot {
+  width: 18px; height: 18px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  border: 1.5px solid var(--radio-border);
+  background: var(--radio-bg);
+  display: flex; align-items: center; justify-content: center;
+  transition: all 180ms var(--ease-out);
+}
+.radio-row[aria-checked='true'] .radio-dot {
+  border-color: var(--radio-border-on);
+  background: var(--radio-bg-on);
+}
+.radio-inner {
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  background: var(--radio-inner-on);
+  opacity: 0;
+  transform: scale(0);
+  transition: all 200ms var(--ease-out);
+}
+.radio-row[aria-checked='true'] .radio-inner {
+  opacity: 1;
+  transform: scale(1);
+  box-shadow: 0 0 6px var(--radio-glow-on);
+}
+
+.radio-body { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.radio-label {
+  font-size: 13px;
+  color: var(--ink-soft);
+  transition: color 180ms var(--ease-out);
+}
+.radio-row[aria-checked='true'] .radio-label { color: var(--ink); font-weight: 500; }
+.radio-sub { font-size: 11px; color: var(--muted); }
+
+@media (prefers-reduced-motion: reduce) {
+  .check-box, .check-label,
+  .radio-row, .radio-dot, .radio-inner, .radio-label { transition: none; }
 }
 
 /* ── Page header ────────────────────────────────────────── */

@@ -4,6 +4,7 @@ import { Breadcrumbs } from '@/components/ui/Breadcrumbs'
 import { toast } from 'sonner'
 import { supabase } from '@/lib/supabase'
 import { Modal } from '@/components/ui/Modal'
+import { Checkbox } from '@/components/ui/Checkbox'
 import { ConfirmDialog } from '@/components/ui/ConfirmDialog'
 import { RelatedEntities } from '@/components/link/RelatedEntities'
 import { Button } from '@/components/ui/Button'
@@ -551,22 +552,11 @@ export default function ItemEditPage() {
               />
             </div>
 
-            <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-              <input
-                id="item-magical"
-                type="checkbox"
-                checked={form.is_magical ?? false}
-                onChange={(e) => set('is_magical', e.target.checked)}
-                style={{ width: 16, height: 16, accentColor: 'var(--gold)', cursor: 'pointer' }}
-              />
-              <label
-                htmlFor="item-magical"
-                className="pangu-label"
-                style={{ marginBottom: 0, cursor: 'pointer' }}
-              >
-                ✦ Magisch item
-              </label>
-            </div>
+            <Checkbox
+              checked={form.is_magical ?? false}
+              onChange={(v) => set('is_magical', v)}
+              label="✦ Magisch item"
+            />
 
             <div className="sm:col-span-2">
               <label className="pangu-label" htmlFor={descriptionId}>Beschrijving</label>
@@ -672,18 +662,11 @@ export default function ItemEditPage() {
               <p style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.16em', textTransform: 'uppercase', color: 'var(--muted)', marginBottom: 12 }}>
                 Pantser­eigenschappen
               </p>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                <input
-                  id="bonus-stealth-disadvantage"
-                  type="checkbox"
-                  checked={props.stealth_disadvantage ?? false}
-                  onChange={(e) => setBonus('stealth_disadvantage', e.target.checked || undefined)}
-                  style={{ width: 16, height: 16, accentColor: 'var(--crimson)', cursor: 'pointer' }}
-                />
-                <label htmlFor="bonus-stealth-disadvantage" className="pangu-label" style={{ marginBottom: 0, cursor: 'pointer' }}>
-                  Sluipen nadeel (zwaar pantser)
-                </label>
-              </div>
+              <Checkbox
+                checked={props.stealth_disadvantage ?? false}
+                onChange={(v) => setBonus('stealth_disadvantage', v || undefined)}
+                label="Sluipen nadeel (zwaar pantser)"
+              />
             </div>
           )}
 

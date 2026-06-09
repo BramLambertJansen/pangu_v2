@@ -14,6 +14,8 @@ import { StatPill } from '@/components/ui/StatPill'
 import { OrnateDivider } from '@/components/ui/OrnateDivider'
 import { Tabs } from '@/components/ui/Tabs'
 import { Toggle } from '@/components/ui/Toggle'
+import { Checkbox } from '@/components/ui/Checkbox'
+import { RadioGroup, Radio } from '@/components/ui/Radio'
 import { DiceRoller } from '@/components/ui/DiceRoller'
 import { KbdHint } from '@/components/ui/KbdHint'
 import { Card } from '@/components/ui/Card'
@@ -65,6 +67,9 @@ export default function DesignSystemPage() {
   const [tab, setTab] = useState('overzicht')
   const [modalOpen, setModalOpen] = useState(false)
   const [toggled, setToggled] = useState(true)
+  const [checked1, setChecked1] = useState(true)
+  const [checked2, setChecked2] = useState(false)
+  const [radio, setRadio] = useState<string>('actief')
 
   return (
     <div className="page-transition mx-auto max-w-5xl">
@@ -299,6 +304,30 @@ export default function DesignSystemPage() {
               label="Lore-suggesties"
               description="Gouden variant voor warme, brand-positieve schakelaars."
             />
+          </div>
+        </div>
+      </Section>
+
+      <Section title="Checkbox + Radio">
+        <div className="grid gap-6 md:grid-cols-2">
+          <div className="flex flex-col gap-3">
+            <Checkbox checked={checked1} onChange={setChecked1} label="✦ Magisch item" />
+            <Checkbox checked={checked2} onChange={setChecked2} label="Sluipen nadeel (zwaar pantser)" />
+            <Checkbox checked indeterminate onChange={() => {}} label="Gedeeltelijk geselecteerd" />
+            <Checkbox checked={false} onChange={() => {}} disabled label="Uitgeschakeld" />
+          </div>
+          <div>
+            <RadioGroup
+              value={radio}
+              onChange={setRadio}
+              label="Status van de kroniek"
+              description="Bepaalt waar de kroniek verschijnt op het dashboard."
+            >
+              <Radio value="concept" label="Concept" description="Nog niet zichtbaar voor spelers." />
+              <Radio value="actief" label="Actief" description="Loopt momenteel, met geplande sessies." />
+              <Radio value="voltooid" label="Voltooid" description="Het verhaal is tot een einde gebracht." />
+              <Radio value="gearchiveerd" label="Gearchiveerd" description="Verborgen uit het standaardoverzicht." disabled />
+            </RadioGroup>
           </div>
         </div>
       </Section>
