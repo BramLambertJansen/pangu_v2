@@ -2,7 +2,6 @@ import { useId, useState, useEffect } from 'react'
 import { useParams, useNavigate, useLocation } from 'react-router-dom'
 import { Breadcrumbs } from '@/components/ui/Breadcrumbs'
 import { toast } from 'sonner'
-import { Modal } from '@/components/ui/Modal'
 import { ConfirmDialog } from '@/components/ui/ConfirmDialog'
 import { Button } from '@/components/ui/Button'
 import { Spinner } from '@/components/ui/Spinner'
@@ -557,25 +556,16 @@ export default function EncounterEditPage() {
         </div>
 
       </div>
-
-      {/* Delete modal */}
-      <Modal
+      <ConfirmDialog
         open={deleteOpen}
         onClose={() => setDeleteOpen(false)}
+        onConfirm={handleDelete}
         title="Gevecht verwijderen"
+        confirmLabel="Verwijder gevecht"
+        loading={deleteEncounter.isPending}
       >
-        <p style={{ fontSize: 14, color: 'var(--ink-soft)', marginBottom: 24 }}>
-          Weet je zeker dat je <strong style={{ color: 'var(--ink)' }}>{encounterData.name}</strong> wilt verwijderen? Dit kan niet ongedaan worden gemaakt.
-        </p>
-        <div className="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
-          <Button variant="ghost" onClick={() => setDeleteOpen(false)}>
-            Annuleren
-          </Button>
-          <Button variant="danger" onClick={handleDelete} disabled={deleteEncounter.isPending}>
-            {deleteEncounter.isPending ? 'Verwijderen...' : 'Verwijder gevecht'}
-          </Button>
-        </div>
-      </Modal>
+        Weet je zeker dat je <strong style={{ color: 'var(--ink)' }}>{encounterData.name}</strong> wilt verwijderen? Dit kan niet ongedaan worden gemaakt.
+      </ConfirmDialog>
 
       {/* Discard dialog */}
       <ConfirmDialog

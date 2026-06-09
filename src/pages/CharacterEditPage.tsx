@@ -7,7 +7,6 @@ import { toast } from 'sonner'
 import { supabase } from '@/lib/supabase'
 import { queryKeys } from '@/lib/queryKeys'
 import { Button } from '@/components/ui/Button'
-import { Modal } from '@/components/ui/Modal'
 import { ConfirmDialog } from '@/components/ui/ConfirmDialog'
 import { Spinner } from '@/components/ui/Spinner'
 import { useEntityEdit } from '@/hooks/useEntityEdit'
@@ -242,25 +241,16 @@ export default function CharacterEditPage() {
         </div>
 
       </div>
-
-      {/* Delete modal */}
-      <Modal
+      <ConfirmDialog
         open={deleteOpen}
         onClose={() => setDeleteOpen(false)}
+        onConfirm={handleDelete}
         title="Karakter verwijderen"
+        confirmLabel="Verwijder karakter"
+        loading={deleteCharacter.isPending}
       >
-        <p style={{ fontSize: 14, color: 'var(--ink-soft)', marginBottom: 24 }}>
-          Weet je zeker dat je <strong style={{ color: 'var(--ink)' }}>{characterData.name}</strong> wilt verwijderen? Dit kan niet ongedaan worden gemaakt.
-        </p>
-        <div className="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
-          <Button variant="ghost" onClick={() => setDeleteOpen(false)}>
-            Annuleren
-          </Button>
-          <Button variant="danger" onClick={handleDelete} loading={deleteCharacter.isPending}>
-            Verwijder karakter
-          </Button>
-        </div>
-      </Modal>
+        Weet je zeker dat je <strong style={{ color: 'var(--ink)' }}>{characterData.name}</strong> wilt verwijderen? Dit kan niet ongedaan worden gemaakt.
+      </ConfirmDialog>
 
       {/* Discard dialog */}
       <ConfirmDialog

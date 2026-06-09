@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useId, useState } from 'react'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { toast } from 'sonner'
 import { supabase } from '@/lib/supabase'
@@ -35,6 +35,7 @@ async function createUser(body: FormState): Promise<void> {
 }
 
 export function CreateUserModal({ open, onClose }: Props) {
+  const formId = useId()
   const queryClient = useQueryClient()
   const [form, setForm] = useState<FormState>({ display_name: '', email: '', password: '' })
   const [errors, setErrors] = useState<Partial<Record<keyof FormState, string>>>({})
@@ -82,8 +83,22 @@ export function CreateUserModal({ open, onClose }: Props) {
   }
 
   return (
-    <Modal open={open} onClose={handleClose} title="Nieuw account aanmaken">
-      <form onSubmit={handleSubmit} noValidate className="flex flex-col gap-4">
+    <Modal
+      open={open}
+      onClose={handleClose}
+      title="Nieuw account aanmaken"
+      footer={
+        <>
+          <Button type="button" variant="ghost" onClick={handleClose}>
+            Annuleren
+          </Button>
+          <Button type="submit" form={formId} loading={mutation.isPending}>
+            Account aanmaken
+          </Button>
+        </>
+      }
+    >
+      <form id={formId} onSubmit={handleSubmit} noValidate className="flex flex-col gap-4">
         <Input
           label="Naam"
           type="text"
@@ -105,14 +120,6 @@ export function CreateUserModal({ open, onClose }: Props) {
           error={errors.password}
           {...field('password')}
         />
-        <div className="mt-2 flex justify-end gap-2">
-          <Button type="button" variant="ghost" onClick={handleClose}>
-            Annuleren
-          </Button>
-          <Button type="submit" loading={mutation.isPending}>
-            Account aanmaken
-          </Button>
-        </div>
       </form>
     </Modal>
   )

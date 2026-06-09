@@ -3,7 +3,6 @@ import { useParams, useNavigate, useLocation } from 'react-router-dom'
 import { Breadcrumbs } from '@/components/ui/Breadcrumbs'
 import { toast } from 'sonner'
 import { supabase } from '@/lib/supabase'
-import { Modal } from '@/components/ui/Modal'
 import { Checkbox } from '@/components/ui/Checkbox'
 import { ConfirmDialog } from '@/components/ui/ConfirmDialog'
 import { RelatedEntities } from '@/components/link/RelatedEntities'
@@ -817,25 +816,16 @@ export default function ItemEditPage() {
       {itemData.committed && itemData.campaign_id && (
         <RelatedEntities type="item" id={itemData.id} campaignId={itemData.campaign_id} />
       )}
-
-      {/* Delete modal */}
-      <Modal
+      <ConfirmDialog
         open={deleteOpen}
         onClose={() => setDeleteOpen(false)}
+        onConfirm={handleDelete}
         title="Item verwijderen"
+        confirmLabel="Verwijder item"
+        loading={deleteItem.isPending}
       >
-        <p style={{ fontSize: 14, color: 'var(--ink-soft)', marginBottom: 24 }}>
-          Weet je zeker dat je <strong style={{ color: 'var(--ink)' }}>{itemData.name}</strong> wilt verwijderen? Dit kan niet ongedaan worden gemaakt.
-        </p>
-        <div className="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
-          <Button variant="ghost" onClick={() => setDeleteOpen(false)}>
-            Annuleren
-          </Button>
-          <Button variant="danger" onClick={handleDelete} disabled={deleteItem.isPending}>
-            {deleteItem.isPending ? 'Verwijderen...' : 'Verwijder item'}
-          </Button>
-        </div>
-      </Modal>
+        Weet je zeker dat je <strong style={{ color: 'var(--ink)' }}>{itemData.name}</strong> wilt verwijderen? Dit kan niet ongedaan worden gemaakt.
+      </ConfirmDialog>
 
       {/* Discard dialog */}
       <ConfirmDialog
