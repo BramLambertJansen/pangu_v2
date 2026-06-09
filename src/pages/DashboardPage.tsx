@@ -5,6 +5,7 @@ import { WorldCard } from '@/components/world/WorldCard'
 import { CampaignCard } from '@/components/campaign/CampaignCard'
 import { SessionCard } from '@/components/session/SessionCard'
 import { OrnateDivider } from '@/components/ui/OrnateDivider'
+import { EmptyState } from '@/components/ui/EmptyState'
 import { useWorlds } from '@/hooks/queries/useWorld'
 import { useActiveCampaigns } from '@/hooks/queries/useCampaign'
 import { usePlannedSessions } from '@/hooks/queries/useSession'
@@ -47,9 +48,12 @@ export default function DashboardPage() {
           <EntityCardSkeleton count={2} variant="hero" />
         </ul>
       ) : (worlds?.length ?? 0) === 0 ? (
-        <p style={{ fontSize: 14, color: 'var(--muted)', fontStyle: 'italic' }}>
-          Nog geen werelden. Begin met het smeden van je eerste wereld.
-        </p>
+        <EmptyState
+          icon="🌐"
+          title="Nog geen werelden"
+          description="Begin met het smeden van je eerste wereld."
+          action={<Link to="/worlds" className="btn btn-primary btn-sm">＋ Wereld smeden</Link>}
+        />
       ) : (
         <>
           <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
@@ -69,9 +73,11 @@ export default function DashboardPage() {
           <EntityCardSkeleton count={2} />
         </ul>
       ) : (activeCampaigns?.length ?? 0) === 0 ? (
-        <p style={{ fontSize: 14, color: 'var(--muted)', fontStyle: 'italic' }}>
-          Geen actieve kronieken. Stel een kroniek in op 'Actief' om hem hier te zien.
-        </p>
+        <EmptyState
+          icon="📜"
+          title="Geen actieve kronieken"
+          description="Stel een kroniek in op 'Actief' om hem hier te zien."
+        />
       ) : (
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
           {activeCampaigns!.map((campaign) => (
@@ -88,9 +94,11 @@ export default function DashboardPage() {
           <EntityCardSkeleton count={3} />
         </ul>
       ) : (plannedSessions?.length ?? 0) === 0 ? (
-        <p style={{ fontSize: 14, color: 'var(--muted)', fontStyle: 'italic' }}>
-          Geen sessies gepland. Voeg een sessie toe aan een kroniek om hem hier te zien.
-        </p>
+        <EmptyState
+          icon="🗓"
+          title="Geen sessies gepland"
+          description="Voeg een sessie toe aan een kroniek om hem hier te zien."
+        />
       ) : (
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {plannedSessions!.map((session) => (

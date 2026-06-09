@@ -112,9 +112,11 @@ export default function SpellsPage() {
           description="Importeer spreuken uit de SRD om je bibliotheek te vullen."
         />
       ) : filtered.length === 0 ? (
-        <p style={{ fontSize: 14, color: 'var(--muted)', textAlign: 'center', padding: '32px 0' }}>
-          Geen spreuken gevonden voor de geselecteerde filters.
-        </p>
+        <EmptyState
+          icon="🔍"
+          title="Geen treffers"
+          description="Geen spreuken voor de huidige filters."
+        />
       ) : (
         <ul
           style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: 'var(--sp-5)', listStyle: 'none', padding: 0, margin: 0 }}

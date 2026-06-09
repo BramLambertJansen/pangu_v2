@@ -137,10 +137,10 @@
   --modal-backdrop-bg:  rgb(var(--void-rgb) / 0.8);
   --modal-backdrop-blur: 14px;
 
-  --empty-bg:           var(--surface);
-  --empty-border:       var(--hairline-strong);
-  --empty-radius:       8px;
-  --empty-glyph-bg:     var(--surface-2);
+  --empty-bg:           rgb(var(--surface-rgb) / 0.35);
+  --empty-border:       var(--hairline);
+  --empty-radius:       12px;
+  --empty-glyph-bg:     rgb(var(--surface-rgb) / 0.6);
   --empty-glyph-border: var(--hairline);
   --empty-glyph-color:  var(--subtle);
   --empty-title-color:  var(--ink-soft);
@@ -148,7 +148,7 @@
   --empty-quote-color:  var(--subtle);
   --empty-error-color:  var(--crimson);
   --empty-error-glyph:  rgb(var(--crimson-rgb) / 0.08);
-  --empty-error-border: rgb(var(--crimson-rgb) / 0.3);
+  --empty-error-border: rgb(var(--crimson-rgb) / 0.25);
 
   /* ── Semantic type roles ─────────────────────────────────
      Mirrors the .pangu-* type utilities; consumed by the .pg-* layer. */
@@ -1885,10 +1885,11 @@ body {
   align-items: center; justify-content: center;
   text-align: center;
   gap: 10px;
-  padding: 36px 28px;
+  padding: 40px 28px;
   background: var(--empty-bg);
   border: 1px dashed var(--empty-border);
   border-radius: var(--empty-radius);
+  animation: emptyFadeIn 480ms var(--ease-out) both;
 }
 
 .empty-glyph {
@@ -1898,9 +1899,11 @@ body {
   background: var(--empty-glyph-bg);
   border: 1px solid var(--empty-glyph-border);
   color: var(--empty-glyph-color);
-  font-size: 32px;
+  font-size: 28px;
   line-height: 1;
   margin-bottom: 4px;
+  opacity: 0.85;
+  animation: emptyGlyphFloat 4.8s ease-in-out infinite;
 }
 
 .empty-title {
@@ -1928,6 +1931,7 @@ body {
   color: var(--empty-quote-color);
   line-height: 1.5;
   margin-top: 4px;
+  opacity: 0.85;
 }
 
 .empty-actions {
@@ -1947,16 +1951,18 @@ body {
 /* Inline list-row variant */
 .empty-inline {
   display: flex; align-items: center; gap: 14px;
-  padding: 16px 20px;
+  padding: 14px 18px;
   background: var(--empty-bg);
-  border: 1px dashed var(--empty-glyph-border);
+  border: 1px dashed var(--empty-border);
   border-radius: var(--r-sm);
   width: 100%;
+  animation: emptyFadeIn 360ms var(--ease-out) both;
 }
 .empty-inline-icon {
-  font-size: 22px;
+  font-size: 20px;
   color: var(--empty-glyph-color);
   flex-shrink: 0;
+  opacity: 0.85;
 }
 .empty-inline-body { flex: 1; min-width: 0; }
 .empty-inline-title {
@@ -1967,6 +1973,20 @@ body {
   font-size: 12px;
   color: var(--empty-sub-color);
   margin-top: 2px;
+}
+
+@keyframes emptyFadeIn {
+  from { opacity: 0; transform: translateY(6px); }
+  to   { opacity: 1; transform: none; }
+}
+@keyframes emptyGlyphFloat {
+  0%, 100% { transform: translateY(0); opacity: 0.85; }
+  50%      { transform: translateY(-3px); opacity: 1; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .empty, .empty-inline { animation: none; }
+  .empty-glyph { animation: none; }
 }
 
 /* ─── Tab indicator (sliding pill) ───────────────────────── */
