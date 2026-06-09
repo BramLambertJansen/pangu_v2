@@ -266,12 +266,38 @@ export default function DesignSystemPage() {
           <Skeleton className="mt-2 h-4 w-1/2 rounded" />
         </div>
 
-        <div className="mt-5 surface">
-          <EmptyState title="Een leeg kosmos wacht." description="Begin waar je wil." />
-        </div>
-
         <div className="mt-5 h-40 max-w-xs overflow-hidden rounded-[var(--r-lg)]">
           <div className="placeholder-img"><span className="ph-glyph">P</span></div>
+        </div>
+      </Section>
+
+      <Section title="Empty states">
+        <div className="grid gap-4 md:grid-cols-2">
+          <EmptyState
+            icon="🌐"
+            title="Geen werelden gesmeed"
+            description="Jouw Codex is leeg. Begin met het smeden van de eerste wereld voor jouw gezelschap."
+            quote="Zelfs de grootste verhalen begonnen met één stap."
+            action={<button className="btn btn-primary btn-sm">＋ Wereld smeden</button>}
+          />
+          <EmptyState
+            variant="error"
+            icon="⚡"
+            title="Nexus onbereikbaar"
+            description="De arcane verbinding is verbroken. Controleer je verbinding en probeer opnieuw."
+            action={<button className="btn btn-crimson btn-sm">↺ Opnieuw proberen</button>}
+          />
+          <EmptyState
+            inline
+            icon="⚔"
+            title="Geen helden toegevoegd"
+            description="Voeg helden toe om het gezelschap samen te stellen."
+            action={<button className="btn btn-ghost btn-sm">＋ Held</button>}
+          />
+          <EmptyState
+            title="Een leeg kosmos wacht."
+            description="Begin waar je wil — geen icoon nodig."
+          />
         </div>
       </Section>
 

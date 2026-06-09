@@ -137,6 +137,19 @@
   --modal-backdrop-bg:  rgb(var(--void-rgb) / 0.8);
   --modal-backdrop-blur: 14px;
 
+  --empty-bg:           var(--surface);
+  --empty-border:       var(--hairline-strong);
+  --empty-radius:       8px;
+  --empty-glyph-bg:     var(--surface-2);
+  --empty-glyph-border: var(--hairline);
+  --empty-glyph-color:  var(--subtle);
+  --empty-title-color:  var(--ink-soft);
+  --empty-sub-color:    var(--muted);
+  --empty-quote-color:  var(--subtle);
+  --empty-error-color:  var(--crimson);
+  --empty-error-glyph:  rgb(var(--crimson-rgb) / 0.08);
+  --empty-error-border: rgb(var(--crimson-rgb) / 0.3);
+
   /* ── Semantic type roles ─────────────────────────────────
      Mirrors the .pangu-* type utilities; consumed by the .pg-* layer. */
   --eyebrow-font: var(--font-body);
@@ -1864,6 +1877,96 @@ body {
 
 @media (prefers-reduced-motion: reduce) {
   .modal-backdrop, .modal { animation: none; }
+}
+
+/* ─── Empty state (canonical) ────────────────────────────── */
+.empty {
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  text-align: center;
+  gap: 10px;
+  padding: 36px 28px;
+  background: var(--empty-bg);
+  border: 1px dashed var(--empty-border);
+  border-radius: var(--empty-radius);
+}
+
+.empty-glyph {
+  width: 56px; height: 56px;
+  display: flex; align-items: center; justify-content: center;
+  border-radius: 50%;
+  background: var(--empty-glyph-bg);
+  border: 1px solid var(--empty-glyph-border);
+  color: var(--empty-glyph-color);
+  font-size: 32px;
+  line-height: 1;
+  margin-bottom: 4px;
+}
+
+.empty-title {
+  font-family: var(--font-display);
+  font-size: 13.5px;
+  font-weight: 600;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  color: var(--empty-title-color);
+  margin: 0;
+}
+
+.empty-sub {
+  font-size: 12.5px;
+  color: var(--empty-sub-color);
+  line-height: 1.6;
+  margin: 0 8px;
+  max-width: 360px;
+}
+
+.empty-quote {
+  font-family: var(--font-quote);
+  font-style: italic;
+  font-size: 14px;
+  color: var(--empty-quote-color);
+  line-height: 1.5;
+  margin-top: 4px;
+}
+
+.empty-actions {
+  margin-top: 12px;
+  display: flex; gap: var(--sp-3);
+  flex-wrap: wrap; justify-content: center;
+}
+
+.empty-error { border-color: var(--empty-error-border); }
+.empty-error .empty-glyph {
+  background: var(--empty-error-glyph);
+  border-color: var(--empty-error-border);
+  color: var(--empty-error-color);
+}
+.empty-error .empty-title { color: var(--empty-error-color); }
+
+/* Inline list-row variant */
+.empty-inline {
+  display: flex; align-items: center; gap: 14px;
+  padding: 16px 20px;
+  background: var(--empty-bg);
+  border: 1px dashed var(--empty-glyph-border);
+  border-radius: var(--r-sm);
+  width: 100%;
+}
+.empty-inline-icon {
+  font-size: 22px;
+  color: var(--empty-glyph-color);
+  flex-shrink: 0;
+}
+.empty-inline-body { flex: 1; min-width: 0; }
+.empty-inline-title {
+  font-size: 13px; font-weight: 600;
+  color: var(--empty-title-color);
+}
+.empty-inline-sub {
+  font-size: 12px;
+  color: var(--empty-sub-color);
+  margin-top: 2px;
 }
 
 /* ─── Tab indicator (sliding pill) ───────────────────────── */
