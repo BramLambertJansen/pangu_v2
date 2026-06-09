@@ -42,7 +42,7 @@ export default function FactionsPage() {
   return (
     <div>
       <div style={{ marginBottom: 24 }}>
-        <Breadcrumbs items={[
+        <Breadcrumbs compact items={[
           { label: 'Wereld', to: `/worlds/${campaign.world_id}` },
           { label: campaign.name, to: `/campaigns/${campaignId}` },
           { label: 'Facties' },

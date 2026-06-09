@@ -41,6 +41,7 @@ export default function BestiaryDetailPage() {
   return (
     <div>
       <Breadcrumb
+        variant="arcane"
         items={[
           ...(world ? [{ label: world.name, onClick: () => navigate(`/worlds/${world.id}`) }] : []),
           ...(world ? [{ label: 'Bestiarium', onClick: () => navigate(`/worlds/${world.id}/bestiary`) }] : []),

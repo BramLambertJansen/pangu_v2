@@ -65,7 +65,7 @@ export default function BestiariesPage() {
     <div>
       {/* Breadcrumb */}
       <div style={{ marginBottom: 24 }}>
-        <Breadcrumbs items={[
+        <Breadcrumbs compact items={[
           { label: 'Werelden', to: '/worlds' },
           { label: world.name, to: `/worlds/${worldId}` },
           { label: 'Bestiarium' },

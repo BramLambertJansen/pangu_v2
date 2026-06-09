@@ -46,6 +46,7 @@ export default function FactionDetailPage() {
   return (
     <div>
       <Breadcrumb
+        variant="arcane"
         items={[
           ...(world ? [{ label: world.name, onClick: () => navigate(`/worlds/${world.id}`) }] : []),
           ...(campaign ? [

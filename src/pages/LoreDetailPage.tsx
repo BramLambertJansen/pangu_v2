@@ -41,6 +41,7 @@ export default function LoreDetailPage() {
   return (
     <div>
       <Breadcrumb
+        variant="arcane"
         items={[
           ...(world ? [{ label: world.name, onClick: () => navigate(`/worlds/${world.id}`) }] : []),
           ...(campaign ? [

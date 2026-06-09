@@ -1,5 +1,6 @@
 import { useId, useCallback } from 'react'
 import { useParams, useNavigate, useLocation } from 'react-router-dom'
+import { Breadcrumbs } from '@/components/ui/Breadcrumbs'
 import { toast } from 'sonner'
 import { Spinner } from '@/components/ui/Spinner'
 import { Button } from '@/components/ui/Button'
@@ -118,29 +119,12 @@ export default function CampaignEditPage() {
   return (
     <div style={{ display: 'flex', justifyContent: 'center', width: '100%' }}>
       <div style={{ maxWidth: 820, width: '100%' }}>
-
-        {/* Back link */}
-        <button
-          type="button"
-          onClick={handleBack}
-          aria-label="Terug naar kroniek"
-          style={{
-            display: 'inline-flex', alignItems: 'center', gap: 6,
-            background: 'none', border: 'none', cursor: 'pointer',
-            color: 'var(--muted)', fontSize: 12, fontWeight: 700,
-            letterSpacing: '0.18em', textTransform: 'uppercase',
-            fontFamily: 'var(--font-body)',
-            marginBottom: 24, padding: 0,
-            transition: 'color var(--t-fast)',
-          }}
-          onMouseEnter={(e) => (e.currentTarget.style.color = 'var(--ink-soft)')}
-          onMouseLeave={(e) => (e.currentTarget.style.color = 'var(--muted)')}
-        >
-          <svg aria-hidden="true" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <path d="M19 12H5" /><path d="M12 19l-7-7 7-7" />
-          </svg>
-          Terug naar kroniek
-        </button>
+        <Breadcrumbs
+          showBack
+          onBack={handleBack}
+          items={[{ label: campaign.name, to: `/campaigns/${id}` }]}
+          current="Bewerken"
+        />
 
         {/* Page header */}
         <header style={{ marginBottom: 40 }}>

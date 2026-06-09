@@ -1,6 +1,7 @@
 import { useCallback } from 'react'
 import { useImagePositioning } from '@/hooks/useImagePositioning'
 import { useParams, useNavigate, useLocation } from 'react-router-dom'
+import { Breadcrumbs } from '@/components/ui/Breadcrumbs'
 import { useQuery } from '@tanstack/react-query'
 import { toast } from 'sonner'
 import { supabase } from '@/lib/supabase'
@@ -166,29 +167,12 @@ export default function CharacterEditPage() {
   return (
     <div style={{ display: 'flex', justifyContent: 'center', width: '100%' }}>
       <div style={{ maxWidth: 820, width: '100%' }}>
-
-        {/* Back link */}
-        <button
-          type="button"
-          onClick={handleBack}
-          aria-label="Terug naar karakter"
-          style={{
-            display: 'inline-flex',
-            alignItems: 'center',
-            gap: 6,
-            fontSize: 13,
-            color: 'var(--muted)',
-            background: 'none',
-            border: 'none',
-            cursor: 'pointer',
-            padding: '0 0 20px',
-            transition: 'color var(--t-fast)',
-          }}
-          onMouseEnter={e => { (e.currentTarget as HTMLElement).style.color = 'var(--ink-soft)' }}
-          onMouseLeave={e => { (e.currentTarget as HTMLElement).style.color = 'var(--muted)' }}
-        >
-          ← Terug
-        </button>
+        <Breadcrumbs
+          showBack
+          onBack={handleBack}
+          items={[{ label: characterData.name, to: `/characters/${id}` }]}
+          current="Bewerken"
+        />
 
         <header style={{ marginBottom: 28 }}>
           <h1 className="pangu-display-xl">{characterData.name}</h1>
