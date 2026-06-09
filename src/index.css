@@ -150,6 +150,20 @@
   --empty-error-glyph:  rgb(var(--crimson-rgb) / 0.08);
   --empty-error-border: rgb(var(--crimson-rgb) / 0.25);
 
+  --toggle-track-bg:     var(--surface-3);
+  --toggle-track-border: var(--hairline-strong);
+  --toggle-track-on:     rgb(var(--violet-rgb) / 0.25);
+  --toggle-track-on-border: var(--violet);
+  --toggle-track-on-glow: var(--violet-glow);
+  --toggle-thumb-bg:     var(--muted);
+  --toggle-thumb-on:     var(--violet);
+  --toggle-thumb-on-glow: var(--violet-glow);
+
+  --toggle-gold-on:        rgb(var(--gold-rgb) / 0.2);
+  --toggle-gold-on-border: var(--gold);
+  --toggle-gold-on-glow:   var(--gold-glow);
+  --toggle-gold-thumb:     var(--gold);
+
   /* ── Semantic type roles ─────────────────────────────────
      Mirrors the .pangu-* type utilities; consumed by the .pg-* layer. */
   --eyebrow-font: var(--font-body);
@@ -630,43 +644,101 @@ body {
 
 /* ── Toggle switch ──────────────────────────────────────── */
 
-.pangu-toggle {
+/* ─── Toggle / Switch (canonical) ────────────────────────── */
+.toggle {
   position: relative;
   width: 44px;
-  height: 24px;
+  height: 26px;
   flex-shrink: 0;
   border-radius: var(--r-full);
-  border: none;
-  cursor: pointer;
-  transition: background var(--t-fast);
-  background: var(--surface-3);
+  border: 1px solid var(--toggle-track-border);
+  background: var(--toggle-track-bg);
   padding: 0;
+  cursor: pointer;
+  transition: background var(--t-fast) var(--ease-out),
+              border-color var(--t-fast) var(--ease-out),
+              box-shadow var(--t-fast) var(--ease-out);
 }
 
-.pangu-toggle[aria-checked='true'] {
-  background: var(--violet);
-  box-shadow: 0 0 10px var(--violet-glow);
-}
-
-.pangu-toggle:focus-visible {
-  outline: 2px solid var(--violet);
+.toggle:focus-visible {
+  outline: 2px solid var(--toggle-track-on-border);
   outline-offset: 2px;
 }
 
-.pangu-toggle-knob {
+.toggle:disabled,
+.toggle[aria-disabled='true'] {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.toggle-thumb {
   position: absolute;
-  top: 3px;
-  left: 3px;
+  top: 2px;
+  left: 2px;
   width: 18px;
   height: 18px;
   border-radius: 50%;
-  background: var(--ink-soft);
-  transition: transform var(--t-fast) var(--ease-out), background var(--t-fast);
+  background: var(--toggle-thumb-bg);
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.4);
+  transition: transform 220ms var(--ease-out),
+              background var(--t-fast) var(--ease-out),
+              box-shadow var(--t-fast) var(--ease-out);
 }
 
-.pangu-toggle[aria-checked='true'] .pangu-toggle-knob {
-  transform: translateX(20px);
-  background: var(--void);
+.toggle[aria-checked='true'] {
+  background: var(--toggle-track-on);
+  border-color: var(--toggle-track-on-border);
+  box-shadow: 0 0 10px var(--toggle-track-on-glow);
+}
+
+.toggle[aria-checked='true'] .toggle-thumb {
+  transform: translateX(18px);
+  background: var(--toggle-thumb-on);
+  box-shadow: 0 0 8px var(--toggle-thumb-on-glow);
+}
+
+/* Gold variant — for warm / brand affordances */
+.toggle.toggle-gold[aria-checked='true'] {
+  background: var(--toggle-gold-on);
+  border-color: var(--toggle-gold-on-border);
+  box-shadow: 0 0 10px var(--toggle-gold-on-glow);
+}
+.toggle.toggle-gold[aria-checked='true'] .toggle-thumb {
+  background: var(--toggle-gold-thumb);
+  box-shadow: 0 0 8px var(--toggle-gold-on-glow);
+}
+
+/* Small size */
+.toggle.toggle-sm { width: 36px; height: 22px; }
+.toggle.toggle-sm .toggle-thumb { width: 14px; height: 14px; top: 3px; left: 3px; }
+.toggle.toggle-sm[aria-checked='true'] .toggle-thumb { transform: translateX(14px); }
+
+/* Toggle row — bundles label + description + switch */
+.toggle-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 12px 14px;
+  background: var(--surface);
+  border: 1px solid var(--hairline);
+  border-radius: var(--r-sm);
+}
+.toggle-row-info { min-width: 0; }
+.toggle-row-label {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--ink);
+}
+.toggle-row-desc {
+  font-size: 11.5px;
+  color: var(--muted);
+  margin-top: 2px;
+  line-height: 1.5;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .toggle, .toggle-thumb { transition: none; }
 }
 
 /* ── Page header ────────────────────────────────────────── */

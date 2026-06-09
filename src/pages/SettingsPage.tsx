@@ -4,6 +4,7 @@ import { CompassRose } from '@/components/world/CompassRose'
 import { Spinner } from '@/components/ui/Spinner'
 import { Button } from '@/components/ui/Button'
 import { Tabs } from '@/components/ui/Tabs'
+import { Toggle } from '@/components/ui/Toggle'
 import { UserTable } from '@/components/admin/UserTable'
 import { CreateUserModal } from '@/components/admin/CreateUserModal'
 import { toast } from 'sonner'
@@ -36,31 +37,13 @@ function SettingToggle({
   checked: boolean
   onChange: (v: boolean) => void
 }) {
-  const id = useId()
-  const labelId = `${id}-label`
   return (
-    <div className="flex items-center justify-between gap-6 py-4" style={{ borderBottom: '1px solid var(--hairline)' }}>
-      <div className="flex flex-col gap-0.5 min-w-0">
-        <label
-          id={labelId}
-          className="text-sm font-medium cursor-pointer"
-          style={{ color: 'var(--ink-soft)' }}
-        >
-          {label}
-        </label>
-        <span className="text-xs" style={{ color: 'var(--muted)' }}>{desc}</span>
-      </div>
-      <button
-        role="switch"
-        aria-labelledby={labelId}
-        aria-checked={checked}
-        onClick={() => onChange(!checked)}
-        className="pangu-toggle"
-        type="button"
-      >
-        <span className="pangu-toggle-knob" />
-      </button>
-    </div>
+    <Toggle
+      label={label}
+      description={desc}
+      checked={checked}
+      onChange={onChange}
+    />
   )
 }
 

@@ -13,6 +13,7 @@ import { Chip } from '@/components/ui/Chip'
 import { StatPill } from '@/components/ui/StatPill'
 import { OrnateDivider } from '@/components/ui/OrnateDivider'
 import { Tabs } from '@/components/ui/Tabs'
+import { Toggle } from '@/components/ui/Toggle'
 import { DiceRoller } from '@/components/ui/DiceRoller'
 import { KbdHint } from '@/components/ui/KbdHint'
 import { Card } from '@/components/ui/Card'
@@ -246,16 +247,7 @@ export default function DesignSystemPage() {
             <span className="pg-mono">24</span>
             <button type="button" className="hp-step" aria-label="HP omhoog">+</button>
           </div>
-          <button
-            type="button"
-            role="switch"
-            aria-checked={toggled}
-            aria-label="Voorbeeld schakelaar"
-            className="pangu-toggle"
-            onClick={() => setToggled((t) => !t)}
-          >
-            <span className="pangu-toggle-knob" />
-          </button>
+          <Toggle checked={toggled} onChange={setToggled} aria-label="Voorbeeld schakelaar" />
           <button type="button" className="btn btn-violet-soft btn-sm" onClick={() => setModalOpen(true)}>
             Open modal
           </button>
@@ -268,6 +260,46 @@ export default function DesignSystemPage() {
 
         <div className="mt-5 h-40 max-w-xs overflow-hidden rounded-[var(--r-lg)]">
           <div className="placeholder-img"><span className="ph-glyph">P</span></div>
+        </div>
+      </Section>
+
+      <Section title="Toggle / Switch">
+        <div className="flex flex-col gap-4">
+          <div className="flex flex-wrap items-center gap-6">
+            <div className="flex flex-col items-center gap-1">
+              <Toggle checked={toggled} onChange={setToggled} aria-label="Default toggle" />
+              <span className="text-[11px] text-muted">default · md</span>
+            </div>
+            <div className="flex flex-col items-center gap-1">
+              <Toggle checked={toggled} onChange={setToggled} variant="gold" aria-label="Gold toggle" />
+              <span className="text-[11px] text-muted">gold</span>
+            </div>
+            <div className="flex flex-col items-center gap-1">
+              <Toggle checked={toggled} onChange={setToggled} size="sm" aria-label="Small toggle" />
+              <span className="text-[11px] text-muted">sm</span>
+            </div>
+            <div className="flex flex-col items-center gap-1">
+              <Toggle checked={toggled} onChange={setToggled} disabled aria-label="Disabled toggle" />
+              <span className="text-[11px] text-muted">disabled</span>
+            </div>
+          </div>
+          <div className="max-w-md">
+            <Toggle
+              checked={toggled}
+              onChange={setToggled}
+              label="Sessieherinneringen"
+              description="Stuur een melding 24 uur vóór een geplande sessie."
+            />
+          </div>
+          <div className="max-w-md">
+            <Toggle
+              checked={toggled}
+              onChange={setToggled}
+              variant="gold"
+              label="Lore-suggesties"
+              description="Gouden variant voor warme, brand-positieve schakelaars."
+            />
+          </div>
         </div>
       </Section>
 
