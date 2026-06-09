@@ -951,82 +951,260 @@ body {
   }
 }
 
-/* ── Breadcrumb ──────────────────────────────────────────── */
+/* ── Breadcrumb (design-system canonical) ───────────────── */
 
-.pangu-breadcrumb {
+.breadcrumb-nav {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: 24px;
   gap: 12px;
+  margin-bottom: 24px;
 }
 
-.pangu-breadcrumb-items {
+.breadcrumb-nav-items {
+  flex: 1;
+  min-width: 0;
+}
+
+.breadcrumb-nav-actions {
+  flex-shrink: 0;
+}
+
+.breadcrumb {
+  display: flex;
+  align-items: center;
+  gap: 0;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  font-family: var(--font-body);
+  font-size: 13px;
+  font-weight: 500;
+  flex-wrap: wrap;
+}
+
+.breadcrumb li {
+  display: flex;
+  align-items: center;
+}
+
+.breadcrumb .bc-link {
+  color: var(--muted);
+  text-decoration: none;
+  background: none;
+  border: none;
+  font: inherit;
+  cursor: pointer;
+  padding: 5px 7px;
+  border-radius: var(--r-xs);
+  white-space: nowrap;
+  transition: color var(--t-fast) var(--ease-out),
+              background var(--t-fast) var(--ease-out);
+}
+
+.breadcrumb .bc-link-static {
+  cursor: default;
+}
+
+.breadcrumb .bc-link:hover:not(.bc-link-static),
+.breadcrumb .bc-link:focus-visible:not(.bc-link-static) {
+  color: var(--ink-soft);
+  background: var(--surface-hover);
+}
+
+.breadcrumb .bc-link:active:not(.bc-link-static) {
+  color: var(--violet-soft);
+  background: rgb(var(--violet-rgb) / 0.12);
+}
+
+.breadcrumb .sep {
+  display: flex;
+  align-items: center;
+  color: var(--subtle);
+  font-size: 11px;
+  padding: 0 1px;
+  user-select: none;
+  flex-shrink: 0;
+}
+
+.breadcrumb .sep svg {
+  width: 12px;
+  height: 12px;
+  stroke: currentColor;
+  fill: none;
+  stroke-width: 1.6;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.breadcrumb .bc-current {
+  color: var(--ink);
+  font-weight: 600;
+  padding: 5px 7px;
+  white-space: nowrap;
+  cursor: default;
+}
+
+/* With back button */
+.bc-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.bc-back {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  background: var(--surface-2);
+  border: 1px solid var(--hairline-strong);
+  color: var(--muted);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: all var(--t-fast) var(--ease-out);
+}
+
+.bc-back:hover,
+.bc-back:focus-visible {
+  background: var(--surface-3);
+  color: var(--ink);
+  border-color: rgb(var(--violet-rgb) / 0.45);
+  box-shadow: 0 0 10px var(--violet-glow);
+}
+
+.bc-back svg {
+  width: 13px;
+  height: 13px;
+  stroke: currentColor;
+  fill: none;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+/* Collapsed / ellipsis */
+.bc-ellipsis {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 24px;
+  padding: 0 8px;
+  background: var(--surface-2);
+  border: 1px solid var(--hairline);
+  border-radius: var(--r-xs);
+  color: var(--muted);
+  font-size: 10px;
+  letter-spacing: 0.14em;
+  cursor: pointer;
+  transition: all var(--t-fast) var(--ease-out);
+  position: relative;
+}
+
+.bc-ellipsis:hover,
+.bc-ellipsis:focus-visible {
+  background: var(--surface-3);
+  color: var(--ink-soft);
+  border-color: rgb(var(--violet-rgb) / 0.3);
+}
+
+.bc-dropdown {
+  position: absolute;
+  top: calc(100% + 6px);
+  left: 50%;
+  transform: translateX(-50%) translateY(-4px);
+  background: var(--surface);
+  border: 1px solid var(--hairline-strong);
+  border-radius: var(--r-sm);
+  box-shadow: var(--shadow-2), 0 0 18px rgba(0, 0, 0, 0.3);
+  padding: 6px;
+  min-width: 160px;
+  z-index: 10;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity var(--t-fast) var(--ease-out),
+              transform var(--t-fast) var(--ease-out);
+}
+
+.bc-ellipsis:hover .bc-dropdown,
+.bc-ellipsis:focus-within .bc-dropdown {
+  opacity: 1;
+  pointer-events: all;
+  transform: translateX(-50%) translateY(0);
+}
+
+.bc-dropdown a,
+.bc-dropdown .bc-dropdown-button {
   display: flex;
   align-items: center;
   gap: 8px;
-  flex: 1;
-  min-width: 0;
-  overflow: hidden;
-}
-
-.pangu-breadcrumb-actions {
-  flex-shrink: 0;
-}
-
-.pangu-breadcrumb-btn {
-  font-family: var(--font-body);
-  font-size: 11px;
-  font-weight: 700;
-  letter-spacing: 0.18em;
-  text-transform: uppercase;
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
+  padding: 8px 10px;
+  border-radius: var(--r-xs);
+  font-size: 12.5px;
+  font-weight: 500;
+  color: var(--ink-soft);
+  text-decoration: none;
   background: none;
   border: none;
+  font-family: inherit;
   cursor: pointer;
-  color: var(--muted);
-  padding: 6px 4px;
-  margin: -6px -4px;
-  min-height: 44px;
-  flex-shrink: 0;
-  white-space: nowrap;
-  transition: color var(--t-fast);
-}
-
-.pangu-breadcrumb-btn:hover {
-  color: var(--ink-soft);
-}
-
-.pangu-breadcrumb-sep {
-  font-family: var(--font-body);
-  font-size: 11px;
-  font-weight: 700;
-  letter-spacing: 0.18em;
-  color: var(--hairline);
-  flex-shrink: 0;
-}
-
-.pangu-breadcrumb-current {
-  font-family: var(--font-body);
-  font-size: 11px;
-  font-weight: 700;
-  letter-spacing: 0.18em;
-  text-transform: uppercase;
-  color: var(--ink-soft);
-  flex-shrink: 0;
+  width: 100%;
+  text-align: left;
+  transition: all var(--t-fast) var(--ease-out);
   white-space: nowrap;
 }
 
-.pangu-breadcrumb-ellipsis {
-  font-family: var(--font-body);
-  font-size: 11px;
-  font-weight: 700;
-  letter-spacing: 0.18em;
-  color: var(--muted);
+.bc-dropdown a:hover,
+.bc-dropdown .bc-dropdown-button:hover,
+.bc-dropdown a:focus-visible,
+.bc-dropdown .bc-dropdown-button:focus-visible {
+  background: var(--surface-hover);
+  color: var(--ink);
+}
+
+.bc-dropdown a .dd-dot,
+.bc-dropdown .bc-dropdown-button .dd-dot {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: var(--violet);
+  opacity: 0.6;
   flex-shrink: 0;
-  white-space: nowrap;
+}
+
+/* Arcane variant */
+.breadcrumb.is-arcane .bc-current {
+  font-family: var(--font-display);
+  font-size: 12.5px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  color: var(--gold);
+  text-shadow: 0 0 14px rgb(var(--gold-rgb) / 0.45);
+}
+
+.breadcrumb.is-arcane .sep-glyph {
+  font-size: 7px;
+  letter-spacing: 0;
+  color: rgb(var(--gold-rgb) / 0.3);
+  padding: 0 5px;
+  user-select: none;
+}
+
+/* Compact variant */
+.breadcrumb.compact {
+  font-size: 11.5px;
+}
+
+.breadcrumb.compact .bc-link,
+.breadcrumb.compact .bc-current {
+  padding: 3px 5px;
+}
+
+.breadcrumb.compact .sep svg {
+  width: 10px;
+  height: 10px;
 }
 
 /* ── Skip-to-content link ────────────────────────────────── */

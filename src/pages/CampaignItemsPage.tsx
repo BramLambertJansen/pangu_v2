@@ -12,7 +12,7 @@ import { useCampaignItems, useForgeCampaignItem, useCreateCampaignItem } from '@
 import { useCampaignCharacters } from '@/hooks/queries/useCampaignCharacters'
 import { useImportMagicItem } from '@/hooks/queries/useSrdSearch'
 import { useDraftGC } from '@/hooks/useDraftGC'
-import { Breadcrumb } from '@/components/ui/Breadcrumb'
+import { Breadcrumb } from '@/components/ui/Breadcrumbs'
 import { Tabs } from '@/components/ui/Tabs'
 import type { ItemType, ItemRarity } from '@/types/item.types'
 import type { Open5eMagicItem } from '@/types/open5e.types'

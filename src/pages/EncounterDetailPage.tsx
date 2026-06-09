@@ -1,7 +1,7 @@
 import { useParams, useNavigate, Link } from 'react-router-dom'
 import { Spinner } from '@/components/ui/Spinner'
 import { Button } from '@/components/ui/Button'
-import { Breadcrumb } from '@/components/ui/Breadcrumb'
+import { Breadcrumb } from '@/components/ui/Breadcrumbs'
 import { WorldDetailDivider } from '@/components/world/WorldDetailDivider'
 import { RelatedEntities } from '@/components/link/RelatedEntities'
 import { CombatTracker, type Combatant } from '@/components/encounter/CombatTracker'

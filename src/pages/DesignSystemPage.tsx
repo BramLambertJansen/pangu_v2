@@ -261,16 +261,102 @@ export default function DesignSystemPage() {
           <Skeleton className="mt-2 h-4 w-1/2 rounded" />
         </div>
 
-        <div className="mt-5">
-          <Breadcrumbs items={[{ label: 'Werelden', to: '/worlds' }, { label: 'Aerthos', to: '/worlds/1' }, { label: 'Bestiarium' }]} />
-        </div>
-
         <div className="mt-5 surface">
           <EmptyState title="Een leeg kosmos wacht." description="Begin waar je wil." />
         </div>
 
         <div className="mt-5 h-40 max-w-xs overflow-hidden rounded-[var(--r-lg)]">
           <div className="placeholder-img"><span className="ph-glyph">P</span></div>
+        </div>
+      </Section>
+
+      <Section title="Breadcrumbs">
+        <div className="flex flex-col gap-5">
+          <div>
+            <p className="label mb-1">Standaard</p>
+            <Breadcrumbs
+              items={[
+                { label: 'Werelden', to: '/worlds' },
+                { label: 'Aerthos', to: '/worlds/1' },
+                { label: 'Bestiarium' },
+              ]}
+            />
+          </div>
+
+          <div>
+            <p className="label mb-1">Met current-prop</p>
+            <Breadcrumbs
+              items={[
+                { label: 'Werelden', to: '/worlds' },
+                { label: 'Aerthos', to: '/worlds/1' },
+                { label: 'Bestiarium', to: '/worlds/1/bestiary' },
+              ]}
+              current="Drakeneed"
+            />
+          </div>
+
+          <div>
+            <p className="label mb-1">Compact</p>
+            <Breadcrumbs
+              compact
+              items={[
+                { label: 'Werelden', to: '/worlds' },
+                { label: 'Aerthos', to: '/worlds/1' },
+                { label: 'Bestiarium' },
+              ]}
+            />
+          </div>
+
+          <div>
+            <p className="label mb-1">Arcane</p>
+            <Breadcrumbs
+              variant="arcane"
+              items={[
+                { label: 'Werelden', to: '/worlds' },
+                { label: 'Aerthos', to: '/worlds/1' },
+              ]}
+              current="Drakeneed"
+            />
+          </div>
+
+          <div>
+            <p className="label mb-1">Met terug-knop</p>
+            <Breadcrumbs
+              showBack
+              onBack={() => {}}
+              items={[
+                { label: 'Werelden', to: '/worlds' },
+                { label: 'Aerthos', to: '/worlds/1' },
+                { label: 'Bestiarium' },
+              ]}
+            />
+          </div>
+
+          <div>
+            <p className="label mb-1">Ingeklapt (diep pad)</p>
+            <Breadcrumbs
+              collapse={{ start: 1, end: -2 }}
+              items={[
+                { label: 'Werelden', to: '/worlds' },
+                { label: 'Aerthos', to: '/worlds/1' },
+                { label: 'Kronieken', to: '/campaigns' },
+                { label: 'De Verloren Vesting', to: '/campaigns/1' },
+                { label: 'Sessies', to: '/campaigns/1/sessions' },
+                { label: 'Sessie IV' },
+              ]}
+            />
+          </div>
+
+          <div>
+            <p className="label mb-1">Met acties</p>
+            <Breadcrumbs
+              items={[
+                { label: 'Werelden', to: '/worlds' },
+                { label: 'Aerthos' },
+              ]}
+              actions={<button className="btn btn-sm btn-ghost">Bewerken</button>}
+            />
+          </div>
         </div>
       </Section>
 
