@@ -197,7 +197,7 @@ export function ReisgezelschapBanner({
                 position: 'relative',
               }}
             >
-              <Avatar name={member.name} size="sm" />
+              <Avatar fallback={member.name.charAt(0).toUpperCase()} alt={member.name} size="sm" />
             </div>
           ))}
           {partyMembers.length > 6 && (

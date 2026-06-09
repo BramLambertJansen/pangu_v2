@@ -137,7 +137,7 @@ export default function FactionDetailPage() {
             fontSize: 10, fontWeight: 700,
             letterSpacing: '0.16em', textTransform: 'uppercase',
             color: factionReputationColor[faction.reputation],
-            background: 'rgba(0,0,0,0.15)',
+            background: 'rgb(var(--void-rgb) / 0.15)',
           }}>
             {factionReputationLabel[faction.reputation]}
           </span>

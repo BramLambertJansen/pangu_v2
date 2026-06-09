@@ -6,6 +6,7 @@ import { useEncounterFull } from '@/hooks/queries/useEncounter'
 import { Modal } from '@/components/ui/Modal'
 import { Button } from '@/components/ui/Button'
 import { Spinner } from '@/components/ui/Spinner'
+import { Chip } from '@/components/ui/Chip'
 import type { Character } from '@/types/character.types'
 import type { Bestiary } from '@/types/bestiary.types'
 import { abilityModifier, formatModifier, formatSign } from '@/utils/dnd5e'
@@ -164,7 +165,7 @@ function HpRow({ current, max, onAdjust }: { current: number; max: number; onAdj
           </button>
         </div>
       </div>
-      <div style={{ height: 5, borderRadius: 3, background: 'rgba(255,255,255,0.08)' }}>
+      <div style={{ height: 5, borderRadius: 3, background: 'rgb(var(--ink-rgb) / 0.08)' }}>
         <div style={{ width: `${pct * 100}%`, height: '100%', borderRadius: 3, background: color, transition: 'width 0.3s ease, background 0.3s ease' }} />
       </div>
     </div>
@@ -223,9 +224,7 @@ function CharacterStatPopup({ character, hpCurrent, onAdjustHp }: { character: C
           </p>
           <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
             {character.saving_throw_proficiencies.map(s => (
-              <span key={s} style={{ fontSize: 11, color: 'var(--violet)', background: 'rgb(var(--violet-rgb) / 0.1)', border: '1px solid rgb(var(--violet-rgb) / 0.25)', borderRadius: 4, padding: '2px 8px', fontWeight: 600 }}>
-                {s.toUpperCase()}
-              </span>
+              <Chip key={s} tone="violet">{s.toUpperCase()}</Chip>
             ))}
           </div>
         </div>
@@ -238,9 +237,7 @@ function CharacterStatPopup({ character, hpCurrent, onAdjustHp }: { character: C
           </p>
           <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
             {character.active_conditions.map(c => (
-              <span key={c} style={{ fontSize: 11, color: 'var(--crimson)', background: 'rgb(var(--crimson-rgb) / 0.1)', border: '1px solid rgb(var(--crimson-rgb) / 0.25)', borderRadius: 4, padding: '2px 8px', fontWeight: 600 }}>
-                {c}
-              </span>
+              <Chip key={c} tone="crimson">{c}</Chip>
             ))}
           </div>
         </div>
@@ -253,9 +250,7 @@ function CharacterStatPopup({ character, hpCurrent, onAdjustHp }: { character: C
           </p>
           <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
             {Object.entries(character.class_resources).map(([name, res]) => (
-              <span key={name} style={{ fontSize: 11, color: 'var(--teal)', background: 'rgb(var(--teal-rgb) / 0.1)', border: '1px solid rgb(var(--teal-rgb) / 0.25)', borderRadius: 4, padding: '2px 8px', fontWeight: 600 }}>
-                {name}: {res.current}/{res.max}
-              </span>
+              <Chip key={name} tone="teal">{name}: {res.current}/{res.max}</Chip>
             ))}
           </div>
         </div>
@@ -824,7 +819,7 @@ export default function EncounterRunPage() {
                   border: isActive ? '1px solid rgb(var(--violet-rgb) / 0.55)' : '1px solid var(--hairline)',
                   background: isActive
                     ? 'linear-gradient(175deg, rgb(var(--violet-rgb) / 0.18) 0%, rgb(var(--violet-rgb) / 0.04) 100%)'
-                    : 'rgba(var(--surface-rgb, 22,22,40), 0.9)',
+                    : 'rgb(var(--surface-rgb) / 0.9)',
                   boxShadow: isActive
                     ? '0 0 30px rgb(var(--violet-rgb) / 0.35), 0 0 10px rgb(var(--violet-rgb) / 0.18)'
                     : 'none',
@@ -850,7 +845,7 @@ export default function EncounterRunPage() {
                   height: isActive ? 46 : 36,
                   borderRadius: '50%',
                   background: iconBg,
-                  border: '1px solid rgba(255,255,255,0.07)',
+                  border: '1px solid rgb(var(--ink-rgb) / 0.07)',
                   display: 'flex', alignItems: 'center', justifyContent: 'center',
                   fontSize: isActive ? 19 : 15,
                   color: iconColor,
@@ -860,7 +855,7 @@ export default function EncounterRunPage() {
                 </div>
 
                 {/* HP bar */}
-                <div style={{ width: '100%', height: 3, borderRadius: 2, background: 'rgba(255,255,255,0.07)' }}>
+                <div style={{ width: '100%', height: 3, borderRadius: 2, background: 'rgb(var(--ink-rgb) / 0.07)' }}>
                   <div style={{
                     width: `${hpPct * 100}%`,
                     height: '100%',
@@ -916,14 +911,14 @@ export default function EncounterRunPage() {
                   style={{
                     width: 38, height: 38, borderRadius: '50%',
                     border: '1px solid var(--hairline-strong)',
-                    background: 'rgba(255,255,255,0.04)',
+                    background: 'rgb(var(--ink-rgb) / 0.04)',
                     color: 'var(--crimson)', fontSize: 14,
                     cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center',
                     transition: 'background var(--t-fast)',
                     backdropFilter: 'blur(4px)',
                   }}
                   onMouseEnter={e => (e.currentTarget.style.background = 'rgb(var(--crimson-rgb) / 0.18)')}
-                  onMouseLeave={e => (e.currentTarget.style.background = 'rgba(255,255,255,0.04)')}
+                  onMouseLeave={e => (e.currentTarget.style.background = 'rgb(var(--ink-rgb) / 0.04)')}
                 >
                   ▼
                 </button>
@@ -933,14 +928,14 @@ export default function EncounterRunPage() {
                   style={{
                     width: 38, height: 38, borderRadius: '50%',
                     border: '1px solid var(--hairline-strong)',
-                    background: 'rgba(255,255,255,0.04)',
+                    background: 'rgb(var(--ink-rgb) / 0.04)',
                     color: 'var(--teal)', fontSize: 14,
                     cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center',
                     transition: 'background var(--t-fast)',
                     backdropFilter: 'blur(4px)',
                   }}
                   onMouseEnter={e => (e.currentTarget.style.background = 'rgb(var(--teal-rgb) / 0.18)')}
-                  onMouseLeave={e => (e.currentTarget.style.background = 'rgba(255,255,255,0.04)')}
+                  onMouseLeave={e => (e.currentTarget.style.background = 'rgb(var(--ink-rgb) / 0.04)')}
                 >
                   ▲
                 </button>

@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/Button'
 import { Breadcrumb } from '@/components/ui/Breadcrumb'
 import { WorldDetailDivider } from '@/components/world/WorldDetailDivider'
 import { RelatedEntities } from '@/components/link/RelatedEntities'
+import { CombatTracker, type Combatant } from '@/components/encounter/CombatTracker'
 import { useEncounterFull } from '@/hooks/queries/useEncounter'
 import { useEncounterMonsters } from '@/hooks/queries/useEncounterMonsters'
 import { encounterStatusLabel, encounterStatusColor } from '@/lib/statusMaps'
@@ -39,6 +40,19 @@ export default function EncounterDetailPage() {
   const world = campaign?.worlds ?? null
   const gradient = pickGradient(encounter.id, encounterGradients)
   const initial = encounter.name.trim()[0]?.toUpperCase() ?? '?'
+
+  // Initiative preview ordered by each creature's DEX modifier (no roll at rest).
+  const initiativeOrder: Combatant[] = (monsters ?? []).map((m) => {
+    const b = m.bestiary
+    const dexMod = b ? Math.floor((b.stat_dex - 10) / 2) : 0
+    return {
+      id: m.id,
+      name: `${b?.name ?? 'Onbekend'}${m.count > 1 ? ` ×${m.count}` : ''}`,
+      initiative: dexMod,
+      hp: b?.hp ?? 0,
+      maxHp: b?.hp ?? 0,
+    }
+  })
 
   return (
     <div>
@@ -158,7 +172,7 @@ export default function EncounterDetailPage() {
               fontSize: 10, fontWeight: 700,
               letterSpacing: '0.16em', textTransform: 'uppercase',
               color: 'var(--ink-soft)',
-              background: 'rgba(255,255,255,0.04)',
+              background: 'rgb(var(--ink-rgb) / 0.04)',
             }}>
               {encounter.environment}
             </span>
@@ -238,7 +252,7 @@ export default function EncounterDetailPage() {
                       borderBottom: i < monsters.length - 1 ? '1px solid var(--hairline)' : 'none',
                       transition: 'background var(--t-fast)',
                     }}
-                    onMouseEnter={(e) => ((e.currentTarget as HTMLTableRowElement).style.background = 'rgba(255,255,255,0.03)')}
+                    onMouseEnter={(e) => ((e.currentTarget as HTMLTableRowElement).style.background = 'rgb(var(--ink-rgb) / 0.03)')}
                     onMouseLeave={(e) => ((e.currentTarget as HTMLTableRowElement).style.background = '')}
                   >
                     <td style={{ padding: '12px 16px', color: 'var(--ink)', fontWeight: 600 }}>
@@ -280,6 +294,14 @@ export default function EncounterDetailPage() {
         <p style={{ fontSize: 14, color: 'var(--muted)', fontStyle: 'italic', margin: 0 }}>
           Nog geen monsters toegevoegd.
         </p>
+      )}
+
+      {/* Initiative order preview */}
+      {initiativeOrder.length > 0 && (
+        <>
+          <WorldDetailDivider label="Initiatiefvolgorde (verwacht)" />
+          <CombatTracker encounterId={encounter.id} combatants={initiativeOrder} activeIndex={-1} />
+        </>
       )}
 
       {/* Description */}

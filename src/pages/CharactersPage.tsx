@@ -3,6 +3,7 @@ import { useAuthStore } from '@/stores/auth.store'
 import { EntityCardSkeleton } from '@/components/ui/EntityCardSkeleton'
 import { Button } from '@/components/ui/Button'
 import { EmptyState } from '@/components/ui/EmptyState'
+import { SearchBar } from '@/components/ui/SearchBar'
 import { WorldDetailDivider } from '@/components/world/WorldDetailDivider'
 import { CharacterCard, ForgeCharacterCard } from '@/components/character/CharacterCard'
 import { useCharacters, useCreateCharacter } from '@/hooks/queries/useCharacters'
@@ -43,13 +44,11 @@ export default function CharactersPage() {
       {/* Search */}
       {!isLoading && characters && characters.length > 0 && (
         <div style={{ marginBottom: 24, maxWidth: 360 }}>
-          <input
-            className="pangu-input"
-            type="search"
-            placeholder="Zoek op naam, klasse of ras..."
+          <SearchBar
             value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            aria-label="Karakters zoeken"
+            onValueChange={setSearch}
+            placeholder="Zoek op naam, klasse of ras..."
+            label="Karakters zoeken"
           />
         </div>
       )}

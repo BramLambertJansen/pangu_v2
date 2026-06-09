@@ -164,7 +164,7 @@ export function InvitePanel({ campaignId, campaignName }: InvitePanelProps) {
             {/* Join URL */}
             <div style={{
               display: 'flex', alignItems: 'center', gap: 8,
-              background: 'rgba(255,255,255,0.03)',
+              background: 'rgb(var(--ink-rgb) / 0.03)',
               border: '1px solid var(--hairline)',
               borderRadius: 6, padding: '8px 12px',
               marginBottom: 20,
@@ -249,7 +249,7 @@ export function InvitePanel({ campaignId, campaignName }: InvitePanelProps) {
                   style={{
                     display: 'flex', alignItems: 'center', gap: 10,
                     padding: '10px 14px',
-                    background: 'rgba(255,255,255,0.03)',
+                    background: 'rgb(var(--ink-rgb) / 0.03)',
                     border: '1px solid var(--hairline)',
                     borderRadius: 8,
                   }}

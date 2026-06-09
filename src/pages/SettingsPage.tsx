@@ -3,6 +3,7 @@ import { useLocation } from 'react-router-dom'
 import { CompassRose } from '@/components/world/CompassRose'
 import { Spinner } from '@/components/ui/Spinner'
 import { Button } from '@/components/ui/Button'
+import { Tabs } from '@/components/ui/Tabs'
 import { UserTable } from '@/components/admin/UserTable'
 import { CreateUserModal } from '@/components/admin/CreateUserModal'
 import { toast } from 'sonner'
@@ -784,26 +785,20 @@ export default function SettingsPage() {
 
       {/* Tab bar */}
       <nav aria-label="Instellingen tabbladen" style={{ marginBottom: 32 }}>
-        <div role="tablist" className="pangu-tab-bar">
-          {tabs.map((tab) => (
-            <button
-              key={tab.id}
-              role="tab"
-              aria-selected={activeTab === tab.id}
-              aria-controls={`tabpanel-${tab.id}`}
-              id={`tab-${tab.id}`}
-              onClick={() => setActiveTab(tab.id)}
-              type="button"
-              className="pangu-tab"
-              style={tab.special ? { color: activeTab === tab.id ? 'var(--violet)' : 'color-mix(in srgb, var(--violet) 60%, var(--muted))' } : undefined}
-            >
-              {tab.special && (
+        <Tabs
+          label="Instellingen tabbladen"
+          value={activeTab}
+          onValueChange={(id) => setActiveTab(id as Tab)}
+          items={tabs.map((tab) => ({
+            id: tab.id,
+            label: tab.special ? (
+              <span style={{ color: activeTab === tab.id ? 'var(--violet)' : 'color-mix(in srgb, var(--violet) 60%, var(--muted))' }}>
                 <span aria-hidden="true" style={{ display: 'inline-block', width: 6, height: 6, borderRadius: '50%', background: 'var(--violet)', marginRight: 6, verticalAlign: 'middle', opacity: 0.8 }} />
-              )}
-              {tab.label}
-            </button>
-          ))}
-        </div>
+                {tab.label}
+              </span>
+            ) : tab.label,
+          }))}
+        />
       </nav>
 
       {/* Tab panels */}

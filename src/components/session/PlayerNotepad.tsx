@@ -134,7 +134,7 @@ export function PlayerNotepad({ sessionId, campaignId }: Props) {
           style={{
             width: '100%',
             minHeight: 180,
-            background: 'rgba(255,255,255,0.03)',
+            background: 'rgb(var(--ink-rgb) / 0.03)',
             border: '1px solid var(--hairline)',
             borderRadius: 8,
             padding: '12px 14px',
