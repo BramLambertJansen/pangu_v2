@@ -14,6 +14,7 @@ import { EncountersTab } from '@/components/campaign/EncountersTab'
 import { TreasuryTab } from '@/components/campaign/TreasuryTab'
 import { NotesTab } from '@/components/campaign/NotesTab'
 import { InvitePanel } from '@/components/campaign/InvitePanel'
+import { ReisgezelschapBanner } from '@/components/campaign/ReisgezelschapBanner'
 import { useCampaignWithWorld } from '@/hooks/queries/useCampaign'
 import { useCampaignSessions, useCreateCampaignSession } from '@/hooks/queries/useCampaignSessions'
 import { useCampaignLocations, useCreateCampaignLocation } from '@/hooks/queries/useCampaignLocations'
@@ -298,6 +299,21 @@ export default function CampaignDetailPage() {
           </div>
         </div>
       </div>
+
+      {/* ── Party banner ── */}
+      {characters && characters.length > 0 && (
+        <div style={{ marginTop: 24 }}>
+          <ReisgezelschapBanner
+            campaignId={id!}
+            partyVitals={{
+              avgLevel: Math.round(characters.reduce((s, c) => s + c.level, 0) / characters.length),
+              totalHp: characters.reduce((s, c) => s + c.hp_current, 0),
+              treasury: characters.reduce((s, c) => s + (c.gold ?? 0), 0),
+            }}
+            partyMembers={characters.map(c => ({ id: c.id, name: c.name }))}
+          />
+        </div>
+      )}
 
       {/* ── Tab navigation ── */}
       <div

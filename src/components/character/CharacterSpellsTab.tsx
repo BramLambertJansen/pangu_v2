@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { Spinner } from '@/components/ui/Spinner'
+import { SpellSlots } from '@/components/character/SpellSlots'
 import { spellSchoolLabel, spellSchoolColor } from '@/lib/statusMaps'
 import {
   useCharacterSpells,
@@ -9,9 +10,9 @@ import {
 } from '@/hooks/queries/useCharacterSpells'
 import { useSpells } from '@/hooks/queries/useSpells'
 import { useUpdateCharacterSpellSlot } from '@/hooks/queries/useCharacter'
-import { SPELL_LEVEL_LABELS, SPELLCASTING_ABILITY_LABELS } from '@/utils/dnd5e'
+import { SPELLCASTING_ABILITY_LABELS } from '@/utils/dnd5e'
 import type { EffectiveStats } from '@/utils/equipmentUtils'
-import type { Character, SpellSlots } from '@/types/character.types'
+import type { Character, SpellSlots as SpellSlotsType } from '@/types/character.types'
 
 interface Props {
   characterId: string
@@ -37,7 +38,12 @@ export function CharacterSpellsTab({ characterId, character, eff }: Props) {
   const spellAbilityMod  = Math.floor((spellAbilityScore - 10) / 2)
   const spellSaveDC      = spellAbility ? 8 + profBonus + spellAbilityMod : null
   const spellAttackBonus = spellAbility ? profBonus + spellAbilityMod : null
-  const spellSlots       = (character.spell_slots ?? {}) as SpellSlots
+  const spellSlots       = (character.spell_slots ?? {}) as SpellSlotsType
+  const slotsArray = Array.from({ length: 9 }, (_, i) => spellSlots[String(i + 1) as keyof SpellSlotsType]?.max ?? 0)
+  const usedArray  = Array.from({ length: 9 }, (_, i) => {
+    const s = spellSlots[String(i + 1) as keyof SpellSlotsType]
+    return s ? s.max - s.current : 0
+  })
 
   return (
     <div id="tabpanel-spreuken" role="tabpanel" aria-labelledby="tab-spreuken">
@@ -98,50 +104,22 @@ export function CharacterSpellsTab({ characterId, character, eff }: Props) {
                 <a href={`/characters/${characterId}/edit`} style={{ color: 'var(--violet)', textDecoration: 'none' }}>Bewerken</a>.
               </p>
             ) : (
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
-                {(['1','2','3','4','5','6','7','8','9'] as const).filter(level => {
-                  const slot = spellSlots[level]
-                  return slot && slot.max > 0
-                }).map(level => {
-                  const slot = spellSlots[level]!
-                  const levelIdx = parseInt(level, 10) - 1
-                  return (
-                    <div key={level}>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 6 }}>
-                        <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.12em', textTransform: 'uppercase', color: 'var(--muted)', minWidth: 64 }}>
-                          {SPELL_LEVEL_LABELS[levelIdx]} niveau
-                        </span>
-                        <span style={{ fontSize: 12, color: 'var(--ink-soft)' }}>{slot.current}/{slot.max}</span>
-                      </div>
-                      <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
-                        {Array.from({ length: slot.max }, (_, i) => {
-                          const used = i >= slot.current
-                          return (
-                            <button
-                              key={i}
-                              type="button"
-                              aria-label={used ? `Slot ${i + 1} herstellen` : `Slot ${i + 1} gebruiken`}
-                              onClick={() => updateSpellSlot.mutate({ level, current: used ? slot.current + 1 : slot.current - 1, currentSlots: character.spell_slots ?? {} as SpellSlots })}
-                              disabled={updateSpellSlot.isPending}
-                              style={{
-                                width: 36, height: 36, borderRadius: 8, cursor: 'pointer',
-                                border: used ? '2px solid var(--hairline-strong)' : '2px solid rgb(var(--violet-rgb) / 0.5)',
-                                background: used ? 'var(--surface)' : 'rgb(var(--violet-rgb) / 0.12)',
-                                display: 'flex', alignItems: 'center', justifyContent: 'center',
-                                transition: 'all var(--t-fast)',
-                              }}
-                            >
-                              <span aria-hidden="true" style={{ fontSize: 16, color: used ? 'var(--muted)' : 'var(--violet)' }}>
-                                {used ? '○' : '✦'}
-                              </span>
-                            </button>
-                          )
-                        })}
-                      </div>
-                    </div>
-                  )
-                })}
-              </div>
+              <SpellSlots
+                slots={slotsArray}
+                used={usedArray}
+                pending={updateSpellSlot.isPending}
+                onToggle={(level, pipIndex) => {
+                  const levelKey = String(level) as keyof SpellSlotsType
+                  const s = spellSlots[levelKey]
+                  if (!s) return
+                  const isExpended = pipIndex < usedArray[level - 1]
+                  updateSpellSlot.mutate({
+                    level: levelKey,
+                    current: isExpended ? s.current + 1 : s.current - 1,
+                    currentSlots: character.spell_slots ?? {} as SpellSlotsType,
+                  })
+                }}
+              />
             )}
           </div>
 

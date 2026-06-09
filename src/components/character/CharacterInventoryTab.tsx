@@ -2,6 +2,7 @@ import { useState, useRef, useEffect } from 'react'
 import { toast } from 'sonner'
 import { Button } from '@/components/ui/Button'
 import { Spinner } from '@/components/ui/Spinner'
+import { SanctumInventory } from '@/components/character/SanctumInventory'
 import { itemRarityLabel, itemRarityColor, itemTypeLabel } from '@/lib/statusMaps'
 import { useCharacterItems } from '@/hooks/queries/useCharacterItems'
 import { useReturnItemToDm } from '@/hooks/queries/useCharacter'
@@ -410,8 +411,26 @@ export function CharacterInventoryTab({ characterId, character }: Props) {
           <Spinner size="md" />
         </div>
       ) : (
-        <div style={{ display: 'flex', gap: 16, alignItems: 'flex-start', flexWrap: 'wrap' }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
 
+          {/* Paper-doll equipment overview */}
+          {items && items.length > 0 && (
+            <div className="pangu-surface" style={{ padding: 20 }}>
+              <p className="pangu-section-title" style={{ marginBottom: 16 }}>Uitrusting</p>
+              <SanctumInventory
+                characterId={characterId}
+                items={items}
+                onUnequip={(slot) =>
+                  unequipItem.mutate(
+                    (items ?? []).find((i) => i.equipped_slot === slot)?.id ?? '',
+                    { onSuccess: () => toast.success('Item afgelegd') }
+                  )
+                }
+              />
+            </div>
+          )}
+
+          <div style={{ display: 'flex', gap: 16, alignItems: 'flex-start', flexWrap: 'wrap' }}>
           {/* Main list */}
           <div style={{ flex: 1, minWidth: 260 }}>
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 14 }}>
@@ -484,6 +503,7 @@ export function CharacterInventoryTab({ characterId, character }: Props) {
             )}
             <DiceRoller />
           </div>
+        </div>
         </div>
       )}
     </div>
