@@ -3,7 +3,7 @@ import { useAuthStore } from '@/stores/auth.store'
 import { Spinner } from '@/components/ui/Spinner'
 import { Button } from '@/components/ui/Button'
 import { Breadcrumb } from '@/components/ui/Breadcrumbs'
-import { WorldDetailDivider } from '@/components/world/WorldDetailDivider'
+import { OrnateDivider } from '@/components/ui/OrnateDivider'
 import { RelatedEntities } from '@/components/link/RelatedEntities'
 import { PartyMemberRow } from '@/components/character/CharacterCard'
 import { useCampaignCharacters } from '@/hooks/queries/useCampaignCharacters'
@@ -194,7 +194,7 @@ export default function SessionDetailPage() {
       </div>
 
       {/* Description */}
-      <WorldDetailDivider label="Beschrijving" />
+      <OrnateDivider label="Beschrijving" />
       {session.description ? (
         <div className="pangu-surface" style={{ padding: 28 }}>
           <p style={{
@@ -214,7 +214,7 @@ export default function SessionDetailPage() {
       {/* DM notes — only visible to the DM */}
       {isDM && (
         <>
-          <WorldDetailDivider label="DM-notities" />
+          <OrnateDivider label="DM-notities" />
           {session.notes ? (
             <div
               className="pangu-surface"
@@ -251,7 +251,7 @@ export default function SessionDetailPage() {
       {/* The Party — only shown when characters are linked to this campaign */}
       {partyMembers && partyMembers.length > 0 && (
         <>
-          <WorldDetailDivider label="The Party" />
+          <OrnateDivider label="The Party" />
           <ul
             style={{ display: 'flex', flexDirection: 'column', gap: 12, listStyle: 'none', padding: 0, margin: 0 }}
             role="list"
@@ -267,7 +267,7 @@ export default function SessionDetailPage() {
       )}
 
       {/* Player notes — players write, DM reads for consolidation */}
-      <WorldDetailDivider label="Spelernotities" />
+      <OrnateDivider label="Spelernotities" />
       {isDM
         ? <DmPlayerNotesPanel sessionId={id!} />
         : <PlayerNotepad sessionId={id!} campaignId={session.campaign_id} />

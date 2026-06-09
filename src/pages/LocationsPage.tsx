@@ -5,7 +5,7 @@ import { EntityCardSkeleton } from '@/components/ui/EntityCardSkeleton'
 import { EmptyState } from '@/components/ui/EmptyState'
 import { Breadcrumbs } from '@/components/ui/Breadcrumbs'
 import { LocationCard, ForgeLocationCard } from '@/components/location/LocationCard'
-import { WorldDetailDivider } from '@/components/world/WorldDetailDivider'
+import { OrnateDivider } from '@/components/ui/OrnateDivider'
 import { useCampaign } from '@/hooks/queries/useCampaign'
 import { useCampaignLocations, useCreateCampaignLocation } from '@/hooks/queries/useCampaignLocations'
 import { useDraftGC } from '@/hooks/useDraftGC'
@@ -59,7 +59,7 @@ export default function LocationsPage() {
         </p>
       </header>
 
-      <WorldDetailDivider label={`${locations?.length ?? 0} locatie${locations?.length !== 1 ? 's' : ''}`} />
+      <OrnateDivider label={`${locations?.length ?? 0} locatie${locations?.length !== 1 ? 's' : ''}`} />
 
       {/* Location grid */}
       <div style={{ marginTop: 24 }}>

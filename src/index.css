@@ -1751,6 +1751,10 @@ body {
   white-space: nowrap;
 }
 
+.div-ornate-compact { margin: var(--sp-5) 0; }
+.div-ornate-violet .glyph { color: var(--violet-soft); }
+.div-ornate-muted .glyph { color: var(--muted); }
+
 /* ─── Tab indicator (sliding pill) ───────────────────────── */
 .tab-indicator {
   position: absolute;

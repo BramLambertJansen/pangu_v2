@@ -4,7 +4,7 @@ import { EntityCardSkeleton } from '@/components/ui/EntityCardSkeleton'
 import { WorldCard } from '@/components/world/WorldCard'
 import { CampaignCard } from '@/components/campaign/CampaignCard'
 import { SessionCard } from '@/components/session/SessionCard'
-import { WorldDetailDivider } from '@/components/world/WorldDetailDivider'
+import { OrnateDivider } from '@/components/ui/OrnateDivider'
 import { useWorlds } from '@/hooks/queries/useWorld'
 import { useActiveCampaigns } from '@/hooks/queries/useCampaign'
 import { usePlannedSessions } from '@/hooks/queries/useSession'
@@ -40,7 +40,7 @@ export default function DashboardPage() {
       </header>
 
       {/* Mijn werelden */}
-      <WorldDetailDivider label="Mijn werelden" />
+      <OrnateDivider label="Mijn werelden" />
 
       {worldsLoading ? (
         <ul style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: 'var(--sp-5)', listStyle: 'none', padding: 0, margin: 0 }} aria-label="Werelden laden..." aria-live="polite">
@@ -62,7 +62,7 @@ export default function DashboardPage() {
       )}
 
       {/* Actieve kronieken */}
-      <WorldDetailDivider label="Actieve kronieken" />
+      <OrnateDivider label="Actieve kronieken" />
 
       {campaignsLoading ? (
         <ul style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: 'var(--sp-4)', listStyle: 'none', padding: 0, margin: 0 }} aria-label="Kronieken laden..." aria-live="polite">
@@ -81,7 +81,7 @@ export default function DashboardPage() {
       )}
 
       {/* Geplande sessies */}
-      <WorldDetailDivider label="Geplande sessies" />
+      <OrnateDivider label="Geplande sessies" />
 
       {sessionsLoading ? (
         <ul style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: 'var(--sp-4)', listStyle: 'none', padding: 0, margin: 0 }} aria-label="Sessies laden..." aria-live="polite">

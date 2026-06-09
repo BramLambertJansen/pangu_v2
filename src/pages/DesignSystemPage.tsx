@@ -165,8 +165,13 @@ export default function DesignSystemPage() {
         </div>
       </Section>
 
-      <Section title="Divider">
+      <Section title="Ornate Divider">
         <OrnateDivider label="Mijn Werelden" />
+        <OrnateDivider label="Violet accent" tone="violet" />
+        <OrnateDivider label="Muted toon" tone="muted" />
+        <OrnateDivider label="Custom glyph" glyph="✦" />
+        <OrnateDivider label="Compact" compact />
+        <OrnateDivider />
       </Section>
 
       <Section title="Dobbelsteen">

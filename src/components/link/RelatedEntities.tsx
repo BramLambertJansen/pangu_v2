@@ -1,6 +1,6 @@
 import { useState, useRef, useCallback } from 'react'
 import { Link } from 'react-router-dom'
-import { WorldDetailDivider } from '@/components/world/WorldDetailDivider'
+import { OrnateDivider } from '@/components/ui/OrnateDivider'
 import { EmptyState } from '@/components/ui/EmptyState'
 import { Spinner } from '@/components/ui/Spinner'
 import { ConfirmDialog } from '@/components/ui/ConfirmDialog'
@@ -57,7 +57,7 @@ export function RelatedEntities({ type, id, campaignId }: Props) {
 
   return (
     <section aria-label="Verbonden entiteiten">
-      <WorldDetailDivider label="Verbonden" />
+      <OrnateDivider label="Verbonden" />
 
       {isLoading && (
         <div style={{ display: 'flex', justifyContent: 'center', padding: '32px 0' }}>

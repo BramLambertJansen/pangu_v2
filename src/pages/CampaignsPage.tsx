@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/Button'
 import { EntityCardSkeleton } from '@/components/ui/EntityCardSkeleton'
 import { EmptyState } from '@/components/ui/EmptyState'
 import { CampaignCard, ForgeCampaignCard } from '@/components/campaign/CampaignCard'
-import { WorldDetailDivider } from '@/components/world/WorldDetailDivider'
+import { OrnateDivider } from '@/components/ui/OrnateDivider'
 import type { World } from '@/types/world.types'
 import { useWorlds } from '@/hooks/queries/useWorld'
 import { useAllCampaignsWithWorlds, useCreateCampaign, type CampaignWithWorldIds } from '@/hooks/queries/useCampaign'
@@ -100,7 +100,7 @@ export default function CampaignsPage() {
         <>
           {worldGroups.map(({ worldId, worldName, campaigns: worldCampaigns }) => (
             <section key={worldId} aria-label={worldName}>
-              <WorldDetailDivider label={worldName} />
+              <OrnateDivider label={worldName} />
               <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: -28, marginBottom: 16 }}>
                 <Button
                   variant="ghost"

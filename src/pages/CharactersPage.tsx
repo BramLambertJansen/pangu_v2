@@ -4,7 +4,7 @@ import { EntityCardSkeleton } from '@/components/ui/EntityCardSkeleton'
 import { Button } from '@/components/ui/Button'
 import { EmptyState } from '@/components/ui/EmptyState'
 import { SearchBar } from '@/components/ui/SearchBar'
-import { WorldDetailDivider } from '@/components/world/WorldDetailDivider'
+import { OrnateDivider } from '@/components/ui/OrnateDivider'
 import { CharacterCard, ForgeCharacterCard } from '@/components/character/CharacterCard'
 import { useCharacters, useCreateCharacter } from '@/hooks/queries/useCharacters'
 import { useDraftGC } from '@/hooks/useDraftGC'
@@ -53,7 +53,7 @@ export default function CharactersPage() {
         </div>
       )}
 
-      <WorldDetailDivider label={`${filtered.length} karakter${filtered.length !== 1 ? 's' : ''}`} />
+      <OrnateDivider label={`${filtered.length} karakter${filtered.length !== 1 ? 's' : ''}`} />
 
       {/* Character grid */}
       <div style={{ marginTop: 24 }}>

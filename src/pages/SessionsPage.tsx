@@ -5,7 +5,7 @@ import { EntityCardSkeleton } from '@/components/ui/EntityCardSkeleton'
 import { EmptyState } from '@/components/ui/EmptyState'
 import { Breadcrumbs } from '@/components/ui/Breadcrumbs'
 import { SessionCard, ForgeSessionCard } from '@/components/session/SessionCard'
-import { WorldDetailDivider } from '@/components/world/WorldDetailDivider'
+import { OrnateDivider } from '@/components/ui/OrnateDivider'
 import { useCampaign } from '@/hooks/queries/useCampaign'
 import { useCampaignSessions, useCreateCampaignSession } from '@/hooks/queries/useCampaignSessions'
 import { useDraftGC } from '@/hooks/useDraftGC'
@@ -66,7 +66,7 @@ export default function SessionsPage() {
         </p>
       </header>
 
-      <WorldDetailDivider label={`${sessions?.length ?? 0} sessie${sessions?.length !== 1 ? 's' : ''}`} />
+      <OrnateDivider label={`${sessions?.length ?? 0} sessie${sessions?.length !== 1 ? 's' : ''}`} />
 
       {/* Session grid */}
       <div style={{ marginTop: 24 }}>

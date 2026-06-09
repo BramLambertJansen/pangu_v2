@@ -2,7 +2,7 @@ import { useParams, useNavigate, Link } from 'react-router-dom'
 import { Spinner } from '@/components/ui/Spinner'
 import { Button } from '@/components/ui/Button'
 import { Breadcrumb } from '@/components/ui/Breadcrumbs'
-import { WorldDetailDivider } from '@/components/world/WorldDetailDivider'
+import { OrnateDivider } from '@/components/ui/OrnateDivider'
 import { RelatedEntities } from '@/components/link/RelatedEntities'
 import { pickGradient, factionGradients } from '@/utils/pickGradient'
 import {
@@ -185,7 +185,7 @@ export default function FactionDetailPage() {
       {/* Motto */}
       {faction.motto && (
         <>
-          <WorldDetailDivider label="Motto" />
+          <OrnateDivider label="Motto" />
           <div className="pangu-surface" style={{ padding: 28 }}>
             <p style={{
               fontFamily: "'Cormorant Garamond', Georgia, serif",
@@ -203,7 +203,7 @@ export default function FactionDetailPage() {
       {/* Goals */}
       {faction.goals && (
         <>
-          <WorldDetailDivider label="Doelen" />
+          <OrnateDivider label="Doelen" />
           <div className="pangu-surface" style={{ padding: 28 }}>
             <p style={{
               fontSize: 15, lineHeight: 1.75,
@@ -217,7 +217,7 @@ export default function FactionDetailPage() {
       )}
 
       {/* Description */}
-      <WorldDetailDivider label="Beschrijving" />
+      <OrnateDivider label="Beschrijving" />
       {faction.description ? (
         <div className="pangu-surface" style={{ padding: 28 }}>
           <p style={{
@@ -235,7 +235,7 @@ export default function FactionDetailPage() {
       )}
 
       {/* Members */}
-      <WorldDetailDivider label={`Leden (${members?.length ?? 0})`} />
+      <OrnateDivider label={`Leden (${members?.length ?? 0})`} />
       {members && members.length > 0 ? (
         <div className="pangu-surface" style={{ padding: 20 }}>
           <ul style={{ display: 'flex', flexDirection: 'column', gap: 4, listStyle: 'none', padding: 0, margin: 0 }}>
@@ -304,7 +304,7 @@ export default function FactionDetailPage() {
       )}
 
       {/* DM notes */}
-      <WorldDetailDivider label="DM-notities" />
+      <OrnateDivider label="DM-notities" />
       {faction.notes ? (
         <div
           className="pangu-surface"

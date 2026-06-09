@@ -4,7 +4,7 @@ import { Spinner } from '@/components/ui/Spinner'
 import { Button } from '@/components/ui/Button'
 import { Breadcrumb } from '@/components/ui/Breadcrumbs'
 import { WorldDetailHeader } from '@/components/world/WorldDetailHeader'
-import { WorldDetailDivider } from '@/components/world/WorldDetailDivider'
+import { OrnateDivider } from '@/components/ui/OrnateDivider'
 import { CampaignCard, ForgeCampaignCard } from '@/components/campaign/CampaignCard'
 import { useWorld } from '@/hooks/queries/useWorld'
 import { useCampaignsByWorld, useCreateCampaign } from '@/hooks/queries/useCampaign'
@@ -85,7 +85,7 @@ export default function WorldDetailPage() {
         onLoreForge={handleLoreForge}
       />
 
-      <WorldDetailDivider label="Kronieken in deze wereld" />
+      <OrnateDivider label="Kronieken in deze wereld" />
 
       {/* Campaign list */}
       {isLoadingCampaigns ? (
@@ -116,7 +116,7 @@ export default function WorldDetailPage() {
         </ul>
       )}
 
-      <WorldDetailDivider label="DM-notities" />
+      <OrnateDivider label="DM-notities" />
 
       {/* DM notes */}
       {world.notes ? (
@@ -150,7 +150,7 @@ export default function WorldDetailPage() {
         </p>
       )}
 
-      <WorldDetailDivider label="Bestiarium" />
+      <OrnateDivider label="Bestiarium" />
 
       {/* Bestiary entry point */}
       <Link

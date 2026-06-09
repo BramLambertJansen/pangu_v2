@@ -2,7 +2,7 @@ import { useParams, useNavigate, Link } from 'react-router-dom'
 import { Spinner } from '@/components/ui/Spinner'
 import { Button } from '@/components/ui/Button'
 import { Breadcrumb } from '@/components/ui/Breadcrumbs'
-import { WorldDetailDivider } from '@/components/world/WorldDetailDivider'
+import { OrnateDivider } from '@/components/ui/OrnateDivider'
 import { useBestiaryFull } from '@/hooks/queries/useBestiary'
 import { bestiaryStatusLabel, bestiaryStatusColor } from '@/lib/statusMaps'
 import { pickGradient, bestiaryGradients } from '@/utils/pickGradient'
@@ -200,7 +200,7 @@ export default function BestiaryDetailPage() {
       </div>
 
       {/* Stat block */}
-      <WorldDetailDivider label="Statistieken" />
+      <OrnateDivider label="Statistieken" />
       <div className="pangu-surface" style={{ padding: 24 }}>
         {/* Combat stats */}
         <div style={{ display: 'flex', gap: 32, flexWrap: 'wrap', marginBottom: 20 }}>
@@ -264,7 +264,7 @@ export default function BestiaryDetailPage() {
         bestiary.damage_immunities || bestiary.damage_resistances || bestiary.damage_vulnerabilities ||
         bestiary.condition_immunities || bestiary.speed_details) && (
         <>
-          <WorldDetailDivider label="Aanvullende Statistieken" />
+          <OrnateDivider label="Aanvullende Statistieken" />
           <div className="pangu-surface" style={{ padding: 24 }}>
             <dl style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(240px, 1fr))', gap: '12px 24px', margin: 0 }}>
               {([
@@ -305,7 +305,7 @@ export default function BestiaryDetailPage() {
         }
         return (
           <div key={section}>
-            <WorldDetailDivider label={labels[section]} />
+            <OrnateDivider label={labels[section]} />
             <div className="pangu-surface" style={{ padding: 24, display: 'flex', flexDirection: 'column', gap: 16 }}>
               {entries.map((entry, i) => (
                 <div key={i}>
@@ -324,7 +324,7 @@ export default function BestiaryDetailPage() {
 
       {(bestiary.legendary_actions?.length || bestiary.legendary_desc) && (
         <div>
-          <WorldDetailDivider label="Legendarische Acties" />
+          <OrnateDivider label="Legendarische Acties" />
           <div className="pangu-surface" style={{ padding: 24, display: 'flex', flexDirection: 'column', gap: 16 }}>
             {bestiary.legendary_desc && (
               <p style={{ margin: 0, fontSize: 14, lineHeight: 1.7, color: 'var(--ink-soft)', fontStyle: 'italic' }}>
@@ -347,7 +347,7 @@ export default function BestiaryDetailPage() {
 
       {(bestiary.lair_actions as BestiaryAction[] | null)?.length && (
         <div>
-          <WorldDetailDivider label="Hol Acties" />
+          <OrnateDivider label="Hol Acties" />
           <div className="pangu-surface" style={{ padding: 24, display: 'flex', flexDirection: 'column', gap: 16 }}>
             {(bestiary.lair_actions as BestiaryAction[]).map((entry, i) => (
               <div key={i}>
@@ -364,7 +364,7 @@ export default function BestiaryDetailPage() {
       )}
 
       {/* Description */}
-      <WorldDetailDivider label="Beschrijving" />
+      <OrnateDivider label="Beschrijving" />
       {bestiary.description ? (
         <div className="pangu-surface" style={{ padding: 28 }}>
           <p style={{
@@ -382,7 +382,7 @@ export default function BestiaryDetailPage() {
       )}
 
       {/* DM notes */}
-      <WorldDetailDivider label="DM-notities" />
+      <OrnateDivider label="DM-notities" />
       {bestiary.notes ? (
         <div
           className="pangu-surface"

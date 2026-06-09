@@ -5,7 +5,7 @@ import { EntityCardSkeleton } from '@/components/ui/EntityCardSkeleton'
 import { EmptyState } from '@/components/ui/EmptyState'
 import { Breadcrumbs } from '@/components/ui/Breadcrumbs'
 import { QuestCard, ForgeQuestCard } from '@/components/quest/QuestCard'
-import { WorldDetailDivider } from '@/components/world/WorldDetailDivider'
+import { OrnateDivider } from '@/components/ui/OrnateDivider'
 import { useCampaign } from '@/hooks/queries/useCampaign'
 import { useCampaignQuests, useCreateCampaignQuest } from '@/hooks/queries/useCampaignQuests'
 import { useDraftGC } from '@/hooks/useDraftGC'
@@ -59,7 +59,7 @@ export default function QuestsPage() {
         </p>
       </header>
 
-      <WorldDetailDivider label={`${quests?.length ?? 0} quest${quests?.length !== 1 ? 's' : ''}`} />
+      <OrnateDivider label={`${quests?.length ?? 0} quest${quests?.length !== 1 ? 's' : ''}`} />
 
       {/* Quest grid */}
       <div style={{ marginTop: 24 }}>

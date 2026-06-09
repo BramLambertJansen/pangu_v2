@@ -2,7 +2,7 @@ import { useParams, useNavigate, Link } from 'react-router-dom'
 import { Spinner } from '@/components/ui/Spinner'
 import { Button } from '@/components/ui/Button'
 import { Breadcrumb } from '@/components/ui/Breadcrumbs'
-import { WorldDetailDivider } from '@/components/world/WorldDetailDivider'
+import { OrnateDivider } from '@/components/ui/OrnateDivider'
 import { RelatedEntities } from '@/components/link/RelatedEntities'
 import { useLoreFull } from '@/hooks/queries/useLore'
 import { loreStatusLabel, loreStatusColor } from '@/lib/statusMaps'
@@ -167,7 +167,7 @@ export default function LoreDetailPage() {
       </div>
 
       {/* Description */}
-      <WorldDetailDivider label="Beschrijving" />
+      <OrnateDivider label="Beschrijving" />
       {lore.description ? (
         <div className="pangu-surface" style={{ padding: 28 }}>
           <p style={{
@@ -185,7 +185,7 @@ export default function LoreDetailPage() {
       )}
 
       {/* DM notes */}
-      <WorldDetailDivider label="DM-notities" />
+      <OrnateDivider label="DM-notities" />
       {lore.notes ? (
         <div
           className="pangu-surface"
