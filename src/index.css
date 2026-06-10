@@ -4134,10 +4134,11 @@ body {
 .atlas-map-img {
   display: block;
   width: 100%;
-  height: 100%;
-  object-fit: cover;
+  /* height:auto lets the image set the container box, so the whole map shows
+     uncropped and percentage pin coordinates map to the same point at every
+     container width (editor 340px, atlas 560px, responsive). */
+  height: auto;
   pointer-events: none;
-  border-radius: 0;
 }
 
 /* ── Pin button ──────────────────────────────────────────── */

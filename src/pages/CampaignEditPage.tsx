@@ -73,7 +73,6 @@ export default function CampaignEditPage() {
     }
     setMapImageUploading(true)
     try {
-      const oldUrl = form.map_image_url as string | null | undefined
       const ext = file.name.split('.').pop() ?? 'jpg'
       const path = `campaign-maps/${user.id}/${id}.${ext}`
       const { error: uploadError } = await supabase.storage
@@ -82,11 +81,9 @@ export default function CampaignEditPage() {
       if (uploadError) throw uploadError
       const { data: urlData } = supabase.storage.from('entity-images').getPublicUrl(path)
       set('map_image_url', urlData.publicUrl)
-      if (oldUrl && extractStoragePath(oldUrl) !== path) {
-        const oldPath = extractStoragePath(oldUrl)
-        if (oldPath) await supabase.storage.from('entity-images').remove([oldPath])
-      }
-      toast.success('Kaartafbeelding opgeslagen — sla de kroniek op om te bevestigen.')
+      // The previous file is removed only after the campaign is saved (see
+      // handleSave), so a cancel/discard never points the DB at a deleted file.
+      toast.success('Kaartafbeelding geüpload — sla de kroniek op om te bevestigen.')
     } catch {
       toast.error('Uploaden mislukt')
     } finally {
@@ -94,12 +91,9 @@ export default function CampaignEditPage() {
     }
   }
 
-  async function handleRemoveMapImage() {
-    const url = form.map_image_url as string | null | undefined
-    if (url) {
-      const path = extractStoragePath(url)
-      if (path) await supabase.storage.from('entity-images').remove([path])
-    }
+  // Clear the field like any other pending edit; the storage object is removed
+  // post-save so discarding the form leaves the persisted map intact.
+  function handleRemoveMapImage() {
     set('map_image_url', null)
   }
 
@@ -132,10 +126,17 @@ export default function CampaignEditPage() {
 
   function handleSave() {
     const worldId = campaign?.world_id ?? worldIdFromState
+    const previousMapUrl = campaign?.map_image_url ?? null
+    const nextMapUrl = (form.map_image_url as string | null | undefined) ?? null
     toast.promise(
-      saveCampaign.mutateAsync({ ...form, worldId }).then(() => {
+      saveCampaign.mutateAsync({ ...form, worldId }).then(async () => {
         setCommitted(true)
         setDirty(false)
+        // Now that the new map reference is persisted, drop the orphaned old file.
+        if (previousMapUrl && previousMapUrl !== nextMapUrl) {
+          const oldPath = extractStoragePath(previousMapUrl)
+          if (oldPath) await supabase.storage.from('entity-images').remove([oldPath])
+        }
       }),
       { loading: 'Opslaan...', success: 'Kroniek opgeslagen', error: 'Opslaan mislukt' },
     )
@@ -374,7 +375,7 @@ export default function CampaignEditPage() {
               <img
                 src={form.map_image_url as string}
                 alt="Kaartafbeelding"
-                style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
+                style={{ width: '100%', height: '100%', objectFit: 'contain', display: 'block' }}
               />
             </div>
           ) : (

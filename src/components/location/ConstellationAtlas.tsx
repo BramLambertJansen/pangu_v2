@@ -89,7 +89,9 @@ export function ConstellationAtlas({
     <div
       ref={containerRef}
       className={`atlas-map${className ? ` ${className}` : ''}`}
-      style={{ height }}
+      // With an image the box is sized by the image (height:auto) so pins stay
+      // put across widths; height only sizes the empty-state placeholder.
+      style={mapImageUrl ? undefined : { height }}
       data-pin-mode={pinMode ? 'true' : undefined}
       onClick={handleContainerClick}
       onTouchEnd={handleContainerTouch}
