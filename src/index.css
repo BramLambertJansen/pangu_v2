@@ -1177,6 +1177,8 @@ body {
 .main-content {
   padding: var(--sp-10) clamp(var(--sp-8), 5vw, var(--sp-14)) 100px;
 }
+/* Programmatic focus target on route change — no visible ring (not tab-reachable). */
+.main-content:focus { outline: none; }
 
 .settings-form-grid {
   display: grid;
