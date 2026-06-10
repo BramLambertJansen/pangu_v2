@@ -11,6 +11,9 @@ import { Spinner } from '@/components/ui/Spinner'
 import { useEntityEdit } from '@/hooks/useEntityEdit'
 import { useAI } from '@/hooks/useAI'
 import { useLocation as useLocationQuery, useSaveLocation, useDeleteLocation } from '@/hooks/queries/useLocation'
+import { useCampaign } from '@/hooks/queries/useCampaign'
+import { useCampaignLocations } from '@/hooks/queries/useCampaignLocations'
+import { ConstellationAtlas } from '@/components/location/ConstellationAtlas'
 import type { LocationStatus } from '@/types/location.types'
 
 const statusOptions: { value: LocationStatus; label: string }[] = [
@@ -44,6 +47,14 @@ export default function LocationEditPage() {
   } = useEntityEdit({ entity: locationData, isNew })
 
   const campaignId = locationData?.campaign_id ?? campaignIdFromState
+
+  const { data: campaign } = useCampaign(campaignId)
+  const { data: allLocations } = useCampaignLocations(campaignId)
+
+  // All other locations on the map (to show as context pins)
+  const otherMarkers = (allLocations ?? [])
+    .filter((l) => l.id !== id && l.map_x != null && l.map_y != null)
+    .map((l) => ({ id: l.id, name: l.name, x: l.map_x!, y: l.map_y!, location_type: l.location_type }))
 
   async function handleDiscardConfirm() {
     if (guard.isDraftDiscard) {
@@ -206,6 +217,20 @@ export default function LocationEditPage() {
               options={statusOptions}
             />
 
+            <Input
+              label="Regio"
+              value={form.region ?? ''}
+              onChange={(e) => set('region', e.target.value || null)}
+              placeholder="Bijv. Sword Coast, Neverwinter Wood..."
+            />
+
+            <Input
+              label="Klimaat"
+              value={form.climate ?? ''}
+              onChange={(e) => set('climate', e.target.value || null)}
+              placeholder="Bijv. Gematigd, Koud en vochtig..."
+            />
+
             <div className="sm:col-span-2">
               <Textarea
                 label="Beschrijving"
@@ -269,6 +294,63 @@ export default function LocationEditPage() {
               Opslaan
             </Button>
           </div>
+        </div>
+
+        {/* Map position section */}
+        <div className="surface" style={{ marginTop: 16, padding: 28 }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16, gap: 12, flexWrap: 'wrap' }}>
+            <div>
+              <p className="pg-section-title" style={{ marginBottom: 2 }}>Positie op kaart</p>
+              <p style={{ fontSize: 13, color: 'var(--muted)', margin: 0 }}>
+                {campaign?.map_image_url
+                  ? 'Klik op de kaart om de pin te plaatsen.'
+                  : 'Upload eerst een kaartafbeelding via Kroniek bewerken.'}
+              </p>
+            </div>
+            {form.map_x != null && form.map_y != null && (
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => { set('map_x', null); set('map_y', null) }}
+              >
+                Verwijder van kaart
+              </Button>
+            )}
+          </div>
+
+          {campaign?.map_image_url ? (
+            <div>
+              <ConstellationAtlas
+                campaignId={campaignId ?? ''}
+                mapImageUrl={campaign.map_image_url}
+                markers={[
+                  ...otherMarkers,
+                  ...(form.map_x != null && form.map_y != null
+                    ? [{ id: id!, name: form.name ?? '', x: form.map_x, y: form.map_y, location_type: form.location_type }]
+                    : []),
+                ]}
+                selectedId={form.map_x != null ? id : undefined}
+                pinMode
+                onPlacePin={(x, y) => { set('map_x', x); set('map_y', y) }}
+                height={340}
+              />
+              {form.map_x != null && form.map_y != null && (
+                <p style={{ fontSize: 12, color: 'var(--muted)', marginTop: 8 }}>
+                  Positie: {(form.map_x as number).toFixed(1)}% × {(form.map_y as number).toFixed(1)}% — klik opnieuw om te verplaatsen.
+                </p>
+              )}
+            </div>
+          ) : (
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: 120, border: '2px dashed var(--hairline)', borderRadius: 'var(--r-md)', padding: 24 }}>
+              <Button
+                variant="secondary"
+                size="sm"
+                onClick={() => campaignId && navigate(`/campaigns/${campaignId}/edit`)}
+              >
+                Kaartafbeelding uploaden →
+              </Button>
+            </div>
+          )}
         </div>
 
         {/* Danger zone */}

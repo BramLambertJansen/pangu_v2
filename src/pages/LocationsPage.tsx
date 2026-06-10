@@ -51,12 +51,22 @@ export default function LocationsPage() {
       </div>
 
       {/* Page header */}
-      <header style={{ marginBottom: 32 }}>
-        <p className="pangu-eyebrow">Kroniek — {campaign.name}</p>
-        <h1 className="pangu-display-xl">Locaties</h1>
-        <p style={{ marginTop: 8, fontSize: 14, color: 'var(--ink-soft)' }}>
-          Beheer de locaties van deze kroniek.
-        </p>
+      <header style={{ marginBottom: 32, display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 16, flexWrap: 'wrap' }}>
+        <div>
+          <p className="pg-eyebrow">Kroniek — {campaign.name}</p>
+          <h1 className="pg-display-xl">Locaties</h1>
+          <p style={{ marginTop: 8, fontSize: 14, color: 'var(--ink-soft)' }}>
+            Beheer de locaties van deze kroniek.
+          </p>
+        </div>
+        <Button
+          variant="secondary"
+          size="sm"
+          onClick={() => navigate(`/campaigns/${campaignId}/atlas`)}
+          style={{ flexShrink: 0, marginTop: 4 }}
+        >
+          🗺 Atlas bekijken
+        </Button>
       </header>
 
       <OrnateDivider label={`${locations?.length ?? 0} locatie${locations?.length !== 1 ? 's' : ''}`} />
