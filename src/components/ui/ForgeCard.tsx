@@ -37,31 +37,19 @@ export const ForgeCard = memo(function ForgeCard({
       role="button"
       tabIndex={0}
       aria-label={ariaLabel ?? title}
-      onClick={() => { if (!loading) onClick() }}
+      aria-busy={loading || undefined}
+      onClick={() => {
+        if (!loading) onClick()
+      }}
       onKeyDown={handleKeyDown}
       data-accent={accent}
       data-variant={variant}
       className={cn('forge-card', className)}
-      style={{ cursor: loading ? 'wait' : 'pointer' }}
     >
       {icon}
-      <div style={{ textAlign: 'center' }}>
-        <p style={{
-          fontFamily: 'var(--font-body)',
-          fontSize: 12,
-          fontWeight: 700,
-          letterSpacing: '0.18em',
-          textTransform: 'uppercase',
-          color: `var(--${accent})`,
-          margin: '0 0 4px',
-        }}>
-          {loading ? 'Aanmaken...' : title}
-        </p>
-        {subtitle && (
-          <p style={{ fontSize: 12, color: 'var(--muted)', margin: 0 }}>
-            {subtitle}
-          </p>
-        )}
+      <div className="forge-card-body">
+        <p className="forge-card-title">{loading ? 'Aanmaken...' : title}</p>
+        {subtitle && <p className="forge-card-subtitle">{subtitle}</p>}
       </div>
     </article>
   )

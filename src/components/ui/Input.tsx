@@ -1,56 +1,55 @@
 import { forwardRef, useId } from 'react'
 import type { ComponentPropsWithoutRef, ReactNode } from 'react'
 import { cn } from '@/utils/cn'
+import { FormField } from './FormField'
 
 export interface InputProps extends ComponentPropsWithoutRef<'input'> {
-  label?: string
+  label?: ReactNode
   error?: string
-  /** Element rendered inside the input wrapper, flush to the right edge. Use for icon buttons (e.g. password toggle). */
+  hint?: string
+  /** Right-aligned node in the label row (e.g. an AI-generate button). */
+  labelAction?: ReactNode
+  /** Element rendered flush to the input's right edge (e.g. password toggle). */
   suffix?: ReactNode
+  /** Extra class on the wrapping form-field. */
+  fieldClassName?: string
 }
 
 export const Input = forwardRef<HTMLInputElement, InputProps>(
-  ({ label, error, suffix, className, id: idProp, ...props }, ref) => {
+  ({ label, error, hint, labelAction, suffix, className, fieldClassName, id: idProp, ...props }, ref) => {
     const generatedId = useId()
     const id = idProp ?? generatedId
-    const errorId = `${id}-error`
+    const describedBy = error ? `${id}-error` : hint ? `${id}-hint` : undefined
+
+    const control = (
+      <input
+        ref={ref}
+        id={id}
+        aria-describedby={describedBy}
+        aria-invalid={error ? true : undefined}
+        className={cn('input', error && 'input-error', className)}
+        {...props}
+      />
+    )
 
     return (
-      <div className="flex flex-col gap-1">
-        {label && (
-          <label htmlFor={id} className="text-sm font-medium text-ink-soft">
-            {label}
-          </label>
+      <FormField
+        label={label}
+        htmlFor={id}
+        error={error}
+        hint={hint}
+        labelAction={labelAction}
+        className={fieldClassName}
+      >
+        {suffix ? (
+          <div className="input-suffix-wrap">
+            {control}
+            <div className="input-suffix">{suffix}</div>
+          </div>
+        ) : (
+          control
         )}
-        <div className="relative">
-          <input
-            ref={ref}
-            id={id}
-            aria-describedby={error ? errorId : undefined}
-            aria-invalid={error ? true : undefined}
-            className={cn(
-              'h-10 w-full rounded-md border border-hairline bg-surface-2 px-3 text-sm text-ink',
-              'placeholder:text-muted',
-              'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet',
-              'disabled:cursor-not-allowed disabled:opacity-50',
-              error && 'border-crimson focus-visible:ring-crimson',
-              suffix && 'pr-10',
-              className,
-            )}
-            {...props}
-          />
-          {suffix && (
-            <div className="absolute inset-y-0 right-0 flex items-center pr-2">
-              {suffix}
-            </div>
-          )}
-        </div>
-        {error && (
-          <p id={errorId} role="alert" className="text-xs text-crimson">
-            {error}
-          </p>
-        )}
-      </div>
+      </FormField>
     )
   },
 )

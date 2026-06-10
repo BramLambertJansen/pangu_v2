@@ -9,6 +9,14 @@ import {
   type ThemeName,
 } from '@/stores/theme.store'
 import { SearchBar } from '@/components/ui/SearchBar'
+import { Input } from '@/components/ui/Input'
+import { Select } from '@/components/ui/Select'
+import { Textarea } from '@/components/ui/Textarea'
+import { FormField } from '@/components/ui/FormField'
+import { IconButton } from '@/components/ui/IconButton'
+import { NumberStepper } from '@/components/ui/NumberStepper'
+import { SegmentedControl } from '@/components/ui/SegmentedControl'
+import { Button } from '@/components/ui/Button'
 import { Chip } from '@/components/ui/Chip'
 import { StatPill } from '@/components/ui/StatPill'
 import { OrnateDivider } from '@/components/ui/OrnateDivider'
@@ -76,6 +84,9 @@ export default function DesignSystemPage() {
   const [checked1, setChecked1] = useState(true)
   const [checked2, setChecked2] = useState(false)
   const [radio, setRadio] = useState<string>('actief')
+  const [hp, setHp] = useState(42)
+  const [seg, setSeg] = useState<'lijst' | 'kaart'>('lijst')
+  const [demoStatus, setDemoStatus] = useState('draft')
 
   return (
     <div className="page-transition mx-auto max-w-5xl">
@@ -117,22 +128,64 @@ export default function DesignSystemPage() {
         </div>
       </Section>
 
-      <Section title="Formulier">
+      <Section title="Formulier-primitives">
         <div className="grid gap-4 sm:grid-cols-2">
-          <div>
-            <label className="label" htmlFor="ds-input">Naam</label>
-            <input id="ds-input" className="input" placeholder="Bijv. Aldric de Wijze" />
-          </div>
-          <div>
-            <label className="label" htmlFor="ds-select">Status</label>
-            <select id="ds-select" className="select-trigger">
-              <option>Concept</option>
-              <option>Actief</option>
-            </select>
-          </div>
+          <Input label="Naam" placeholder="Bijv. Aldric de Wijze" hint="Zoals getoond aan spelers" />
+          <Select
+            label="Status"
+            value={demoStatus}
+            onChange={(e) => setDemoStatus(e.target.value)}
+            options={[
+              { value: 'draft', label: 'Concept' },
+              { value: 'active', label: 'Actief' },
+              { value: 'archived', label: 'Gearchiveerd' },
+            ]}
+          />
+          <Input label="Met fout" defaultValue="te kort" error="Naam moet minstens 3 tekens zijn" />
+          <Input label="Met suffix" placeholder="Wachtwoord" suffix={<KbdHint>⏎</KbdHint>} />
+        </div>
+        <div className="mt-4">
+          <Textarea
+            label="Beschrijving"
+            placeholder="Beschrijf de locatie…"
+            rows={3}
+            labelAction={
+              <Button variant="ghost" size="sm">
+                ✦ Genereer
+              </Button>
+            }
+          />
+        </div>
+        <div className="mt-4">
+          <FormField label="Aangepaste controle" hint="FormField wikkelt willekeurige controls">
+            <div className="flex items-center gap-3">
+              <Toggle checked={toggled} onChange={setToggled} label="Zichtbaar voor spelers" />
+            </div>
+          </FormField>
         </div>
         <div className="mt-4 max-w-md">
           <SearchBar value={search} onValueChange={setSearch} placeholder="Zoek in de kosmos…" />
+        </div>
+      </Section>
+
+      <Section title="Acties & invoer-widgets">
+        <div className="flex flex-wrap items-center gap-6">
+          <div className="flex items-center gap-2">
+            <IconButton aria-label="Verwijderen">🗑</IconButton>
+            <IconButton aria-label="Bewerken" size="sm">
+              ✎
+            </IconButton>
+          </div>
+          <NumberStepper label="HP" value={hp} onChange={setHp} min={0} max={99} />
+          <SegmentedControl
+            label="Weergave"
+            value={seg}
+            onChange={setSeg}
+            options={[
+              { value: 'lijst', label: 'Lijst' },
+              { value: 'kaart', label: 'Kaart' },
+            ]}
+          />
         </div>
       </Section>
 

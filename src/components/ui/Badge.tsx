@@ -7,24 +7,17 @@ export interface BadgeProps extends ComponentPropsWithoutRef<'span'> {
   variant?: Variant
 }
 
-const variantStyles: Record<Variant, string> = {
-  default: 'bg-surface-2 text-ink-soft',
-  success: 'bg-teal/15 text-teal',
-  warning: 'bg-gold/15 text-gold',
-  danger:  'bg-crimson/15 text-crimson',
-  info:    'bg-violet/15 text-violet',
+const variantClass: Record<Variant, string> = {
+  default: 'badge-neutral',
+  success: 'badge-teal',
+  warning: 'badge-gold',
+  danger: 'badge-crimson',
+  info: 'badge-violet',
 }
 
 export function Badge({ variant = 'default', className, children, ...props }: BadgeProps) {
   return (
-    <span
-      className={cn(
-        'inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium',
-        variantStyles[variant],
-        className,
-      )}
-      {...props}
-    >
+    <span className={cn('badge', variantClass[variant], className)} {...props}>
       {children}
     </span>
   )

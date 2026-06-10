@@ -505,8 +505,8 @@ body {
 
 .input:focus,
 .pangu-input:focus {
-  border-color: rgba(155, 138, 255, 0.5);
-  box-shadow: 0 0 0 3px rgba(155, 138, 255, 0.12), 0 2px 16px rgba(155, 138, 255, 0.07);
+  border-color: rgb(var(--violet-rgb) / 0.5);
+  box-shadow: 0 0 0 3px rgb(var(--violet-rgb) / var(--o-12)), 0 2px 16px rgb(var(--violet-rgb) / 0.07);
 }
 
 .input:disabled,
@@ -540,8 +540,8 @@ body {
 
 .textarea:focus,
 .pangu-textarea:focus {
-  border-color: rgba(155, 138, 255, 0.5);
-  box-shadow: 0 0 0 3px rgba(155, 138, 255, 0.12), 0 2px 16px rgba(155, 138, 255, 0.07);
+  border-color: rgb(var(--violet-rgb) / 0.5);
+  box-shadow: 0 0 0 3px rgb(var(--violet-rgb) / var(--o-12)), 0 2px 16px rgb(var(--violet-rgb) / 0.07);
 }
 
 .select-trigger,
@@ -567,8 +567,48 @@ body {
 
 .select-trigger:focus,
 .pangu-select:focus {
-  border-color: rgba(155, 138, 255, 0.5);
-  box-shadow: 0 0 0 3px rgba(155, 138, 255, 0.12);
+  border-color: rgb(var(--violet-rgb) / 0.5);
+  box-shadow: 0 0 0 3px rgb(var(--violet-rgb) / var(--o-12));
+}
+
+/* ── Form field wrapper + states (canonical) ────────────────
+   Self-contained Input/Select/Textarea and the FormField wrapper share this
+   structure: optional head row (label + action), control, then error/hint. */
+.form-field { display: block; }
+.form-field-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--sp-2);
+  margin-bottom: 8px;
+}
+.form-field-head .label,
+.form-field-head .pangu-label { margin-bottom: 0; }
+.input-error { border-color: rgb(var(--crimson-rgb) / 0.6); }
+.input-error:focus {
+  border-color: rgb(var(--crimson-rgb) / 0.7);
+  box-shadow: 0 0 0 3px rgb(var(--crimson-rgb) / var(--o-12));
+}
+.field-error {
+  margin-top: 6px;
+  font-size: 12px;
+  color: var(--crimson);
+  font-family: var(--font-body);
+}
+.field-hint {
+  margin-top: 6px;
+  font-size: 12px;
+  color: var(--muted);
+  font-family: var(--font-body);
+}
+.input-suffix-wrap { position: relative; }
+.input-suffix-wrap .input { padding-right: 40px; }
+.input-suffix {
+  position: absolute;
+  inset-block: 0;
+  right: 8px;
+  display: flex;
+  align-items: center;
 }
 
 /* ── Buttons ────────────────────────────────────────────── */
@@ -1667,27 +1707,46 @@ body {
 
 .forge-card[data-accent="violet"]:hover {
   border-color: var(--violet);
-  background: rgba(155,138,255,0.04);
+  background: rgb(var(--violet-rgb) / var(--o-04));
 }
 
 .forge-card[data-accent="gold"]:hover {
   border-color: var(--gold);
-  background: rgba(245,200,66,0.03);
+  background: rgb(var(--gold-rgb) / var(--o-04));
 }
 
 .forge-card[data-accent="teal"]:hover {
   border-color: var(--teal);
-  background: rgba(62,207,178,0.04);
+  background: rgb(var(--teal-rgb) / var(--o-04));
 }
 
 .forge-card[data-accent="crimson"]:hover {
   border-color: var(--crimson);
-  background: rgba(220,90,80,0.04);
+  background: rgb(var(--crimson-rgb) / var(--o-04));
 }
 .forge-card[data-accent="azure"]:hover {
   border-color: var(--azure);
-  background: rgba(107,167,255,0.04);
+  background: rgb(var(--azure-rgb) / var(--o-04));
 }
+
+/* Forge-card interior typography (was inline in ForgeCard.tsx). The accent
+   tint comes from the card's [data-accent] via these custom-property hooks. */
+.forge-card-body { text-align: center; }
+.forge-card-title {
+  font-family: var(--font-body);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  margin: 0 0 4px;
+}
+.forge-card[data-accent="violet"] .forge-card-title { color: var(--violet); }
+.forge-card[data-accent="gold"] .forge-card-title { color: var(--gold); }
+.forge-card[data-accent="teal"] .forge-card-title { color: var(--teal); }
+.forge-card[data-accent="crimson"] .forge-card-title { color: var(--crimson); }
+.forge-card[data-accent="azure"] .forge-card-title { color: var(--azure); }
+.forge-card-subtitle { font-size: 12px; color: var(--muted); margin: 0; }
+.forge-card[aria-busy="true"] { cursor: wait; }
 
 /* ── Status badge ────────────────────────────────────────── */
 
@@ -1703,10 +1762,15 @@ body {
   letter-spacing: 0.16em;
   text-transform: uppercase;
   color: var(--void);
+  background: var(--sb-color, var(--violet));
 }
 
+/* Soft tone tints the status colour (--sb-color, a var(--token)) for use over
+   imagery. color-mix lives here in CSS, not inline, so the channel stays clean. */
 .status-badge--soft {
-  color: inherit;
+  color: var(--sb-color, var(--violet));
+  background: color-mix(in srgb, var(--sb-color, var(--violet)) 7%, transparent);
+  border: 1px solid color-mix(in srgb, var(--sb-color, var(--violet)) 33%, transparent);
   backdrop-filter: blur(4px);
 }
 
@@ -1837,8 +1901,10 @@ body {
   cursor: pointer;
   transition: all var(--t-fast);
 }
-.btn-icon:hover { background: rgba(155, 138, 255, 0.1); color: var(--violet); }
+.btn-icon:hover { background: rgb(var(--violet-rgb) / var(--o-10)); color: var(--violet); }
 .btn-icon:focus-visible { outline: 2px solid var(--violet); outline-offset: 2px; }
+.btn-icon:disabled { opacity: 0.45; cursor: not-allowed; }
+.btn-icon.btn-icon-sm { width: 36px; height: 36px; }
 
 .btn-lg { padding: 14px 28px; min-height: 52px; font-size: 13px; }
 
@@ -1884,7 +1950,47 @@ body {
 }
 .hp-step:hover { background: var(--surface); border-color: var(--hairline-strong); }
 .hp-step:focus-visible { outline: 2px solid var(--violet); outline-offset: 2px; }
-@media (max-width: 900px) { .hp-step { width: 38px; height: 38px; } }
+.hp-step:disabled { opacity: 0.4; cursor: not-allowed; }
+@media (max-width: 900px) { .hp-step { width: 44px; height: 44px; } }
+
+/* Number stepper — − value + cluster built on .hp-step. */
+.number-stepper { display: inline-flex; align-items: center; gap: var(--sp-2); }
+.number-stepper-value {
+  min-width: 2ch;
+  text-align: center;
+  font-family: var(--font-mono);
+  font-size: 14px;
+  color: var(--ink);
+}
+
+/* Segmented control — radiogroup of pill options (theme axes, filters). */
+.segmented {
+  display: inline-flex;
+  gap: 2px;
+  padding: 3px;
+  background: var(--surface-2);
+  border: 1px solid var(--hairline);
+  border-radius: var(--r-full);
+}
+.segmented-option {
+  appearance: none;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  padding: 7px 14px;
+  min-height: 36px;
+  border-radius: var(--r-full);
+  color: var(--muted);
+  font-family: var(--font-body);
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  transition: var(--tr-fast);
+}
+.segmented-option:hover { color: var(--ink-soft); }
+.segmented-option[aria-checked='true'] { background: rgb(var(--violet-rgb) / var(--o-15)); color: var(--violet); }
+.segmented-option:focus-visible { outline: 2px solid var(--violet); outline-offset: 2px; }
+.segmented-option:disabled { opacity: 0.4; cursor: not-allowed; }
 
 /* ─── Surface variants ───────────────────────────────────── */
 .surface-2 {
@@ -1973,12 +2079,65 @@ body {
   text-transform: uppercase;
   border: 1px solid transparent;
 }
-.badge-violet { background: rgba(155, 138, 255, 0.12); color: var(--violet); border-color: rgba(155, 138, 255, 0.3); }
-.badge-gold { background: rgba(245, 200, 66, 0.12); color: var(--gold); border-color: rgba(245, 200, 66, 0.3); }
-.badge-teal { background: rgba(62, 207, 178, 0.12); color: var(--teal); border-color: rgba(62, 207, 178, 0.3); }
+.badge-violet { background: rgb(var(--violet-rgb) / var(--o-12)); color: var(--violet); border-color: rgb(var(--violet-rgb) / 0.3); }
+.badge-gold { background: rgb(var(--gold-rgb) / var(--o-12)); color: var(--gold); border-color: rgb(var(--gold-rgb) / 0.3); }
+.badge-teal { background: rgb(var(--teal-rgb) / var(--o-12)); color: var(--teal); border-color: rgb(var(--teal-rgb) / 0.3); }
+.badge-crimson { background: rgb(var(--crimson-rgb) / var(--o-12)); color: var(--crimson); border-color: rgb(var(--crimson-rgb) / 0.3); }
+.badge-azure { background: rgb(var(--azure-rgb) / var(--o-12)); color: var(--azure); border-color: rgb(var(--azure-rgb) / 0.3); }
+.badge-neutral { background: var(--surface-2); color: var(--ink-soft); border-color: var(--hairline); }
 .badge-solid-gold { background: var(--gold); color: var(--void); }
 .badge-solid-violet { background: var(--violet); color: var(--void); }
 .badge-outline { background: transparent; color: var(--ink-soft); border-color: var(--hairline-strong); }
+
+/* ── Avatar ──────────────────────────────────────────────── */
+.avatar {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  border-radius: var(--r-full);
+  background: var(--violet-deep);
+  color: var(--ink);
+  font-family: var(--font-body);
+  font-weight: 500;
+  user-select: none;
+  flex-shrink: 0;
+}
+.avatar img { width: 100%; height: 100%; object-fit: cover; }
+.avatar-sm { width: 32px; height: 32px; font-size: 12px; }
+.avatar-md { width: 40px; height: 40px; font-size: 14px; }
+.avatar-lg { width: 56px; height: 56px; font-size: 16px; }
+
+/* ── Spinner ─────────────────────────────────────────────── */
+.spinner {
+  display: inline-block;
+  border-radius: var(--r-full);
+  border: 2px solid currentColor;
+  border-top-color: transparent;
+  animation: pangu-spin 0.7s linear infinite;
+}
+.spinner-sm { width: 16px; height: 16px; border-width: 2px; }
+.spinner-md { width: 24px; height: 24px; border-width: 2px; }
+.spinner-lg { width: 32px; height: 32px; border-width: 3px; }
+@keyframes pangu-spin { to { transform: rotate(360deg); } }
+@media (prefers-reduced-motion: reduce) { .spinner { animation-duration: 1.4s; } }
+
+/* ── Kbd hint ────────────────────────────────────────────── */
+.kbd {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 22px;
+  min-width: 22px;
+  padding: 0 5px;
+  border-radius: var(--r-xs);
+  border: 1px solid var(--hairline);
+  background: var(--surface);
+  color: var(--subtle);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 600;
+}
 
 /* ─── Chip ───────────────────────────────────────────────── */
 .chip {
