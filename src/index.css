@@ -637,6 +637,25 @@ body {
   align-items: center;
 }
 
+/* AI suggestion preview box (edit pages). */
+.ai-suggestion {
+  margin-top: 8px;
+  padding: 12px 14px;
+  background: rgb(var(--violet-rgb) / var(--o-08));
+  border: 1px solid rgb(var(--violet-rgb) / var(--o-25));
+  border-radius: var(--r-md);
+}
+.ai-suggestion-label {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  color: var(--violet);
+  margin-bottom: 6px;
+  text-transform: uppercase;
+}
+.ai-suggestion-text { font-size: 14px; color: var(--ink-soft); white-space: pre-wrap; line-height: 1.6; margin: 0; }
+.ai-suggestion-actions { display: flex; gap: 8px; margin-top: 12px; }
+
 /* ── Buttons ────────────────────────────────────────────── */
 
 .btn,

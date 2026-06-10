@@ -1,8 +1,11 @@
-import { useId, useState } from 'react'
+import { useState } from 'react'
 import { useParams, useNavigate, useLocation as useRouterLocation } from 'react-router-dom'
 import { Breadcrumbs } from '@/components/ui/Breadcrumbs'
 import { toast } from 'sonner'
 import { Button } from '@/components/ui/Button'
+import { Input } from '@/components/ui/Input'
+import { Select } from '@/components/ui/Select'
+import { Textarea } from '@/components/ui/Textarea'
 import { ConfirmDialog } from '@/components/ui/ConfirmDialog'
 import { Spinner } from '@/components/ui/Spinner'
 import { useEntityEdit } from '@/hooks/useEntityEdit'
@@ -21,11 +24,6 @@ export default function LocationEditPage() {
   const { id } = useParams<{ id: string }>()
   const navigate = useNavigate()
   const location = useRouterLocation()
-
-  const descriptionId = useId()
-  const notesId = useId()
-  const statusId = useId()
-  const locationTypeId = useId()
 
   const { ask, loading: aiLoading } = useAI()
   const [aiPreview, setAiPreview] = useState<string | null>(null)
@@ -149,8 +147,8 @@ export default function LocationEditPage() {
   if (!locationData) {
     return (
       <div>
-        <p style={{ color: 'var(--muted)' }}>Locatie niet gevonden.</p>
-        <Button variant="ghost" onClick={() => navigate('/dashboard')} style={{ marginTop: 16 }}>
+        <p className="text-muted">Locatie niet gevonden.</p>
+        <Button variant="ghost" onClick={() => navigate('/dashboard')} className="mt-4">
           ← Terug naar dashboard
         </Button>
       </div>
@@ -169,117 +167,69 @@ export default function LocationEditPage() {
 
         {/* Page header */}
         <header style={{ marginBottom: 40 }}>
-          <p className="pangu-eyebrow">Locatie bewerken</p>
-          <h1 className="pangu-display-xl">{locationData.name}</h1>
-          <p style={{ marginTop: 8, fontSize: 14, color: 'var(--ink-soft)' }}>
+          <p className="pg-eyebrow">Locatie bewerken</p>
+          <h1 className="pg-display-xl">{locationData.name}</h1>
+          <p className="mt-2 text-sm text-ink-soft">
             Pas de details van deze locatie aan.
           </p>
         </header>
 
         {/* Form */}
-        <div className="pangu-surface" style={{ padding: 28 }}>
+        <div className="surface" style={{ padding: 28 }}>
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
 
-            <div>
-              <label className="pangu-label" htmlFor="location-name">Naam</label>
-              <input
-                id="location-name"
-                className="pangu-input"
-                value={form.name ?? ''}
-                onChange={(e) => set('name', e.target.value)}
-                placeholder="Naam van de locatie"
-              />
-            </div>
+            <Input
+              label="Naam"
+              value={form.name ?? ''}
+              onChange={(e) => set('name', e.target.value)}
+              placeholder="Naam van de locatie"
+            />
 
-            <div>
-              <label className="pangu-label" htmlFor="location-subtitle">Subtitel</label>
-              <input
-                id="location-subtitle"
-                className="pangu-input"
-                value={form.subtitle ?? ''}
-                onChange={(e) => set('subtitle', e.target.value || null)}
-                placeholder="Korte omschrijving of tagline"
-              />
-            </div>
+            <Input
+              label="Subtitel"
+              value={form.subtitle ?? ''}
+              onChange={(e) => set('subtitle', e.target.value || null)}
+              placeholder="Korte omschrijving of tagline"
+            />
 
-            <div>
-              <label className="pangu-label" htmlFor={locationTypeId}>Type locatie</label>
-              <input
-                id={locationTypeId}
-                className="pangu-input"
-                value={form.location_type ?? ''}
-                onChange={(e) => set('location_type', e.target.value || null)}
-                placeholder="Bijv. Stad, Kerker, Herberg, Woud..."
-              />
-            </div>
+            <Input
+              label="Type locatie"
+              value={form.location_type ?? ''}
+              onChange={(e) => set('location_type', e.target.value || null)}
+              placeholder="Bijv. Stad, Kerker, Herberg, Woud..."
+            />
 
-            <div>
-              <label className="pangu-label" htmlFor={statusId}>Status</label>
-              <select
-                id={statusId}
-                className="pangu-select"
-                value={form.status ?? 'draft'}
-                onChange={(e) => set('status', e.target.value as LocationStatus)}
-              >
-                {statusOptions.map((o) => (
-                  <option key={o.value} value={o.value}>{o.label}</option>
-                ))}
-              </select>
-            </div>
+            <Select
+              label="Status"
+              value={form.status ?? 'draft'}
+              onChange={(e) => set('status', e.target.value as LocationStatus)}
+              options={statusOptions}
+            />
 
             <div className="sm:col-span-2">
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 4 }}>
-                <label className="pangu-label" htmlFor={descriptionId} style={{ margin: 0 }}>Beschrijving</label>
-                <button
-                  type="button"
-                  onClick={handleGenerateDescription}
-                  disabled={aiLoading}
-                  aria-label="Genereer beschrijving met AI"
-                  style={{
-                    display: 'inline-flex', alignItems: 'center', gap: 5,
-                    background: 'none', border: '1px solid var(--hairline)',
-                    borderRadius: 6, cursor: aiLoading ? 'not-allowed' : 'pointer',
-                    color: aiLoading ? 'var(--subtle)' : 'var(--violet)',
-                    fontSize: 11, fontWeight: 600, letterSpacing: '0.06em',
-                    padding: '3px 8px', fontFamily: 'var(--font-body)',
-                    transition: 'color var(--t-fast), border-color var(--t-fast)',
-                    opacity: aiLoading ? 0.6 : 1,
-                  }}
-                  onMouseEnter={(e) => { if (!aiLoading) e.currentTarget.style.borderColor = 'var(--violet)' }}
-                  onMouseLeave={(e) => { e.currentTarget.style.borderColor = 'var(--hairline)' }}
-                >
-                  {aiLoading
-                    ? <><Spinner size="sm" /> Genereren...</>
-                    : <>✦ Genereer</>
-                  }
-                </button>
-              </div>
-              <textarea
-                id={descriptionId}
-                className="pangu-textarea"
+              <Textarea
+                label="Beschrijving"
                 value={form.description ?? ''}
                 onChange={(e) => { set('description', e.target.value || null); setAiPreview(null) }}
                 placeholder="Beschrijf de locatie, haar sfeer en bijzonderheden..."
                 rows={4}
+                labelAction={
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={handleGenerateDescription}
+                    loading={aiLoading}
+                    aria-label="Genereer beschrijving met AI"
+                  >
+                    ✦ Genereer
+                  </Button>
+                }
               />
               {aiPreview !== null && (
-                <div
-                  role="status"
-                  aria-live="polite"
-                  style={{
-                    marginTop: 8, padding: '12px 14px',
-                    background: 'color-mix(in srgb, var(--violet) 8%, var(--surface-2))',
-                    border: '1px solid color-mix(in srgb, var(--violet) 25%, transparent)',
-                    borderRadius: 8,
-                  }}
-                >
-                  <p style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.1em', color: 'var(--violet)', marginBottom: 6, textTransform: 'uppercase' }}>
-                    AI-suggestie
-                  </p>
-                  <p style={{ fontSize: 14, color: 'var(--ink-soft)', whiteSpace: 'pre-wrap', lineHeight: 1.6, margin: 0 }}>
-                    {aiPreview}
-                  </p>
-                  <div style={{ display: 'flex', gap: 8, marginTop: 12 }}>
+                <div role="status" aria-live="polite" className="ai-suggestion">
+                  <p className="ai-suggestion-label">AI-suggestie</p>
+                  <p className="ai-suggestion-text">{aiPreview}</p>
+                  <div className="ai-suggestion-actions">
                     <Button variant="secondary" size="sm" onClick={handleAcceptGenerated}>
                       Overnemen
                     </Button>
@@ -291,17 +241,14 @@ export default function LocationEditPage() {
               )}
             </div>
 
-            <div className="sm:col-span-2">
-              <label className="pangu-label" htmlFor={notesId}>DM notities</label>
-              <textarea
-                id={notesId}
-                className="pangu-textarea"
-                value={form.notes ?? ''}
-                onChange={(e) => set('notes', e.target.value || null)}
-                placeholder="Aantekeningen voor de DM: geheimen, NPCs, verborgen items..."
-                rows={8}
-              />
-            </div>
+            <Textarea
+              fieldClassName="sm:col-span-2"
+              label="DM notities"
+              value={form.notes ?? ''}
+              onChange={(e) => set('notes', e.target.value || null)}
+              placeholder="Aantekeningen voor de DM: geheimen, NPCs, verborgen items..."
+              rows={8}
+            />
 
           </div>
 
@@ -326,10 +273,10 @@ export default function LocationEditPage() {
 
         {/* Danger zone */}
         <div
-          className="pangu-surface"
+          className="surface"
           style={{ marginTop: 24, padding: 28, borderColor: 'rgb(var(--crimson-rgb) / 0.18)' }}
         >
-          <p className="pangu-section-title" style={{ marginBottom: 4 }}>Gevarenzone</p>
+          <p className="pg-section-title" style={{ marginBottom: 4 }}>Gevarenzone</p>
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 16, paddingTop: 16, borderTop: '1px solid var(--hairline)' }}>
             <div>
               <p style={{ fontSize: 14, color: 'var(--ink-soft)', margin: 0 }}>Locatie verwijderen</p>
@@ -356,7 +303,7 @@ export default function LocationEditPage() {
         confirmLabel="Verwijder locatie"
         loading={deleteLocation.isPending}
       >
-        Weet je zeker dat je <strong style={{ color: 'var(--ink)' }}>{locationData.name}</strong> wilt verwijderen? Dit kan niet ongedaan worden gemaakt.
+        Weet je zeker dat je <strong className="text-ink">{locationData.name}</strong> wilt verwijderen? Dit kan niet ongedaan worden gemaakt.
       </ConfirmDialog>
 
       {/* Discard dialog */}
