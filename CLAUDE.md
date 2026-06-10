@@ -63,9 +63,13 @@ src/
 │   │   ├── Input.tsx
 │   │   ├── Modal.tsx
 │   │   ├── NotificationCenter.tsx # Notificatie-dropdown met realtime updates, mark-read, delete
+│   │   ├── PickProgress.tsx # Voortgangspips "x van n gekozen" (skills, spreuken)
+│   │   ├── SelectableCardGrid.tsx # "Kies één/meer uit grid"-kaarten (radio + multi, pijltjes)
 │   │   ├── Skeleton.tsx     # Basis skeleton-loader
 │   │   ├── Spinner.tsx
-│   │   └── StatusBadge.tsx  # Badge met status-kleur via statusMaps
+│   │   ├── StatusBadge.tsx  # Badge met status-kleur via statusMaps
+│   │   ├── WizardNavBar.tsx # Terug/Doorgaan-balk met validatie-gate + blokkeer-melding
+│   │   └── WizardShell.tsx  # Generiek meerstaps-frame: rail (desktop) / voortgangsheader (mobiel) + aside
 │   ├── admin/               # Admin feature components
 │   │   ├── CreateUserModal.tsx
 │   │   ├── DeleteUserModal.tsx
@@ -78,8 +82,12 @@ src/
 │   │   ├── CampaignCard.tsx  # CampaignCard + ForgeCampaignCard
 │   │   └── InvitePanel.tsx   # Genereer/revoke/kopieer uitnodigingscode; ledenlijst
 │   ├── character/
+│   │   ├── AbilityScoreEditor.tsx # Point buy / standard array / handmatig + rasbonus-kolom
+│   │   ├── AlignmentGrid.tsx      # 3×3 uitlijningsraster (radiogroup, pijltjesnavigatie)
 │   │   ├── CharacterCard.tsx
-│   │   └── DmCharacterPanel.tsx   # DM-only karakter-preview (portret, stats, condities)
+│   │   ├── CharacterWizard.tsx    # 7-staps begeleide karakteropbouw + overzicht (orkestratie)
+│   │   ├── DmCharacterPanel.tsx   # DM-only karakter-preview (portret, stats, condities)
+│   │   └── wizard/                # Stap-componenten: StepBasics t/m StepReview + WizardPreviewPanel
 │   ├── encounter/
 │   │   └── EncounterCard.tsx
 │   ├── item/
@@ -103,8 +111,11 @@ src/
 │       ├── WorldCard.tsx      # WorldCard + ForgeWorldCard
 │       ├── WorldDetailDivider.tsx
 │       └── WorldDetailHeader.tsx
+├── data/
+│   └── dnd5e/               # Statische SRD 5.1-dataset (CC-BY-4.0): races, classes, backgrounds, abilityMethods
 ├── hooks/                   # Custom React hooks
 │   ├── useAI.ts             # AI chat integration (calls ai-chat Edge Function)
+│   ├── useCharacterWizard.ts # Wizard-draft state + per-user localStorage resume + stapvalidatie
 │   ├── useEditGuard.ts      # Voorkomt navigeren weg bij unsaved changes
 │   ├── useEntityEdit.ts     # Generieke edit form state (dirty, committed, delete)
 │   ├── useImagePositioning.ts # Drag-to-reposition voor header images
@@ -125,7 +136,7 @@ src/
 │       ├── useCampaignSessions.ts
 │       ├── useCharacterItems.ts
 │       ├── useCharacterSpells.ts
-│       ├── useCharacters.ts         # + useUnassignedCharacters export
+│       ├── useCharacters.ts         # + useUnassignedCharacters, useForgeCharacterFromWizard exports
 │       ├── useEncounterMonsters.ts  # Encounter monsters + bestiary join; EncounterMonsterFull type
 │       ├── useEntityLinks.ts
 │       ├── useFaction.ts
@@ -160,6 +171,7 @@ src/
 │   ├── CharacterDetailPage.tsx
 │   ├── CharacterEditPage.tsx
 │   ├── CharactersPage.tsx
+│   ├── CharacterWizardPage.tsx # /characters/new — wizard-route met "wizard overslaan"-fallback
 │   ├── DashboardPage.tsx
 │   ├── EncounterDetailPage.tsx
 │   ├── EncounterEditPage.tsx
@@ -217,7 +229,9 @@ src/
 │   ├── bestiary.types.ts     # BestiaryAction + uitgebreid stat block (actions, legendary, etc.)
 │   ├── campaign.types.ts
 │   ├── campaign_member.types.ts # CampaignMember + CampaignMemberWithProfile
-│   ├── character.types.ts
+│   ├── character.types.ts    # + background kolom (049)
+│   ├── character_wizard.types.ts # WizardDraft, WizardStepId, AbilityMethod
+│   ├── srd5e.types.ts        # SrdRace, SrdClass, SrdSubclass, SrdBackground, CasterType
 │   ├── encounter.types.ts
 │   ├── faction.types.ts
 │   ├── item.types.ts         # requires_attunement + image_url toegevoegd
@@ -234,6 +248,7 @@ src/
 │   └── world.types.ts
 └── utils/
     ├── apiError.ts           # getApiError() voor serverless responses
+    ├── characterWizard.ts    # Wizard-draft helpers: stapvalidatie, level 1-derivatie, buildCharacterInsert
     ├── cn.ts                 # clsx + tailwind-merge
     ├── equipmentUtils.ts     # Equipment slots: labels, icons, ALLOWED_SLOTS_BY_TYPE, calculateEffectiveStats, getEquippedItemsBySlot, formatItemBonuses
     ├── inviteCode.ts         # generateInviteCode() — leesbare codes als WOLF-4532
@@ -651,6 +666,7 @@ Alle tabellen hebben `committed boolean DEFAULT false` — bestaande rijen zijn 
 | 046 | `046_bestiary_actions.sql` | Gestructureerde gevechtsdata op `bestiaries`: `special_abilities`, `actions`, `bonus_actions`, `reactions`, `legendary_desc`, `legendary_actions`, `lair_actions` (jsonb arrays van `{ name, desc }`) |
 | 047 | `047_bestiary_combat_stats.sql` | Volledig D&D stat block op `bestiaries`: `alignment`, `hit_dice`, `proficiency_bonus`, `senses`, `languages`, `saving_throws`, `skills`, `damage_immunities/resistances/vulnerabilities`, `condition_immunities`, `speed_details`; `requires_attunement boolean` op `items` |
 | 048 | `048_entity_image_url.sql` | `image_url text` op `bestiaries` + `items`; `entity-images` public storage bucket aanmaken met RLS policies |
+| 049 | `049_character_background.sql` | `background text` op `characters` (D&D-achtergrond uit de karakter-wizard) |
 
 ---
 
@@ -727,6 +743,7 @@ Routes zijn gedefinieerd in `src/routes/index.tsx`. Lazy-loading voor alle pagin
 | `/encounters/:id/edit` | `EncounterEditPage` | `requireAuth` |
 | `/encounters/:id/run` | `EncounterRunPage` | `requireAuth` |
 | `/characters` | `CharactersPage` | `requireAuth` |
+| `/characters/new` | `CharacterWizardPage` | `requireAuth` |
 | `/characters/:id` | `CharacterDetailPage` | `requireAuth` |
 | `/characters/:id/edit` | `CharacterEditPage` | `requireAuth` |
 | `/items/:id/edit` | `ItemEditPage` | `requireAuth` |
@@ -1059,6 +1076,19 @@ npm run test         # Vitest
 - [x] D&D 5.5e — feats & weapon masteries als TagInput; uiterlijk (leeftijd/lengte/gewicht); alternatieve snelheden + duisterzicht; platina + elektrum valuta
 - [x] D&D 5.5e — condities picker (17 condities) in Stats-tab van detailpagina
 - [x] Karakterportret — `portrait_url` + `portrait_position` op characters (`033`/`034_character_portrait*.sql`); drag-to-reposition via `useImagePositioning`
+
+### Karakter-wizard (begeleide karakteropbouw)
+> Plan: `docs/design-system/04-character-wizard-plan.md`. Route `/characters/new`; de `ForgeCharacterCard` linkt hierheen, met "wizard overslaan" als fallback naar het oude forge-patroon.
+- [x] Migratie `049_character_background.sql` — `background text` op characters; gewired in types, `useSaveCharacter`, lore-editsectie en detail-loretab
+- [x] Statische SRD 5.1-dataset `src/data/dnd5e/` (CC-BY-4.0) — 10 rassen, 12 klassen (subklasses, skill-pools, saving throws, caster-info), 8 achtergronden, point-buy/standard-array regels; skill-namen gevalideerd tegen `D5E_SKILLS` (NL)
+- [x] `src/utils/characterWizard.ts` — `WizardDraft` helpers: per-stap validatie, level 1-derivatie (HP/AC/initiatief/spell slots, unarmored defense voor barbarian/monk), `buildCharacterInsert` (committed insert, skills uit klasse ∪ ras ∪ achtergrond)
+- [x] `useCharacterWizard` hook — draft + stapindex met per-user localStorage-resume (`pangu-wizard:<userId>`); `selectRace`/`selectClass` resetten afhankelijke keuzes; stepper alleen tot de eerste invalide stap
+- [x] Generieke primitives: `WizardShell` (rail/voortgangsheader/aside), `WizardNavBar`, `SelectableCardGrid` (radio + multi, roving tabindex), `PickProgress`; karakter-primitives `AbilityScoreEditor` + `AlignmentGrid` — allemaal getoond op `/design-system`
+- [x] 8 stappen: Basis (naam/subtitel/kroniek/portret) → Ras → Klasse (+optionele subklasse) → Eigenschappen (point buy 27 / standard array / handmatig + vrije half-elf +1's) → Vaardigheden (klasse-pool, ras/achtergrond-overlap geblokkeerd) → Achtergrond (+ uitlijning + roleplay-velden met optionele AI-suggesties via `useAI`) → Spreuken → Overzicht ("Smeed karakter")
+- [x] Spreuken-stap hergebruikt de spreukenbibliotheek: filter op klasse + level 0/1, inline SRD-import (`CompendiumBrowser`), "later kiezen"-uitstel; gekozen spreuken worden `character_spells` (prepared)
+- [x] `useForgeCharacterFromWizard` — geen DB-rij tot afronding; één committed insert + bulk spreuk-koppeling + cache-invalidatie
+- [x] A11Y: axe-scan 0 critical/serious op alle 8 stappen; focus naar stap-titel bij stapwissel; `aria-current="step"`; geen horizontale scroll op 360/768px
+- [x] Tests: `dnd5e-data.test.ts` (data-integriteit), `characterWizard.test.ts` (validatie + derivatie + insert), `useCharacterWizard.test.ts` (persistentie + gates)
 
 ### Items / Schatkist
 - [x] Items tabel + RLS (`021_items.sql`) — campaign-scoped, character_id nullable (DM-pool vs toegewezen)
