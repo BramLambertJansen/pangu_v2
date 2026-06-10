@@ -1,5 +1,5 @@
 import { useRef } from 'react'
-import type { CSSProperties, MouseEvent } from 'react'
+import type { CSSProperties, MouseEvent, TouchEvent } from 'react'
 import { CompassRose } from '@/components/world/CompassRose'
 
 export interface AtlasMarker {
@@ -60,7 +60,7 @@ export function ConstellationAtlas({
 }: ConstellationAtlasProps) {
   const containerRef = useRef<HTMLDivElement>(null)
 
-  function handleContainerClick(e: { clientX: number; clientY: number; target: EventTarget | null }) {
+  function handleContainerClick(e: MouseEvent<HTMLDivElement>) {
     if (!pinMode || !onPlacePin) return
     if ((e.target as HTMLElement).closest?.('.atlas-pin')) return
     const rect = containerRef.current!.getBoundingClientRect()
@@ -72,7 +72,7 @@ export function ConstellationAtlas({
     )
   }
 
-  function handleContainerTouch(e: { changedTouches: TouchList; target: EventTarget | null }) {
+  function handleContainerTouch(e: TouchEvent<HTMLDivElement>) {
     if (!pinMode || !onPlacePin) return
     if ((e.target as HTMLElement).closest?.('.atlas-pin')) return
     const touch = e.changedTouches[0]
@@ -102,14 +102,13 @@ export function ConstellationAtlas({
           alt="Kaartafbeelding"
           className="atlas-map-img"
           draggable={false}
-          style={{ height: '100%' }}
         />
       ) : (
         <div className="atlas-empty">
           <svg aria-hidden="true" width={40} height={40} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5}>
             <path d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7" />
           </svg>
-          <p style={{ fontSize: 13, maxWidth: 220 }}>
+          <p className="atlas-empty-text">
             {pinMode
               ? 'Nog geen kaartafbeelding. Upload er een via Kroniek bewerken.'
               : 'Geen kaartafbeelding — upload er een via kroniek-instellingen.'}

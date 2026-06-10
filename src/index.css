@@ -4256,6 +4256,7 @@ body {
   text-align: center;
   padding: 24px;
 }
+.atlas-empty-text { font-size: 13px; max-width: 220px; }
 
 /* ── Split aside layout ──────────────────────────────────── */
 .atlas-layout {
@@ -4316,7 +4317,34 @@ body {
   width: 8px; height: 8px;
   border-radius: 50%;
   flex-shrink: 0;
+  background: var(--dot, var(--hairline-strong));
 }
+.atlas-loc-row-name { flex: 1; font-size: 13px; font-weight: 500; }
+.atlas-loc-row-type {
+  font-size: 10px;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+.atlas-loc-row-flag { font-size: 10px; color: var(--muted); }
+
+/* ── Aside list / detail typography ──────────────────────── */
+.atlas-aside-hint { font-size: 12px; color: var(--muted); margin-bottom: 14px; }
+.atlas-aside-empty { font-size: 12px; color: var(--muted); font-style: italic; }
+.atlas-aside-loading { display: flex; justify-content: center; padding: 24px; }
+.atlas-aside-list { display: flex; flex-direction: column; gap: 4px; }
+.atlas-aside-back { margin-bottom: 12px; }
+.atlas-aside-meta { display: flex; gap: 6px; flex-wrap: wrap; align-items: center; margin-bottom: 10px; }
+.atlas-aside-title {
+  font-family: var(--font-display);
+  font-size: 20px;
+  text-transform: uppercase;
+  line-height: 1.1;
+  margin: 0 0 8px;
+}
+.atlas-aside-sub { font-size: 13px; color: var(--gold); font-style: italic; margin-bottom: 8px; }
+.atlas-aside-desc { font-size: 13px; color: var(--ink-soft); line-height: 1.6; margin-bottom: 12px; }
+.atlas-aside-foot .btn { width: 100%; justify-content: center; }
 
 /* ── Detail card in aside ────────────────────────────────── */
 .atlas-stat-grid {

@@ -1,7 +1,9 @@
 import { useState } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
+import type { CSSProperties } from 'react'
 import { Spinner } from '@/components/ui/Spinner'
 import { Button } from '@/components/ui/Button'
+import { Chip } from '@/components/ui/Chip'
 import { Breadcrumbs } from '@/components/ui/Breadcrumbs'
 import { OrnateDivider } from '@/components/ui/OrnateDivider'
 import { EmptyState } from '@/components/ui/EmptyState'
@@ -60,8 +62,8 @@ export default function AtlasPage() {
       {/* Page header */}
       <header style={{ marginBottom: 28, display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 16, flexWrap: 'wrap' }}>
         <div>
-          <p className="pangu-eyebrow">Kroniek — {campaign.name}</p>
-          <h1 className="pangu-display-xl">Atlas</h1>
+          <p className="pg-eyebrow">Kroniek — {campaign.name}</p>
+          <h1 className="pg-display-xl">Atlas</h1>
           <p style={{ marginTop: 8, fontSize: 14, color: 'var(--ink-soft)' }}>
             {markers.length > 0
               ? `${markers.length} van de ${(locations ?? []).length} locatie${(locations ?? []).length !== 1 ? 's' : ''} op de kaart geplaatst.`
@@ -97,66 +99,60 @@ export default function AtlasPage() {
           <div className="atlas-aside-scroll">
             {selected ? (
               <div>
-                <button
-                  style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 12, color: 'var(--muted)', background: 'none', border: 'none', cursor: 'pointer', padding: '0 0 12px', fontFamily: 'var(--font-body)' }}
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="atlas-aside-back"
                   onClick={() => setSelectedId(null)}
                 >
                   ← Alle locaties
-                </button>
+                </Button>
 
-                <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', marginBottom: 10 }}>
-                  {selected.location_type && (
-                    <span className="badge badge-violet" style={{ fontSize: 11 }}>{selected.location_type}</span>
-                  )}
-                  {selected.region && (
-                    <span style={{ fontSize: 12, color: 'var(--muted)', alignSelf: 'center' }}>{selected.region}</span>
-                  )}
-                </div>
-
-                <h2 style={{ fontFamily: 'var(--font-display)', fontSize: 20, textTransform: 'uppercase', lineHeight: 1.1, margin: '0 0 8px' }}>
-                  {selected.name}
-                </h2>
-
-                {selected.subtitle && (
-                  <p style={{ fontSize: 13, color: 'var(--gold)', fontStyle: 'italic', marginBottom: 8 }}>{selected.subtitle}</p>
+                {(selected.location_type || selected.region) && (
+                  <div className="atlas-aside-meta">
+                    {selected.location_type && <Chip tone="violet">{selected.location_type}</Chip>}
+                    {selected.region && <Chip>{selected.region}</Chip>}
+                  </div>
                 )}
 
+                <h2 className="atlas-aside-title">{selected.name}</h2>
+
+                {selected.subtitle && <p className="atlas-aside-sub">{selected.subtitle}</p>}
+
                 {selected.description && (
-                  <p style={{ fontSize: 13, color: 'var(--ink-soft)', lineHeight: 1.6, marginBottom: 12 }}>
+                  <p className="atlas-aside-desc">
                     {selected.description.length > 200
                       ? selected.description.slice(0, 200) + '…'
                       : selected.description}
                   </p>
                 )}
 
-                {(selected.climate) && (
+                {selected.climate && (
                   <div className="atlas-stat-grid">
-                    {selected.climate && (
-                      <div className="atlas-stat">
-                        <div className="atlas-stat-label">Klimaat</div>
-                        <div className="atlas-stat-val">{selected.climate}</div>
-                      </div>
-                    )}
+                    <div className="atlas-stat">
+                      <div className="atlas-stat-label">Klimaat</div>
+                      <div className="atlas-stat-val">{selected.climate}</div>
+                    </div>
                   </div>
                 )}
               </div>
             ) : (
               <div>
-                <p className="pangu-eyebrow" style={{ marginBottom: 8 }}>
+                <p className="pg-eyebrow" style={{ marginBottom: 8 }}>
                   {(locations ?? []).length} locatie{(locations ?? []).length !== 1 ? 's' : ''}
                 </p>
-                <p style={{ fontSize: 12, color: 'var(--muted)', marginBottom: 14 }}>
+                <p className="atlas-aside-hint">
                   {markers.length > 0 ? 'Klik op een pin of kies hieronder.' : 'Nog geen pins op de kaart — bewerk een locatie om te plaatsen.'}
                 </p>
 
                 {locationsLoading ? (
-                  <div style={{ display: 'flex', justifyContent: 'center', padding: 24 }}>
+                  <div className="atlas-aside-loading">
                     <Spinner size="sm" />
                   </div>
                 ) : (locations ?? []).length === 0 ? (
-                  <p style={{ fontSize: 12, color: 'var(--muted)', fontStyle: 'italic' }}>Nog geen locaties.</p>
+                  <p className="atlas-aside-empty">Nog geen locaties.</p>
                 ) : (
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+                  <div className="atlas-aside-list">
                     {(locations ?? []).map((loc) => (
                       <button
                         key={loc.id}
@@ -166,17 +162,15 @@ export default function AtlasPage() {
                       >
                         <span
                           className="atlas-loc-row-dot"
-                          style={{ background: loc.map_x != null ? locationStatusColor[loc.status] ?? 'var(--violet)' : 'var(--hairline-strong)' }}
+                          style={{ '--dot': loc.map_x != null ? locationStatusColor[loc.status] ?? 'var(--violet)' : 'var(--hairline-strong)' } as CSSProperties}
                           aria-hidden="true"
                         />
-                        <span style={{ flex: 1, fontSize: 13, fontWeight: 500 }}>{loc.name}</span>
+                        <span className="atlas-loc-row-name">{loc.name}</span>
                         {loc.location_type && (
-                          <span style={{ fontSize: 10, color: 'var(--muted)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>
-                            {loc.location_type}
-                          </span>
+                          <span className="atlas-loc-row-type">{loc.location_type}</span>
                         )}
                         {loc.map_x == null && (
-                          <span title="Niet op kaart" style={{ fontSize: 10, color: 'var(--muted)' }}>–</span>
+                          <span className="atlas-loc-row-flag" title="Niet op kaart">–</span>
                         )}
                       </button>
                     ))}
@@ -190,7 +184,6 @@ export default function AtlasPage() {
             <div className="atlas-aside-foot">
               <Button
                 variant="primary"
-                style={{ width: '100%', justifyContent: 'center' }}
                 onClick={() => navigate(`/locations/${selected.id}`)}
               >
                 Open locatiepagina →

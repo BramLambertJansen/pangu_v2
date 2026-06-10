@@ -53,8 +53,8 @@ export default function LocationsPage() {
       {/* Page header */}
       <header style={{ marginBottom: 32, display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 16, flexWrap: 'wrap' }}>
         <div>
-          <p className="pangu-eyebrow">Kroniek — {campaign.name}</p>
-          <h1 className="pangu-display-xl">Locaties</h1>
+          <p className="pg-eyebrow">Kroniek — {campaign.name}</p>
+          <h1 className="pg-display-xl">Locaties</h1>
           <p style={{ marginTop: 8, fontSize: 14, color: 'var(--ink-soft)' }}>
             Beheer de locaties van deze kroniek.
           </p>

@@ -332,10 +332,10 @@ export default function CampaignEditPage() {
         </div>
 
         {/* Map image section */}
-        <div className="pangu-surface" style={{ padding: 28, marginTop: 16 }}>
+        <div className="surface" style={{ padding: 28, marginTop: 16 }}>
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16, gap: 12, flexWrap: 'wrap' }}>
             <div>
-              <p className="pangu-section-title" style={{ marginBottom: 2 }}>Kaartafbeelding</p>
+              <p className="pg-section-title" style={{ marginBottom: 2 }}>Kaartafbeelding</p>
               <p style={{ fontSize: 13, color: 'var(--muted)', margin: 0 }}>
                 Upload een kaartafbeelding. Je kunt er daarna locatie-pins op plaatsen via de Atlas.
               </p>
