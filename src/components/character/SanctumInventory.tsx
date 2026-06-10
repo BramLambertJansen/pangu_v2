@@ -1,5 +1,6 @@
+import type { CSSProperties } from 'react'
 import { EQUIPMENT_SLOT_LABELS, EQUIPMENT_SLOT_ICONS } from '@/utils/equipmentUtils'
-import { itemRarityColor } from '@/lib/statusMaps'
+import { itemRarityRgb } from '@/lib/statusMaps'
 import type { EquipmentSlot, Item } from '@/types/item.types'
 
 export interface SanctumInventoryProps {
@@ -12,21 +13,21 @@ export interface SanctumInventoryProps {
 }
 
 const SLOT_LAYOUT: { slot: EquipmentSlot; column: 'left' | 'center' | 'right' }[] = [
-  { slot: 'main_hand', column: 'left'   },
-  { slot: 'gloves',    column: 'left'   },
-  { slot: 'ring1',     column: 'left'   },
-  { slot: 'head',      column: 'center' },
-  { slot: 'neck',      column: 'center' },
-  { slot: 'chest',     column: 'center' },
-  { slot: 'boots',     column: 'center' },
-  { slot: 'off_hand',  column: 'right'  },
-  { slot: 'cloak',     column: 'right'  },
-  { slot: 'ring2',     column: 'right'  },
+  { slot: 'main_hand', column: 'left' },
+  { slot: 'gloves', column: 'left' },
+  { slot: 'ring1', column: 'left' },
+  { slot: 'head', column: 'center' },
+  { slot: 'neck', column: 'center' },
+  { slot: 'chest', column: 'center' },
+  { slot: 'boots', column: 'center' },
+  { slot: 'off_hand', column: 'right' },
+  { slot: 'cloak', column: 'right' },
+  { slot: 'ring2', column: 'right' },
 ]
 
-function rarityGlow(rarity: Item['rarity']): string {
-  const color = itemRarityColor[rarity]
-  return `0 0 10px ${color}55, 0 0 4px ${color}33`
+// Rarity colour is passed to CSS as a channel token; it is meaning-driven data.
+function rarityVar(rarity: Item['rarity']): CSSProperties {
+  return { '--rarity-rgb': itemRarityRgb[rarity] } as CSSProperties
 }
 
 function SlotCell({
@@ -39,33 +40,18 @@ function SlotCell({
   onUnequip?: (slot: EquipmentSlot) => void
 }) {
   const label = EQUIPMENT_SLOT_LABELS[slot]
-  const icon  = EQUIPMENT_SLOT_ICONS[slot]
+  const icon = EQUIPMENT_SLOT_ICONS[slot]
+  const clickable = !!item && !!onUnequip
 
   return (
     <div
+      className="sanctum-slot"
+      data-equipped={!!item}
+      data-rare={!!item && item.rarity !== 'common'}
+      style={item ? rarityVar(item.rarity) : undefined}
       title={item ? `${item.name} (${label})` : label}
-      style={{
-        position: 'relative',
-        display: 'flex',
-        flexDirection: 'column',
-        alignItems: 'center',
-        gap: 4,
-        padding: '10px 8px',
-        borderRadius: 10,
-        border: item
-          ? `1px solid ${itemRarityColor[item.rarity]}66`
-          : '1px dashed var(--hairline-strong)',
-        background: item
-          ? `rgb(var(--gold-rgb) / 0.06)`
-          : 'var(--surface)',
-        boxShadow: item && item.rarity !== 'common' ? rarityGlow(item.rarity) : 'none',
-        minHeight: 72,
-        transition: 'all var(--t-base)',
-        cursor: item && onUnequip ? 'pointer' : 'default',
-        minWidth: 72,
-      }}
-      role={item && onUnequip ? 'button' : undefined}
-      tabIndex={item && onUnequip ? 0 : undefined}
+      role={clickable ? 'button' : undefined}
+      tabIndex={clickable ? 0 : undefined}
       aria-label={
         item
           ? `${item.name} uitgerust in ${label}${onUnequip ? ' — klik om af te leggen' : ''}`
@@ -79,198 +65,79 @@ function SlotCell({
         }
       }}
     >
-      <span aria-hidden="true" style={{ fontSize: 16, opacity: item ? 1 : 0.35 }}>
+      <span aria-hidden="true" className="sanctum-slot-icon" data-empty={!item}>
         {icon}
       </span>
       {item ? (
         <>
-          <span
-            style={{
-              fontSize: 9,
-              fontWeight: 700,
-              letterSpacing: '0.06em',
-              textTransform: 'uppercase',
-              color: itemRarityColor[item.rarity],
-              textAlign: 'center',
-              lineHeight: 1.2,
-              maxWidth: 64,
-              overflow: 'hidden',
-              textOverflow: 'ellipsis',
-              whiteSpace: 'nowrap',
-            }}
-          >
-            {item.name}
-          </span>
+          <span className="sanctum-slot-name">{item.name}</span>
           {item.is_magical && (
-            <span aria-hidden="true" style={{ fontSize: 8, color: 'var(--gold)', position: 'absolute', top: 4, right: 5 }}>✦</span>
+            <span aria-hidden="true" className="sanctum-slot-magic">
+              ✦
+            </span>
           )}
         </>
       ) : (
-        <span
-          style={{
-            fontSize: 9,
-            color: 'var(--subtle)',
-            textAlign: 'center',
-            lineHeight: 1.2,
-            letterSpacing: '0.04em',
-          }}
-        >
-          {label}
-        </span>
+        <span className="sanctum-slot-empty">{label}</span>
       )}
     </div>
   )
 }
 
 /** Paper-doll equipment silhouette with 10 slots + backpack grid. */
-export function SanctumInventory({
-  items = [],
-  onEquip: _onEquip,
-  onUnequip,
-  className,
-}: SanctumInventoryProps) {
+export function SanctumInventory({ items = [], onUnequip, className }: SanctumInventoryProps) {
   const equippedMap: Partial<Record<EquipmentSlot, Item>> = {}
   for (const item of items) {
     if (item.equipped_slot) equippedMap[item.equipped_slot] = item
   }
 
   const backpackItems = items.filter((i) => !i.equipped_slot)
-
-  const leftSlots   = SLOT_LAYOUT.filter((s) => s.column === 'left')
-  const centerSlots = SLOT_LAYOUT.filter((s) => s.column === 'center')
-  const rightSlots  = SLOT_LAYOUT.filter((s) => s.column === 'right')
+  const columns: Array<['left' | 'center' | 'right', string]> = [
+    ['left', 'sanctum-col'],
+    ['center', 'sanctum-col sanctum-col--center'],
+    ['right', 'sanctum-col'],
+  ]
 
   return (
     <div className={className}>
-      {/* Paper-doll layout: 3 columns */}
-      <div
-        style={{
-          display: 'grid',
-          gridTemplateColumns: '1fr auto 1fr',
-          gap: 8,
-          alignItems: 'start',
-        }}
-        aria-label="Uitrustingsslots"
-      >
-        {/* Left column */}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-          {leftSlots.map(({ slot }) => (
-            <SlotCell
-              key={slot}
-              slot={slot}
-              item={equippedMap[slot]}
-              onUnequip={onUnequip}
-            />
-          ))}
-        </div>
-
-        {/* Center column */}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 8, minWidth: 84 }}>
-          {centerSlots.map(({ slot }) => (
-            <SlotCell
-              key={slot}
-              slot={slot}
-              item={equippedMap[slot]}
-              onUnequip={onUnequip}
-            />
-          ))}
-        </div>
-
-        {/* Right column */}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-          {rightSlots.map(({ slot }) => (
-            <SlotCell
-              key={slot}
-              slot={slot}
-              item={equippedMap[slot]}
-              onUnequip={onUnequip}
-            />
-          ))}
-        </div>
+      <div className="sanctum-doll" aria-label="Uitrustingsslots">
+        {columns.map(([column, cls]) => (
+          <div key={column} className={cls}>
+            {SLOT_LAYOUT.filter((s) => s.column === column).map(({ slot }) => (
+              <SlotCell key={slot} slot={slot} item={equippedMap[slot]} onUnequip={onUnequip} />
+            ))}
+          </div>
+        ))}
       </div>
 
-      {/* Backpack grid */}
       {backpackItems.length > 0 && (
-        <div style={{ marginTop: 20 }}>
-          <p
-            style={{
-              fontFamily: 'var(--font-body)',
-              fontSize: 10,
-              fontWeight: 700,
-              letterSpacing: '0.18em',
-              textTransform: 'uppercase',
-              color: 'var(--muted)',
-              margin: '0 0 10px',
-            }}
-          >
-            Rugzak ({backpackItems.length})
-          </p>
-          <div
-            style={{
-              display: 'grid',
-              gridTemplateColumns: 'repeat(auto-fill, minmax(72px, 1fr))',
-              gap: 6,
-            }}
-            aria-label="Rugzakitems"
-          >
-            {backpackItems.map((item) => (
-              <div
-                key={item.id}
-                title={item.name}
-                style={{
-                  display: 'flex',
-                  flexDirection: 'column',
-                  alignItems: 'center',
-                  gap: 3,
-                  padding: '8px 6px',
-                  borderRadius: 8,
-                  border: `1px solid ${item.rarity !== 'common' ? `${itemRarityColor[item.rarity]}44` : 'var(--hairline)'}`,
-                  background: 'var(--surface)',
-                  minHeight: 56,
-                }}
-                aria-label={`${item.name}${item.quantity > 1 ? ` ×${item.quantity}` : ''}`}
-              >
-                <span aria-hidden="true" style={{ fontSize: 14 }}>
-                  {item.is_magical ? '✦' : '⬡'}
-                </span>
-                <span
-                  style={{
-                    fontSize: 9,
-                    fontWeight: 600,
-                    color: item.rarity !== 'common' ? itemRarityColor[item.rarity] : 'var(--ink-soft)',
-                    textAlign: 'center',
-                    lineHeight: 1.2,
-                    maxWidth: 62,
-                    overflow: 'hidden',
-                    textOverflow: 'ellipsis',
-                    whiteSpace: 'nowrap',
-                    display: 'block',
-                  }}
+        <div className="sanctum-backpack">
+          <p className="sanctum-backpack-title">Rugzak ({backpackItems.length})</p>
+          <div className="sanctum-backpack-grid" aria-label="Rugzakitems">
+            {backpackItems.map((item) => {
+              const rare = item.rarity !== 'common'
+              return (
+                <div
+                  key={item.id}
+                  className="sanctum-backpack-item"
+                  data-rare={rare}
+                  style={rare ? rarityVar(item.rarity) : undefined}
+                  title={item.name}
+                  aria-label={`${item.name}${item.quantity > 1 ? ` ×${item.quantity}` : ''}`}
                 >
-                  {item.name}
-                </span>
-                {item.quantity > 1 && (
-                  <span style={{ fontSize: 9, color: 'var(--muted)', fontWeight: 700 }}>×{item.quantity}</span>
-                )}
-              </div>
-            ))}
+                  <span aria-hidden="true" className="sanctum-backpack-icon">
+                    {item.is_magical ? '✦' : '⬡'}
+                  </span>
+                  <span className="sanctum-backpack-name">{item.name}</span>
+                  {item.quantity > 1 && <span className="sanctum-backpack-qty">×{item.quantity}</span>}
+                </div>
+              )
+            })}
           </div>
         </div>
       )}
 
-      {items.length === 0 && (
-        <p
-          style={{
-            fontSize: 13,
-            color: 'var(--muted)',
-            fontStyle: 'italic',
-            textAlign: 'center',
-            padding: '20px 0',
-          }}
-        >
-          Geen items in je inventaris.
-        </p>
-      )}
+      {items.length === 0 && <p className="sanctum-empty">Geen items in je inventaris.</p>}
     </div>
   )
 }

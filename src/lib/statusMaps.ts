@@ -168,6 +168,16 @@ export const itemRarityColor: Record<ItemRarity, string> = {
   artifact:   'var(--crimson)',
 }
 
+// Channel-token form of the rarity colours, for alpha tints: rgb(var(--rarity-rgb) / a)
+export const itemRarityRgb: Record<ItemRarity, string> = {
+  common:     'var(--muted-rgb)',
+  uncommon:   'var(--teal-rgb)',
+  rare:       'var(--azure-rgb)',
+  very_rare:  'var(--violet-rgb)',
+  legendary:  'var(--gold-rgb)',
+  artifact:   'var(--crimson-rgb)',
+}
+
 export const itemTypeLabel: Record<ItemType, string> = {
   weapon:   'Wapen',
   armor:    'Pantser',
