@@ -95,8 +95,11 @@ export function ConstellationAtlas({
       data-pin-mode={pinMode ? 'true' : undefined}
       onClick={handleContainerClick}
       onTouchEnd={handleContainerTouch}
-      role={pinMode ? 'button' : undefined}
-      aria-label={pinMode ? 'Klik om pin te plaatsen' : 'Locatiekaart'}
+      // A group (not a button): the pins are the interactive controls, and
+      // click-to-place is a pointer-only enhancement — so we must not nest them
+      // inside a widget role or promise keyboard activation we can't deliver.
+      role="group"
+      aria-label={pinMode ? 'Locatiekaart — klik om een pin te plaatsen' : 'Locatiekaart'}
     >
       {mapImageUrl ? (
         <img
