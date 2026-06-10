@@ -2263,6 +2263,128 @@ body {
   line-height: 1;
 }
 
+/* ── Spell slots (character) ─────────────────────────────── */
+.spell-slots { display: flex; flex-direction: column; gap: 14px; }
+.spell-slots-empty { font-size: 13px; color: var(--muted); font-style: italic; margin: 0; }
+.spell-slot-head { display: flex; align-items: center; gap: 12px; margin-bottom: 8px; }
+.spell-slot-roman {
+  font-family: var(--font-display);
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  color: var(--muted);
+  min-width: 28px;
+  transition: color var(--t-fast);
+}
+.spell-slot-roman[data-available='true'] { color: var(--violet); }
+.spell-slot-count { font-size: 11px; color: var(--muted); font-family: var(--font-body); }
+.spell-slot-count b { font-weight: 700; color: var(--muted); }
+.spell-slot-count[data-available='true'] b { color: var(--ink); }
+.spell-slot-pips { display: flex; gap: 6px; flex-wrap: wrap; }
+.spell-slot-pip {
+  width: 34px;
+  height: 34px;
+  border-radius: var(--r-md);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 2px solid rgb(var(--violet-rgb) / 0.5);
+  background: rgb(var(--violet-rgb) / var(--o-12));
+  color: var(--violet);
+  font-size: 14px;
+  cursor: pointer;
+  transition: var(--tr-fast);
+}
+.spell-slot-pip:hover:not(:disabled) { border-color: rgb(var(--violet-rgb) / 0.8); }
+.spell-slot-pip:focus-visible { outline: 2px solid var(--violet); outline-offset: 2px; }
+.spell-slot-pip:disabled { opacity: 0.5; cursor: default; }
+.spell-slot-pip--expended {
+  border-color: var(--hairline-strong);
+  background: var(--surface);
+  color: var(--muted);
+}
+.spell-slot-pip--expended:hover:not(:disabled) { border-color: rgb(var(--teal-rgb) / 0.5); }
+@media (max-width: 900px) { .spell-slot-pip { width: 40px; height: 40px; } }
+
+/* ── Skills panel (character) ────────────────────────────────
+   Variant driven by data-prof = none | proficient | expert. */
+.skills-panel { display: flex; flex-direction: column; gap: 24px; }
+.skill-ability-head {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 8px;
+  padding-bottom: 6px;
+  border-bottom: 1px solid var(--hairline);
+}
+.skill-ability-abbr {
+  font-family: var(--font-body);
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--muted);
+  min-width: 28px;
+}
+.skill-ability-mod {
+  font-family: var(--font-display);
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--gold);
+  line-height: 1;
+  min-width: 28px;
+}
+.skill-ability-label { font-size: 12px; color: var(--muted); font-weight: 400; }
+.skill-empty { font-size: 12px; color: var(--subtle); font-style: italic; margin: 4px 0 0 38px; }
+.skill-list { display: flex; flex-direction: column; gap: 4px; }
+.skill-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 7px 10px 7px 38px;
+  border-radius: var(--r-md);
+  border: 1px solid transparent;
+  background: transparent;
+  transition: background var(--t-fast), border-color var(--t-fast);
+}
+.skill-row[data-prof='proficient'] { background: rgb(var(--violet-rgb) / var(--o-08)); border-color: rgb(var(--violet-rgb) / 0.28); }
+.skill-row[data-prof='expert'] { background: rgb(var(--teal-rgb) / var(--o-08)); border-color: rgb(var(--teal-rgb) / 0.28); }
+.skill-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: var(--r-full);
+  flex-shrink: 0;
+  background: transparent;
+  border: 2px solid var(--hairline-strong);
+  position: relative;
+  left: -28px;
+  margin-right: -18px;
+}
+.skill-row[data-prof='proficient'] .skill-dot { background: var(--violet); border-color: var(--violet); }
+.skill-row[data-prof='expert'] .skill-dot { background: var(--teal); border-color: var(--teal); box-shadow: 0 0 0 2px rgb(var(--teal-rgb) / 0.28); }
+.skill-name { flex: 1; font-size: 13px; color: var(--ink-soft); font-weight: 400; }
+.skill-row[data-prof='proficient'] .skill-name { color: var(--ink); font-weight: 600; }
+.skill-row[data-prof='expert'] .skill-name { color: var(--teal); font-weight: 600; }
+.skill-exp {
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--teal);
+  margin-left: 6px;
+}
+.skill-item-bonus { font-size: 10px; font-weight: 700; color: var(--teal); }
+.skill-mod {
+  font-family: var(--font-display);
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--ink-soft);
+  min-width: 30px;
+  text-align: right;
+}
+.skill-row[data-prof='proficient'] .skill-mod { color: var(--violet); }
+.skill-row[data-prof='expert'] .skill-mod { color: var(--teal); }
+
 /* ─── Chip ───────────────────────────────────────────────── */
 .chip {
   display: inline-flex;
