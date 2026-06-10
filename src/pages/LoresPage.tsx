@@ -5,7 +5,7 @@ import { EntityCardSkeleton } from '@/components/ui/EntityCardSkeleton'
 import { EmptyState } from '@/components/ui/EmptyState'
 import { Breadcrumbs } from '@/components/ui/Breadcrumbs'
 import { LoreCard, ForgeLoreCard } from '@/components/lore/LoreCard'
-import { WorldDetailDivider } from '@/components/world/WorldDetailDivider'
+import { OrnateDivider } from '@/components/ui/OrnateDivider'
 import { useCampaign } from '@/hooks/queries/useCampaign'
 import { useCampaignLore, useCreateCampaignLore } from '@/hooks/queries/useCampaignLore'
 import { useDraftGC } from '@/hooks/useDraftGC'
@@ -43,7 +43,7 @@ export default function LoresPage() {
     <div>
       {/* Breadcrumb */}
       <div style={{ marginBottom: 24 }}>
-        <Breadcrumbs items={[
+        <Breadcrumbs compact items={[
           { label: 'Wereld', to: `/worlds/${campaign.world_id}` },
           { label: campaign.name, to: `/campaigns/${campaignId}` },
           { label: 'Lore' },
@@ -59,7 +59,7 @@ export default function LoresPage() {
         </p>
       </header>
 
-      <WorldDetailDivider label={`${loreItems?.length ?? 0} lore-item${loreItems?.length !== 1 ? 's' : ''}`} />
+      <OrnateDivider label={`${loreItems?.length ?? 0} lore-item${loreItems?.length !== 1 ? 's' : ''}`} />
 
       {/* Lore grid */}
       <div style={{ marginTop: 24 }}>

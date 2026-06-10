@@ -56,7 +56,8 @@ doel; `.pangu-*` blijft werken tot de sweep (sectie "Resterende migratie") klaar
 | `Input`, `Badge` | Tailwind semantische aliassen (`border-hairline`, `bg-surface`) — token-backed, theme-klaar. |
 | `Modal` | Tailwind + inline; kan optioneel naar `.modal*`-klassen (cosmetisch, niet blokkerend). |
 | `StatusBadge` | `.status-badge` + dynamische `style.background` uit `statusMaps` — OK. |
-| `Breadcrumbs`, `EmptyState`, `ForgeCard`, `NotificationCenter` | Inline `style={{}}` — gebruiken `var(--token)` (theme-klaar). Hardgecodeerde kleurliterals zijn verwijderd; markup-naar-klasse opschoning is optioneel. |
+| `Breadcrumbs` | ✅ **Geconsolideerd** — `Breadcrumb` (onClick-API) en `Breadcrumbs` (Link-API) samengevoegd tot één component (`src/components/ui/Breadcrumbs.tsx`). Items accepteren `to` of `onClick`; varianten: `standard`/`arcane`, `compact`, `showBack`, `collapse`. CSS in `src/index.css` (`.breadcrumb`, `.bc-*`) volgt de canonieke design-tokens uit `pangu-design-system`. |
+| `EmptyState`, `ForgeCard`, `NotificationCenter` | Inline `style={{}}` — gebruiken `var(--token)` (theme-klaar). Hardgecodeerde kleurliterals zijn verwijderd; markup-naar-klasse opschoning is optioneel. |
 | `Skeleton`, `Spinner`, `Avatar`, `ConfirmDialog` | Klasse / Tailwind — OK. |
 
 ## Hardgecodeerde-kleur hotlist (thema-blokkers)

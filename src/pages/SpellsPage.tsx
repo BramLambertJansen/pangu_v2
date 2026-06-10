@@ -112,9 +112,11 @@ export default function SpellsPage() {
           description="Importeer spreuken uit de SRD om je bibliotheek te vullen."
         />
       ) : filtered.length === 0 ? (
-        <p style={{ fontSize: 14, color: 'var(--muted)', textAlign: 'center', padding: '32px 0' }}>
-          Geen spreuken gevonden voor de geselecteerde filters.
-        </p>
+        <EmptyState
+          icon="🔍"
+          title="Geen treffers"
+          description="Geen spreuken voor de huidige filters."
+        />
       ) : (
         <ul
           style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: 'var(--sp-5)', listStyle: 'none', padding: 0, margin: 0 }}
@@ -130,7 +132,7 @@ export default function SpellsPage() {
       )}
 
       {/* SRD import modal */}
-      <Modal open={srdOpen} onClose={() => setSrdOpen(false)} title="Spreuken importeren uit de SRD" className="max-w-xl">
+      <Modal open={srdOpen} onClose={() => setSrdOpen(false)} title="Spreuken importeren uit de SRD" size="lg">
         <CompendiumBrowser
           kind="spell"
           onImport={(data, edition) => importSpell.mutate({ spell: data as Open5eSpell, edition })}

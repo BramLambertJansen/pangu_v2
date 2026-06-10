@@ -1,8 +1,8 @@
 import { useParams, useNavigate, Link } from 'react-router-dom'
 import { Spinner } from '@/components/ui/Spinner'
 import { Button } from '@/components/ui/Button'
-import { Breadcrumb } from '@/components/ui/Breadcrumb'
-import { WorldDetailDivider } from '@/components/world/WorldDetailDivider'
+import { Breadcrumb } from '@/components/ui/Breadcrumbs'
+import { OrnateDivider } from '@/components/ui/OrnateDivider'
 import { RelatedEntities } from '@/components/link/RelatedEntities'
 import { PlaceAccordion } from '@/components/location/PlaceAccordion'
 import { useLocationFull } from '@/hooks/queries/useLocation'
@@ -167,7 +167,7 @@ export default function LocationDetailPage() {
       </div>
 
       {/* Description */}
-      <WorldDetailDivider label="Beschrijving" />
+      <OrnateDivider label="Beschrijving" />
       {location.description ? (
         <div className="pangu-surface" style={{ padding: 28 }}>
           <p style={{
@@ -185,7 +185,7 @@ export default function LocationDetailPage() {
       )}
 
       {/* DM notes */}
-      <WorldDetailDivider label="DM-notities" />
+      <OrnateDivider label="DM-notities" />
       {location.notes ? (
         <div
           className="pangu-surface"
@@ -218,7 +218,7 @@ export default function LocationDetailPage() {
       )}
 
       {/* Sub-locations */}
-      <WorldDetailDivider label="Sublocaties" />
+      <OrnateDivider label="Sublocaties" />
       <PlaceAccordion locationId={location.id} places={[]} />
 
       {location.campaign_id && (

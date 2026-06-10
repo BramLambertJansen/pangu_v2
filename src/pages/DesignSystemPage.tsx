@@ -13,6 +13,9 @@ import { Chip } from '@/components/ui/Chip'
 import { StatPill } from '@/components/ui/StatPill'
 import { OrnateDivider } from '@/components/ui/OrnateDivider'
 import { Tabs } from '@/components/ui/Tabs'
+import { Toggle } from '@/components/ui/Toggle'
+import { Checkbox } from '@/components/ui/Checkbox'
+import { RadioGroup, Radio } from '@/components/ui/Radio'
 import { DiceRoller } from '@/components/ui/DiceRoller'
 import { KbdHint } from '@/components/ui/KbdHint'
 import { Card } from '@/components/ui/Card'
@@ -64,6 +67,9 @@ export default function DesignSystemPage() {
   const [tab, setTab] = useState('overzicht')
   const [modalOpen, setModalOpen] = useState(false)
   const [toggled, setToggled] = useState(true)
+  const [checked1, setChecked1] = useState(true)
+  const [checked2, setChecked2] = useState(false)
+  const [radio, setRadio] = useState<string>('actief')
 
   return (
     <div className="page-transition mx-auto max-w-5xl">
@@ -165,8 +171,13 @@ export default function DesignSystemPage() {
         </div>
       </Section>
 
-      <Section title="Divider">
+      <Section title="Ornate Divider">
         <OrnateDivider label="Mijn Werelden" />
+        <OrnateDivider label="Violet accent" tone="violet" />
+        <OrnateDivider label="Muted toon" tone="muted" />
+        <OrnateDivider label="Custom glyph" glyph="✦" />
+        <OrnateDivider label="Compact" compact />
+        <OrnateDivider />
       </Section>
 
       <Section title="Dobbelsteen">
@@ -241,16 +252,7 @@ export default function DesignSystemPage() {
             <span className="pg-mono">24</span>
             <button type="button" className="hp-step" aria-label="HP omhoog">+</button>
           </div>
-          <button
-            type="button"
-            role="switch"
-            aria-checked={toggled}
-            aria-label="Voorbeeld schakelaar"
-            className="pangu-toggle"
-            onClick={() => setToggled((t) => !t)}
-          >
-            <span className="pangu-toggle-knob" />
-          </button>
+          <Toggle checked={toggled} onChange={setToggled} aria-label="Voorbeeld schakelaar" />
           <button type="button" className="btn btn-violet-soft btn-sm" onClick={() => setModalOpen(true)}>
             Open modal
           </button>
@@ -261,26 +263,210 @@ export default function DesignSystemPage() {
           <Skeleton className="mt-2 h-4 w-1/2 rounded" />
         </div>
 
-        <div className="mt-5">
-          <Breadcrumbs items={[{ label: 'Werelden', to: '/worlds' }, { label: 'Aerthos', to: '/worlds/1' }, { label: 'Bestiarium' }]} />
-        </div>
-
-        <div className="mt-5 surface">
-          <EmptyState title="Een leeg kosmos wacht." description="Begin waar je wil." />
-        </div>
-
         <div className="mt-5 h-40 max-w-xs overflow-hidden rounded-[var(--r-lg)]">
           <div className="placeholder-img"><span className="ph-glyph">P</span></div>
         </div>
       </Section>
 
-      <Modal open={modalOpen} onClose={() => setModalOpen(false)} title="Voorbeeld modal">
-        <p className="text-sm text-ink-soft">
-          Token-gedreven dialoog met focus-trap. Sluit met Escape of de knop.
-        </p>
-        <div className="mt-4 flex justify-end">
-          <button type="button" className="btn btn-primary btn-sm" onClick={() => setModalOpen(false)}>Sluiten</button>
+      <Section title="Toggle / Switch">
+        <div className="flex flex-col gap-4">
+          <div className="flex flex-wrap items-center gap-6">
+            <div className="flex flex-col items-center gap-1">
+              <Toggle checked={toggled} onChange={setToggled} aria-label="Default toggle" />
+              <span className="text-[11px] text-muted">default · md</span>
+            </div>
+            <div className="flex flex-col items-center gap-1">
+              <Toggle checked={toggled} onChange={setToggled} variant="gold" aria-label="Gold toggle" />
+              <span className="text-[11px] text-muted">gold</span>
+            </div>
+            <div className="flex flex-col items-center gap-1">
+              <Toggle checked={toggled} onChange={setToggled} size="sm" aria-label="Small toggle" />
+              <span className="text-[11px] text-muted">sm</span>
+            </div>
+            <div className="flex flex-col items-center gap-1">
+              <Toggle checked={toggled} onChange={setToggled} disabled aria-label="Disabled toggle" />
+              <span className="text-[11px] text-muted">disabled</span>
+            </div>
+          </div>
+          <div className="max-w-md">
+            <Toggle
+              checked={toggled}
+              onChange={setToggled}
+              label="Sessieherinneringen"
+              description="Stuur een melding 24 uur vóór een geplande sessie."
+            />
+          </div>
+          <div className="max-w-md">
+            <Toggle
+              checked={toggled}
+              onChange={setToggled}
+              variant="gold"
+              label="Lore-suggesties"
+              description="Gouden variant voor warme, brand-positieve schakelaars."
+            />
+          </div>
         </div>
+      </Section>
+
+      <Section title="Checkbox + Radio">
+        <div className="grid gap-6 md:grid-cols-2">
+          <div className="flex flex-col gap-3">
+            <Checkbox checked={checked1} onChange={setChecked1} label="✦ Magisch item" />
+            <Checkbox checked={checked2} onChange={setChecked2} label="Sluipen nadeel (zwaar pantser)" />
+            <Checkbox checked indeterminate onChange={() => {}} label="Gedeeltelijk geselecteerd" />
+            <Checkbox checked={false} onChange={() => {}} disabled label="Uitgeschakeld" />
+          </div>
+          <div>
+            <RadioGroup
+              value={radio}
+              onChange={setRadio}
+              label="Status van de kroniek"
+              description="Bepaalt waar de kroniek verschijnt op het dashboard."
+            >
+              <Radio value="concept" label="Concept" description="Nog niet zichtbaar voor spelers." />
+              <Radio value="actief" label="Actief" description="Loopt momenteel, met geplande sessies." />
+              <Radio value="voltooid" label="Voltooid" description="Het verhaal is tot een einde gebracht." />
+              <Radio value="gearchiveerd" label="Gearchiveerd" description="Verborgen uit het standaardoverzicht." disabled />
+            </RadioGroup>
+          </div>
+        </div>
+      </Section>
+
+      <Section title="Empty states">
+        <div className="grid gap-4 md:grid-cols-2">
+          <EmptyState
+            icon="🌐"
+            title="Geen werelden gesmeed"
+            description="Jouw Codex is leeg. Begin met het smeden van de eerste wereld voor jouw gezelschap."
+            quote="Zelfs de grootste verhalen begonnen met één stap."
+            action={<button className="btn btn-primary btn-sm">＋ Wereld smeden</button>}
+          />
+          <EmptyState
+            variant="error"
+            icon="⚡"
+            title="Nexus onbereikbaar"
+            description="De arcane verbinding is verbroken. Controleer je verbinding en probeer opnieuw."
+            action={<button className="btn btn-crimson btn-sm">↺ Opnieuw proberen</button>}
+          />
+          <EmptyState
+            inline
+            icon="⚔"
+            title="Geen helden toegevoegd"
+            description="Voeg helden toe om het gezelschap samen te stellen."
+            action={<button className="btn btn-ghost btn-sm">＋ Held</button>}
+          />
+          <EmptyState
+            title="Een leeg kosmos wacht."
+            description="Begin waar je wil — geen icoon nodig."
+          />
+        </div>
+      </Section>
+
+      <Section title="Breadcrumbs">
+        <div className="flex flex-col gap-5">
+          <div>
+            <p className="label mb-1">Standaard</p>
+            <Breadcrumbs
+              items={[
+                { label: 'Werelden', to: '/worlds' },
+                { label: 'Aerthos', to: '/worlds/1' },
+                { label: 'Bestiarium' },
+              ]}
+            />
+          </div>
+
+          <div>
+            <p className="label mb-1">Met current-prop</p>
+            <Breadcrumbs
+              items={[
+                { label: 'Werelden', to: '/worlds' },
+                { label: 'Aerthos', to: '/worlds/1' },
+                { label: 'Bestiarium', to: '/worlds/1/bestiary' },
+              ]}
+              current="Drakeneed"
+            />
+          </div>
+
+          <div>
+            <p className="label mb-1">Compact</p>
+            <Breadcrumbs
+              compact
+              items={[
+                { label: 'Werelden', to: '/worlds' },
+                { label: 'Aerthos', to: '/worlds/1' },
+                { label: 'Bestiarium' },
+              ]}
+            />
+          </div>
+
+          <div>
+            <p className="label mb-1">Arcane</p>
+            <Breadcrumbs
+              variant="arcane"
+              items={[
+                { label: 'Werelden', to: '/worlds' },
+                { label: 'Aerthos', to: '/worlds/1' },
+              ]}
+              current="Drakeneed"
+            />
+          </div>
+
+          <div>
+            <p className="label mb-1">Met terug-knop</p>
+            <Breadcrumbs
+              showBack
+              onBack={() => {}}
+              items={[
+                { label: 'Werelden', to: '/worlds' },
+                { label: 'Aerthos', to: '/worlds/1' },
+                { label: 'Bestiarium' },
+              ]}
+            />
+          </div>
+
+          <div>
+            <p className="label mb-1">Ingeklapt (diep pad)</p>
+            <Breadcrumbs
+              collapse={{ start: 1, end: -2 }}
+              items={[
+                { label: 'Werelden', to: '/worlds' },
+                { label: 'Aerthos', to: '/worlds/1' },
+                { label: 'Kronieken', to: '/campaigns' },
+                { label: 'De Verloren Vesting', to: '/campaigns/1' },
+                { label: 'Sessies', to: '/campaigns/1/sessions' },
+                { label: 'Sessie IV' },
+              ]}
+            />
+          </div>
+
+          <div>
+            <p className="label mb-1">Met acties</p>
+            <Breadcrumbs
+              items={[
+                { label: 'Werelden', to: '/worlds' },
+                { label: 'Aerthos' },
+              ]}
+              actions={<button className="btn btn-sm btn-ghost">Bewerken</button>}
+            />
+          </div>
+        </div>
+      </Section>
+
+      <Modal
+        open={modalOpen}
+        onClose={() => setModalOpen(false)}
+        title="Voorbeeld modal"
+        footer={
+          <>
+            <button type="button" className="btn btn-ghost btn-sm" onClick={() => setModalOpen(false)}>Annuleren</button>
+            <button type="button" className="btn btn-primary btn-sm" onClick={() => setModalOpen(false)}>Bevestigen</button>
+          </>
+        }
+      >
+        <p className="text-sm text-ink-soft">
+          Token-gedreven dialoog met focus-trap, gestructureerde head/body/foot
+          en violet-glow box-shadow. Sluit met Escape, de kruisknop of de annuleren-knop.
+        </p>
       </Modal>
 
       <OrnateDivider label="Gevechts- & locatiewidgets" />

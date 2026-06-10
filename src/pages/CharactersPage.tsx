@@ -4,7 +4,7 @@ import { EntityCardSkeleton } from '@/components/ui/EntityCardSkeleton'
 import { Button } from '@/components/ui/Button'
 import { EmptyState } from '@/components/ui/EmptyState'
 import { SearchBar } from '@/components/ui/SearchBar'
-import { WorldDetailDivider } from '@/components/world/WorldDetailDivider'
+import { OrnateDivider } from '@/components/ui/OrnateDivider'
 import { CharacterCard, ForgeCharacterCard } from '@/components/character/CharacterCard'
 import { useCharacters, useCreateCharacter } from '@/hooks/queries/useCharacters'
 import { useDraftGC } from '@/hooks/useDraftGC'
@@ -53,7 +53,7 @@ export default function CharactersPage() {
         </div>
       )}
 
-      <WorldDetailDivider label={`${filtered.length} karakter${filtered.length !== 1 ? 's' : ''}`} />
+      <OrnateDivider label={`${filtered.length} karakter${filtered.length !== 1 ? 's' : ''}`} />
 
       {/* Character grid */}
       <div style={{ marginTop: 24 }}>
@@ -80,17 +80,16 @@ export default function CharactersPage() {
             ) : (
               <>
                 {filtered.length === 0 && search && (
-                  <div style={{ textAlign: 'center', padding: '40px 0' }}>
-                    <p style={{ color: 'var(--muted)', fontSize: 14 }}>
-                      Geen resultaten voor <strong style={{ color: 'var(--ink-soft)' }}>"{search}"</strong>.
-                    </p>
-                    <Button variant="ghost" size="sm"
-                      onClick={() => setSearch('')}
-                      style={{ marginTop: 12 }}
-                    >
-                      Wis zoekopdracht
-                    </Button>
-                  </div>
+                  <EmptyState
+                    icon="🔍"
+                    title="Geen resultaten"
+                    description={`Niets gevonden voor "${search}".`}
+                    action={
+                      <Button variant="ghost" size="sm" onClick={() => setSearch('')}>
+                        Wis zoekopdracht
+                      </Button>
+                    }
+                  />
                 )}
                 <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
                   {filtered.map((character) => (

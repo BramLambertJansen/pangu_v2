@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useId } from 'react'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { toast } from 'sonner'
 import { supabase } from '@/lib/supabase'
@@ -36,6 +36,7 @@ async function updateUser(id: string, body: Partial<FormState>): Promise<void> {
 }
 
 export function EditUserModal({ user, onClose }: Props) {
+  const formId = useId()
   const queryClient = useQueryClient()
   const [form, setForm] = useState<FormState>({ display_name: '', email: '', password: '' })
   const [errors, setErrors] = useState<Partial<Record<keyof FormState, string>>>({})
@@ -99,9 +100,25 @@ export function EditUserModal({ user, onClose }: Props) {
     form.password.length > 0
 
   return (
-    <Modal open={user !== null} onClose={handleClose} title="Account bewerken">
+    <Modal
+      open={user !== null}
+      onClose={handleClose}
+      title="Account bewerken"
+      footer={
+        user && (
+          <>
+            <Button type="button" variant="ghost" onClick={handleClose}>
+              Annuleren
+            </Button>
+            <Button type="submit" form={formId} loading={mutation.isPending} disabled={!hasChanges}>
+              Opslaan
+            </Button>
+          </>
+        )
+      }
+    >
       {user && (
-        <form onSubmit={handleSubmit} noValidate className="flex flex-col gap-4">
+        <form id={formId} onSubmit={handleSubmit} noValidate className="flex flex-col gap-4">
           <Input
             label="Naam"
             type="text"
@@ -124,14 +141,6 @@ export function EditUserModal({ user, onClose }: Props) {
             error={errors.password}
             {...field('password')}
           />
-          <div className="mt-2 flex justify-end gap-2">
-            <Button type="button" variant="ghost" onClick={handleClose}>
-              Annuleren
-            </Button>
-            <Button type="submit" loading={mutation.isPending} disabled={!hasChanges}>
-              Opslaan
-            </Button>
-          </div>
         </form>
       )}
     </Modal>

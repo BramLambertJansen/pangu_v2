@@ -5,7 +5,7 @@ import { EntityCardSkeleton } from '@/components/ui/EntityCardSkeleton'
 import { EmptyState } from '@/components/ui/EmptyState'
 import { Breadcrumbs } from '@/components/ui/Breadcrumbs'
 import { EncounterCard, ForgeEncounterCard } from '@/components/encounter/EncounterCard'
-import { WorldDetailDivider } from '@/components/world/WorldDetailDivider'
+import { OrnateDivider } from '@/components/ui/OrnateDivider'
 import { useCampaign } from '@/hooks/queries/useCampaign'
 import { useCampaignEncounters, useCreateCampaignEncounter } from '@/hooks/queries/useCampaignEncounters'
 import { useDraftGC } from '@/hooks/useDraftGC'
@@ -43,7 +43,7 @@ export default function EncountersPage() {
     <div>
       {/* Breadcrumb */}
       <div style={{ marginBottom: 24 }}>
-        <Breadcrumbs items={[
+        <Breadcrumbs compact items={[
           { label: 'Wereld', to: `/worlds/${campaign.world_id}` },
           { label: campaign.name, to: `/campaigns/${campaignId}` },
           { label: 'Gevechten' },
@@ -59,7 +59,7 @@ export default function EncountersPage() {
         </p>
       </header>
 
-      <WorldDetailDivider label={`${encounters?.length ?? 0} gevecht${encounters?.length !== 1 ? 'en' : ''}`} />
+      <OrnateDivider label={`${encounters?.length ?? 0} gevecht${encounters?.length !== 1 ? 'en' : ''}`} />
 
       {/* Encounter grid */}
       <div style={{ marginTop: 24 }}>

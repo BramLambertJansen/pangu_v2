@@ -1,8 +1,8 @@
 import { useParams, useNavigate, Link } from 'react-router-dom'
 import { Spinner } from '@/components/ui/Spinner'
 import { Button } from '@/components/ui/Button'
-import { Breadcrumb } from '@/components/ui/Breadcrumb'
-import { WorldDetailDivider } from '@/components/world/WorldDetailDivider'
+import { Breadcrumb } from '@/components/ui/Breadcrumbs'
+import { OrnateDivider } from '@/components/ui/OrnateDivider'
 import { RelatedEntities } from '@/components/link/RelatedEntities'
 import { CombatTracker, type Combatant } from '@/components/encounter/CombatTracker'
 import { useEncounterFull } from '@/hooks/queries/useEncounter'
@@ -218,7 +218,7 @@ export default function EncounterDetailPage() {
       </div>
 
       {/* Monsters */}
-      <WorldDetailDivider label="Monsters" />
+      <OrnateDivider label="Monsters" />
       {monstersLoading ? (
         <div style={{ display: 'flex', justifyContent: 'center', padding: '24px 0' }}>
           <Spinner size="sm" />
@@ -299,13 +299,13 @@ export default function EncounterDetailPage() {
       {/* Initiative order preview */}
       {initiativeOrder.length > 0 && (
         <>
-          <WorldDetailDivider label="Initiatiefvolgorde (verwacht)" />
+          <OrnateDivider label="Initiatiefvolgorde (verwacht)" />
           <CombatTracker encounterId={encounter.id} combatants={initiativeOrder} activeIndex={-1} />
         </>
       )}
 
       {/* Description */}
-      <WorldDetailDivider label="Beschrijving" />
+      <OrnateDivider label="Beschrijving" />
       {encounter.description ? (
         <div className="pangu-surface" style={{ padding: 28 }}>
           <p style={{
@@ -323,7 +323,7 @@ export default function EncounterDetailPage() {
       )}
 
       {/* DM notes */}
-      <WorldDetailDivider label="DM-notities" />
+      <OrnateDivider label="DM-notities" />
       {encounter.notes ? (
         <div
           className="pangu-surface"

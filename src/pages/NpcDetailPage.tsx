@@ -1,8 +1,8 @@
 import { useParams, useNavigate, Link } from 'react-router-dom'
 import { Spinner } from '@/components/ui/Spinner'
 import { Button } from '@/components/ui/Button'
-import { Breadcrumb } from '@/components/ui/Breadcrumb'
-import { WorldDetailDivider } from '@/components/world/WorldDetailDivider'
+import { Breadcrumb } from '@/components/ui/Breadcrumbs'
+import { OrnateDivider } from '@/components/ui/OrnateDivider'
 import { RelatedEntities } from '@/components/link/RelatedEntities'
 import { useNpcFull } from '@/hooks/queries/useNpc'
 import { npcStatusLabel, npcStatusColor } from '@/lib/statusMaps'
@@ -190,7 +190,7 @@ export default function NpcDetailPage() {
       </div>
 
       {/* Description */}
-      <WorldDetailDivider label="Beschrijving" />
+      <OrnateDivider label="Beschrijving" />
       {npc.description ? (
         <div className="pangu-surface" style={{ padding: 28 }}>
           <p style={{
@@ -208,7 +208,7 @@ export default function NpcDetailPage() {
       )}
 
       {/* DM notes */}
-      <WorldDetailDivider label="DM-notities" />
+      <OrnateDivider label="DM-notities" />
       {npc.notes ? (
         <div
           className="pangu-surface"

@@ -1,8 +1,9 @@
 import { useId, useRef, useState } from 'react'
 import { useParams, useNavigate, useLocation } from 'react-router-dom'
+import { Breadcrumbs } from '@/components/ui/Breadcrumbs'
 import { toast } from 'sonner'
 import { supabase } from '@/lib/supabase'
-import { Modal } from '@/components/ui/Modal'
+import { Checkbox } from '@/components/ui/Checkbox'
 import { ConfirmDialog } from '@/components/ui/ConfirmDialog'
 import { RelatedEntities } from '@/components/link/RelatedEntities'
 import { Button } from '@/components/ui/Button'
@@ -352,28 +353,12 @@ export default function ItemEditPage() {
     <div style={{ display: 'flex', justifyContent: 'center', width: '100%' }}>
       <div style={{ maxWidth: 820, width: '100%' }}>
 
-        {/* Back link */}
-        <button
-          type="button"
-          onClick={handleBack}
-          aria-label="Terug naar items"
-          style={{
-            display: 'inline-flex', alignItems: 'center', gap: 6,
-            background: 'none', border: 'none', cursor: 'pointer',
-            color: 'var(--muted)', fontSize: 12, fontWeight: 700,
-            letterSpacing: '0.18em', textTransform: 'uppercase',
-            fontFamily: 'var(--font-body)',
-            marginBottom: 24, padding: 0,
-            transition: 'color var(--t-fast)',
-          }}
-          onMouseEnter={(e) => (e.currentTarget.style.color = 'var(--ink-soft)')}
-          onMouseLeave={(e) => (e.currentTarget.style.color = 'var(--muted)')}
-        >
-          <svg aria-hidden="true" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <path d="M19 12H5" /><path d="M12 19l-7-7 7-7" />
-          </svg>
-          Terug naar items
-        </button>
+        <Breadcrumbs
+          showBack
+          onBack={handleBack}
+          items={[{ label: itemData.name, onClick: handleBack }]}
+          current="Bewerken"
+        />
 
         {/* Page header */}
         <header style={{ marginBottom: 40 }}>
@@ -566,22 +551,11 @@ export default function ItemEditPage() {
               />
             </div>
 
-            <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-              <input
-                id="item-magical"
-                type="checkbox"
-                checked={form.is_magical ?? false}
-                onChange={(e) => set('is_magical', e.target.checked)}
-                style={{ width: 16, height: 16, accentColor: 'var(--gold)', cursor: 'pointer' }}
-              />
-              <label
-                htmlFor="item-magical"
-                className="pangu-label"
-                style={{ marginBottom: 0, cursor: 'pointer' }}
-              >
-                ✦ Magisch item
-              </label>
-            </div>
+            <Checkbox
+              checked={form.is_magical ?? false}
+              onChange={(v) => set('is_magical', v)}
+              label="✦ Magisch item"
+            />
 
             <div className="sm:col-span-2">
               <label className="pangu-label" htmlFor={descriptionId}>Beschrijving</label>
@@ -687,18 +661,11 @@ export default function ItemEditPage() {
               <p style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.16em', textTransform: 'uppercase', color: 'var(--muted)', marginBottom: 12 }}>
                 Pantser­eigenschappen
               </p>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                <input
-                  id="bonus-stealth-disadvantage"
-                  type="checkbox"
-                  checked={props.stealth_disadvantage ?? false}
-                  onChange={(e) => setBonus('stealth_disadvantage', e.target.checked || undefined)}
-                  style={{ width: 16, height: 16, accentColor: 'var(--crimson)', cursor: 'pointer' }}
-                />
-                <label htmlFor="bonus-stealth-disadvantage" className="pangu-label" style={{ marginBottom: 0, cursor: 'pointer' }}>
-                  Sluipen nadeel (zwaar pantser)
-                </label>
-              </div>
+              <Checkbox
+                checked={props.stealth_disadvantage ?? false}
+                onChange={(v) => setBonus('stealth_disadvantage', v || undefined)}
+                label="Sluipen nadeel (zwaar pantser)"
+              />
             </div>
           )}
 
@@ -849,25 +816,16 @@ export default function ItemEditPage() {
       {itemData.committed && itemData.campaign_id && (
         <RelatedEntities type="item" id={itemData.id} campaignId={itemData.campaign_id} />
       )}
-
-      {/* Delete modal */}
-      <Modal
+      <ConfirmDialog
         open={deleteOpen}
         onClose={() => setDeleteOpen(false)}
+        onConfirm={handleDelete}
         title="Item verwijderen"
+        confirmLabel="Verwijder item"
+        loading={deleteItem.isPending}
       >
-        <p style={{ fontSize: 14, color: 'var(--ink-soft)', marginBottom: 24 }}>
-          Weet je zeker dat je <strong style={{ color: 'var(--ink)' }}>{itemData.name}</strong> wilt verwijderen? Dit kan niet ongedaan worden gemaakt.
-        </p>
-        <div className="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
-          <Button variant="ghost" onClick={() => setDeleteOpen(false)}>
-            Annuleren
-          </Button>
-          <Button variant="danger" onClick={handleDelete} disabled={deleteItem.isPending}>
-            {deleteItem.isPending ? 'Verwijderen...' : 'Verwijder item'}
-          </Button>
-        </div>
-      </Modal>
+        Weet je zeker dat je <strong style={{ color: 'var(--ink)' }}>{itemData.name}</strong> wilt verwijderen? Dit kan niet ongedaan worden gemaakt.
+      </ConfirmDialog>
 
       {/* Discard dialog */}
       <ConfirmDialog

@@ -5,6 +5,7 @@ import { useAI } from '@/hooks/useAI'
 import { Spinner } from '@/components/ui/Spinner'
 import { Button } from '@/components/ui/Button'
 import { Modal } from '@/components/ui/Modal'
+import { EmptyState } from '@/components/ui/EmptyState'
 import { ItemCard, ForgeItemCard } from '@/components/item/ItemCard'
 import { CompendiumBrowser } from '@/components/compendium/CompendiumBrowser'
 import { useCampaignWithWorld } from '@/hooks/queries/useCampaign'
@@ -12,7 +13,7 @@ import { useCampaignItems, useForgeCampaignItem, useCreateCampaignItem } from '@
 import { useCampaignCharacters } from '@/hooks/queries/useCampaignCharacters'
 import { useImportMagicItem } from '@/hooks/queries/useSrdSearch'
 import { useDraftGC } from '@/hooks/useDraftGC'
-import { Breadcrumb } from '@/components/ui/Breadcrumb'
+import { Breadcrumb } from '@/components/ui/Breadcrumbs'
 import { Tabs } from '@/components/ui/Tabs'
 import type { ItemType, ItemRarity } from '@/types/item.types'
 import type { Open5eMagicItem } from '@/types/open5e.types'
@@ -264,9 +265,12 @@ Return ONLY a raw JSON array with one item — no markdown, no explanation:
       )}
 
       {filteredItems.length === 0 && !isLoadingItems && activeTab !== 'all' && activeTab !== 'unassigned' && (
-        <p style={{ fontSize: 14, color: 'var(--muted)', fontStyle: 'italic', textAlign: 'center', padding: '32px 0' }}>
-          Geen items toegewezen aan dit karakter.
-        </p>
+        <EmptyState
+          inline
+          icon="🎒"
+          title="Geen items toegewezen"
+          description="Dit karakter draagt nog niets."
+        />
       )}
 
       {/* AI generate single item modal */}
@@ -362,7 +366,7 @@ Return ONLY a raw JSON array with one item — no markdown, no explanation:
         </div>
       </Modal>
 
-      <Modal open={srdOpen} onClose={() => setSrdOpen(false)} title="Magische items importeren uit de SRD" className="max-w-xl">
+      <Modal open={srdOpen} onClose={() => setSrdOpen(false)} title="Magische items importeren uit de SRD" size="lg">
         <CompendiumBrowser
           kind="item"
           onImport={(data, edition) => importItem.mutate({ magicItem: data as Open5eMagicItem, edition })}

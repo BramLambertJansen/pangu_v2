@@ -1,12 +1,12 @@
 import { useCallback } from 'react'
 import { useImagePositioning } from '@/hooks/useImagePositioning'
 import { useParams, useNavigate, useLocation } from 'react-router-dom'
+import { Breadcrumbs } from '@/components/ui/Breadcrumbs'
 import { useQuery } from '@tanstack/react-query'
 import { toast } from 'sonner'
 import { supabase } from '@/lib/supabase'
 import { queryKeys } from '@/lib/queryKeys'
 import { Button } from '@/components/ui/Button'
-import { Modal } from '@/components/ui/Modal'
 import { ConfirmDialog } from '@/components/ui/ConfirmDialog'
 import { Spinner } from '@/components/ui/Spinner'
 import { useEntityEdit } from '@/hooks/useEntityEdit'
@@ -166,29 +166,12 @@ export default function CharacterEditPage() {
   return (
     <div style={{ display: 'flex', justifyContent: 'center', width: '100%' }}>
       <div style={{ maxWidth: 820, width: '100%' }}>
-
-        {/* Back link */}
-        <button
-          type="button"
-          onClick={handleBack}
-          aria-label="Terug naar karakter"
-          style={{
-            display: 'inline-flex',
-            alignItems: 'center',
-            gap: 6,
-            fontSize: 13,
-            color: 'var(--muted)',
-            background: 'none',
-            border: 'none',
-            cursor: 'pointer',
-            padding: '0 0 20px',
-            transition: 'color var(--t-fast)',
-          }}
-          onMouseEnter={e => { (e.currentTarget as HTMLElement).style.color = 'var(--ink-soft)' }}
-          onMouseLeave={e => { (e.currentTarget as HTMLElement).style.color = 'var(--muted)' }}
-        >
-          ← Terug
-        </button>
+        <Breadcrumbs
+          showBack
+          onBack={handleBack}
+          items={[{ label: characterData.name, to: `/characters/${id}` }]}
+          current="Bewerken"
+        />
 
         <header style={{ marginBottom: 28 }}>
           <h1 className="pangu-display-xl">{characterData.name}</h1>
@@ -258,25 +241,16 @@ export default function CharacterEditPage() {
         </div>
 
       </div>
-
-      {/* Delete modal */}
-      <Modal
+      <ConfirmDialog
         open={deleteOpen}
         onClose={() => setDeleteOpen(false)}
+        onConfirm={handleDelete}
         title="Karakter verwijderen"
+        confirmLabel="Verwijder karakter"
+        loading={deleteCharacter.isPending}
       >
-        <p style={{ fontSize: 14, color: 'var(--ink-soft)', marginBottom: 24 }}>
-          Weet je zeker dat je <strong style={{ color: 'var(--ink)' }}>{characterData.name}</strong> wilt verwijderen? Dit kan niet ongedaan worden gemaakt.
-        </p>
-        <div className="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
-          <Button variant="ghost" onClick={() => setDeleteOpen(false)}>
-            Annuleren
-          </Button>
-          <Button variant="danger" onClick={handleDelete} loading={deleteCharacter.isPending}>
-            Verwijder karakter
-          </Button>
-        </div>
-      </Modal>
+        Weet je zeker dat je <strong style={{ color: 'var(--ink)' }}>{characterData.name}</strong> wilt verwijderen? Dit kan niet ongedaan worden gemaakt.
+      </ConfirmDialog>
 
       {/* Discard dialog */}
       <ConfirmDialog

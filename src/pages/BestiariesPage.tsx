@@ -7,7 +7,7 @@ import { Breadcrumbs } from '@/components/ui/Breadcrumbs'
 import { Modal } from '@/components/ui/Modal'
 import { BestiaryRow, ForgeBestiaryCard } from '@/components/bestiary/BestiaryCard'
 import { DmBestiaryPanel } from '@/components/bestiary/DmBestiaryPanel'
-import { WorldDetailDivider } from '@/components/world/WorldDetailDivider'
+import { OrnateDivider } from '@/components/ui/OrnateDivider'
 import { CompendiumBrowser } from '@/components/compendium/CompendiumBrowser'
 import type { Open5eMonster } from '@/types/open5e.types'
 import { useWorld } from '@/hooks/queries/useWorld'
@@ -65,7 +65,7 @@ export default function BestiariesPage() {
     <div>
       {/* Breadcrumb */}
       <div style={{ marginBottom: 24 }}>
-        <Breadcrumbs items={[
+        <Breadcrumbs compact items={[
           { label: 'Werelden', to: '/worlds' },
           { label: world.name, to: `/worlds/${worldId}` },
           { label: 'Bestiarium' },
@@ -106,7 +106,7 @@ export default function BestiariesPage() {
         </button>
       </header>
 
-      <Modal open={srdOpen} onClose={() => setSrdOpen(false)} title="Wezens importeren uit de SRD" className="max-w-xl">
+      <Modal open={srdOpen} onClose={() => setSrdOpen(false)} title="Wezens importeren uit de SRD" size="lg">
         <CompendiumBrowser
           kind="monster"
           onImport={(data, edition) => importMonster.mutate({ monster: data as Open5eMonster, edition })}
@@ -115,7 +115,7 @@ export default function BestiariesPage() {
         />
       </Modal>
 
-      <WorldDetailDivider label={`${committed.length} wezen${committed.length !== 1 ? 's' : ''}`} />
+      <OrnateDivider label={`${committed.length} wezen${committed.length !== 1 ? 's' : ''}`} />
 
       {/* Splitscreen */}
       <style>{`

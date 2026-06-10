@@ -5,7 +5,7 @@ import { EntityCardSkeleton } from '@/components/ui/EntityCardSkeleton'
 import { EmptyState } from '@/components/ui/EmptyState'
 import { Breadcrumbs } from '@/components/ui/Breadcrumbs'
 import { FactionCard, ForgeFactionCard } from '@/components/faction/FactionCard'
-import { WorldDetailDivider } from '@/components/world/WorldDetailDivider'
+import { OrnateDivider } from '@/components/ui/OrnateDivider'
 import { useCampaign } from '@/hooks/queries/useCampaign'
 import { useCampaignFactions, useCreateCampaignFaction } from '@/hooks/queries/useCampaignFactions'
 import { useDraftGC } from '@/hooks/useDraftGC'
@@ -42,7 +42,7 @@ export default function FactionsPage() {
   return (
     <div>
       <div style={{ marginBottom: 24 }}>
-        <Breadcrumbs items={[
+        <Breadcrumbs compact items={[
           { label: 'Wereld', to: `/worlds/${campaign.world_id}` },
           { label: campaign.name, to: `/campaigns/${campaignId}` },
           { label: 'Facties' },
@@ -57,7 +57,7 @@ export default function FactionsPage() {
         </p>
       </header>
 
-      <WorldDetailDivider label={`${factions?.length ?? 0} factie${factions?.length !== 1 ? 's' : ''}`} />
+      <OrnateDivider label={`${factions?.length ?? 0} factie${factions?.length !== 1 ? 's' : ''}`} />
 
       <div style={{ marginTop: 24 }}>
         {factionsLoading ? (

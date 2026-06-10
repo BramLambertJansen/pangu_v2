@@ -5,7 +5,7 @@ import { EntityCardSkeleton } from '@/components/ui/EntityCardSkeleton'
 import { EmptyState } from '@/components/ui/EmptyState'
 import { Breadcrumbs } from '@/components/ui/Breadcrumbs'
 import { NpcCard, ForgeNpcCard } from '@/components/npc/NpcCard'
-import { WorldDetailDivider } from '@/components/world/WorldDetailDivider'
+import { OrnateDivider } from '@/components/ui/OrnateDivider'
 import { useCampaign } from '@/hooks/queries/useCampaign'
 import { useCampaignNpcs, useCreateCampaignNpc } from '@/hooks/queries/useCampaignNpcs'
 import { useDraftGC } from '@/hooks/useDraftGC'
@@ -43,7 +43,7 @@ export default function NpcsPage() {
     <div>
       {/* Breadcrumb */}
       <div style={{ marginBottom: 24 }}>
-        <Breadcrumbs items={[
+        <Breadcrumbs compact items={[
           { label: 'Wereld', to: `/worlds/${campaign.world_id}` },
           { label: campaign.name, to: `/campaigns/${campaignId}` },
           { label: 'NPCs' },
@@ -59,7 +59,7 @@ export default function NpcsPage() {
         </p>
       </header>
 
-      <WorldDetailDivider label={`${npcs?.length ?? 0} personage${npcs?.length !== 1 ? 's' : ''}`} />
+      <OrnateDivider label={`${npcs?.length ?? 0} personage${npcs?.length !== 1 ? 's' : ''}`} />
 
       {/* NPC grid */}
       <div style={{ marginTop: 24 }}>
