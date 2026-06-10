@@ -26,61 +26,57 @@ import { useCampaignEncounters, useCreateCampaignEncounter } from '@/hooks/queri
 import { useCampaignCharacters } from '@/hooks/queries/useCampaignCharacters'
 import { useCampaignItems, useForgeCampaignItem } from '@/hooks/queries/useCampaignItems'
 import { useCampaignFactions, useCreateCampaignFaction } from '@/hooks/queries/useCampaignFactions'
-import { pickGradient, coverGradients } from '@/utils/pickGradient'
 import { sanitizeImageUrl } from '@/utils/sanitizeUrl'
+import { pickGradient, coverGradients } from '@/utils/pickGradient'
 import { campaignStatusLabel, campaignStatusColor } from '@/lib/statusMaps'
 import { StatusBadge } from '@/components/ui/StatusBadge'
 import { useAuthStore } from '@/stores/auth.store'
 
-const scrimGradient =
-  'linear-gradient(to top, var(--void) 0%, rgb(var(--void-rgb) / 0.97) 20%, rgb(var(--void-rgb) / 0.72) 40%, rgb(var(--void-rgb) / 0.18) 62%, transparent 82%)'
-
 type TabId = 'party' | 'sessions' | 'locations' | 'lore' | 'npcs' | 'factions' | 'quests' | 'encounters' | 'treasury' | 'notes' | 'invite'
 
-const TABS: { id: TabId; label: string; dmOnly?: boolean }[] = [
-  { id: 'party', label: 'The Party' },
-  { id: 'sessions', label: 'Sessies' },
+const ALL_TABS: { id: TabId; label: string; dmOnly?: boolean }[] = [
+  { id: 'party',     label: 'The Party' },
+  { id: 'sessions',  label: 'Sessies' },
   { id: 'locations', label: 'Locaties' },
-  { id: 'lore', label: 'Lore' },
-  { id: 'npcs', label: "NPC's" },
-  { id: 'factions', label: 'Facties' },
-  { id: 'quests', label: 'Quests' },
-  { id: 'encounters', label: 'Gevechten' },
-  { id: 'treasury', label: 'Schatkist' },
-  { id: 'notes', label: 'DM-notities' },
-  { id: 'invite', label: 'Uitnodigingen', dmOnly: true },
+  { id: 'lore',      label: 'Lore' },
+  { id: 'npcs',      label: "NPC's" },
+  { id: 'factions',  label: 'Facties' },
+  { id: 'quests',    label: 'Quests' },
+  { id: 'encounters',label: 'Gevechten' },
+  { id: 'treasury',  label: 'Schatkist' },
+  { id: 'notes',     label: 'DM-notities', dmOnly: true },
+  { id: 'invite',    label: 'Uitnodigingen', dmOnly: true },
 ]
 
 export default function CampaignDetailPage() {
   const { id } = useParams<{ id: string }>()
   const navigate = useNavigate()
   const [activeTab, setActiveTab] = useState<TabId>('sessions')
-
   const user = useAuthStore(s => s.user)
 
   const { data: campaign, isLoading } = useCampaignWithWorld(id)
-  const { data: sessions, isLoading: isLoadingSessions } = useCampaignSessions(id)
-  const { data: characters, isLoading: isLoadingCharacters } = useCampaignCharacters(id)
-  const { data: allItems, isLoading: isLoadingItems } = useCampaignItems(id)
-  const { data: locations, isLoading: isLoadingLocations } = useCampaignLocations(id)
-  const { data: loreItems, isLoading: isLoadingLore } = useCampaignLore(id)
-  const { data: npcs, isLoading: isLoadingNpcs } = useCampaignNpcs(id)
-  const { data: quests, isLoading: isLoadingQuests } = useCampaignQuests(id)
-  const { data: encounters, isLoading: isLoadingEncounters } = useCampaignEncounters(id)
-  const { data: factions, isLoading: isLoadingFactions } = useCampaignFactions(id)
+  const { data: sessions,    isLoading: isLoadingSessions }    = useCampaignSessions(id)
+  const { data: characters,  isLoading: isLoadingCharacters }  = useCampaignCharacters(id)
+  const { data: allItems,    isLoading: isLoadingItems }        = useCampaignItems(id)
+  const { data: locations,   isLoading: isLoadingLocations }   = useCampaignLocations(id)
+  const { data: loreItems,   isLoading: isLoadingLore }         = useCampaignLore(id)
+  const { data: npcs,        isLoading: isLoadingNpcs }         = useCampaignNpcs(id)
+  const { data: quests,      isLoading: isLoadingQuests }       = useCampaignQuests(id)
+  const { data: encounters,  isLoading: isLoadingEncounters }   = useCampaignEncounters(id)
+  const { data: factions,    isLoading: isLoadingFactions }     = useCampaignFactions(id)
 
-  const createSession = useCreateCampaignSession(id!)
-  const createLocation = useCreateCampaignLocation(id!)
-  const createLore = useCreateCampaignLore(id!)
-  const createNpc = useCreateCampaignNpc(id!)
-  const createQuest = useCreateCampaignQuest(id!)
+  const createSession   = useCreateCampaignSession(id!)
+  const createLocation  = useCreateCampaignLocation(id!)
+  const createLore      = useCreateCampaignLore(id!)
+  const createNpc       = useCreateCampaignNpc(id!)
+  const createQuest     = useCreateCampaignQuest(id!)
   const createEncounter = useCreateCampaignEncounter(id!)
-  const createFaction = useCreateCampaignFaction(id!)
-  const createItem = useForgeCampaignItem(id!)
+  const createFaction   = useCreateCampaignFaction(id!)
+  const createItem      = useForgeCampaignItem(id!)
 
   if (isLoading) {
     return (
-      <div style={{ display: 'flex', justifyContent: 'center', padding: '80px 0' }} aria-live="polite" aria-label="Kroniek laden...">
+      <div style={{ display: 'flex', justifyContent: 'center', padding: '80px 0' }} aria-live="polite" aria-label="Kroniek laden…">
         <Spinner size="lg" />
       </div>
     )
@@ -97,197 +93,125 @@ export default function CampaignDetailPage() {
     )
   }
 
-  const initial = campaign.name.trim()[0]?.toUpperCase() ?? '?'
+  const isDM = campaign.user_id === user?.id
+  const tabs = ALL_TABS.filter(t => !t.dmOnly || isDM)
+
   const gradient = campaign.header_image ? undefined : pickGradient(campaign.id, coverGradients)
+
+  /* Dynamic font size based on title length (matches prototype) */
+  const titleLen = campaign.name.length
+  const titleSize =
+    titleLen <= 12 ? 'clamp(56px, 8vw, 100px)' :
+    titleLen <= 22 ? 'clamp(44px, 6.5vw, 84px)' :
+    titleLen <= 32 ? 'clamp(32px, 4.8vw, 62px)' :
+                     'clamp(24px, 3.4vw, 44px)'
 
   return (
     <div>
-      <Breadcrumb items={[
-        { label: campaign.worlds?.name ?? 'Wereld', onClick: () => navigate(`/worlds/${campaign.world_id}`) },
-        { label: campaign.name },
-      ]} />
+      <Breadcrumb
+        items={[
+          { label: campaign.worlds?.name ?? 'Wereld', onClick: () => navigate(`/worlds/${campaign.world_id}`) },
+          { label: campaign.name },
+        ]}
+      />
 
-      {/* Campaign header */}
-      <div
+      {/* ── Hero ── */}
+      <section
+        className="world-hero-v2"
         style={{
-          position: 'relative',
-          borderRadius: 'var(--r-xl)',
-          border: '1px solid var(--hairline)',
-          overflow: 'hidden',
-        }}
+          '--accent': 'var(--violet)',
+          marginTop: 16,
+          backgroundImage: campaign.header_image
+            ? undefined
+            : `${gradient}, var(--void)`,
+          backgroundSize: 'cover',
+        } as React.CSSProperties}
+        aria-label={`${campaign.name} — kroniek-header`}
       >
-        {campaign.header_image ? (
+        {/* Background image */}
+        {campaign.header_image && sanitizeImageUrl(campaign.header_image) && (
           <div
             aria-hidden="true"
             style={{
               position: 'absolute', inset: 0,
-              backgroundImage: sanitizeImageUrl(campaign.header_image) ? `url(${sanitizeImageUrl(campaign.header_image)})` : undefined,
+              backgroundImage: `url(${sanitizeImageUrl(campaign.header_image)})`,
               backgroundSize: 'cover',
               backgroundPosition: campaign.header_image_position ?? 'center',
             }}
           />
-        ) : (
-          <div
-            aria-hidden="true"
-            style={{ position: 'absolute', inset: 0, background: `${gradient}, var(--void)` }}
-          />
         )}
 
-        <div aria-hidden="true" className="wdh-scrim" style={{ background: scrimGradient }} />
+        <div className="world-hero-v2-gradient" aria-hidden="true" />
+        <div className="world-hero-v2-accent-bar" aria-hidden="true" />
 
-        {/* Mobile layout */}
-        <div className="wdh-mobile">
-          <div
-            aria-hidden="true"
-            style={{
-              position: 'absolute',
-              top: '8%', left: '50%',
-              transform: 'translateX(-50%)',
-              fontFamily: 'var(--font-display)',
-              fontSize: 'clamp(120px, 38vw, 180px)',
-              fontWeight: 600,
-              color: 'var(--ink)', opacity: 0.09,
-              lineHeight: 1, userSelect: 'none', pointerEvents: 'none',
-              whiteSpace: 'nowrap',
-            }}
+        {/* Status badge top-right */}
+        <div style={{ position: 'absolute', top: 20, right: 24, zIndex: 3 }}>
+          <StatusBadge
+            label={campaignStatusLabel[campaign.status]}
+            color={campaignStatusColor[campaign.status]}
+          />
+        </div>
+
+        <div className="world-hero-v2-content">
+          {/* Eyebrow: world name */}
+          <p className="world-hero-v2-era">
+            {campaign.worlds?.name ?? ''}
+          </p>
+
+          {/* Title */}
+          <h1
+            className="world-hero-v2-name"
+            style={{ fontSize: titleSize }}
           >
-            {initial}
-          </div>
+            {campaign.name.toUpperCase()}
+          </h1>
 
-          <div style={{ display: 'flex', justifyContent: 'flex-end', padding: '16px 20px 0' }}>
-            <StatusBadge label={campaignStatusLabel[campaign.status]} color={campaignStatusColor[campaign.status]} />
-          </div>
+          {/* Motto / subtitle */}
+          {campaign.subtitle && (
+            <p className="world-hero-v2-quote">"{campaign.subtitle}"</p>
+          )}
 
-          <div style={{ flex: 1 }} />
-
-          <div style={{ padding: '0 24px 28px' }}>
-            {campaign.subtitle && (
-              <p style={{
-                fontFamily: "'Cormorant Garamond', Georgia, serif",
-                fontStyle: 'italic',
-                fontSize: 13, letterSpacing: '0.03em',
-                color: 'var(--gold)', margin: '0 0 10px',
-              }}>
-                {campaign.subtitle}
-              </p>
-            )}
-            <h1 style={{
-              fontFamily: 'var(--font-display)',
-              fontSize: 'clamp(24px, 6.5vw, 34px)',
-              fontWeight: 600, lineHeight: 0.92,
-              letterSpacing: '0.04em', textTransform: 'uppercase',
-              color: 'var(--ink)', margin: '0 0 14px',
-              overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
-              maxWidth: '100%',
-            }}>
-              {campaign.name}
-            </h1>
+          <div className="world-hero-v2-bottom">
             {campaign.description && (
-              <p style={{
-                fontSize: 13, lineHeight: 1.7,
-                color: 'var(--ink-soft)', margin: '0 0 18px',
-              }}>
-                {campaign.description}
-              </p>
+              <p className="world-hero-v2-desc">{campaign.description}</p>
             )}
-            <div className="wdh-btns">
+            <div className="world-hero-v2-actions">
               <Button
                 variant="primary"
-                aria-label="Sessie starten"
                 onClick={() => navigate(`/campaigns/${id}/sessions`)}
+                aria-label="Sessie starten"
               >
                 ▶ Sessie starten
               </Button>
               <Button
                 variant="gold"
-                aria-label="Lore Forge — AI lore genereren"
+                onClick={() => navigate(`/worlds/${campaign.world_id}/world-builder`)}
+                aria-label="Lore Forge openen"
               >
                 ✦ Lore Forge
               </Button>
-            </div>
-          </div>
-        </div>
-
-        {/* Desktop layout */}
-        <div className="wdh-desktop">
-          <div
-            aria-hidden="true"
-            style={{
-              position: 'absolute',
-              top: '8%', left: '50%',
-              transform: 'translateX(-50%)',
-              fontFamily: 'var(--font-display)',
-              fontSize: 'clamp(180px, 26vw, 320px)',
-              fontWeight: 600,
-              color: 'var(--ink)', opacity: 0.09,
-              lineHeight: 1, userSelect: 'none', pointerEvents: 'none',
-              whiteSpace: 'nowrap',
-            }}
-          >
-            {initial}
-          </div>
-
-          <div style={{ display: 'flex', justifyContent: 'flex-end', padding: '20px 28px 0' }}>
-            <StatusBadge label={campaignStatusLabel[campaign.status]} color={campaignStatusColor[campaign.status]} />
-          </div>
-
-          <div style={{ flex: 1 }} />
-
-          <div style={{ padding: '0 clamp(28px, 4vw, 48px) 36px' }}>
-            {campaign.subtitle && (
-              <p style={{
-                fontFamily: "'Cormorant Garamond', Georgia, serif",
-                fontStyle: 'italic',
-                fontSize: 15, letterSpacing: '0.03em',
-                color: 'var(--gold)', margin: '0 0 12px',
-              }}>
-                {campaign.subtitle}
-              </p>
-            )}
-            <h1 style={{
-              fontFamily: 'var(--font-display)',
-              fontSize: 'clamp(44px, 5.5vw, 80px)',
-              fontWeight: 600, lineHeight: 0.92,
-              letterSpacing: '0.04em', textTransform: 'uppercase',
-              color: 'var(--ink)', margin: '0 0 18px',
-              overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
-            }}>
-              {campaign.name}
-            </h1>
-
-            <div style={{ display: 'flex', alignItems: 'flex-end', gap: 32 }}>
-              <div style={{ flex: 1, minWidth: 0 }}>
-                {campaign.description && (
-                  <p style={{
-                    fontSize: 14, lineHeight: 1.7,
-                    color: 'var(--ink-soft)', margin: 0,
-                  }}>
-                    {campaign.description}
-                  </p>
-                )}
-              </div>
-              <div style={{ flexShrink: 0, display: 'flex', gap: 10 }}>
+              {isDM && (
                 <Button
-                  variant="primary"
-                  aria-label="Sessie starten"
-                  onClick={() => navigate(`/campaigns/${id}/sessions`)}
+                  variant="ghost"
+                  onClick={() => navigate(`/campaigns/${id}/edit`)}
+                  aria-label="Kroniek bewerken"
                 >
-                  ▶ Sessie starten
+                  ✎ Bewerken
                 </Button>
-              </div>
+              )}
             </div>
           </div>
         </div>
-      </div>
+      </section>
 
       {/* ── Party banner ── */}
       {characters && characters.length > 0 && (
-        <div style={{ marginTop: 24 }}>
+        <div style={{ marginTop: 20 }}>
           <ReisgezelschapBanner
             campaignId={id!}
             partyVitals={{
               avgLevel: Math.round(characters.reduce((s, c) => s + c.level, 0) / characters.length),
-              totalHp: characters.reduce((s, c) => s + c.hp_current, 0),
+              totalHp:  characters.reduce((s, c) => s + c.hp_current, 0),
               treasury: characters.reduce((s, c) => s + (c.gold ?? 0), 0),
             }}
             partyMembers={characters.map(c => ({ id: c.id, name: c.name }))}
@@ -295,17 +219,14 @@ export default function CampaignDetailPage() {
         </div>
       )}
 
-      {/* ── Tab navigation ── */}
-      <div style={{ marginTop: 32 }}>
+      {/* ── Tabs ── */}
+      <div style={{ marginTop: 28 }}>
         <Tabs
           variant="line"
-          label="Kroniek secties"
+          label="Kroniek-secties"
           value={activeTab}
-          onValueChange={(id) => setActiveTab(id as TabId)}
-          items={TABS.filter(tab => !tab.dmOnly || campaign.user_id === user?.id).map(tab => ({
-            id: tab.id,
-            label: tab.label,
-          }))}
+          onValueChange={(v) => setActiveTab(v as TabId)}
+          items={tabs.map(t => ({ id: t.id, label: t.label }))}
         />
       </div>
 
@@ -313,7 +234,8 @@ export default function CampaignDetailPage() {
       <div
         role="tabpanel"
         id={`panel-${activeTab}`}
-        style={{ marginTop: 32 }}
+        aria-labelledby={`tab-${activeTab}`}
+        style={{ marginTop: 28 }}
       >
         {activeTab === 'party' && (
           <PartyTab
@@ -356,6 +278,7 @@ export default function CampaignDetailPage() {
         {activeTab === 'npcs' && (
           <NpcsTab
             npcs={npcs ?? []}
+            factions={factions}
             isLoading={isLoadingNpcs}
             forging={createNpc.isPending}
             onForge={() => createNpc.mutate()}
@@ -366,6 +289,7 @@ export default function CampaignDetailPage() {
         {activeTab === 'factions' && (
           <FactionsTab
             factions={factions}
+            npcs={npcs}
             isLoading={isLoadingFactions}
             forging={createFaction.isPending}
             onForge={() => createFaction.mutate()}
@@ -403,11 +327,11 @@ export default function CampaignDetailPage() {
           />
         )}
 
-        {activeTab === 'notes' && (
+        {activeTab === 'notes' && isDM && (
           <NotesTab notes={campaign.notes} />
         )}
 
-        {activeTab === 'invite' && campaign.user_id === user?.id && (
+        {activeTab === 'invite' && isDM && (
           <InvitePanel campaignId={id!} campaignName={campaign.name} />
         )}
       </div>
