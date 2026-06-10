@@ -2,15 +2,8 @@ import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import type { Faction, FactionReputation } from '@/types/faction.types'
 import type { Npc } from '@/types/npc.types'
-import { factionReputationLabel } from '@/lib/statusMaps'
-
-const STANDING_COLORS: Record<FactionReputation, string> = {
-  hostile:    'var(--crimson)',
-  unfriendly: 'var(--crimson)',
-  neutral:    'var(--muted)',
-  friendly:   'var(--teal)',
-  allied:     'var(--teal)',
-}
+import { factionReputationLabel, factionReputationColor } from '@/lib/statusMaps'
+import { entityAccentColor } from '@/utils/pickGradient'
 
 const REPUTATION_ORDER: FactionReputation[] = ['hostile', 'unfriendly', 'neutral', 'friendly', 'allied']
 
@@ -19,17 +12,11 @@ function reputationIndex(rep: FactionReputation): number {
 }
 
 function pipColor(faction: Faction, i: number): string {
+  const color = factionReputationColor[faction.reputation]
   const idx = reputationIndex(faction.reputation)
-  if (i < idx) return STANDING_COLORS[faction.reputation]
-  if (i === idx) return `color-mix(in oklab, ${STANDING_COLORS[faction.reputation]} 42%, transparent)`
+  if (i < idx) return color
+  if (i === idx) return `color-mix(in oklab, ${color} 42%, transparent)`
   return 'var(--surface-3)'
-}
-
-function factionAccent(id: string): string {
-  const colors = ['var(--violet)', 'var(--gold)', 'var(--teal)', 'var(--crimson)', 'var(--azure)']
-  let h = 0
-  for (let i = 0; i < id.length; i++) h = (h * 31 + id.charCodeAt(i)) >>> 0
-  return colors[h % colors.length]
 }
 
 interface Props {
@@ -44,7 +31,8 @@ export function FactionSplitView({ factions, npcs = [] }: Props) {
 
   if (factions.length === 0) return null
 
-  const accent = selected ? factionAccent(selected.id) : 'var(--violet)'
+  const accent = selected ? entityAccentColor(selected.id) : 'var(--violet)'
+  const repColor = selected ? factionReputationColor[selected.reputation] : 'var(--muted)'
   const members = selected ? npcs.filter(n => n.faction_id === selected.id) : []
 
   return (
@@ -57,9 +45,9 @@ export function FactionSplitView({ factions, npcs = [] }: Props) {
         aria-orientation="vertical"
       >
         {factions.map((f) => {
-          const acc = factionAccent(f.id)
+          const acc = entityAccentColor(f.id)
           const isSel = f.id === selectedId
-          const stColor = STANDING_COLORS[f.reputation]
+          const stColor = factionReputationColor[f.reputation]
           return (
             <li
               key={f.id}
@@ -73,7 +61,6 @@ export function FactionSplitView({ factions, npcs = [] }: Props) {
                 aria-label={`${f.name}, ${factionReputationLabel[f.reputation]}`}
               >
                 <div className="party-split-row-stripe" aria-hidden="true" />
-                {/* Glyph circle */}
                 <div style={{
                   width: 44, height: 44, borderRadius: '50%', flexShrink: 0,
                   display: 'flex', alignItems: 'center', justifyContent: 'center',
@@ -87,7 +74,6 @@ export function FactionSplitView({ factions, npcs = [] }: Props) {
                   <div className="party-split-row-top">
                     <span style={{ fontSize: 13, fontWeight: 600, color: 'var(--ink)' }}>{f.name}</span>
                   </div>
-                  {/* Standing pips */}
                   <div style={{ display: 'flex', gap: 3, marginTop: 6 }}>
                     {[1,2,3,4,5].map((i) => (
                       <div key={i} style={{ width: 16, height: 4, borderRadius: 2, background: pipColor(f, i), transition: 'background 300ms' }} aria-hidden="true" />
@@ -106,19 +92,17 @@ export function FactionSplitView({ factions, npcs = [] }: Props) {
       {/* RIGHT — detail */}
       {selected && (
         <div className="party-split-detail fade-in" key={selected.id}>
-          {/* Header */}
+          {/* Header — not aria-hidden; contains the navigation button */}
           <div
             className="party-split-portrait"
             style={{ '--accent': accent } as React.CSSProperties}
-            aria-hidden="true"
           >
-            <div style={{
+            <div aria-hidden="true" style={{
               position: 'absolute', inset: 0,
               background: `linear-gradient(135deg, color-mix(in oklab, ${accent} 18%, var(--void)) 0%, var(--void) 100%)`,
             }} />
-            <div className="party-split-portrait-scrim" />
-            {/* Watermark glyph */}
-            <div style={{
+            <div className="party-split-portrait-scrim" aria-hidden="true" />
+            <div aria-hidden="true" style={{
               position: 'absolute', top: '50%', left: '50%',
               transform: 'translate(-50%, -60%)',
               fontFamily: 'var(--font-display)', fontSize: 110, fontWeight: 700,
@@ -131,10 +115,10 @@ export function FactionSplitView({ factions, npcs = [] }: Props) {
               onClick={() => navigate(`/factions/${selected.id}`)}
               aria-label={`Volledige factie-pagina van ${selected.name} openen`}
             >
-              <span className="char-portal-btn-label">Toon factie</span>
+              <span className="char-portal-btn-label" aria-hidden="true">Toon factie</span>
               <span className="char-portal-btn-icon" aria-hidden="true">→</span>
             </button>
-            <div className="party-split-portrait-badge">
+            <div className="party-split-portrait-badge" aria-hidden="true">
               <span style={{
                 fontSize: 9, fontFamily: 'var(--font-mono)', fontWeight: 700, letterSpacing: '0.12em',
                 padding: '3px 9px', borderRadius: 'var(--r-full)',
@@ -161,25 +145,25 @@ export function FactionSplitView({ factions, npcs = [] }: Props) {
             <div style={{ marginTop: 16 }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 }}>
                 <span style={{ fontFamily: 'var(--font-mono)', fontSize: 9, letterSpacing: '0.18em', textTransform: 'uppercase', color: 'var(--muted)' }}>Houding</span>
-                <span style={{ fontFamily: 'var(--font-mono)', fontSize: 10, fontWeight: 600, color: STANDING_COLORS[selected.reputation] }}>
+                <span style={{ fontFamily: 'var(--font-mono)', fontSize: 10, fontWeight: 600, color: repColor }}>
                   {factionReputationLabel[selected.reputation]}
                 </span>
               </div>
-              <div className="faction-standing-track">
+              <div className="faction-standing-track" aria-label={`Reputatie: ${factionReputationLabel[selected.reputation]}`}>
                 {[1,2,3,4,5].map((i) => (
                   <div key={i} className="faction-standing-pip" style={{ background: pipColor(selected, i) }} aria-hidden="true" />
                 ))}
               </div>
-              <div className="faction-standing-labels">
+              <div className="faction-standing-labels" aria-hidden="true">
                 {['Vijandig', '', 'Neutraal', '', 'Trouw'].map((t, i) => (
                   <span key={i} style={{ fontSize: 8, color: 'var(--subtle)', fontFamily: 'var(--font-mono)' }}>{t}</span>
                 ))}
               </div>
             </div>
 
-            {/* Two-column body */}
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 160px', gap: 20, marginTop: 20 }}>
-              {/* Left: description */}
+            {/* Body: description + members — stacks on narrow, side-by-side on wide */}
+            <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1fr)', gap: 20, marginTop: 20 }}
+              className="faction-detail-body-grid">
               <div>
                 {selected.description && (
                   <div>
@@ -207,7 +191,6 @@ export function FactionSplitView({ factions, npcs = [] }: Props) {
                 )}
               </div>
 
-              {/* Right: members */}
               <div>
                 <div style={{ fontFamily: 'var(--font-mono)', fontSize: 9, fontWeight: 600, letterSpacing: '0.18em', textTransform: 'uppercase', color: 'var(--muted)', marginBottom: 8 }}>
                   Leden · {members.length}
@@ -233,7 +216,7 @@ export function FactionSplitView({ factions, npcs = [] }: Props) {
                           fontFamily: 'var(--font-display)', fontSize: 10, color: accent,
                           background: `color-mix(in oklab, ${accent} 12%, transparent)`,
                           border: `1px solid color-mix(in oklab, ${accent} 26%, transparent)`,
-                        }}>
+                        }} aria-hidden="true">
                           {m.name[0]?.toUpperCase()}
                         </div>
                         <div style={{ fontSize: 11, fontWeight: 600, color: 'var(--ink)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', flex: 1 }}>

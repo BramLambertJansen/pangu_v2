@@ -2580,6 +2580,8 @@ body {
 
 /* RIGHT — detail panel */
 .party-split-detail {
+  container-type: inline-size;
+  container-name: party-detail;
   display: flex;
   flex-direction: column;
   overflow-y: auto;
@@ -2702,6 +2704,16 @@ body {
   display: flex;
   justify-content: space-between;
   margin-top: 5px;
+}
+
+/* Body grid: single column by default, two-column when space allows */
+.faction-detail-body-grid {
+  grid-template-columns: minmax(0, 1fr);
+}
+@container party-detail (min-width: 360px) {
+  .faction-detail-body-grid {
+    grid-template-columns: 1fr 160px;
+  }
 }
 
 /* ════════════════════════════════════════════════════════════════

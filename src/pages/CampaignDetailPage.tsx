@@ -35,7 +35,7 @@ import { useAuthStore } from '@/stores/auth.store'
 type TabId = 'party' | 'sessions' | 'locations' | 'lore' | 'npcs' | 'factions' | 'quests' | 'encounters' | 'treasury' | 'notes' | 'invite'
 
 const ALL_TABS: { id: TabId; label: string; dmOnly?: boolean }[] = [
-  { id: 'party',     label: 'The Party' },
+  { id: 'party',     label: 'Het Gezelschap' },
   { id: 'sessions',  label: 'Sessies' },
   { id: 'locations', label: 'Locaties' },
   { id: 'lore',      label: 'Lore' },
@@ -241,7 +241,6 @@ export default function CampaignDetailPage() {
           <PartyTab
             characters={characters ?? []}
             isLoading={isLoadingCharacters}
-            allItems={allItems ?? []}
             onAddHero={() => navigate('/characters')}
           />
         )}

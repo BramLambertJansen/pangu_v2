@@ -2,17 +2,8 @@ import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { sanitizeImageUrl } from '@/utils/sanitizeUrl'
 import { OrnateDivider } from '@/components/ui/OrnateDivider'
+import { entityAccentColor } from '@/utils/pickGradient'
 import type { Character } from '@/types/character.types'
-
-const ACCENT_COLORS = [
-  'var(--violet)', 'var(--teal)', 'var(--gold)', 'var(--crimson)', 'var(--azure)',
-]
-
-function getAccent(id: string): string {
-  let h = 0
-  for (let i = 0; i < id.length; i++) h = (h * 31 + id.charCodeAt(i)) >>> 0
-  return ACCENT_COLORS[h % ACCENT_COLORS.length]
-}
 
 function mod(v: number): string {
   const m = Math.floor((v - 10) / 2)
@@ -55,7 +46,7 @@ export function PartySplitView({ characters }: Props) {
         aria-orientation="vertical"
       >
         {characters.map((c) => {
-          const accent = getAccent(c.id)
+          const accent = entityAccentColor(c.id)
           const hpPct = c.hp_max > 0 ? c.hp_current / c.hp_max : 1
           const xpPct = c.xp_next > 0 ? c.xp / c.xp_next : 0
           const isSel = c.id === selectedId
@@ -117,47 +108,49 @@ export function PartySplitView({ characters }: Props) {
       </ul>
 
       {/* RIGHT — detail */}
-      {selected && (
+      {selected && (() => {
+        const accent = entityAccentColor(selected.id)
+        return (
         <div className="party-split-detail fade-in" key={selected.id}>
-          {/* Portrait */}
+          {/* Portrait — not aria-hidden; contains the navigation button */}
           <div
             className="party-split-portrait"
-            style={{ '--accent': getAccent(selected.id) } as React.CSSProperties}
-            aria-hidden="true"
+            style={{ '--accent': accent } as React.CSSProperties}
           >
             {selected.portrait_url ? (
               <img
                 src={sanitizeImageUrl(selected.portrait_url) ?? ''}
                 alt=""
+                aria-hidden="true"
                 style={{
                   position: 'absolute', inset: 0, width: '100%', height: '100%',
                   objectFit: 'cover', objectPosition: selected.portrait_position ?? 'center',
                 }}
               />
             ) : (
-              <div style={{
+              <div aria-hidden="true" style={{
                 position: 'absolute', inset: 0,
-                background: `linear-gradient(135deg, color-mix(in oklab, ${getAccent(selected.id)} 18%, var(--void-2)) 0%, var(--void-2) 100%)`,
+                background: `linear-gradient(135deg, color-mix(in oklab, ${accent} 18%, var(--void-2)) 0%, var(--void-2) 100%)`,
                 display: 'flex', alignItems: 'center', justifyContent: 'center',
                 fontFamily: 'var(--font-display)', fontSize: 80, fontWeight: 700,
-                color: getAccent(selected.id), opacity: 0.35,
+                color: accent, opacity: 0.35,
               }}>
                 {selected.name[0]?.toUpperCase()}
               </div>
             )}
-            <div className="party-split-portrait-scrim" />
+            <div className="party-split-portrait-scrim" aria-hidden="true" />
             <button
               className="char-portal-btn"
               onClick={() => navigate(`/characters/${selected.id}`)}
               aria-label={`Volledige karakterpagina van ${selected.name} openen`}
             >
-              <span className="char-portal-btn-label">Toon karakter</span>
+              <span className="char-portal-btn-label" aria-hidden="true">Toon karakter</span>
               <span className="char-portal-btn-icon" aria-hidden="true">→</span>
             </button>
-            <div className="party-split-portrait-badge">
+            <div className="party-split-portrait-badge" aria-hidden="true">
               <span className="badge badge-solid-gold">LV {selected.level}</span>
               {selected.character_class && (
-                <span className="badge badge-outline" style={{ borderColor: getAccent(selected.id), color: getAccent(selected.id) }}>
+                <span className="badge badge-outline" style={{ borderColor: accent, color: accent }}>
                   {selected.character_class}
                 </span>
               )}
@@ -185,7 +178,7 @@ export function PartySplitView({ characters }: Props) {
                   <div style={{
                     height: '100%', borderRadius: 2,
                     width: `${Math.min(100, (selected.xp / selected.xp_next) * 100)}%`,
-                    background: getAccent(selected.id),
+                    background: accent,
                     transition: 'width 600ms',
                   }} />
                 </div>
@@ -243,14 +236,15 @@ export function PartySplitView({ characters }: Props) {
             {/* Description */}
             {selected.description && (
               <div style={{ marginTop: 16 }}>
-                <p style={{ fontSize: 13, lineHeight: 1.7, color: 'var(--ink-soft)', margin: 0, borderLeft: `2px solid ${getAccent(selected.id)}`, paddingLeft: 12 }}>
+                <p style={{ fontSize: 13, lineHeight: 1.7, color: 'var(--ink-soft)', margin: 0, borderLeft: `2px solid ${accent}`, paddingLeft: 12 }}>
                   {selected.description}
                 </p>
               </div>
             )}
           </div>
         </div>
-      )}
+        )
+      })()}
     </div>
   )
 }

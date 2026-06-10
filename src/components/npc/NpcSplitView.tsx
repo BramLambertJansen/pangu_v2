@@ -2,26 +2,13 @@ import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import type { Npc } from '@/types/npc.types'
 import type { Faction } from '@/types/faction.types'
+import { npcStatusColor, npcStatusLabel } from '@/lib/statusMaps'
 
-type Mood = 'ally' | 'neutral' | 'uncertain' | 'hostile' | 'dangerous'
-
-interface MoodMeta { color: string; label: string; glyph: string }
-
-const MOOD_META: Record<Mood, MoodMeta> = {
-  ally:      { color: 'var(--teal)',    label: 'Bondgenoot', glyph: '✓' },
-  neutral:   { color: 'var(--muted)',   label: 'Neutraal',   glyph: '·' },
-  uncertain: { color: 'var(--gold)',    label: 'Onzeker',    glyph: '?' },
-  hostile:   { color: 'var(--crimson)', label: 'Vijand',     glyph: '✗' },
-  dangerous: { color: 'var(--crimson)', label: 'Gevaarlijk', glyph: '☠' },
-}
-
-function statusToMood(status: Npc['status']): Mood {
-  switch (status) {
-    case 'active':   return 'ally'
-    case 'retired':  return 'uncertain'
-    case 'archived': return 'hostile'
-    default:         return 'neutral'
-  }
+const STATUS_GLYPH: Record<Npc['status'], string> = {
+  active:   '✓',
+  draft:    '·',
+  retired:  '?',
+  archived: '✗',
 }
 
 interface Props {
@@ -46,7 +33,7 @@ export function NpcSplitView({ npcs, factions = [] }: Props) {
         aria-orientation="vertical"
       >
         {npcs.map((n) => {
-          const mood = MOOD_META[statusToMood(n.status)]
+          const color = npcStatusColor[n.status]
           const isSel = n.id === selectedId
           const faction = n.faction_id ? factions.find(f => f.id === n.faction_id) : null
           return (
@@ -57,16 +44,16 @@ export function NpcSplitView({ npcs, factions = [] }: Props) {
             >
               <button
                 className={`npc-split-row${isSel ? ' is-selected' : ''}`}
-                style={{ '--mood-color': mood.color } as React.CSSProperties}
+                style={{ '--mood-color': color } as React.CSSProperties}
                 onClick={() => setSelectedId(n.id)}
                 aria-label={`${n.name}${n.npc_role ? `, ${n.npc_role}` : ''}`}
               >
                 <div className="npc-split-mood-bar" aria-hidden="true" />
                 <div className="npc-split-av" aria-hidden="true">
                   <div className="npc-split-av-img">
-                    <span style={{ color: mood.color }}>{n.name[0]?.toUpperCase()}</span>
+                    <span style={{ color }}>{n.name[0]?.toUpperCase()}</span>
                   </div>
-                  <div className="npc-mood-dot" aria-hidden="true">{mood.glyph}</div>
+                  <div className="npc-mood-dot" aria-hidden="true">{STATUS_GLYPH[n.status]}</div>
                 </div>
                 <div style={{ flex: 1, minWidth: 0, textAlign: 'left' }}>
                   <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--ink)' }}>{n.name}</div>
@@ -87,42 +74,42 @@ export function NpcSplitView({ npcs, factions = [] }: Props) {
 
       {/* RIGHT — detail */}
       {selected && (() => {
-        const mood = MOOD_META[statusToMood(selected.status)]
+        const color = npcStatusColor[selected.status]
         const faction = selected.faction_id ? factions.find(f => f.id === selected.faction_id) : null
         return (
           <div className="party-split-detail fade-in" key={selected.id}>
+            {/* Portrait — not aria-hidden; contains the navigation button */}
             <div
               className="party-split-portrait"
-              style={{ '--mood-color': mood.color } as React.CSSProperties}
-              aria-hidden="true"
+              style={{ '--mood-color': color } as React.CSSProperties}
             >
-              <div style={{
+              <div aria-hidden="true" style={{
                 position: 'absolute', inset: 0,
-                background: `linear-gradient(135deg, color-mix(in oklab, ${mood.color} 14%, var(--void-2)) 0%, var(--void-2) 100%)`,
+                background: `linear-gradient(135deg, color-mix(in oklab, ${color} 14%, var(--void-2)) 0%, var(--void-2) 100%)`,
                 display: 'flex', alignItems: 'center', justifyContent: 'center',
                 fontFamily: 'var(--font-display)', fontSize: 80, fontWeight: 700,
-                color: mood.color, opacity: 0.25,
+                color, opacity: 0.25,
               }}>
                 {selected.name[0]?.toUpperCase()}
               </div>
-              <div className="party-split-portrait-scrim" />
+              <div className="party-split-portrait-scrim" aria-hidden="true" />
               <button
                 className="char-portal-btn"
                 onClick={() => navigate(`/npcs/${selected.id}`)}
                 aria-label={`Volledige NPC-pagina van ${selected.name} openen`}
               >
-                <span className="char-portal-btn-label">Toon NPC</span>
+                <span className="char-portal-btn-label" aria-hidden="true">Toon NPC</span>
                 <span className="char-portal-btn-icon" aria-hidden="true">→</span>
               </button>
-              <div className="party-split-portrait-badge">
+              <div className="party-split-portrait-badge" aria-hidden="true">
                 <span style={{
                   fontSize: 9, fontFamily: 'var(--font-mono)', fontWeight: 700, letterSpacing: '0.12em',
                   padding: '3px 9px', borderRadius: 'var(--r-full)',
-                  background: `color-mix(in oklab, ${mood.color} 18%, transparent)`,
-                  border: `1px solid color-mix(in oklab, ${mood.color} 40%, transparent)`,
-                  color: mood.color, textTransform: 'uppercase',
+                  background: `color-mix(in oklab, ${color} 18%, transparent)`,
+                  border: `1px solid color-mix(in oklab, ${color} 40%, transparent)`,
+                  color, textTransform: 'uppercase',
                 }}>
-                  {mood.label}
+                  {npcStatusLabel[selected.status]}
                 </span>
               </div>
             </div>
@@ -138,7 +125,7 @@ export function NpcSplitView({ npcs, factions = [] }: Props) {
               {selected.description && (
                 <p style={{
                   fontSize: 14, lineHeight: 1.7, color: 'var(--ink-soft)',
-                  borderLeft: `2px solid ${mood.color}`, paddingLeft: 14,
+                  borderLeft: `2px solid ${color}`, paddingLeft: 14,
                   margin: '16px 0 0',
                   fontStyle: 'italic',
                 }}>
@@ -159,7 +146,7 @@ export function NpcSplitView({ npcs, factions = [] }: Props) {
                     fontFamily: 'var(--font-display)', fontSize: 13, color: 'var(--violet)',
                     background: 'rgb(var(--violet-rgb) / 0.14)',
                     border: '1px solid rgb(var(--violet-rgb) / 0.28)',
-                  }}>
+                  }} aria-hidden="true">
                     {faction.name[0]?.toUpperCase()}
                   </div>
                   <div>

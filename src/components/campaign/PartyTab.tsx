@@ -2,7 +2,6 @@ import { Button } from '@/components/ui/Button'
 import { Spinner } from '@/components/ui/Spinner'
 import { PartySplitView, PartyVitalsGrid } from '@/components/campaign/PartySplitView'
 import type { Character } from '@/types/character.types'
-import type { Item } from '@/types/item.types'
 
 export function PartyTab({
   characters,
@@ -11,7 +10,6 @@ export function PartyTab({
 }: {
   characters: Character[]
   isLoading: boolean
-  allItems: Item[]
   onAddHero: () => void
 }) {
   return (
