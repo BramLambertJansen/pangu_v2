@@ -1,51 +1,50 @@
-import { useState } from 'react'
-import { NpcRow } from '@/components/npc/NpcCard'
-import { DmNpcPanel } from '@/components/npc/DmNpcPanel'
 import { Button } from '@/components/ui/Button'
 import { Spinner } from '@/components/ui/Spinner'
+import { NpcSplitView } from '@/components/npc/NpcSplitView'
 import type { Npc } from '@/types/npc.types'
+import type { Faction } from '@/types/faction.types'
 
 export function NpcsTab({
   npcs,
+  factions,
   isLoading,
   forging,
   onForge,
   onViewAll,
 }: {
   npcs: Npc[]
+  factions?: Faction[]
   isLoading: boolean
   forging: boolean
   onForge: () => void
   onViewAll: () => void
 }) {
-  const [selectedId, setSelectedId] = useState<string | null>(
-    () => npcs[0]?.id ?? null
-  )
-  const selected = npcs.find(n => n.id === selectedId) ?? npcs[0] ?? null
-
   return (
     <section aria-labelledby="tab-npcs-heading">
-      <style>{`
-        .npc-split { display: grid; grid-template-columns: minmax(240px, 2fr) minmax(300px, 3fr); gap: 20px; align-items: start; }
-        @media (max-width: 700px) { .npc-split { grid-template-columns: 1fr; } }
-      `}</style>
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
-        <h2
-          id="tab-npcs-heading"
-          style={{
-            fontFamily: 'var(--font-display)',
-            fontSize: 'clamp(22px, 4vw, 30px)',
-            fontWeight: 600,
-            letterSpacing: '0.06em',
-            textTransform: 'uppercase',
-            color: 'var(--ink)',
-            margin: 0,
-          }}
-        >
-          NPC's
-        </h2>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 20 }}>
+        <div>
+          <h2
+            id="tab-npcs-heading"
+            style={{
+              fontFamily: 'var(--font-display)',
+              fontSize: 'clamp(20px, 3.5vw, 28px)',
+              fontWeight: 700,
+              letterSpacing: '0.06em',
+              textTransform: 'uppercase',
+              color: 'var(--ink)',
+              margin: 0,
+            }}
+          >
+            NPC's
+          </h2>
+          <div style={{ fontSize: 11, color: 'var(--muted)', marginTop: 4 }}>
+            {npcs.length} personage{npcs.length !== 1 ? 's' : ''}
+          </div>
+        </div>
         <div style={{ display: 'flex', gap: 8 }}>
-          <Button variant="ghost" size="sm"
+          <Button
+            variant="ghost"
+            size="sm"
             onClick={onForge}
             disabled={forging}
             aria-busy={forging}
@@ -53,9 +52,7 @@ export function NpcsTab({
             {forging ? 'Aanmaken…' : '+ NPC toevoegen'}
           </Button>
           {npcs.length > 0 && (
-            <Button variant="ghost" size="sm"
-              onClick={onViewAll}
-            >
+            <Button variant="ghost" size="sm" onClick={onViewAll}>
               Alle NPCs →
             </Button>
           )}
@@ -67,37 +64,22 @@ export function NpcsTab({
           <Spinner size="md" />
         </div>
       ) : npcs.length > 0 ? (
-        <div className="npc-split">
-          <ul
-            style={{ display: 'flex', flexDirection: 'column', gap: 8, listStyle: 'none', padding: 0, margin: 0 }}
-            role="list"
-            aria-label="NPC's in deze kroniek"
-          >
-            {npcs.map((npc) => (
-              <li key={npc.id}>
-                <NpcRow
-                  npc={npc}
-                  selected={npc.id === (selected?.id)}
-                  onSelect={() => setSelectedId(npc.id)}
-                />
-              </li>
-            ))}
-          </ul>
-
-          {selected && (
-            <div style={{ position: 'sticky', top: 20, maxHeight: 'calc(100vh - 180px)' }}>
-              <DmNpcPanel npc={selected} />
-            </div>
-          )}
-        </div>
+        <NpcSplitView npcs={npcs} factions={factions} />
       ) : (
-        <div className="pangu-surface" style={{ padding: 24, textAlign: 'center', borderStyle: 'dashed' }}>
-          <p style={{ fontSize: 14, color: 'var(--muted)', margin: '0 0 6px', fontStyle: 'italic' }}>
+        <div
+          style={{
+            padding: 32, textAlign: 'center',
+            background: 'var(--surface)',
+            border: '1px dashed var(--hairline)',
+            borderRadius: 'var(--r-xl)',
+          }}
+        >
+          <p style={{ fontSize: 14, color: 'var(--muted)', margin: '0 0 8px', fontStyle: 'italic' }}>
             Nog geen NPC's in deze kroniek.
           </p>
-          <p style={{ fontSize: 12, color: 'var(--subtle)', margin: 0 }}>
-            Voeg een NPC toe om personages bij te houden.
-          </p>
+          <Button variant="ghost" size="sm" onClick={onForge} disabled={forging}>
+            {forging ? 'Aanmaken…' : '+ NPC toevoegen'}
+          </Button>
         </div>
       )}
     </section>

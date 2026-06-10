@@ -1,50 +1,40 @@
-import { useState } from 'react'
-import { PartyMemberRow } from '@/components/character/CharacterCard'
-import { DmCharacterPanel } from '@/components/character/DmCharacterPanel'
 import { Button } from '@/components/ui/Button'
 import { Spinner } from '@/components/ui/Spinner'
+import { PartySplitView, PartyVitalsGrid } from '@/components/campaign/PartySplitView'
 import type { Character } from '@/types/character.types'
-import type { Item } from '@/types/item.types'
 
 export function PartyTab({
   characters,
   isLoading,
-  allItems,
   onAddHero,
 }: {
   characters: Character[]
   isLoading: boolean
-  allItems: Item[]
   onAddHero: () => void
 }) {
-  const [selectedId, setSelectedId] = useState<string | null>(
-    () => characters[0]?.id ?? null
-  )
-
-  const selected = characters.find(c => c.id === selectedId) ?? characters[0] ?? null
-  const characterItems = selected ? allItems.filter(i => i.character_id === selected.id) : []
-
   return (
     <section aria-labelledby="tab-party-heading">
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
-        <h2
-          id="tab-party-heading"
-          style={{
-            fontFamily: 'var(--font-display)',
-            fontSize: 'clamp(22px, 4vw, 30px)',
-            fontWeight: 600,
-            letterSpacing: '0.06em',
-            textTransform: 'uppercase',
-            color: 'var(--ink)',
-            margin: 0,
-          }}
-        >
-          The Party
-        </h2>
-        <Button variant="ghost" size="sm"
-          onClick={onAddHero}
-          aria-label="Held toevoegen — ga naar karakters"
-        >
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 20 }}>
+        <div>
+          <h2
+            id="tab-party-heading"
+            style={{
+              fontFamily: 'var(--font-display)',
+              fontSize: 'clamp(20px, 3.5vw, 28px)',
+              fontWeight: 700,
+              letterSpacing: '0.06em',
+              textTransform: 'uppercase',
+              color: 'var(--ink)',
+              margin: 0,
+            }}
+          >
+            Helden
+          </h2>
+          <div style={{ fontSize: 11, color: 'var(--muted)', marginTop: 4 }}>
+            {characters.length} speler{characters.length !== 1 ? 's' : ''}
+          </div>
+        </div>
+        <Button variant="ghost" size="sm" onClick={onAddHero} aria-label="Held toevoegen">
           + Held toevoegen
         </Button>
       </div>
@@ -54,44 +44,31 @@ export function PartyTab({
           <Spinner size="md" />
         </div>
       ) : characters.length > 0 ? (
-        <div style={{
-          display: 'grid',
-          gridTemplateColumns: 'minmax(280px, 2fr) minmax(320px, 3fr)',
-          gap: 20,
-          alignItems: 'start',
-        }}>
-          {/* Left: party member list */}
-          <ul
-            style={{ display: 'flex', flexDirection: 'column', gap: 10, listStyle: 'none', padding: 0, margin: 0 }}
-            role="list"
-            aria-label="Karakters in deze kroniek"
-          >
-            {characters.map((character) => (
-              <li key={character.id}>
-                <PartyMemberRow
-                  character={character}
-                  selected={character.id === (selected?.id)}
-                  onSelect={() => setSelectedId(character.id)}
-                />
-              </li>
-            ))}
-          </ul>
-
-          {/* Right: DM detail panel */}
-          {selected && (
-            <div style={{ position: 'sticky', top: 20, maxHeight: 'calc(100vh - 180px)' }}>
-              <DmCharacterPanel character={selected} items={characterItems} />
-            </div>
-          )}
-        </div>
+        <>
+          <PartySplitView characters={characters} />
+          <div style={{ marginTop: 28 }}>
+            <PartyVitalsGrid characters={characters} />
+          </div>
+        </>
       ) : (
-        <div className="pangu-surface" style={{ padding: 24, textAlign: 'center', borderStyle: 'dashed' }}>
-          <p style={{ fontSize: 14, color: 'var(--muted)', margin: '0 0 6px', fontStyle: 'italic' }}>
+        <div
+          style={{
+            padding: 32,
+            textAlign: 'center',
+            background: 'var(--surface)',
+            border: '1px dashed var(--hairline)',
+            borderRadius: 'var(--r-xl)',
+          }}
+        >
+          <p style={{ fontSize: 14, color: 'var(--muted)', margin: '0 0 8px', fontStyle: 'italic' }}>
             Nog geen helden in deze kroniek.
           </p>
-          <p style={{ fontSize: 12, color: 'var(--subtle)', margin: 0 }}>
-            Spelers kunnen hun karakter koppelen via het karakterscherm (Karakters → Bewerken → Kampagne).
+          <p style={{ fontSize: 12, color: 'var(--subtle)', margin: '0 0 16px' }}>
+            Spelers koppelen hun karakter via Karakters → Bewerken → Kroniek.
           </p>
+          <Button variant="ghost" size="sm" onClick={onAddHero}>
+            Naar karakters →
+          </Button>
         </div>
       )}
     </section>

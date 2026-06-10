@@ -118,3 +118,13 @@ export function pickCharacterAccent(id: string): string {
   const code = (id.charCodeAt(0) || 0) + (id.charCodeAt(id.length - 1) || 0)
   return characterAccents[code % characterAccents.length]
 }
+
+const entityAccents = ['var(--violet)', 'var(--teal)', 'var(--gold)', 'var(--crimson)', 'var(--azure)'] as const
+
+// Returns a deterministic accent color for any entity using a full polynomial hash of the ID.
+// More uniform distribution than pickCharacterAccent for long UUIDs.
+export function entityAccentColor(id: string): string {
+  let h = 0
+  for (let i = 0; i < id.length; i++) h = (h * 31 + id.charCodeAt(i)) >>> 0
+  return entityAccents[h % entityAccents.length]
+}

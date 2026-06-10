@@ -40,6 +40,12 @@ import { PlaceAccordion } from '@/components/location/PlaceAccordion'
 import { ReisgezelschapBanner } from '@/components/campaign/ReisgezelschapBanner'
 import { StoryArcSpine } from '@/components/campaign/StoryArcSpine'
 import { FactionDisplay } from '@/components/faction/FactionDisplay'
+import { PartySplitView, PartyVitalsGrid } from '@/components/campaign/PartySplitView'
+import { NpcSplitView } from '@/components/npc/NpcSplitView'
+import { FactionSplitView } from '@/components/faction/FactionSplitView'
+import type { Character } from '@/types/character.types'
+import type { Npc } from '@/types/npc.types'
+import type { Faction } from '@/types/faction.types'
 
 const COLOR_TOKENS = [
   'void', 'void-2', 'surface', 'surface-2', 'surface-3', 'surface-hover',
@@ -530,6 +536,23 @@ export default function DesignSystemPage() {
         <SanctumInventory characterId="demo" items={[]} />
       </Section>
 
+      <OrnateDivider label="Split View — meester/detail layouts" />
+
+      <Section title="PartySplitView">
+        <PartySplitView characters={DEMO_CHARACTERS} />
+        <div style={{ marginTop: 24 }}>
+          <PartyVitalsGrid characters={DEMO_CHARACTERS} />
+        </div>
+      </Section>
+
+      <Section title="NpcSplitView">
+        <NpcSplitView npcs={DEMO_NPCS} factions={DEMO_FACTIONS} />
+      </Section>
+
+      <Section title="FactionSplitView">
+        <FactionSplitView factions={DEMO_FACTIONS} npcs={DEMO_NPCS} />
+      </Section>
+
       <OrnateDivider label="Toekomstige componenten" />
 
       <Section title="Stubs (in ontwikkeling)">
@@ -543,6 +566,95 @@ export default function DesignSystemPage() {
     </div>
   )
 }
+
+/* ── Demo data for split-view previews ── */
+
+const DEMO_CHARACTERS: Character[] = [
+  {
+    id: 'c1', user_id: 'u1', campaign_id: null, name: 'Aldric Stonehammer',
+    subtitle: null, character_class: 'Paladin', character_subclass: 'Oath of Devotion',
+    character_race: 'Dwarf', level: 7, xp: 2350, xp_next: 6500,
+    hp_current: 58, hp_max: 72, temp_hp: 0, armor_class: 18, speed: 25,
+    fly_speed: 0, swim_speed: 0, climb_speed: 0, burrow_speed: 0, initiative: 1,
+    proficiency_bonus: 3,
+    stat_str: 18, stat_dex: 12, stat_con: 16, stat_int: 10, stat_wis: 14, stat_cha: 16,
+    gold: 245, silver: 0, copper: 0, platinum: 0, electrum: 0,
+    description: 'Een rechtvaardige dwerg-paladin op zoek naar zijn verloren clan.',
+    notes: null, status: 'active', proficient_skills: ['athletics', 'perception'],
+    saving_throw_proficiencies: ['wis', 'cha'], expertise_skills: [],
+    languages: '', tool_proficiencies: '', weapon_proficiencies: '', armor_proficiencies: '',
+    inspiration: false, hit_die: 'd10', hit_die_current: 7, hit_die_max: 7,
+    death_save_successes: 0, death_save_failures: 0, exhaustion_level: 0,
+    alignment: 'Wettig Goed', personality_traits: '', ideals: '', bonds: '', flaws: '',
+    portrait_url: null, portrait_position: null, background: null,
+    feats: [], weapon_masteries: [], conditions: [],
+    darkvision: 60, other_senses: '',
+    walk_speed_override: null, other_speed_details: null,
+    spell_dc: null, spell_attack_bonus: null, spell_slots: null, concentration: false,
+    spellcasting_ability: null, class_resources: null,
+    committed: true, created_at: '', updated_at: '',
+  },
+  {
+    id: 'c2', user_id: 'u1', campaign_id: null, name: 'Sareth Moonwhisper',
+    subtitle: null, character_class: 'Wizard', character_subclass: 'School of Illusion',
+    character_race: 'Elf', level: 7, xp: 3100, xp_next: 6500,
+    hp_current: 32, hp_max: 48, temp_hp: 0, armor_class: 13, speed: 30,
+    fly_speed: 0, swim_speed: 0, climb_speed: 0, burrow_speed: 0, initiative: 3,
+    proficiency_bonus: 3,
+    stat_str: 8, stat_dex: 16, stat_con: 12, stat_int: 20, stat_wis: 14, stat_cha: 10,
+    gold: 90, silver: 0, copper: 0, platinum: 0, electrum: 0,
+    description: 'Een sluwe elf-magiër gespecialiseerd in illusies.',
+    notes: null, status: 'active', proficient_skills: ['arcana', 'history'],
+    saving_throw_proficiencies: ['int', 'wis'], expertise_skills: ['arcana'],
+    languages: '', tool_proficiencies: '', weapon_proficiencies: '', armor_proficiencies: '',
+    inspiration: true, hit_die: 'd6', hit_die_current: 7, hit_die_max: 7,
+    death_save_successes: 0, death_save_failures: 0, exhaustion_level: 0,
+    alignment: 'Chaotisch Neutraal', personality_traits: '', ideals: '', bonds: '', flaws: '',
+    portrait_url: null, portrait_position: null, background: null,
+    feats: [], weapon_masteries: [], conditions: [],
+    darkvision: 60, other_senses: '',
+    walk_speed_override: null, other_speed_details: null,
+    spell_dc: 17, spell_attack_bonus: 9, spell_slots: null, concentration: true,
+    spellcasting_ability: 'int', class_resources: null,
+    committed: true, created_at: '', updated_at: '',
+  },
+] as Character[]
+
+const DEMO_FACTIONS: Faction[] = [
+  {
+    id: 'f1', campaign_id: 'camp1', user_id: 'u1',
+    name: 'Zilveren Schemering', subtitle: null,
+    type: 'arcane', reputation: 'friendly', status: 'active',
+    motto: 'Kennis is de enige ware macht.', goals: 'De oude arcanumteksten verzamelen.',
+    description: 'Een geheime genootschap van magiërs dat zich inzet voor het behoud van magische kennis.',
+    notes: null, committed: true, created_at: '', updated_at: '',
+  },
+  {
+    id: 'f2', campaign_id: 'camp1', user_id: 'u1',
+    name: 'Ijzeren Troon', subtitle: null,
+    type: 'noble_house', reputation: 'unfriendly', status: 'active',
+    motto: 'Macht door ijzer en bloed.', goals: 'Controle over de handelswegen.',
+    description: 'Een ambitieuze adellijke familie die streeft naar politieke dominantie.',
+    notes: null, committed: true, created_at: '', updated_at: '',
+  },
+] as Faction[]
+
+const DEMO_NPCS: Npc[] = [
+  {
+    id: 'n1', campaign_id: 'camp1', user_id: 'u1',
+    name: 'Myrna Ashvale', subtitle: null,
+    npc_role: 'Herbergier', status: 'active', faction_id: 'f1',
+    description: 'Een vriendelijke herbergier met geheimen uit het verleden.',
+    notes: null, created_at: '', updated_at: '',
+  },
+  {
+    id: 'n2', campaign_id: 'camp1', user_id: 'u1',
+    name: 'Lord Caius', subtitle: null,
+    npc_role: 'Edelman', status: 'archived', faction_id: 'f2',
+    description: 'Een meedogenloze edelman met duistere plannen voor de regio.',
+    notes: null, created_at: '', updated_at: '',
+  },
+] as Npc[]
 
 function ThemeAxis<T extends string>({
   label,
