@@ -7,10 +7,10 @@ export interface SpinnerProps extends ComponentPropsWithoutRef<'span'> {
   size?: Size
 }
 
-const sizeStyles: Record<Size, string> = {
-  sm: 'h-4 w-4 border-2',
-  md: 'h-6 w-6 border-2',
-  lg: 'h-8 w-8 border-[3px]',
+const sizeClass: Record<Size, string> = {
+  sm: 'spinner-sm',
+  md: 'spinner-md',
+  lg: 'spinner-lg',
 }
 
 export function Spinner({ size = 'md', className, 'aria-label': ariaLabel = 'Laden...', ...props }: SpinnerProps) {
@@ -18,11 +18,7 @@ export function Spinner({ size = 'md', className, 'aria-label': ariaLabel = 'Lad
     <span
       role="status"
       aria-label={ariaLabel}
-      className={cn(
-        'inline-block animate-spin rounded-full border-current border-t-transparent',
-        sizeStyles[size],
-        className,
-      )}
+      className={cn('spinner', sizeClass[size], className)}
       {...props}
     />
   )

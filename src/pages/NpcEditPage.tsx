@@ -1,8 +1,11 @@
-import { useId, useState } from 'react'
+import { useState } from 'react'
 import { useParams, useNavigate, useLocation } from 'react-router-dom'
 import { toast } from 'sonner'
 import { ConfirmDialog } from '@/components/ui/ConfirmDialog'
 import { Button } from '@/components/ui/Button'
+import { Input } from '@/components/ui/Input'
+import { Select } from '@/components/ui/Select'
+import { Textarea } from '@/components/ui/Textarea'
 import { Spinner } from '@/components/ui/Spinner'
 import { useEntityEdit } from '@/hooks/useEntityEdit'
 import { useAI } from '@/hooks/useAI'
@@ -22,12 +25,6 @@ export default function NpcEditPage() {
   const { id } = useParams<{ id: string }>()
   const navigate = useNavigate()
   const location = useLocation()
-
-  const descriptionId = useId()
-  const notesId = useId()
-  const statusId = useId()
-  const npcRoleId = useId()
-  const factionId = useId()
 
   const { ask, loading: aiLoading } = useAI()
   const [aiPreview, setAiPreview] = useState<string | null>(null)
@@ -154,8 +151,8 @@ export default function NpcEditPage() {
   if (!npcData) {
     return (
       <div>
-        <p style={{ color: 'var(--muted)' }}>NPC niet gevonden.</p>
-        <Button variant="ghost" onClick={() => navigate('/dashboard')} style={{ marginTop: 16 }}>
+        <p className="text-muted">NPC niet gevonden.</p>
+        <Button variant="ghost" onClick={() => navigate('/dashboard')} className="mt-4">
           ← Terug naar dashboard
         </Button>
       </div>
@@ -175,132 +172,80 @@ export default function NpcEditPage() {
 
         {/* Page header */}
         <header style={{ marginBottom: 40 }}>
-          <p className="pangu-eyebrow">NPC bewerken</p>
-          <h1 className="pangu-display-xl">{npcData.name}</h1>
-          <p style={{ marginTop: 8, fontSize: 14, color: 'var(--ink-soft)' }}>
+          <p className="pg-eyebrow">NPC bewerken</p>
+          <h1 className="pg-display-xl">{npcData.name}</h1>
+          <p className="mt-2 text-sm text-ink-soft">
             Pas de details van dit personage aan.
           </p>
         </header>
 
         {/* Form */}
-        <div className="pangu-surface" style={{ padding: 28 }}>
+        <div className="surface" style={{ padding: 28 }}>
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
 
-            <div>
-              <label className="pangu-label" htmlFor="npc-name">Naam</label>
-              <input
-                id="npc-name"
-                className="pangu-input"
-                value={form.name ?? ''}
-                onChange={(e) => set('name', e.target.value)}
-                placeholder="Naam van het personage"
-              />
-            </div>
+            <Input
+              label="Naam"
+              value={form.name ?? ''}
+              onChange={(e) => set('name', e.target.value)}
+              placeholder="Naam van het personage"
+            />
 
-            <div>
-              <label className="pangu-label" htmlFor="npc-subtitle">Subtitel</label>
-              <input
-                id="npc-subtitle"
-                className="pangu-input"
-                value={form.subtitle ?? ''}
-                onChange={(e) => set('subtitle', e.target.value || null)}
-                placeholder="Bijnaam, titel of tagline"
-              />
-            </div>
+            <Input
+              label="Subtitel"
+              value={form.subtitle ?? ''}
+              onChange={(e) => set('subtitle', e.target.value || null)}
+              placeholder="Bijnaam, titel of tagline"
+            />
 
-            <div>
-              <label className="pangu-label" htmlFor={npcRoleId}>Rol</label>
-              <input
-                id={npcRoleId}
-                className="pangu-input"
-                value={form.npc_role ?? ''}
-                onChange={(e) => set('npc_role', e.target.value || null)}
-                placeholder="Bijv. Schurk, Bondgenoot, Koopman, Gids..."
-              />
-            </div>
+            <Input
+              label="Rol"
+              value={form.npc_role ?? ''}
+              onChange={(e) => set('npc_role', e.target.value || null)}
+              placeholder="Bijv. Schurk, Bondgenoot, Koopman, Gids..."
+            />
 
-            <div>
-              <label className="pangu-label" htmlFor={statusId}>Status</label>
-              <select
-                id={statusId}
-                className="pangu-select"
-                value={form.status ?? 'draft'}
-                onChange={(e) => set('status', e.target.value as NpcStatus)}
-              >
-                {statusOptions.map((o) => (
-                  <option key={o.value} value={o.value}>{o.label}</option>
-                ))}
-              </select>
-            </div>
+            <Select
+              label="Status"
+              value={form.status ?? 'draft'}
+              onChange={(e) => set('status', e.target.value as NpcStatus)}
+              options={statusOptions}
+            />
 
-            <div>
-              <label className="pangu-label" htmlFor={factionId}>Factie</label>
-              <select
-                id={factionId}
-                className="pangu-select"
-                value={form.faction_id ?? ''}
-                onChange={(e) => set('faction_id', e.target.value || null)}
-              >
-                <option value="">— Geen factie —</option>
-                {factions?.map((f) => (
-                  <option key={f.id} value={f.id}>{f.name}</option>
-                ))}
-              </select>
-            </div>
+            <Select
+              label="Factie"
+              value={form.faction_id ?? ''}
+              onChange={(e) => set('faction_id', e.target.value || null)}
+            >
+              <option value="">— Geen factie —</option>
+              {factions?.map((f) => (
+                <option key={f.id} value={f.id}>{f.name}</option>
+              ))}
+            </Select>
 
             <div className="sm:col-span-2">
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 4 }}>
-                <label className="pangu-label" htmlFor={descriptionId} style={{ margin: 0 }}>Beschrijving</label>
-                <button
-                  type="button"
-                  onClick={handleGenerateDescription}
-                  disabled={aiLoading}
-                  aria-label="Genereer beschrijving met AI"
-                  style={{
-                    display: 'inline-flex', alignItems: 'center', gap: 5,
-                    background: 'none', border: '1px solid var(--hairline)',
-                    borderRadius: 6, cursor: aiLoading ? 'not-allowed' : 'pointer',
-                    color: aiLoading ? 'var(--subtle)' : 'var(--violet)',
-                    fontSize: 11, fontWeight: 600, letterSpacing: '0.06em',
-                    padding: '3px 8px', fontFamily: 'var(--font-body)',
-                    transition: 'color var(--t-fast), border-color var(--t-fast)',
-                    opacity: aiLoading ? 0.6 : 1,
-                  }}
-                  onMouseEnter={(e) => { if (!aiLoading) e.currentTarget.style.borderColor = 'var(--violet)' }}
-                  onMouseLeave={(e) => { e.currentTarget.style.borderColor = 'var(--hairline)' }}
-                >
-                  {aiLoading
-                    ? <><Spinner size="sm" /> Genereren...</>
-                    : <>✦ Genereer</>
-                  }
-                </button>
-              </div>
-              <textarea
-                id={descriptionId}
-                className="pangu-textarea"
+              <Textarea
+                label="Beschrijving"
                 value={form.description ?? ''}
                 onChange={(e) => { set('description', e.target.value || null); setAiPreview(null) }}
                 placeholder="Beschrijf het personage, uiterlijk, persoonlijkheid en achtergrond..."
                 rows={4}
+                labelAction={
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={handleGenerateDescription}
+                    loading={aiLoading}
+                    aria-label="Genereer beschrijving met AI"
+                  >
+                    ✦ Genereer
+                  </Button>
+                }
               />
               {aiPreview !== null && (
-                <div
-                  role="status"
-                  aria-live="polite"
-                  style={{
-                    marginTop: 8, padding: '12px 14px',
-                    background: 'color-mix(in srgb, var(--violet) 8%, var(--surface-2))',
-                    border: '1px solid color-mix(in srgb, var(--violet) 25%, transparent)',
-                    borderRadius: 8,
-                  }}
-                >
-                  <p style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.1em', color: 'var(--violet)', marginBottom: 6, textTransform: 'uppercase' }}>
-                    AI-suggestie
-                  </p>
-                  <p style={{ fontSize: 14, color: 'var(--ink-soft)', whiteSpace: 'pre-wrap', lineHeight: 1.6, margin: 0 }}>
-                    {aiPreview}
-                  </p>
-                  <div style={{ display: 'flex', gap: 8, marginTop: 12 }}>
+                <div role="status" aria-live="polite" className="ai-suggestion">
+                  <p className="ai-suggestion-label">AI-suggestie</p>
+                  <p className="ai-suggestion-text">{aiPreview}</p>
+                  <div className="ai-suggestion-actions">
                     <Button variant="secondary" size="sm" onClick={handleAcceptGenerated}>
                       Overnemen
                     </Button>
@@ -312,17 +257,14 @@ export default function NpcEditPage() {
               )}
             </div>
 
-            <div className="sm:col-span-2">
-              <label className="pangu-label" htmlFor={notesId}>DM notities</label>
-              <textarea
-                id={notesId}
-                className="pangu-textarea"
-                value={form.notes ?? ''}
-                onChange={(e) => set('notes', e.target.value || null)}
-                placeholder="Aantekeningen voor de DM: geheimen, motieven, verborgen agenda's..."
-                rows={8}
-              />
-            </div>
+            <Textarea
+              fieldClassName="sm:col-span-2"
+              label="DM notities"
+              value={form.notes ?? ''}
+              onChange={(e) => set('notes', e.target.value || null)}
+              placeholder="Aantekeningen voor de DM: geheimen, motieven, verborgen agenda's..."
+              rows={8}
+            />
 
           </div>
 
@@ -344,10 +286,10 @@ export default function NpcEditPage() {
 
         {/* Danger zone */}
         <div
-          className="pangu-surface"
+          className="surface"
           style={{ marginTop: 24, padding: 28, borderColor: 'rgb(var(--crimson-rgb) / 0.18)' }}
         >
-          <p className="pangu-section-title" style={{ marginBottom: 4 }}>Gevarenzone</p>
+          <p className="pg-section-title" style={{ marginBottom: 4 }}>Gevarenzone</p>
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 16, paddingTop: 16, borderTop: '1px solid var(--hairline)' }}>
             <div>
               <p style={{ fontSize: 14, color: 'var(--ink-soft)', margin: 0 }}>NPC verwijderen</p>
@@ -372,7 +314,7 @@ export default function NpcEditPage() {
         confirmLabel="Verwijder NPC"
         loading={deleteNpc.isPending}
       >
-        Weet je zeker dat je <strong style={{ color: 'var(--ink)' }}>{npcData.name}</strong> wilt verwijderen? Dit kan niet ongedaan worden gemaakt.
+        Weet je zeker dat je <strong className="text-ink">{npcData.name}</strong> wilt verwijderen? Dit kan niet ongedaan worden gemaakt.
       </ConfirmDialog>
 
       {/* Discard dialog */}

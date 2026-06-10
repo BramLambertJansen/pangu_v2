@@ -80,3 +80,27 @@ tokens verwijzen, herstyle je de hele app door het attribuut te zetten.
    houden — die horen niet bij de thema-skin.
 4. Componenten blijven puur presentatie; geen thema-logica buiten `theme.store` +
    `ThemeProvider`.
+
+## Twee toegestane styling-vocabulaires (fase 0)
+
+Beide zijn thema-veilig omdat ze uitsluitend tokens raken:
+
+1. **Canonieke DS-klassen** — `.btn`, `.surface`, `.input`, `.badge`, … (bron in `index.css`).
+2. **Semantische Tailwind-utilities** — `bg-surface`, `text-ink`, `border-hairline`
+   (kleuren via `@theme inline`) en **`rounded-*`** (radii via `@theme inline` →
+   `--radius-* = var(--r-*)`). Spacing gebruikt `var(--sp-*)` of Tailwind's eigen schaal
+   (volgt de densiteits-as). Shadows/fonts worden via `var(--shadow-*)` / `var(--font-*)`
+   of de canonieke klassen geconsumeerd (niet als Tailwind-utility — de namen botsen met
+   onze `:root`-tokens, dus géén `@theme`-mapping).
+
+Voor alpha-tints: `rgb(var(--violet-rgb) / var(--o-08))` met de nieuwe opaciteitsschaal
+(`--o-04 … --o-50`); voor transities `var(--tr-fast)` / `var(--tr-base)`.
+
+## Vangrail
+
+`npm run check:styles` (`scripts/check-inline-styles.mjs`) scant `src/` op de thema-blokkers:
+literale hex, gekleurde `rgb()/rgba()`, `color-mix()` en `.pangu-*` in TSX (plus een
+niet-blokkerende warn op rauwe-px `borderRadius`). Draait standaard in **warn**-modus;
+`--strict` faalt op blokkers. Zet `--strict` in CI aan zodra de sweep (fase 3) klaar is.
+Toegestane uitzonderingen: `rgba(0,0,0,…)`-schaduwen, `rgba(255,255,255,…)`-sheens en
+munt-/rariteit-datakleuren.

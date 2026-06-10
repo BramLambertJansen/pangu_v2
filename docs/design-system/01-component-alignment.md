@@ -106,3 +106,27 @@ thema-onafhankelijk.
 `src/components/ui/`: `Starfield`, `SearchBar`, `Chip`, `StatPill`, `OrnateDivider`,
 `Tabs` (geanimeerde indicator), `KbdHint`, `DiceRoller`, `StubPanel`. Allemaal
 token-gedreven; zichtbaar in `/design-system`.
+
+## Standaardisatie fase 1 — primitive-laag compleet (vervolg-branch)
+
+**Nieuwe primitives** (`src/components/ui/`), token-gedreven, in `/design-system`:
+
+| Primitive | Klasse | Doel |
+|---|---|---|
+| `FormField` | `.form-field` + `.form-field-head` + `.field-error`/`.field-hint` | Canonieke veld-chrome (label-rij + control-slot + error/hint); `labelAction` voor o.a. de AI-genereer-knop |
+| `Select` | `.select-trigger` + `.input-error` | Wrapt `<select>`; `options`-prop of `<option>`-children |
+| `Textarea` | `.textarea` + `.input-error` | Wrapt `<textarea>` |
+| `IconButton` | `.btn-icon` (48px, `aria-label` verplicht in type) | Icon-only knoppen |
+| `NumberStepper` | `.hp-step` (mobiel 44px) + `.number-stepper` | − value + cluster |
+| `SegmentedControl` | `.segmented` (radiogroup + arrow-keys) | Wederzijds-exclusieve keuze (thema-assen, filters) |
+
+`Input`/`Select`/`Textarea` delen één veld-chrome via `FormField` en passen op
+`useEntityEdit`'s `set(key, value)`. Allemaal: `ComponentPropsWithoutRef`, `cn()`,
+`forwardRef`, `aria-describedby`/`aria-invalid` op error.
+
+**Bestaande primitives geconvergeerd naar DS-klassen:** `Input` (`.input`/`.input-error`),
+`Badge` (`.badge-*`, kanaal-tokens), `StatusBadge` (`--sb-color` CSS-var — `color-mix` uit
+TSX naar de stylesheet), `Avatar` (`.avatar*`), `Spinner` (`.spinner*`), `KbdHint` (`.kbd`),
+`ForgeCard`-interieur (`.forge-card-title/subtitle/body`, geen inline meer). CSS-literals in
+`.input/.textarea/.select-trigger:focus`, `.btn-icon:hover`, `.badge-*` en `.forge-card`-hovers
+omgezet naar kanaal-tokens. Tests: `src/test/ui-primitives.test.tsx`.

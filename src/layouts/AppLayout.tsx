@@ -145,6 +145,17 @@ export default function AppLayout() {
     return () => main.removeEventListener('scroll', onScroll)
   }, [])
 
+  // Move focus to the main region on route change so keyboard/screen-reader
+  // users land on the new page's content instead of staying on a stale control.
+  const firstRender = useRef(true)
+  useEffect(() => {
+    if (firstRender.current) {
+      firstRender.current = false
+      return
+    }
+    mainRef.current?.focus()
+  }, [location.pathname])
+
   const iconOnly = `nav-item nav-item--icon-only`
   const sidebarWidth = sidebarCollapsed ? '56px' : '240px'
 
@@ -372,6 +383,7 @@ export default function AppLayout() {
       <main
         ref={mainRef}
         id="main-content"
+        tabIndex={-1}
         className="main-content flex-1 overflow-auto"
         style={{ position: 'relative', zIndex: 10 }}
       >
