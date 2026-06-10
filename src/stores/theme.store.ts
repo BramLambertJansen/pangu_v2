@@ -6,14 +6,15 @@ import { persist } from 'zustand/middleware'
  * while `accent` (primary tint) and `density` (spacing) are orthogonal axes the
  * design system ships as `data-accent` / `data-density`. Default = today's look.
  *
- * The actual extra theme bodies + a Settings switch land in step 4; this store
- * is the groundwork so the switch becomes a one-line state change.
+ * Themes change structure/mood (surfaces, voids, hairlines, radii); accent and
+ * density stay orthogonal so any combination is valid.
  */
-export type ThemeName = 'sanctum'
+export type ThemeName = 'sanctum' | 'ember'
 export type ThemeAccent = 'violet' | 'teal' | 'gold' | 'azure' | 'crimson'
 export type ThemeDensity = 'standard' | 'cozy' | 'compact'
 
-export const THEMES: ThemeName[] = ['sanctum']
+export const THEMES: ThemeName[] = ['sanctum', 'ember']
+export const THEME_LABELS: Record<ThemeName, string> = { sanctum: 'Sanctum', ember: 'Ember' }
 export const ACCENTS: ThemeAccent[] = ['violet', 'teal', 'gold', 'azure', 'crimson']
 export const DENSITIES: ThemeDensity[] = ['standard', 'cozy', 'compact']
 

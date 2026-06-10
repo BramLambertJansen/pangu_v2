@@ -5,6 +5,19 @@ import { Spinner } from '@/components/ui/Spinner'
 import { Button } from '@/components/ui/Button'
 import { Tabs } from '@/components/ui/Tabs'
 import { Toggle } from '@/components/ui/Toggle'
+import { Select } from '@/components/ui/Select'
+import { FormField } from '@/components/ui/FormField'
+import { SegmentedControl } from '@/components/ui/SegmentedControl'
+import {
+  useThemeStore,
+  THEMES,
+  THEME_LABELS,
+  ACCENTS,
+  DENSITIES,
+  type ThemeName,
+  type ThemeAccent,
+  type ThemeDensity,
+} from '@/stores/theme.store'
 import { UserTable } from '@/components/admin/UserTable'
 import { CreateUserModal } from '@/components/admin/CreateUserModal'
 import { toast } from 'sonner'
@@ -280,6 +293,20 @@ function ProfielTab() {
 
 // ── Preferences tab ───────────────────────────────────────
 
+const ACCENT_LABELS: Record<ThemeAccent, string> = {
+  violet: 'Violet',
+  teal: 'Teal',
+  gold: 'Goud',
+  azure: 'Azuur',
+  crimson: 'Karmijn',
+}
+
+const DENSITY_LABELS: Record<ThemeDensity, string> = {
+  standard: 'Standaard',
+  cozy: 'Ruim',
+  compact: 'Compact',
+}
+
 function VoorkeurenTab() {
   const sessionReminders = usePreferencesStore(s => s.sessionReminders)
   const soundEffects = usePreferencesStore(s => s.soundEffects)
@@ -287,7 +314,8 @@ function VoorkeurenTab() {
   const loreSuggestions = usePreferencesStore(s => s.loreSuggestions)
   const language = usePreferencesStore(s => s.language)
   const setPreference = usePreferencesStore(s => s.setPreference)
-  const langId = useId()
+
+  const { theme, accent, density, setTheme, setAccent, setDensity } = useThemeStore()
 
   const languages: { value: PreferencesLanguage; label: string }[] = [
     { value: 'en', label: 'English' },
@@ -298,8 +326,37 @@ function VoorkeurenTab() {
 
   return (
     <div className="flex flex-col gap-4">
-      <div className="pangu-surface" style={{ padding: 24 }}>
-        <p className="pangu-section-title" style={{ marginBottom: 4 }}>Meldingen</p>
+      <div className="surface" style={{ padding: 24 }}>
+        <p className="pg-section-title" style={{ marginBottom: 12 }}>Weergave</p>
+        <div className="flex flex-col gap-4">
+          <FormField label="Thema">
+            <SegmentedControl<ThemeName>
+              label="Thema"
+              value={theme}
+              onChange={setTheme}
+              options={THEMES.map((t) => ({ value: t, label: THEME_LABELS[t] }))}
+            />
+          </FormField>
+          <FormField label="Accentkleur">
+            <SegmentedControl<ThemeAccent>
+              label="Accentkleur"
+              value={accent}
+              onChange={setAccent}
+              options={ACCENTS.map((a) => ({ value: a, label: ACCENT_LABELS[a] }))}
+            />
+          </FormField>
+          <FormField label="Densiteit">
+            <SegmentedControl<ThemeDensity>
+              label="Densiteit"
+              value={density}
+              onChange={setDensity}
+              options={DENSITIES.map((d) => ({ value: d, label: DENSITY_LABELS[d] }))}
+            />
+          </FormField>
+        </div>
+      </div>
+      <div className="surface" style={{ padding: 24 }}>
+        <p className="pg-section-title" style={{ marginBottom: 4 }}>Meldingen</p>
         <SettingToggle
           label="Sessieherinneringen"
           desc="Herinner me voor mijn volgende sessie."
@@ -321,8 +378,8 @@ function VoorkeurenTab() {
           />
         </div>
       </div>
-      <div className="pangu-surface" style={{ padding: 24 }}>
-        <p className="pangu-section-title" style={{ marginBottom: 4 }}>AI</p>
+      <div className="surface" style={{ padding: 24 }}>
+        <p className="pg-section-title" style={{ marginBottom: 4 }}>AI</p>
         <SettingToggle
           label="Lore-suggesties"
           desc="Laat de kosmos ideeën fluisteren in de kantlijn."
@@ -330,17 +387,12 @@ function VoorkeurenTab() {
           onChange={(v) => setPreference('loreSuggestions', v)}
         />
         <div style={{ paddingTop: 16, marginTop: 4 }}>
-          <label className="pangu-label" htmlFor={langId}>Taal</label>
-          <select
-            id={langId}
-            className="pangu-select"
+          <Select
+            label="Taal"
             value={language}
             onChange={(e) => setPreference('language', e.target.value as PreferencesLanguage)}
-          >
-            {languages.map((l) => (
-              <option key={l.value} value={l.value}>{l.label}</option>
-            ))}
-          </select>
+            options={languages}
+          />
         </div>
       </div>
     </div>

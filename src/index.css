@@ -252,6 +252,32 @@
 /* data-theme="sanctum" is the default look (identity). Future themes add
    their own :root[data-theme="..."] override blocks here. */
 
+/* Ember — a warm, rounder dark skin. Overrides structure/mood tokens only;
+   --violet (accent) and --sp-* (density) stay under their own axes so any
+   accent/density combination keeps working. Proves the theme switch end-to-end. */
+:root[data-theme="ember"] {
+  --void: #14100c;
+  --void-2: #1a140e;
+  --surface: #221a12;
+  --surface-2: #2b2118;
+  --surface-3: #362a1e;
+  --surface-hover: #43331f;
+  --ink: #f6efe4;
+  --ink-soft: #ddd0bd;
+  --muted: #ab9c85;
+  --subtle: #5e5040;
+  --hairline: rgba(245, 200, 66, 0.12);
+  --hairline-strong: rgba(245, 200, 66, 0.26);
+  --void-rgb: 20 16 12;
+  --surface-rgb: 34 26 18;
+  --ink-rgb: 246 239 228;
+  /* Rounder radii (DS-v2 direction) — Tailwind rounded-* follows via @theme. */
+  --r-sm: 8px;
+  --r-md: 12px;
+  --r-lg: 18px;
+  --r-xl: 24px;
+}
+
 body {
   background: var(--void);
   color: var(--ink);
@@ -1966,11 +1992,12 @@ body {
 /* Segmented control — radiogroup of pill options (theme axes, filters). */
 .segmented {
   display: inline-flex;
+  flex-wrap: wrap;
   gap: 2px;
   padding: 3px;
   background: var(--surface-2);
   border: 1px solid var(--hairline);
-  border-radius: var(--r-full);
+  border-radius: var(--r-lg);
 }
 .segmented-option {
   appearance: none;
