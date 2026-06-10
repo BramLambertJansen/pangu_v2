@@ -11,6 +11,11 @@ export function CharacterLoreTab({ character }: Props) {
       {/* Achtergrond */}
       <div className="pangu-surface" style={{ padding: 28, marginBottom: 16 }}>
         <p className="pangu-section-title" style={{ marginBottom: 12 }}>Achtergrond</p>
+        {character.background && (
+          <p style={{ fontSize: 12, color: 'var(--muted)', margin: '0 0 6px', fontStyle: 'italic' }}>
+            Achtergrond: <span style={{ color: 'var(--ink-soft)', fontStyle: 'normal' }}>{character.background}</span>
+          </p>
+        )}
         {character.alignment && (
           <p style={{ fontSize: 12, color: 'var(--muted)', margin: '0 0 12px', fontStyle: 'italic' }}>
             Uitlijning: <span style={{ color: 'var(--ink-soft)', fontStyle: 'normal' }}>{character.alignment}</span>

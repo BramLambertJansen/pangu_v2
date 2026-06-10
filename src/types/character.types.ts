@@ -93,6 +93,7 @@ export interface Character {
   appearance: string | null
 
   // D&D 5.5e — roleplay traits
+  background: string | null
   personality_traits: string | null
   ideals: string | null
   bonds: string | null
