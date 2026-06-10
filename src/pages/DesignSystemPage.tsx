@@ -41,7 +41,14 @@ import { Modal } from '@/components/ui/Modal'
 import { SkillsPanel } from '@/components/character/SkillsPanel'
 import { SpellSlots } from '@/components/character/SpellSlots'
 import { SanctumInventory } from '@/components/character/SanctumInventory'
-import { CharacterWizard } from '@/components/character/CharacterWizard'
+import { WizardShell } from '@/components/ui/WizardShell'
+import { WizardNavBar } from '@/components/ui/WizardNavBar'
+import { SelectableCardGrid } from '@/components/ui/SelectableCardGrid'
+import { PickProgress } from '@/components/ui/PickProgress'
+import { AlignmentGrid } from '@/components/character/AlignmentGrid'
+import { AbilityScoreEditor } from '@/components/character/AbilityScoreEditor'
+import type { AbilityKey } from '@/utils/dnd5e'
+import type { AbilityMethod } from '@/types/character_wizard.types'
 import { CombatTracker } from '@/components/encounter/CombatTracker'
 import { ConstellationAtlas } from '@/components/location/ConstellationAtlas'
 import { PlaceAccordion } from '@/components/location/PlaceAccordion'
@@ -606,11 +613,24 @@ export default function DesignSystemPage() {
         <FactionSplitView factions={DEMO_FACTIONS} npcs={DEMO_NPCS} />
       </Section>
 
+      <OrnateDivider label="Wizard primitives" />
+
+      <Section title="WizardShell + WizardNavBar + SelectableCardGrid + PickProgress">
+        <WizardPrimitivesDemo />
+      </Section>
+
+      <Section title="AbilityScoreEditor">
+        <AbilityEditorDemo />
+      </Section>
+
+      <Section title="AlignmentGrid">
+        <AlignmentGridDemo />
+      </Section>
+
       <OrnateDivider label="Toekomstige componenten" />
 
       <Section title="Stubs (in ontwikkeling)">
         <div className="grid gap-4 md:grid-cols-2">
-          <CharacterWizard />
           <ConstellationAtlas campaignId="demo" />
           <StoryArcSpine campaignId="demo" />
           <FactionDisplay campaignId="demo" />
@@ -618,6 +638,94 @@ export default function DesignSystemPage() {
       </Section>
     </div>
   )
+}
+
+/* ── Wizard primitive demos (lokale state, geen persistentie) ── */
+
+const DEMO_WIZARD_STEPS = [
+  { id: 'een', label: 'Basis' },
+  { id: 'twee', label: 'Keuze' },
+  { id: 'drie', label: 'Overzicht' },
+]
+
+const DEMO_OPTIONS = [
+  { id: 'a', title: 'Optie A', tagline: 'Eerste smaak', meta: '+2 DEX', glyph: '✦' },
+  { id: 'b', title: 'Optie B', tagline: 'Tweede smaak', meta: '+2 STR', glyph: '⚒' },
+  { id: 'c', title: 'Optie C', tagline: 'Derde smaak', meta: '+2 CHA', glyph: '◈' },
+]
+
+function WizardPrimitivesDemo() {
+  const [stepIndex, setStepIndex] = useState(0)
+  const [choice, setChoice] = useState<string | null>(null)
+  const [picks, setPicks] = useState<string[]>([])
+
+  return (
+    <WizardShell
+      steps={DEMO_WIZARD_STEPS}
+      activeIndex={stepIndex}
+      maxReachableIndex={DEMO_WIZARD_STEPS.length - 1}
+      onStepSelect={setStepIndex}
+      aside={<div className="surface p-4 text-sm text-muted">Live preview-slot</div>}
+    >
+      <h3 className="wizard-step-title">{DEMO_WIZARD_STEPS[stepIndex].label}</h3>
+      <p className="wizard-step-subtitle">Demo van het generieke wizard-frame.</p>
+      <div className="flex flex-col gap-4">
+        <SelectableCardGrid
+          label="Demo-keuze"
+          options={DEMO_OPTIONS}
+          value={choice}
+          onSelect={(id) => setChoice(id === choice ? null : id)}
+        />
+        <PickProgress count={picks.length} total={2} itemsLabel="opties">
+          {picks.map((p) => <Chip key={p} tone="teal">{p}</Chip>)}
+        </PickProgress>
+        <SelectableCardGrid
+          label="Demo-meerkeuze"
+          multiple
+          compact
+          options={DEMO_OPTIONS.map((o) => ({
+            ...o,
+            disabled: !picks.includes(o.id) && picks.length >= 2,
+          }))}
+          value={picks}
+          onSelect={(id) =>
+            setPicks(picks.includes(id) ? picks.filter((p) => p !== id) : [...picks, id])
+          }
+        />
+      </div>
+      <WizardNavBar
+        onBack={stepIndex > 0 ? () => setStepIndex(stepIndex - 1) : undefined}
+        onNext={() => setStepIndex(Math.min(stepIndex + 1, DEMO_WIZARD_STEPS.length - 1))}
+        canNext={choice !== null}
+        hint="Kies eerst een optie"
+      />
+    </WizardShell>
+  )
+}
+
+function AbilityEditorDemo() {
+  const [method, setMethod] = useState<AbilityMethod>('pointbuy')
+  const [scores, setScores] = useState<Record<AbilityKey, number>>({
+    stat_str: 8, stat_dex: 8, stat_con: 8, stat_int: 8, stat_wis: 8, stat_cha: 8,
+  })
+  const [assigned, setAssigned] = useState<Partial<Record<AbilityKey, number>>>({})
+
+  return (
+    <AbilityScoreEditor
+      method={method}
+      onMethodChange={setMethod}
+      scores={scores}
+      onScoresChange={setScores}
+      arrayAssigned={assigned}
+      onArrayAssignedChange={setAssigned}
+      bonuses={{ stat_str: 0, stat_dex: 2, stat_con: 0, stat_int: 1, stat_wis: 0, stat_cha: 0 }}
+    />
+  )
+}
+
+function AlignmentGridDemo() {
+  const [alignment, setAlignment] = useState<string | null>('Neutraal')
+  return <AlignmentGrid value={alignment} onChange={setAlignment} />
 }
 
 /* ── Demo data for split-view previews ── */
@@ -639,7 +747,7 @@ const DEMO_CHARACTERS: Character[] = [
     inspiration: false, hit_die: 'd10', hit_dice_current: 7,
     death_save_successes: 0, death_save_failures: 0, exhaustion: 0,
     alignment: 'Wettig Goed', personality_traits: '', ideals: '', bonds: '', flaws: '',
-    portrait_url: null, portrait_position: 'center',
+    background: null, portrait_url: null, portrait_position: 'center',
     feats: [], weapon_masteries: [], active_conditions: [],
     darkvision: 60, special_senses: null,
     age: null, height: null, weight: null, appearance: null,
@@ -663,7 +771,7 @@ const DEMO_CHARACTERS: Character[] = [
     inspiration: true, hit_die: 'd6', hit_dice_current: 7,
     death_save_successes: 0, death_save_failures: 0, exhaustion: 0,
     alignment: 'Chaotisch Neutraal', personality_traits: '', ideals: '', bonds: '', flaws: '',
-    portrait_url: null, portrait_position: 'center',
+    background: null, portrait_url: null, portrait_position: 'center',
     feats: [], weapon_masteries: [], active_conditions: [],
     darkvision: 60, special_senses: null,
     age: null, height: null, weight: null, appearance: null,

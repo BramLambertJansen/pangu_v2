@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { useAuthStore } from '@/stores/auth.store'
 import { EntityCardSkeleton } from '@/components/ui/EntityCardSkeleton'
 import { Button } from '@/components/ui/Button'
@@ -6,15 +7,15 @@ import { EmptyState } from '@/components/ui/EmptyState'
 import { SearchBar } from '@/components/ui/SearchBar'
 import { OrnateDivider } from '@/components/ui/OrnateDivider'
 import { CharacterCard, ForgeCharacterCard } from '@/components/character/CharacterCard'
-import { useCharacters, useCreateCharacter } from '@/hooks/queries/useCharacters'
+import { useCharacters } from '@/hooks/queries/useCharacters'
 import { useDraftGC } from '@/hooks/useDraftGC'
 
 export default function CharactersPage() {
   const user = useAuthStore(s => s.user)
+  const navigate = useNavigate()
   const [search, setSearch] = useState('')
 
   const { data: characters, isLoading } = useCharacters()
-  const createCharacter = useCreateCharacter()
 
   useDraftGC('characters', 'user_id', user?.id)
 
@@ -74,7 +75,7 @@ export default function CharactersPage() {
                   description="Maak je eerste personage aan en begin je avontuur."
                 />
                 <div style={{ width: '100%', maxWidth: 320 }}>
-                  <ForgeCharacterCard onClick={() => createCharacter.mutate()} loading={createCharacter.isPending} />
+                  <ForgeCharacterCard onClick={() => navigate('/characters/new')} />
                 </div>
               </div>
             ) : (
@@ -95,7 +96,7 @@ export default function CharactersPage() {
                   {filtered.map((character) => (
                     <CharacterCard key={character.id} character={character} />
                   ))}
-                  <ForgeCharacterCard onClick={() => createCharacter.mutate()} loading={createCharacter.isPending} />
+                  <ForgeCharacterCard onClick={() => navigate('/characters/new')} />
                 </div>
               </>
             )}

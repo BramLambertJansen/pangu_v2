@@ -7,7 +7,6 @@ import {
   getBackground,
   POINT_BUY_BUDGET,
   POINT_BUY_COSTS,
-  STANDARD_ARRAY,
 } from '@/data/dnd5e'
 import type { SrdClass } from '@/types/srd5e.types'
 import type { WizardDraft, WizardStepId } from '@/types/character_wizard.types'

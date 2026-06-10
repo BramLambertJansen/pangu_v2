@@ -31,6 +31,7 @@ const SessionsPage = lazy(() => import('@/pages/SessionsPage'))
 const SessionDetailPage = lazy(() => import('@/pages/SessionDetailPage'))
 const SessionEditPage = lazy(() => import('@/pages/SessionEditPage'))
 const CharactersPage = lazy(() => import('@/pages/CharactersPage'))
+const CharacterWizardPage = lazy(() => import('@/pages/CharacterWizardPage'))
 const CharacterDetailPage = lazy(() => import('@/pages/CharacterDetailPage'))
 const CharacterEditPage = lazy(() => import('@/pages/CharacterEditPage'))
 const BestiariesPage = lazy(() => import('@/pages/BestiariesPage'))
@@ -200,6 +201,11 @@ export const router = createBrowserRouter([
         path: '/characters',
         loader: requireAuth,
         element: wrap(CharactersPage),
+      },
+      {
+        path: '/characters/new',
+        loader: requireAuth,
+        element: wrap(CharacterWizardPage),
       },
       {
         path: '/characters/:id',
