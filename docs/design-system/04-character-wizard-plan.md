@@ -1,6 +1,6 @@
 # 04 — Implementatieplan: Karakter-wizard (7 stappen)
 
-> **Status: gebouwd** (fase 1 t/m 5). Afwijkingen t.o.v. dit plan: glyph/accentkleur-personalisatie weggelaten (geen kolommen), `background text` kolom toegevoegd via migratie 049, en het portret in stap 1 is een URL + preview (drag-reposition blijft op de bewerkpagina). Zie de sectie "Karakter-wizard" in `CLAUDE.md` voor de gerealiseerde omvang.
+> **Status: gebouwd** (fase 1 t/m 5). Afwijkingen t.o.v. dit plan: glyph/accentkleur-personalisatie weggelaten (geen kolommen), `background text` kolom toegevoegd via migratie 049, en het portret in stap 1 is een URL + preview (drag-reposition blijft op de bewerkpagina). **Layout-revisie:** voor rust is `/characters/new` een gefocuste full-screen takeover gemaakt — een standalone route búiten `AppLayout`, waarbij de wizard-rail de app-nav vervangt (merk + stappen + annuleren/overslaan), de paginakop is geschrapt, de content een gecentreerde max-breedte (680px) met gepinde navigatiebalk krijgt, en de keuzekaarten neutraal zijn (kleur alleen bij selectie). `WizardShell` heeft hiervoor `brand`/`railFooter`/`footer`/`fullHeight` slots; de normale (ingebedde) modus blijft bestaan. Zie de sectie "Karakter-wizard" in `CLAUDE.md` voor de gerealiseerde omvang.
 
 > Bouwplan voor de begeleide karakteropbouw uit het prototype (`wiz-pangu.jsx`, `wiz-steps.jsx`, `wiz-data.jsx`, `wiz-ui.jsx`). Vervangt de stub `src/components/character/CharacterWizard.tsx`. Zie ook backlog-item "Karakter-wizard (7 stappen)" in `02-feature-backlog.md`.
 

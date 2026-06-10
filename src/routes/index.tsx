@@ -203,11 +203,6 @@ export const router = createBrowserRouter([
         element: wrap(CharactersPage),
       },
       {
-        path: '/characters/new',
-        loader: requireAuth,
-        element: wrap(CharacterWizardPage),
-      },
-      {
         path: '/characters/:id',
         loader: requireAuth,
         element: wrap(CharacterDetailPage),
@@ -309,6 +304,14 @@ export const router = createBrowserRouter([
       },
       { path: '*', element: <RouteErrorPage /> },
     ],
+  },
+  {
+    // Focused full-screen takeover — deliberately outside AppLayout so the
+    // wizard rail replaces the app navigation for the duration of the flow.
+    path: '/characters/new',
+    loader: requireAuth,
+    element: wrap(CharacterWizardPage),
+    errorElement: <RouteErrorPage />,
   },
   {
     path: '/join/:code',

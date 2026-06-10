@@ -21,6 +21,11 @@ export interface CharacterWizardProps {
   campaignId?: string
   onComplete?: (characterId: string) => void
   onCancel?: () => void
+  /** Escape hatch: skip the wizard and create a blank character instead. */
+  onSkip?: () => void
+  skipLoading?: boolean
+  /** Render as a focused full-screen takeover (rail becomes the nav). */
+  fullHeight?: boolean
 }
 
 const STEP_COPY: Record<WizardStepId, { title: string; subtitle: string }> = {
@@ -35,7 +40,14 @@ const STEP_COPY: Record<WizardStepId, { title: string; subtitle: string }> = {
 }
 
 /** 7-staps begeleide karakteropbouw + overzicht; draft hervatbaar via localStorage. */
-export function CharacterWizard({ campaignId, onComplete, onCancel }: CharacterWizardProps) {
+export function CharacterWizard({
+  campaignId,
+  onComplete,
+  onCancel,
+  onSkip,
+  skipLoading,
+  fullHeight = false,
+}: CharacterWizardProps) {
   const user = useAuthStore((s) => s.user)
   const wizard = useCharacterWizard(user?.id ?? 'anon', campaignId ?? null)
   const forge = useForgeCharacterFromWizard()
@@ -81,6 +93,46 @@ export function CharacterWizard({ campaignId, onComplete, onCancel }: CharacterW
     overzicht: <StepReview draft={wizard.draft} goToStep={wizard.goToStep} />,
   }
 
+  const navbar = (
+    <WizardNavBar
+      onBack={wizard.stepIndex > 0 ? wizard.goBack : undefined}
+      onNext={handleNext}
+      canNext={wizard.validation.ok}
+      hint={wizard.validation.reason}
+      nextLabel={isLastStep ? '⚒ Smeed karakter' : 'Doorgaan →'}
+      nextLoading={forge.isPending}
+    />
+  )
+
+  const brand = (
+    <div className="wizard-brand">
+      <img src="/pangu.svg" alt="" aria-hidden="true" className="wizard-brand-mark" />
+      <div>
+        <div className="wizard-brand-title">Nieuw karakter</div>
+        <div className="wizard-brand-sub">Karaktersmederij</div>
+      </div>
+    </div>
+  )
+
+  const railActions = (onSkip || onCancel) && (
+    <>
+      {onSkip && (
+        <button type="button" className="btn-link" onClick={onSkip} disabled={skipLoading}>
+          Wizard overslaan
+        </button>
+      )}
+      {onCancel && (
+        <button type="button" className="wizard-cancel-btn" onClick={handleCancel} aria-label="Annuleren">
+          <svg aria-hidden="true" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+            <line x1="18" y1="6" x2="6" y2="18" />
+            <line x1="6" y1="6" x2="18" y2="18" />
+          </svg>
+          <span className="wizard-cancel-label">Annuleren</span>
+        </button>
+      )}
+    </>
+  )
+
   return (
     <>
       <WizardShell
@@ -90,24 +142,20 @@ export function CharacterWizard({ campaignId, onComplete, onCancel }: CharacterW
         onStepSelect={wizard.goToStep}
         aside={<WizardPreviewPanel draft={wizard.draft} />}
         asideLabel="Karakter-preview"
+        fullHeight={fullHeight}
+        brand={fullHeight ? brand : undefined}
+        railFooter={fullHeight ? railActions : undefined}
+        footer={fullHeight ? navbar : undefined}
       >
-        <h2 ref={headingRef} tabIndex={-1} className="wizard-step-title">
+        <h1 ref={headingRef} tabIndex={-1} className="wizard-step-title">
           {copy.title}
-        </h2>
+        </h1>
         <p className="wizard-step-subtitle">{copy.subtitle}</p>
 
         {stepBody[wizard.stepId]}
 
-        <WizardNavBar
-          onBack={wizard.stepIndex > 0 ? wizard.goBack : undefined}
-          onNext={handleNext}
-          canNext={wizard.validation.ok}
-          hint={wizard.validation.reason}
-          nextLabel={isLastStep ? '⚒ Smeed karakter' : 'Doorgaan →'}
-          nextLoading={forge.isPending}
-        />
-
-        {onCancel && (
+        {!fullHeight && navbar}
+        {!fullHeight && onCancel && (
           <p className="m-0 mt-3 text-right">
             <button type="button" className="btn-link" onClick={handleCancel}>
               Annuleren

@@ -1,7 +1,7 @@
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import { CharacterWizard } from '@/components/character/CharacterWizard'
 import { useCreateCharacter } from '@/hooks/queries/useCharacters'
-import { Button } from '@/components/ui/Button'
+import { Starfield } from '@/components/ui/Starfield'
 
 export default function CharacterWizardPage() {
   const navigate = useNavigate()
@@ -11,30 +11,19 @@ export default function CharacterWizardPage() {
   const createCharacter = useCreateCharacter()
 
   return (
-    <div>
-      <header className="mb-6 flex flex-wrap items-end justify-between gap-4">
-        <div>
-          <p className="pg-eyebrow">Spelersperspectief</p>
-          <h1 className="pg-display-xl">Nieuw karakter</h1>
-          <p className="mb-0 mt-2 text-sm text-ink-soft">
-            Bouw je held stap voor stap — of sla de wizard over en vul alles zelf in.
-          </p>
-        </div>
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={() => createCharacter.mutate()}
-          loading={createCharacter.isPending}
-        >
-          Wizard overslaan → leeg karakter
-        </Button>
-      </header>
-
-      <CharacterWizard
-        campaignId={campaignId}
-        onComplete={(id) => navigate(`/characters/${id}`)}
-        onCancel={() => navigate('/characters')}
-      />
+    <div className="wizard-fullscreen">
+      <div aria-hidden="true" className="wizard-fullscreen-bg" />
+      <Starfield />
+      <main id="main-content" className="wizard-fullscreen-main">
+        <CharacterWizard
+          fullHeight
+          campaignId={campaignId}
+          onComplete={(id) => navigate(`/characters/${id}`)}
+          onCancel={() => navigate('/characters')}
+          onSkip={() => createCharacter.mutate()}
+          skipLoading={createCharacter.isPending}
+        />
+      </main>
     </div>
   )
 }

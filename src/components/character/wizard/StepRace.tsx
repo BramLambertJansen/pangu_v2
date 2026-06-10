@@ -2,7 +2,6 @@ import { SelectableCardGrid } from '@/components/ui/SelectableCardGrid'
 import { Chip } from '@/components/ui/Chip'
 import { SRD_RACES, getRace } from '@/data/dnd5e'
 import { ABILITY_SCORES, formatSign } from '@/utils/dnd5e'
-import { pickGradient, characterGradients } from '@/utils/pickGradient'
 import type { SrdRace } from '@/types/srd5e.types'
 import type { WizardDraft } from '@/types/character_wizard.types'
 
@@ -38,7 +37,6 @@ export function StepRace({ draft, selectRace }: Props) {
           tagline: race.tagline,
           meta: formatRaceBonuses(race),
           glyph: race.glyph,
-          gradient: pickGradient(race.id, characterGradients),
         }))}
       />
 

@@ -2,7 +2,6 @@ import { SelectableCardGrid } from '@/components/ui/SelectableCardGrid'
 import { Chip } from '@/components/ui/Chip'
 import { SRD_CLASSES, getClass } from '@/data/dnd5e'
 import { ABILITY_SCORES } from '@/utils/dnd5e'
-import { pickGradient, characterGradients } from '@/utils/pickGradient'
 import type { CasterType } from '@/types/srd5e.types'
 import type { WizardDraft } from '@/types/character_wizard.types'
 
@@ -35,7 +34,6 @@ export function StepClass({ draft, selectClass, patch }: Props) {
           tagline: cls.tagline,
           meta: `${cls.hitDie} · ${abbrFor(cls.primaryAbility)} · ${CASTER_LABELS[cls.casterType]}`,
           glyph: cls.glyph,
-          gradient: pickGradient(cls.id, characterGradients),
         }))}
       />
 
