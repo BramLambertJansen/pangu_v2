@@ -22,6 +22,17 @@
   --color-subtle:         var(--subtle);
   --color-hairline:       var(--hairline);
   --color-hairline-strong: var(--hairline-strong);
+
+  /* Radius bridge: makes Tailwind's rounded-* utilities token-driven so they
+     follow a theme / DS-v2 re-skin. (Namespace --radius-* does not clash with
+     our --r-* root tokens.) Shadows, fonts and spacing are consumed via
+     var(--token) and the canonical classes — see docs/design-system/03. */
+  --radius-xs:   var(--r-xs);
+  --radius-sm:   var(--r-sm);
+  --radius-md:   var(--r-md);
+  --radius-lg:   var(--r-lg);
+  --radius-xl:   var(--r-xl);
+  --radius-full: var(--r-full);
 }
 
 :root {
@@ -90,6 +101,24 @@
   --t-fast: 180ms;
   --t-base: 220ms;
   --t-slow: 280ms;
+
+  /* ── Opacity scale + composite transitions ───────────────
+     Canonical alpha steps for token-driven tints (rgb(var(--x-rgb) / var(--o-08)))
+     and reusable transition shorthands. Normalizes the ad-hoc color-mix()/loose
+     alpha values that were scattered through the app. */
+  --o-04: 0.04;
+  --o-06: 0.06;
+  --o-08: 0.08;
+  --o-10: 0.10;
+  --o-12: 0.12;
+  --o-15: 0.15;
+  --o-20: 0.20;
+  --o-25: 0.25;
+  --o-30: 0.30;
+  --o-40: 0.40;
+  --o-50: 0.50;
+  --tr-fast: all var(--t-fast) var(--ease-out);
+  --tr-base: all var(--t-base) var(--ease-out);
 
   /* ── Elevation / shadow ──────────────────────────────────
      Structural tokens added for the canonical component layer.
