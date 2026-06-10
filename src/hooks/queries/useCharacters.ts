@@ -5,7 +5,9 @@ import { toast } from 'sonner'
 import { supabase } from '@/lib/supabase'
 import { queryKeys } from '@/lib/queryKeys'
 import { useAuthStore } from '@/stores/auth.store'
+import { buildCharacterInsert } from '@/utils/characterWizard'
 import type { Character } from '@/types/character.types'
+import type { WizardDraft } from '@/types/character_wizard.types'
 
 export function useCharacters() {
   const user = useAuthStore(s => s.user)
@@ -50,6 +52,49 @@ export function useCreateCharacter() {
     onSuccess: (newCharacter) => {
       queryClient.invalidateQueries({ queryKey: queryKeys.characters.all })
       navigate(`/characters/${newCharacter.id}/edit`, { state: { isNew: true } })
+    },
+    onError: () => toast.error('Karakter aanmaken mislukt'),
+  })
+}
+
+/**
+ * Rondt de karakter-wizard af: één committed insert + gekozen spreuken als
+ * character_spells. Anders dan het forge-patroon bestaat er vóór dit moment
+ * geen DB-rij.
+ */
+export function useForgeCharacterFromWizard() {
+  const queryClient = useQueryClient()
+  const user = useAuthStore(s => s.user)
+
+  return useMutation({
+    mutationFn: async (draft: WizardDraft) => {
+      if (!user) throw new Error('Niet ingelogd')
+      const { data, error } = await supabase
+        .from('characters')
+        .insert(buildCharacterInsert(draft, user.id))
+        .select()
+        .single()
+      if (error) throw error
+      const character = data as unknown as Character
+
+      const spellIds = draft.spellsDeferred ? [] : [...draft.cantripIds, ...draft.spellIds]
+      if (spellIds.length > 0) {
+        const { error: spellsError } = await supabase
+          .from('character_spells')
+          .insert(spellIds.map(spellId => ({ character_id: character.id, spell_id: spellId, prepared: true })))
+        // karakter bestaat al — spreuken zijn via de detailpagina alsnog te koppelen
+        if (spellsError) toast.error('Spreuken koppelen mislukt — voeg ze toe via de detailpagina')
+      }
+
+      return character
+    },
+    onSuccess: (character) => {
+      queryClient.invalidateQueries({ queryKey: queryKeys.characters.all })
+      queryClient.invalidateQueries({ queryKey: queryKeys.characters.spells(character.id) })
+      if (character.campaign_id) {
+        queryClient.invalidateQueries({ queryKey: queryKeys.characters.byCampaign(character.campaign_id) })
+      }
+      toast.success('Karakter gesmeed')
     },
     onError: () => toast.error('Karakter aanmaken mislukt'),
   })

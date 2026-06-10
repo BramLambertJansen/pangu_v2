@@ -31,6 +31,7 @@ const SessionsPage = lazy(() => import('@/pages/SessionsPage'))
 const SessionDetailPage = lazy(() => import('@/pages/SessionDetailPage'))
 const SessionEditPage = lazy(() => import('@/pages/SessionEditPage'))
 const CharactersPage = lazy(() => import('@/pages/CharactersPage'))
+const CharacterWizardPage = lazy(() => import('@/pages/CharacterWizardPage'))
 const CharacterDetailPage = lazy(() => import('@/pages/CharacterDetailPage'))
 const CharacterEditPage = lazy(() => import('@/pages/CharacterEditPage'))
 const BestiariesPage = lazy(() => import('@/pages/BestiariesPage'))
@@ -303,6 +304,14 @@ export const router = createBrowserRouter([
       },
       { path: '*', element: <RouteErrorPage /> },
     ],
+  },
+  {
+    // Focused full-screen takeover — deliberately outside AppLayout so the
+    // wizard rail replaces the app navigation for the duration of the flow.
+    path: '/characters/new',
+    loader: requireAuth,
+    element: wrap(CharacterWizardPage),
+    errorElement: <RouteErrorPage />,
   },
   {
     path: '/join/:code',

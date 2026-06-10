@@ -600,6 +600,7 @@ export type Database = {
           appearance: string | null
           portrait_url: string | null
           portrait_position: string
+          background: string | null
         }
         Insert: {
           id?: string
@@ -675,6 +676,7 @@ export type Database = {
           appearance?: string | null
           portrait_url?: string | null
           portrait_position?: string
+          background?: string | null
         }
         Update: {
           id?: string
@@ -750,6 +752,7 @@ export type Database = {
           appearance?: string | null
           portrait_url?: string | null
           portrait_position?: string
+          background?: string | null
         }
         Relationships: [
           {

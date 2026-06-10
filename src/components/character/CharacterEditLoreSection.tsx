@@ -13,6 +13,7 @@ interface Props {
 }
 
 export function CharacterEditLoreSection({ form, set, onCancel, onSave, isSaving, dirty, committed }: Props) {
+  const backgroundId = useId()
   const ageId = useId()
   const heightId = useId()
   const weightId = useId()
@@ -59,6 +60,16 @@ export function CharacterEditLoreSection({ form, set, onCancel, onSave, isSaving
       {/* ── Achtergrond & Persoonlijkheid ── */}
       <div className="pangu-surface" style={{ padding: 28, marginBottom: 16 }}>
         <p className="pangu-section-title" style={{ marginBottom: 16 }}>Achtergrond</p>
+        <div style={{ marginBottom: 16, maxWidth: 360 }}>
+          <label className="label" htmlFor={backgroundId}>Achtergrond (D&D)</label>
+          <input
+            id={backgroundId}
+            className="input"
+            value={form.background ?? ''}
+            onChange={(e) => set('background', e.target.value || null)}
+            placeholder="Bijv. Acolyte, Soldier, Sage..."
+          />
+        </div>
         <div>
           <label className="pangu-label" htmlFor={descriptionId}>Beschrijving</label>
           <textarea

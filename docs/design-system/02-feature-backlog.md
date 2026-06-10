@@ -20,7 +20,7 @@ zodat de uitwerking later geen API-churn geeft.
 | Plaatsen-accordion | `pages-atlas.jsx` (PlaceAccordion), `comp-place-accordion.html` | `location/PlaceAccordion` | Uitklapbare sublocaties (tavernes, gilden, tempels) met NPC-aanwezigheid. Ontbreekt. |
 | Verhaallijn-ruggengraat / hoofdstukken | `pages-1.jsx` (CampaignDetail arc), `comp-chapter-spine.html` | `campaign/StoryArcSpine` | Verticale hoofdstuk-tijdlijn met detailpaneel. Deels: `StoryArcTracker` toont sessies, geen hoofdstuk-model. |
 | Reisgezelschap-banner | `pages-1.jsx`, `comp-reisgezelschap-banner.html` | `campaign/ReisgezelschapBanner` | Huidige locatie → bestemming met statusstippen + groepsvitaliteit. Geen reis-/party-locatiestatus aanwezig. |
-| Karakter-wizard (7 stappen) | `wiz-pangu.jsx`, `wiz-steps.jsx`, screenshots `*-wizard-steps.png` | `character/CharacterWizard` | Begeleide karakteropbouw. Nu directe `CharacterEditPage` zonder wizard. |
+| ~~Karakter-wizard (7 stappen)~~ ✅ | `wiz-pangu.jsx`, `wiz-steps.jsx`, screenshots `*-wizard-steps.png` | `character/CharacterWizard` | **Gebouwd** — route `/characters/new`; plan + details in `04-character-wizard-plan.md`. |
 | Live sessie-weergave | `pages-2.jsx` (SessionView), `comp-session.html` | (toekomstig) | Speelklok, party-tiles, sessielog + AI-kroniek, encounter/notities-panelen. Deels: `SessionDetailPage` + `EncounterRunPage`. |
 
 ## Herbruikbare widgets

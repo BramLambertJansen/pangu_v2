@@ -99,6 +99,7 @@ export function useSaveCharacter(id: string) {
           height:                     form.height ?? null,
           weight:                     form.weight ?? null,
           appearance:                 form.appearance ?? null,
+          background:                 form.background ?? null,
           personality_traits:         form.personality_traits ?? null,
           ideals:                     form.ideals ?? null,
           bonds:                      form.bonds ?? null,
