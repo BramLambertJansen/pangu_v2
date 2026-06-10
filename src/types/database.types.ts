@@ -212,6 +212,7 @@ export type Database = {
           status: string
           notes: string | null
           invite_code: string | null
+          map_image_url: string | null
           committed: boolean
           created_at: string
           updated_at: string
@@ -228,6 +229,7 @@ export type Database = {
           status?: string
           notes?: string | null
           invite_code?: string | null
+          map_image_url?: string | null
           committed?: boolean
           created_at?: string
           updated_at?: string
@@ -244,6 +246,7 @@ export type Database = {
           status?: string
           notes?: string | null
           invite_code?: string | null
+          map_image_url?: string | null
           committed?: boolean
           created_at?: string
           updated_at?: string
@@ -371,6 +374,10 @@ export type Database = {
           notes: string | null
           status: string
           location_type: string | null
+          map_x: number | null
+          map_y: number | null
+          region: string | null
+          climate: string | null
           committed: boolean
           created_at: string
           updated_at: string
@@ -385,6 +392,10 @@ export type Database = {
           notes?: string | null
           status?: string
           location_type?: string | null
+          map_x?: number | null
+          map_y?: number | null
+          region?: string | null
+          climate?: string | null
           committed?: boolean
           created_at?: string
           updated_at?: string
@@ -399,6 +410,10 @@ export type Database = {
           notes?: string | null
           status?: string
           location_type?: string | null
+          map_x?: number | null
+          map_y?: number | null
+          region?: string | null
+          climate?: string | null
           committed?: boolean
           created_at?: string
           updated_at?: string

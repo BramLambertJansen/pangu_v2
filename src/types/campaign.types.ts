@@ -12,6 +12,7 @@ export interface Campaign {
   status: CampaignStatus
   notes: string | null
   invite_code: string | null
+  map_image_url: string | null
   created_at: string
   updated_at: string
 }

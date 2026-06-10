@@ -4115,3 +4115,235 @@ body {
   .alignment-cell, .wizard-rail-dot, .wizard-progress-fill { transition: none; }
   .option-card:hover:not(:disabled) { transform: none; }
 }
+
+/* ═══════════════════════════════════════════════════════════════
+   ATLAS MAP — custom map image with clickable location pins
+   ═══════════════════════════════════════════════════════════════ */
+
+.atlas-map {
+  position: relative;
+  width: 100%;
+  border-radius: var(--r-md);
+  overflow: hidden;
+  background: var(--void);
+  border: 1px solid var(--hairline-strong);
+  user-select: none;
+}
+.atlas-map[data-pin-mode='true'] { cursor: crosshair; }
+
+.atlas-map-img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  pointer-events: none;
+  border-radius: 0;
+}
+
+/* ── Pin button ──────────────────────────────────────────── */
+.atlas-pin {
+  position: absolute;
+  transform: translate(-50%, -100%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background: transparent;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  z-index: 4;
+  transition: transform var(--t-fast) var(--ease-out);
+}
+.atlas-pin:hover,
+.atlas-pin[data-selected='true'] { transform: translate(-50%, -100%) scale(1.25); z-index: 5; }
+.atlas-pin:focus-visible { outline: 2px solid var(--violet); outline-offset: 3px; border-radius: 50%; }
+
+.atlas-pin-icon {
+  width: 28px;
+  height: 28px;
+  border-radius: 50% 50% 50% 0;
+  transform: rotate(-45deg);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--atlas-pin-color, var(--violet));
+  box-shadow: 0 0 10px var(--atlas-pin-color, var(--violet)), 0 2px 6px rgba(0,0,0,0.5);
+  border: 1.5px solid rgba(255,255,255,0.2);
+  transition: box-shadow var(--t-fast) var(--ease-out);
+  flex-shrink: 0;
+}
+.atlas-pin:hover .atlas-pin-icon,
+.atlas-pin[data-selected='true'] .atlas-pin-icon {
+  box-shadow: 0 0 18px var(--atlas-pin-color, var(--violet)), 0 2px 8px rgba(0,0,0,0.6);
+}
+
+.atlas-pin-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.9);
+  transform: none;
+  flex-shrink: 0;
+}
+
+/* "is-here" pulsing ring — shown on selected pin */
+.atlas-pin-ring {
+  position: absolute;
+  width: 38px; height: 38px;
+  top: 50%; left: 50%;
+  transform: translate(-50%, -50%) rotate(45deg);
+  border-radius: 50% 50% 50% 0;
+  border: 1.5px solid var(--gold);
+  animation: atlas-pulse 2.2s ease-in-out infinite;
+  pointer-events: none;
+}
+.atlas-pin-ring-2 {
+  width: 52px; height: 52px;
+  border-width: 1px;
+  border-color: rgb(var(--gold-rgb) / 0.35);
+  animation-delay: 0.7s;
+}
+@keyframes atlas-pulse {
+  0%, 100% { opacity: 0.85; transform: translate(-50%, -50%) rotate(45deg) scale(1); }
+  50%       { opacity: 0.1;  transform: translate(-50%, -50%) rotate(45deg) scale(1.55); }
+}
+
+/* ── Pin label / tooltip ─────────────────────────────────── */
+.atlas-pin-label {
+  position: absolute;
+  bottom: 100%;
+  left: 50%;
+  transform: translateX(-50%) translateY(-6px);
+  white-space: nowrap;
+  padding: 4px 10px;
+  background: rgba(10, 10, 20, 0.88);
+  backdrop-filter: blur(6px);
+  border: 1px solid var(--hairline-strong);
+  border-radius: var(--r-xs);
+  font-family: var(--font-body);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--ink);
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity var(--t-fast) var(--ease-out);
+  z-index: 10;
+}
+.atlas-pin:hover .atlas-pin-label,
+.atlas-pin[data-selected='true'] .atlas-pin-label { opacity: 1; }
+
+/* ── Compass rose corner ─────────────────────────────────── */
+.atlas-compass {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  z-index: 6;
+  pointer-events: none;
+}
+
+/* ── Empty state overlay ─────────────────────────────────── */
+.atlas-empty {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  color: var(--muted);
+  text-align: center;
+  padding: 24px;
+}
+
+/* ── Split aside layout ──────────────────────────────────── */
+.atlas-layout {
+  display: grid;
+  grid-template-columns: 1fr 320px;
+  gap: 20px;
+  align-items: start;
+}
+@media (max-width: 900px) {
+  .atlas-layout { grid-template-columns: 1fr; }
+}
+
+.atlas-aside {
+  display: flex;
+  flex-direction: column;
+  max-height: 560px;
+  overflow: hidden;
+  border: 1px solid var(--hairline);
+  border-radius: var(--r-md);
+  background: var(--surface);
+}
+.atlas-aside-scroll {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  padding: 20px;
+}
+.atlas-aside-foot {
+  flex-shrink: 0;
+  padding: 14px 18px;
+  background: var(--void-2);
+  border-top: 1px solid var(--hairline);
+}
+
+/* ── Location row in aside list ──────────────────────────── */
+.atlas-loc-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 10px 12px;
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: var(--r-sm);
+  text-align: left;
+  cursor: pointer;
+  transition: all var(--t-fast) var(--ease-out);
+  color: var(--ink-soft);
+  font-family: var(--font-body);
+}
+.atlas-loc-row:hover { background: var(--surface-2); border-color: var(--hairline); color: var(--ink); }
+.atlas-loc-row[data-selected='true'] {
+  background: rgb(var(--violet-rgb) / var(--o-08));
+  border-color: rgb(var(--violet-rgb) / 0.3);
+  color: var(--ink);
+}
+.atlas-loc-row-dot {
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+/* ── Detail card in aside ────────────────────────────────── */
+.atlas-stat-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin-top: 14px;
+}
+.atlas-stat {
+  padding: 8px 10px;
+  background: var(--void-2);
+  border: 1px solid var(--hairline);
+  border-radius: var(--r-xs);
+}
+.atlas-stat-label { font-size: 9px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); }
+.atlas-stat-val { font-family: var(--font-display); font-size: 15px; color: var(--ink); margin-top: 3px; }
+
+/* Pin placement preview for edit mode */
+.atlas-pin-preview {
+  position: absolute;
+  transform: translate(-50%, -100%);
+  pointer-events: none;
+  z-index: 6;
+  opacity: 0.7;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .atlas-pin, .atlas-pin-icon, .atlas-pin-label { transition: none; }
+  .atlas-pin-ring, .atlas-pin-ring-2 { animation: none; }
+}

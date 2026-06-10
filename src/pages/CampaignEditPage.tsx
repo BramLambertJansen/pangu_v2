@@ -1,14 +1,18 @@
-import { useId, useCallback } from 'react'
+import { useId, useCallback, useRef, useState } from 'react'
 import { useParams, useNavigate, useLocation } from 'react-router-dom'
 import { Breadcrumbs } from '@/components/ui/Breadcrumbs'
 import { toast } from 'sonner'
 import { Spinner } from '@/components/ui/Spinner'
 import { Button } from '@/components/ui/Button'
 import { ConfirmDialog } from '@/components/ui/ConfirmDialog'
+import { supabase } from '@/lib/supabase'
+import { useAuthStore } from '@/stores/auth.store'
 import { useCampaign, useSaveCampaign, useDeleteCampaign } from '@/hooks/queries/useCampaign'
 import { useEntityEdit } from '@/hooks/useEntityEdit'
 import { useImagePositioning } from '@/hooks/useImagePositioning'
 import type { Campaign, CampaignStatus } from '@/types/campaign.types'
+
+const MAX_MAP_IMAGE_BYTES = 10 * 1024 * 1024
 
 const statusOptions: { value: CampaignStatus; label: string }[] = [
   { value: 'draft',     label: 'Concept'      },
@@ -21,6 +25,9 @@ export default function CampaignEditPage() {
   const { id } = useParams<{ id: string }>()
   const navigate = useNavigate()
   const location = useLocation()
+  const user = useAuthStore((s) => s.user)
+  const mapImageInputRef = useRef<HTMLInputElement>(null)
+  const [mapImageUploading, setMapImageUploading] = useState(false)
   const descriptionId = useId()
   const notesId = useId()
   const statusId = useId()
@@ -47,6 +54,54 @@ export default function CampaignEditPage() {
     campaign?.header_image_position,
     handlePositionChange,
   )
+
+  function extractStoragePath(url: string): string | null {
+    const marker = '/entity-images/'
+    const idx = url.indexOf(marker)
+    return idx !== -1 ? url.slice(idx + marker.length) : null
+  }
+
+  async function handleMapImageUpload(file: File) {
+    if (!user || !id) return
+    if (!file.type.startsWith('image/')) {
+      toast.error('Alleen afbeeldingen zijn toegestaan')
+      return
+    }
+    if (file.size > MAX_MAP_IMAGE_BYTES) {
+      toast.error('Afbeelding mag maximaal 10 MB zijn')
+      return
+    }
+    setMapImageUploading(true)
+    try {
+      const oldUrl = form.map_image_url as string | null | undefined
+      const ext = file.name.split('.').pop() ?? 'jpg'
+      const path = `campaign-maps/${user.id}/${id}.${ext}`
+      const { error: uploadError } = await supabase.storage
+        .from('entity-images')
+        .upload(path, file, { upsert: true })
+      if (uploadError) throw uploadError
+      const { data: urlData } = supabase.storage.from('entity-images').getPublicUrl(path)
+      set('map_image_url', urlData.publicUrl)
+      if (oldUrl && extractStoragePath(oldUrl) !== path) {
+        const oldPath = extractStoragePath(oldUrl)
+        if (oldPath) await supabase.storage.from('entity-images').remove([oldPath])
+      }
+      toast.success('Kaartafbeelding opgeslagen — sla de kroniek op om te bevestigen.')
+    } catch {
+      toast.error('Uploaden mislukt')
+    } finally {
+      setMapImageUploading(false)
+    }
+  }
+
+  async function handleRemoveMapImage() {
+    const url = form.map_image_url as string | null | undefined
+    if (url) {
+      const path = extractStoragePath(url)
+      if (path) await supabase.storage.from('entity-images').remove([path])
+    }
+    set('map_image_url', null)
+  }
 
   function handleCancel() {
     if (!committed) {
@@ -274,6 +329,61 @@ export default function CampaignEditPage() {
               {saveCampaign.isPending ? 'Opslaan...' : 'Opslaan'}
             </Button>
           </div>
+        </div>
+
+        {/* Map image section */}
+        <div className="pangu-surface" style={{ padding: 28, marginTop: 16 }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16, gap: 12, flexWrap: 'wrap' }}>
+            <div>
+              <p className="pangu-section-title" style={{ marginBottom: 2 }}>Kaartafbeelding</p>
+              <p style={{ fontSize: 13, color: 'var(--muted)', margin: 0 }}>
+                Upload een kaartafbeelding. Je kunt er daarna locatie-pins op plaatsen via de Atlas.
+              </p>
+            </div>
+            <div style={{ display: 'flex', gap: 8 }}>
+              {form.map_image_url && (
+                <Button variant="ghost" size="sm" onClick={handleRemoveMapImage}>
+                  Verwijder kaart
+                </Button>
+              )}
+              <Button
+                variant="secondary"
+                size="sm"
+                loading={mapImageUploading}
+                onClick={() => mapImageInputRef.current?.click()}
+              >
+                {form.map_image_url ? 'Vervang afbeelding' : 'Afbeelding uploaden'}
+              </Button>
+              <input
+                ref={mapImageInputRef}
+                type="file"
+                accept="image/*"
+                style={{ display: 'none' }}
+                aria-label="Kaartafbeelding uploaden"
+                onChange={(e) => {
+                  const file = e.target.files?.[0]
+                  if (file) handleMapImageUpload(file)
+                  e.target.value = ''
+                }}
+              />
+            </div>
+          </div>
+
+          {form.map_image_url ? (
+            <div style={{ position: 'relative', borderRadius: 'var(--r-md)', overflow: 'hidden', border: '1px solid var(--hairline)', aspectRatio: '16/9', maxHeight: 320 }}>
+              <img
+                src={form.map_image_url as string}
+                alt="Kaartafbeelding"
+                style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
+              />
+            </div>
+          ) : (
+            <div
+              style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: 140, border: '2px dashed var(--hairline)', borderRadius: 'var(--r-md)', color: 'var(--muted)', fontSize: 13 }}
+            >
+              Nog geen kaartafbeelding
+            </div>
+          )}
         </div>
 
         {/* Danger zone */}

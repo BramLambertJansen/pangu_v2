@@ -56,6 +56,10 @@ export function useSaveLocation(id: string) {
           notes: form.notes,
           status: form.status,
           location_type: form.location_type ?? null,
+          map_x: form.map_x ?? null,
+          map_y: form.map_y ?? null,
+          region: form.region ?? null,
+          climate: form.climate ?? null,
           committed: true,
           updated_at: new Date().toISOString(),
         })

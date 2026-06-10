@@ -118,6 +118,7 @@ export function useSaveCampaign(id: string) {
           header_image_position: form.header_image_position ?? 'center',
           status: form.status,
           notes: form.notes ?? null,
+          map_image_url: form.map_image_url ?? null,
           committed: true,
           updated_at: new Date().toISOString(),
         })
