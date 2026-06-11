@@ -12,15 +12,11 @@ import { useEntityEdit } from '@/hooks/useEntityEdit'
 import { useImagePositioning } from '@/hooks/useImagePositioning'
 import { sanitizeImageUrl } from '@/utils/sanitizeUrl'
 import type { Campaign, CampaignStatus } from '@/types/campaign.types'
+import { campaignStatusLabel, optionsFromLabels } from '@/lib/statusMaps'
 
 const MAX_MAP_IMAGE_BYTES = 10 * 1024 * 1024
 
-const statusOptions: { value: CampaignStatus; label: string }[] = [
-  { value: 'draft',     label: 'Concept'      },
-  { value: 'active',    label: 'Actief'       },
-  { value: 'archived',  label: 'Gearchiveerd' },
-  { value: 'completed', label: 'Voltooid'     },
-]
+const statusOptions = optionsFromLabels(campaignStatusLabel)
 
 export default function CampaignEditPage() {
   const { id } = useParams<{ id: string }>()

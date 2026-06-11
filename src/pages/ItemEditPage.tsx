@@ -20,29 +20,11 @@ function pollinationsUrl(prompt: string): string {
   return `https://image.pollinations.ai/prompt/${encodeURIComponent(prompt)}?width=512&height=512&nologo=true&model=flux&seed=${Math.floor(Math.random() * 99999)}`
 }
 import type { ItemType, ItemRarity, ItemStatBonuses } from '@/types/item.types'
+import { itemRarityLabel, itemTypeLabel, optionsFromLabels } from '@/lib/statusMaps'
 import { D5E_SKILLS } from '@/utils/dnd5e'
 
-const rarityOptions: { value: ItemRarity; label: string }[] = [
-  { value: 'common',    label: 'Gewoon'          },
-  { value: 'uncommon',  label: 'Ongewoon'        },
-  { value: 'rare',      label: 'Zeldzaam'        },
-  { value: 'very_rare', label: 'Zeer zeldzaam'   },
-  { value: 'legendary', label: 'Legendarisch'    },
-  { value: 'artifact',  label: 'Artefact'        },
-]
-
-const typeOptions: { value: ItemType; label: string }[] = [
-  { value: 'weapon',   label: 'Wapen'     },
-  { value: 'armor',    label: 'Pantser'   },
-  { value: 'potion',   label: 'Drankje'   },
-  { value: 'ring',     label: 'Ring'      },
-  { value: 'rod',      label: 'Staf'      },
-  { value: 'scroll',   label: 'Perkament' },
-  { value: 'staff',    label: 'Stok'      },
-  { value: 'wand',     label: 'Toverstok' },
-  { value: 'wondrous', label: 'Wonderlijk'},
-  { value: 'misc',     label: 'Overig'    },
-]
+const rarityOptions = optionsFromLabels(itemRarityLabel)
+const typeOptions = optionsFromLabels(itemTypeLabel)
 
 const SKILLS = D5E_SKILLS.map(s => s.name)
 

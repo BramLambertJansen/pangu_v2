@@ -11,6 +11,7 @@ import { useWorldBestiaries } from '@/hooks/queries/useWorldBestiaries'
 import { useCampaignSessions } from '@/hooks/queries/useCampaignSessions'
 import { useAuthStore } from '@/stores/auth.store'
 import type { EncounterStatus } from '@/types/encounter.types'
+import { encounterStatusLabel, optionsFromLabels } from '@/lib/statusMaps'
 import type { Bestiary } from '@/types/bestiary.types'
 
 type MonsterRow = {
@@ -21,13 +22,7 @@ type MonsterRow = {
   count: number
 }
 
-const statusOptions: { value: EncounterStatus; label: string }[] = [
-  { value: 'draft',     label: 'Concept'      },
-  { value: 'ready',     label: 'Klaar'        },
-  { value: 'active',    label: 'Actief'       },
-  { value: 'completed', label: 'Voltooid'     },
-  { value: 'archived',  label: 'Gearchiveerd' },
-]
+const statusOptions = optionsFromLabels(encounterStatusLabel)
 
 export default function EncounterEditPage() {
   const { id } = useParams<{ id: string }>()

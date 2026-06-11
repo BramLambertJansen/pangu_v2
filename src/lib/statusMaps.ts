@@ -12,6 +12,17 @@ import type { ItemRarity, ItemType } from '@/types/item.types'
 import type { FactionStatus, FactionType, FactionReputation } from '@/types/faction.types'
 import type { SpellSchool } from '@/types/spell.types'
 
+/**
+ * Turns a label map into the `{ value, label }[]` shape that <select> option
+ * lists expect, preserving the map's key order. Object.entries widens the key
+ * to string, so the inner cast restores the union — call sites stay type-safe.
+ */
+export function optionsFromLabels<T extends string>(
+  map: Record<T, string>,
+): { value: T; label: string }[] {
+  return (Object.entries(map) as [T, string][]).map(([value, label]) => ({ value, label }))
+}
+
 export const worldStatusLabel: Record<WorldStatus, string> = {
   draft:    'Concept',
   active:   'Actief',

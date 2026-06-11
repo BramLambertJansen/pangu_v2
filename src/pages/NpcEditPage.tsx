@@ -13,13 +13,9 @@ import { Breadcrumbs } from '@/components/ui/Breadcrumbs'
 import { useNpc, useSaveNpc, useDeleteNpc } from '@/hooks/queries/useNpc'
 import { useCampaignFactions } from '@/hooks/queries/useCampaignFactions'
 import type { NpcStatus } from '@/types/npc.types'
+import { npcStatusLabel, optionsFromLabels } from '@/lib/statusMaps'
 
-const statusOptions: { value: NpcStatus; label: string }[] = [
-  { value: 'draft',    label: 'Concept'        },
-  { value: 'active',   label: 'Actief'         },
-  { value: 'retired',  label: 'Teruggetrokken' },
-  { value: 'archived', label: 'Gearchiveerd'   },
-]
+const statusOptions = optionsFromLabels(npcStatusLabel)
 
 export default function NpcEditPage() {
   const { id } = useParams<{ id: string }>()

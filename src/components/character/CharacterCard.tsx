@@ -35,6 +35,7 @@ export const CharacterCard = memo(function CharacterCard({ character }: Props) {
       role="button"
       tabIndex={0}
       aria-label={`Karakter: ${character.name}`}
+      className={portraitUrl ? undefined : 'character-card-fallback'}
       onClick={() => navigate(`/characters/${character.id}`)}
       onKeyDown={handleKeyDown}
       style={{
@@ -48,9 +49,7 @@ export const CharacterCard = memo(function CharacterCard({ character }: Props) {
         cursor: 'pointer',
         outline: 'none',
         overflow: 'hidden',
-        background: portraitUrl
-          ? 'var(--void)'
-          : 'linear-gradient(175deg, #141b3a 0%, #0d1228 60%, #0a0e20 100%)',
+        background: portraitUrl ? 'var(--void)' : undefined,
         transition: 'border-color var(--t-base) var(--ease-out), box-shadow var(--t-base) var(--ease-out), transform var(--t-base) var(--ease-out)',
       }}
       onMouseEnter={e => {

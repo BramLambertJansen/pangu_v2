@@ -663,26 +663,43 @@ Migreer inline `style={{}}` naar Tailwind-klassen per component-groep, in dezelf
 | 1.1 | Inline queries/mutaties in pagina's | HOOG | 1 | ✅ |
 | 1.2 | Draft GC 12× gedupliceerd | HOOG | 1 | ✅ |
 | 2.9 | Forge-mutaties niet geëxtraheerd | MIDDEN | 1 | ✅ |
-| 1.3 | WorldEditPage/CampaignEditPage geen useEntityEdit | HOOG | 4 | — |
-| 1.4 | CharacterDetailPage/EditPage monolithisch | HOOG | 5 | — |
-| 1.5 | CampaignDetailPage monolithisch | HOOG | 5 | — |
+| 1.3 | WorldEditPage/CampaignEditPage geen useEntityEdit | HOOG | 4 | ✅ |
+| 1.4 | CharacterDetailPage/EditPage monolithisch | HOOG | 5 | ✅ (#122/#123) |
+| 1.5 | CampaignDetailPage monolithisch | HOOG | 5 | ✅ (#123) |
 | 2.1 | `abilityModifier` 3× gedefinieerd | HOOG | 2 | ✅ |
 | 2.2 | SKILLS/SAVING_THROWS 2× gedefinieerd | HOOG | 2 | ✅ |
-| 2.5 | Lokale pickGradient in 5 pagina's | HOOG | 3 | — |
+| 2.5 | Lokale pickGradient in 5 pagina's | HOOG | 3 | ✅ |
 | 2.3 | ABILITY_SCORES 2× gedefinieerd | MIDDEN | 2 | ✅ |
 | 2.4 | D&D constanten verspreid | MIDDEN | 2 | ✅ |
-| 2.6 | Lokale statusMaps in NpcDetailPage | MIDDEN | 3 | — |
+| 2.6 | Lokale statusMaps in NpcDetailPage | MIDDEN | 3 | ✅ |
 | 2.7 | `formatDate` 3× gedefinieerd | MIDDEN | 2 | ✅ |
 | 2.8 | Feature-card structuur identiek | MIDDEN | 5 | — |
-| 2.10 | `as unknown as SupabaseClient` | MIDDEN | 3 | — |
+| 2.10 | `as unknown as SupabaseClient` | MIDDEN | 3 | ✅ |
 | 2.11 | staleTime inconsistentie | LAAG | 2 | ✅ |
 | 2.12 | Inline style domineert | MIDDEN | 7 | — |
 | 3.1 | pangu-btn bypast Button component | MIDDEN | 6 | — |
-| 3.2 | Tab-navigatie niet toegankelijk | MIDDEN | 6 | — |
-| 3.3 | DashboardPage LinkRow JS hover | LAAG | 6 | — |
+| 3.2 | Tab-navigatie niet toegankelijk | MIDDEN | 6 | ✅ |
+| 3.3 | DashboardPage LinkRow JS hover | LAAG | 6 | ✅ |
 | 3.4 | queryKeys inconsistent | LAAG | 4 | — |
-| 4.1 | outline:none zonder focus-vervanging | MIDDEN | 6 | — |
-| 4.2 | EntityCard role=button op article | LAAG | 6 | — |
+| 4.1 | outline:none zonder focus-vervanging | MIDDEN | 6 | ✅ |
+| 4.2 | EntityCard role=button op article | LAAG | 6 | ✅ |
 | 4.3 | Laadstates zonder aria-live | LAAG | 6 | — |
 | 5.1 | CLAUDE.md structuur verouderd | LAAG | na fase 5 | — |
-| 5.2 | Geen tests voor pagina's/grote hooks | LAAG | per fase | — |
+| 5.2 | Geen tests voor pagina's/grote hooks | LAAG | per fase | gedeeltelijk |
+
+---
+
+## Quick-wins batch (juni 2026)
+
+Kleine opruimacties bovenop de fasen hierboven:
+
+- **Status-opties via `statusMaps`** — de 14 hardcoded `…Options`-arrays in de 11 edit-pagina's
+  (World/Campaign/Session/Location/Lore/Npc/Bestiary/Quest/Encounter/Faction/Item) zijn vervangen
+  door `optionsFromLabels(<labelMap>)` uit `src/lib/statusMaps.ts`. Eén bron voor labels en volgorde.
+- **`CharacterCard` fallback-gradient** verplaatst naar de `.character-card-fallback` CSS-klasse —
+  laatste `literal-hex` blocking violation in `npm run check:styles` is opgelost.
+- **`as any` weg** in `useCampaignItems` (`as unknown as Json`), `useEntityLinks`
+  (`typeToTable` getypeerd als `keyof Database['public']['Tables']`) en `api/generate-image.ts`.
+- **Unit tests** toegevoegd voor pure utils: `sanitizeUrl`, `equipmentUtils`, `inviteCode`,
+  `format`, `apiError` (§5.2 deels afgehandeld).
+- **`npm run check`** script (lint + type-check + test) en een root-`README.md` toegevoegd.

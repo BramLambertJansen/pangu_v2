@@ -15,13 +15,9 @@ import { useCampaign } from '@/hooks/queries/useCampaign'
 import { useCampaignLocations } from '@/hooks/queries/useCampaignLocations'
 import { ConstellationAtlas } from '@/components/location/ConstellationAtlas'
 import type { LocationStatus } from '@/types/location.types'
+import { locationStatusLabel, optionsFromLabels } from '@/lib/statusMaps'
 
-const statusOptions: { value: LocationStatus; label: string }[] = [
-  { value: 'draft',      label: 'Concept'      },
-  { value: 'active',     label: 'Actief'       },
-  { value: 'discovered', label: 'Ontdekt'      },
-  { value: 'archived',   label: 'Gearchiveerd' },
-]
+const statusOptions = optionsFromLabels(locationStatusLabel)
 
 export default function LocationEditPage() {
   const { id } = useParams<{ id: string }>()

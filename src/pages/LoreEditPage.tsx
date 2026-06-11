@@ -9,12 +9,9 @@ import { useEntityEdit } from '@/hooks/useEntityEdit'
 import { useAI } from '@/hooks/useAI'
 import { useLore, useSaveLore, useDeleteLore } from '@/hooks/queries/useLore'
 import type { LoreStatus } from '@/types/lore.types'
+import { loreStatusLabel, optionsFromLabels } from '@/lib/statusMaps'
 
-const statusOptions: { value: LoreStatus; label: string }[] = [
-  { value: 'draft',    label: 'Concept'      },
-  { value: 'active',   label: 'Actief'       },
-  { value: 'archived', label: 'Gearchiveerd' },
-]
+const statusOptions = optionsFromLabels(loreStatusLabel)
 
 export default function LoreEditPage() {
   const { id } = useParams<{ id: string }>()

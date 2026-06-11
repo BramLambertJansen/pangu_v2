@@ -10,14 +10,11 @@ import { useEntityEdit } from '@/hooks/useEntityEdit'
 import { useAuthStore } from '@/stores/auth.store'
 import { useBestiary, useSaveBestiary, useDeleteBestiary } from '@/hooks/queries/useBestiary'
 import type { BestiaryStatus } from '@/types/bestiary.types'
+import { bestiaryStatusLabel, optionsFromLabels } from '@/lib/statusMaps'
 
 const MAX_IMAGE_BYTES = 5 * 1024 * 1024
 
-const statusOptions: { value: BestiaryStatus; label: string }[] = [
-  { value: 'draft',    label: 'Concept'      },
-  { value: 'active',   label: 'Actief'       },
-  { value: 'archived', label: 'Gearchiveerd' },
-]
+const statusOptions = optionsFromLabels(bestiaryStatusLabel)
 
 interface NumericFieldProps {
   id: string

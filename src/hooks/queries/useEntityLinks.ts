@@ -4,6 +4,7 @@ import { toast } from 'sonner'
 import { supabase } from '@/lib/supabase'
 import { queryKeys } from '@/lib/queryKeys'
 import type { LinkableEntityType, LinkRelation, EntityLink, ResolvedLink } from '@/types/link.types'
+import type { Database } from '@/types/database.types'
 
 // DEV_MODE has no .or() support in the LocalQueryBuilder, so we fetch
 // from both directions separately and merge in JS. This applies in both
@@ -13,7 +14,7 @@ import type { LinkableEntityType, LinkRelation, EntityLink, ResolvedLink } from 
 // fetching by grouping the "other side" IDs per type and issuing one
 // .in('id', ids) per type against the correct table.
 
-const typeToTable: Record<LinkableEntityType, string> = {
+const typeToTable: Record<LinkableEntityType, keyof Database['public']['Tables']> = {
   location:  'locations',
   npc:       'npcs',
   lore:      'lore',   // singular — matches the actual Supabase table name
@@ -40,8 +41,7 @@ async function resolveNames(
   for (const [type, ids] of grouped.entries()) {
     // Items have no status column — select only id and name to avoid a column error
     const cols = type === 'item' ? 'id, name' : 'id, name, status'
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const { data } = await (supabase as any)
+    const { data } = await supabase
       .from(typeToTable[type])
       .select(cols)
       .in('id', ids)
