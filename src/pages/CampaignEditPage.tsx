@@ -10,6 +10,7 @@ import { useAuthStore } from '@/stores/auth.store'
 import { useCampaign, useSaveCampaign, useDeleteCampaign } from '@/hooks/queries/useCampaign'
 import { useEntityEdit } from '@/hooks/useEntityEdit'
 import { useImagePositioning } from '@/hooks/useImagePositioning'
+import { sanitizeImageUrl } from '@/utils/sanitizeUrl'
 import type { Campaign, CampaignStatus } from '@/types/campaign.types'
 
 const MAX_MAP_IMAGE_BYTES = 10 * 1024 * 1024
@@ -49,6 +50,8 @@ export default function CampaignEditPage() {
   const handlePositionChange = useCallback((posString: string) => {
     set('header_image_position', posString)
   }, [set])
+
+  const safeMapPreviewUrl = sanitizeImageUrl(form.map_image_url as string | null | undefined)
 
   const { containerRef, posString: imagePosString, isDragging, resetPosition, handlers: imagePosHandlers } = useImagePositioning(
     campaign?.header_image_position,
@@ -394,19 +397,27 @@ export default function CampaignEditPage() {
               className="pangu-input"
               type="url"
               value={(form.map_image_url as string | null) ?? ''}
-              onChange={(e) => set('map_image_url', e.target.value || null as unknown as string)}
+              onChange={(e) => set('map_image_url', e.target.value || null)}
               placeholder="https://... (externe kaartafbeelding)"
             />
           </div>
 
           {form.map_image_url ? (
-            <div style={{ position: 'relative', borderRadius: 'var(--r-md)', overflow: 'hidden', border: '1px solid var(--hairline)', aspectRatio: '16/9', maxHeight: 320 }}>
-              <img
-                src={form.map_image_url as string}
-                alt="Kaartafbeelding"
-                style={{ width: '100%', height: '100%', objectFit: 'contain', display: 'block' }}
-              />
-            </div>
+            safeMapPreviewUrl ? (
+              <div style={{ position: 'relative', borderRadius: 'var(--r-md)', overflow: 'hidden', border: '1px solid var(--hairline)', aspectRatio: '16/9', maxHeight: 320 }}>
+                <img
+                  src={safeMapPreviewUrl}
+                  alt="Kaartafbeelding"
+                  style={{ width: '100%', height: '100%', objectFit: 'contain', display: 'block' }}
+                />
+              </div>
+            ) : (
+              <div
+                style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: 140, border: '2px dashed var(--hairline)', borderRadius: 'var(--r-md)', color: 'var(--muted)', fontSize: 13, textAlign: 'center', padding: 16 }}
+              >
+                Alleen https-afbeeldings-URL's worden getoond.
+              </div>
+            )
           ) : (
             <div
               style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: 140, border: '2px dashed var(--hairline)', borderRadius: 'var(--r-md)', color: 'var(--muted)', fontSize: 13 }}

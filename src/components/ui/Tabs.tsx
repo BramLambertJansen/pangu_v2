@@ -39,6 +39,12 @@ export function Tabs({ items, value, onValueChange, label, variant = 'pill', cla
       e.preventDefault()
       const next = e.key === 'ArrowRight' ? (idx + 1) % items.length : (idx - 1 + items.length) % items.length
       onValueChange(items[next].id)
+    } else if (e.key === 'Home') {
+      e.preventDefault()
+      onValueChange(items[0].id)
+    } else if (e.key === 'End') {
+      e.preventDefault()
+      onValueChange(items[items.length - 1].id)
     }
   }
 

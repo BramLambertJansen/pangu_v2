@@ -1,6 +1,7 @@
 import { useRef } from 'react'
 import type { CSSProperties, MouseEvent, TouchEvent } from 'react'
 import { CompassRose } from '@/components/world/CompassRose'
+import { sanitizeImageUrl } from '@/utils/sanitizeUrl'
 
 export interface AtlasMarker {
   id: string
@@ -59,6 +60,9 @@ export function ConstellationAtlas({
   className,
 }: ConstellationAtlasProps) {
   const containerRef = useRef<HTMLDivElement>(null)
+  // Match the app-wide convention: only render https image URLs (rejects
+  // http/data/javascript URIs that a free-text map-URL field could supply).
+  const safeMapUrl = sanitizeImageUrl(mapImageUrl)
 
   function handleContainerClick(e: MouseEvent<HTMLDivElement>) {
     if (!pinMode || !onPlacePin) return
@@ -91,7 +95,7 @@ export function ConstellationAtlas({
       className={`atlas-map${className ? ` ${className}` : ''}`}
       // With an image the box is sized by the image (height:auto) so pins stay
       // put across widths; height only sizes the empty-state placeholder.
-      style={mapImageUrl ? undefined : { height }}
+      style={safeMapUrl ? undefined : { height }}
       data-pin-mode={pinMode ? 'true' : undefined}
       onClick={handleContainerClick}
       onTouchEnd={handleContainerTouch}
@@ -101,9 +105,9 @@ export function ConstellationAtlas({
       role="group"
       aria-label={pinMode ? 'Locatiekaart — klik om een pin te plaatsen' : 'Locatiekaart'}
     >
-      {mapImageUrl ? (
+      {safeMapUrl ? (
         <img
-          src={mapImageUrl}
+          src={safeMapUrl}
           alt="Kaartafbeelding"
           className="atlas-map-img"
           draggable={false}
