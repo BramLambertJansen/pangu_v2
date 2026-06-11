@@ -8,32 +8,11 @@ import { Spinner } from '@/components/ui/Spinner'
 import { useEntityEdit } from '@/hooks/useEntityEdit'
 import { useFaction, useSaveFaction, useDeleteFaction } from '@/hooks/queries/useFaction'
 import type { FactionStatus, FactionType, FactionReputation } from '@/types/faction.types'
+import { factionStatusLabel, factionTypeLabel, factionReputationLabel, optionsFromLabels } from '@/lib/statusMaps'
 
-const statusOptions: { value: FactionStatus; label: string }[] = [
-  { value: 'draft',    label: 'Concept'      },
-  { value: 'active',   label: 'Actief'       },
-  { value: 'archived', label: 'Gearchiveerd' },
-]
-
-const typeOptions: { value: FactionType; label: string }[] = [
-  { value: 'guild',       label: 'Gilde'                  },
-  { value: 'noble_house', label: 'Adellijk huis'          },
-  { value: 'religious',   label: 'Religieuze orde'        },
-  { value: 'criminal',    label: 'Criminele organisatie'  },
-  { value: 'military',    label: 'Militaire orde'         },
-  { value: 'merchant',    label: 'Handelsgilde'           },
-  { value: 'arcane',      label: 'Arcane genootschap'     },
-  { value: 'tribal',      label: 'Stam'                   },
-  { value: 'other',       label: 'Overig'                 },
-]
-
-const reputationOptions: { value: FactionReputation; label: string }[] = [
-  { value: 'hostile',    label: 'Vijandig'    },
-  { value: 'unfriendly', label: 'Wantrouwend' },
-  { value: 'neutral',    label: 'Neutraal'    },
-  { value: 'friendly',   label: 'Vriendelijk' },
-  { value: 'allied',     label: 'Bondgenoot'  },
-]
+const statusOptions = optionsFromLabels(factionStatusLabel)
+const typeOptions = optionsFromLabels(factionTypeLabel)
+const reputationOptions = optionsFromLabels(factionReputationLabel)
 
 export default function FactionEditPage() {
   const { id } = useParams<{ id: string }>()

@@ -8,14 +8,9 @@ import { Spinner } from '@/components/ui/Spinner'
 import { useEntityEdit } from '@/hooks/useEntityEdit'
 import { useQuest, useSaveQuest, useDeleteQuest } from '@/hooks/queries/useQuest'
 import type { QuestStatus } from '@/types/quest.types'
+import { questStatusLabel, optionsFromLabels } from '@/lib/statusMaps'
 
-const statusOptions: { value: QuestStatus; label: string }[] = [
-  { value: 'draft',     label: 'Concept'      },
-  { value: 'active',    label: 'Actief'       },
-  { value: 'completed', label: 'Voltooid'     },
-  { value: 'failed',    label: 'Mislukt'      },
-  { value: 'archived',  label: 'Gearchiveerd' },
-]
+const statusOptions = optionsFromLabels(questStatusLabel)
 
 export default function QuestEditPage() {
   const { id } = useParams<{ id: string }>()

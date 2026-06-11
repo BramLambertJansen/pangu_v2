@@ -31,8 +31,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   }
 
   // Fetch user's BYOK OpenAI key
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const { data: settings } = await (adminClient as any)
+  const { data: settings } = await adminClient
     .from('user_ai_settings')
     .select('byok_keys')
     .eq('user_id', user.id)

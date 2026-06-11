@@ -9,12 +9,9 @@ import { useWorld, useSaveWorld, useDeleteWorld } from '@/hooks/queries/useWorld
 import { useEntityEdit } from '@/hooks/useEntityEdit'
 import { useImagePositioning } from '@/hooks/useImagePositioning'
 import type { World, WorldStatus } from '@/types/world.types'
+import { worldStatusLabel, optionsFromLabels } from '@/lib/statusMaps'
 
-const statusOptions: { value: WorldStatus; label: string }[] = [
-  { value: 'draft',    label: 'Concept'      },
-  { value: 'active',   label: 'Actief'       },
-  { value: 'archived', label: 'Gearchiveerd' },
-]
+const statusOptions = optionsFromLabels(worldStatusLabel)
 
 export default function WorldEditPage() {
   const { id } = useParams<{ id: string }>()

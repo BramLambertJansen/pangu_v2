@@ -1639,6 +1639,12 @@ body {
 
 /* ── Entity cards ───────────────────────────────────────── */
 
+/* Portrait-less character card fallback (kept as a class so the literal
+   gradient stays out of the TSX theming guardrail). */
+.character-card-fallback {
+  background: linear-gradient(175deg, #141b3a 0%, #0d1228 60%, #0a0e20 100%);
+}
+
 .entity-card {
   position: relative;
   border-radius: var(--r-xl);

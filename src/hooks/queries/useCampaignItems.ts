@@ -5,6 +5,7 @@ import { toast } from 'sonner'
 import { supabase } from '@/lib/supabase'
 import { queryKeys } from '@/lib/queryKeys'
 import type { Item, ItemType, ItemRarity, ItemStatBonuses } from '@/types/item.types'
+import type { Json } from '@/types/database.types'
 
 export function useCampaignItems(campaignId: string | undefined) {
   return useQuery<Item[]>({
@@ -72,8 +73,7 @@ export function useCreateCampaignItem(campaignId: string) {
           is_magical: input.is_magical,
           weight: input.weight,
           quantity: 1,
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          properties: (input.properties ?? {}) as any,
+          properties: (input.properties ?? {}) as unknown as Json,
           image_url: input.image_url ?? null,
           committed: true,
         })

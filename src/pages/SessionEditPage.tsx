@@ -8,13 +8,9 @@ import { Spinner } from '@/components/ui/Spinner'
 import { useEntityEdit } from '@/hooks/useEntityEdit'
 import { useSession, useSaveSession, useDeleteSession } from '@/hooks/queries/useSession'
 import type { SessionStatus } from '@/types/session.types'
+import { sessionStatusLabel, optionsFromLabels } from '@/lib/statusMaps'
 
-const statusOptions: { value: SessionStatus; label: string }[] = [
-  { value: 'planned',   label: 'Gepland'       },
-  { value: 'active',    label: 'Actief'        },
-  { value: 'completed', label: 'Voltooid'      },
-  { value: 'archived',  label: 'Gearchiveerd'  },
-]
+const statusOptions = optionsFromLabels(sessionStatusLabel)
 
 export default function SessionEditPage() {
   const { id } = useParams<{ id: string }>()

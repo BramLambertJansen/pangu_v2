@@ -93,7 +93,9 @@ src/
 │   ├── item/
 │   │   └── ItemCard.tsx
 │   ├── location/
-│   │   └── LocationCard.tsx
+│   │   ├── LocationCard.tsx
+│   │   ├── ConstellationAtlas.tsx # Interactieve kaart: zoom/pan, locatie-pins, pin-plaatsmodus
+│   │   └── PlaceAccordion.tsx     # Uitklapbare sublocaties met NPC-aanwezigheid
 │   ├── lore/
 │   │   └── LoreCard.tsx
 │   ├── npc/
@@ -118,6 +120,7 @@ src/
 │   ├── useCharacterWizard.ts # Wizard-draft state + per-user localStorage resume + stapvalidatie
 │   ├── useEditGuard.ts      # Voorkomt navigeren weg bij unsaved changes
 │   ├── useEntityEdit.ts     # Generieke edit form state (dirty, committed, delete)
+│   ├── useDraftGC.ts        # Verwijdert verlopen uncommitted drafts (>30 min) per tabel
 │   ├── useImagePositioning.ts # Drag-to-reposition voor header images
 │   ├── useNotificationRealtime.ts # Supabase realtime subscription op notifications INSERT
 │   ├── useOnlineStatus.ts   # Browser online/offline status via navigator.onLine + events
@@ -161,6 +164,7 @@ src/
 │   └── supabaseLocal.ts      # Supabase-compatible localStorage adapter voor DEV_MODE (LocalQueryBuilder)
 ├── pages/                   # Pagina-componenten (lazy-loaded via routes)
 │   ├── AdminPage.tsx
+│   ├── AtlasPage.tsx         # Interactieve kroniek-kaart met locatie-pins (ConstellationAtlas)
 │   ├── BestiariesPage.tsx
 │   ├── BestiaryDetailPage.tsx
 │   ├── BestiaryEditPage.tsx
@@ -173,6 +177,7 @@ src/
 │   ├── CharactersPage.tsx
 │   ├── CharacterWizardPage.tsx # /characters/new — wizard-route met "wizard overslaan"-fallback
 │   ├── DashboardPage.tsx
+│   ├── DesignSystemPage.tsx  # /design-system — token-swatches + alle DS-componenten
 │   ├── EncounterDetailPage.tsx
 │   ├── EncounterEditPage.tsx
 │   ├── EncounterRunPage.tsx  # Live gevechtsrunner: initiatiefvolgorde, HP tracking, d20 rolls
@@ -250,6 +255,8 @@ src/
     ├── apiError.ts           # getApiError() voor serverless responses
     ├── characterWizard.ts    # Wizard-draft helpers: stapvalidatie, level 1-derivatie, buildCharacterInsert
     ├── cn.ts                 # clsx + tailwind-merge
+    ├── dnd5e.ts              # Gedeelde D&D 5e constanten + abilityModifier/formatModifier
+    ├── format.ts             # formatDate (nl-NL, lokale kalenderdatum)
     ├── equipmentUtils.ts     # Equipment slots: labels, icons, ALLOWED_SLOTS_BY_TYPE, calculateEffectiveStats, getEquippedItemsBySlot, formatItemBonuses
     ├── inviteCode.ts         # generateInviteCode() — leesbare codes als WOLF-4532
     ├── pickGradient.ts       # Hash-gebaseerde gradient paletten per entity-type
@@ -708,6 +715,7 @@ Routes zijn gedefinieerd in `src/routes/index.tsx`. Lazy-loading voor alle pagin
 | `/dashboard` | `DashboardPage` | `requireAuth` |
 | `/admin` | `AdminPage` | `requireAdmin` |
 | `/settings` | `SettingsPage` | `requireAuth` |
+| `/design-system` | `DesignSystemPage` | `requireAuth` |
 | `/worlds` | `WorldsPage` | `requireAuth` |
 | `/worlds/:id` | `WorldDetailPage` | `requireAuth` |
 | `/worlds/:id/edit` | `WorldEditPage` | `requireAuth` |
@@ -717,6 +725,7 @@ Routes zijn gedefinieerd in `src/routes/index.tsx`. Lazy-loading voor alle pagin
 | `/campaigns/:id/edit` | `CampaignEditPage` | `requireAuth` |
 | `/campaigns/:id/sessions` | `SessionsPage` | `requireAuth` |
 | `/campaigns/:id/locations` | `LocationsPage` | `requireAuth` |
+| `/campaigns/:id/atlas` | `AtlasPage` | `requireAuth` |
 | `/campaigns/:id/lore` | `LoresPage` | `requireAuth` |
 | `/campaigns/:id/npcs` | `NpcsPage` | `requireAuth` |
 | `/campaigns/:id/quests` | `QuestsPage` | `requireAuth` |
