@@ -13,6 +13,24 @@
     <meta name="apple-mobile-web-app-title" content="PANGU" />
     <meta name="color-scheme" content="dark" />
     <title>PANGU</title>
+    <script>
+      // Apply persisted theme axes before first paint so a non-default skin
+      // (e.g. ember) never flashes the default look while React mounts.
+      // Mirrors ThemeProvider: theme is always set; accent/density only when
+      // they differ from the baseline (violet/standard).
+      (function () {
+        try {
+          var raw = localStorage.getItem('theme');
+          if (!raw) return;
+          var s = JSON.parse(raw).state;
+          if (!s) return;
+          var root = document.documentElement;
+          if (s.theme) root.setAttribute('data-theme', s.theme);
+          if (s.accent && s.accent !== 'violet') root.setAttribute('data-accent', s.accent);
+          if (s.density && s.density !== 'standard') root.setAttribute('data-density', s.density);
+        } catch (e) {}
+      })();
+    </script>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600&family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400;1,600&family=Manrope:wght@400;500;600;700&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet" />
