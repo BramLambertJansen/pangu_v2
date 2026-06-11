@@ -10,6 +10,7 @@ import { useAuthStore } from '@/stores/auth.store'
 import { useCampaign, useSaveCampaign, useDeleteCampaign } from '@/hooks/queries/useCampaign'
 import { useEntityEdit } from '@/hooks/useEntityEdit'
 import { useImagePositioning } from '@/hooks/useImagePositioning'
+import { sanitizeImageUrl } from '@/utils/sanitizeUrl'
 import type { Campaign, CampaignStatus } from '@/types/campaign.types'
 
 const MAX_MAP_IMAGE_BYTES = 10 * 1024 * 1024
@@ -50,6 +51,8 @@ export default function CampaignEditPage() {
     set('header_image_position', posString)
   }, [set])
 
+  const safeMapPreviewUrl = sanitizeImageUrl(form.map_image_url as string | null | undefined)
+
   const { containerRef, posString: imagePosString, isDragging, resetPosition, handlers: imagePosHandlers } = useImagePositioning(
     campaign?.header_image_position,
     handlePositionChange,
@@ -83,7 +86,7 @@ export default function CampaignEditPage() {
       set('map_image_url', urlData.publicUrl)
       // The previous file is removed only after the campaign is saved (see
       // handleSave), so a cancel/discard never points the DB at a deleted file.
-      toast.success('Kaartafbeelding geüpload — sla de kroniek op om te bevestigen.')
+      toast.success('Kaartafbeelding geüpload — klik "Sla kaart op" om te bewaren.')
     } catch {
       toast.error('Uploaden mislukt')
     } finally {
@@ -338,10 +341,10 @@ export default function CampaignEditPage() {
             <div>
               <p className="pg-section-title" style={{ marginBottom: 2 }}>Kaartafbeelding</p>
               <p style={{ fontSize: 13, color: 'var(--muted)', margin: 0 }}>
-                Upload een kaartafbeelding. Je kunt er daarna locatie-pins op plaatsen via de Atlas.
+                Upload een kaartafbeelding of voer een URL in. Je kunt er daarna locatie-pins op plaatsen via de Atlas.
               </p>
             </div>
-            <div style={{ display: 'flex', gap: 8 }}>
+            <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
               {form.map_image_url && (
                 <Button variant="ghost" size="sm" onClick={handleRemoveMapImage}>
                   Verwijder kaart
@@ -367,17 +370,54 @@ export default function CampaignEditPage() {
                   e.target.value = ''
                 }}
               />
+              {(form.map_image_url ?? null) !== (campaign?.map_image_url ?? null) && (
+                <Button
+                  variant="primary"
+                  size="sm"
+                  onClick={handleSave}
+                  loading={saveCampaign.isPending}
+                >
+                  Sla kaart op
+                </Button>
+              )}
             </div>
           </div>
 
+          {/* URL input */}
+          <div style={{ marginBottom: 16 }}>
+            <label
+              className="pangu-label"
+              htmlFor="map-image-url"
+              style={{ display: 'block', marginBottom: 6 }}
+            >
+              Kaart-URL (optioneel)
+            </label>
+            <input
+              id="map-image-url"
+              className="pangu-input"
+              type="url"
+              value={(form.map_image_url as string | null) ?? ''}
+              onChange={(e) => set('map_image_url', e.target.value || null)}
+              placeholder="https://... (externe kaartafbeelding)"
+            />
+          </div>
+
           {form.map_image_url ? (
-            <div style={{ position: 'relative', borderRadius: 'var(--r-md)', overflow: 'hidden', border: '1px solid var(--hairline)', aspectRatio: '16/9', maxHeight: 320 }}>
-              <img
-                src={form.map_image_url as string}
-                alt="Kaartafbeelding"
-                style={{ width: '100%', height: '100%', objectFit: 'contain', display: 'block' }}
-              />
-            </div>
+            safeMapPreviewUrl ? (
+              <div style={{ position: 'relative', borderRadius: 'var(--r-md)', overflow: 'hidden', border: '1px solid var(--hairline)', aspectRatio: '16/9', maxHeight: 320 }}>
+                <img
+                  src={safeMapPreviewUrl}
+                  alt="Kaartafbeelding"
+                  style={{ width: '100%', height: '100%', objectFit: 'contain', display: 'block' }}
+                />
+              </div>
+            ) : (
+              <div
+                style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: 140, border: '2px dashed var(--hairline)', borderRadius: 'var(--r-md)', color: 'var(--muted)', fontSize: 13, textAlign: 'center', padding: 16 }}
+              >
+                Alleen https-afbeeldings-URL's worden getoond.
+              </div>
+            )
           ) : (
             <div
               style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: 140, border: '2px dashed var(--hairline)', borderRadius: 'var(--r-md)', color: 'var(--muted)', fontSize: 13 }}
