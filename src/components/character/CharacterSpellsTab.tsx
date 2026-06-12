@@ -1,5 +1,8 @@
 import { useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { Spinner } from '@/components/ui/Spinner'
+import { Button } from '@/components/ui/Button'
+import { EmptyState } from '@/components/ui/EmptyState'
 import { SpellSlots } from '@/components/character/SpellSlots'
 import { spellSchoolLabel, spellSchoolColor } from '@/lib/statusMaps'
 import {
@@ -21,6 +24,7 @@ interface Props {
 }
 
 export function CharacterSpellsTab({ characterId, character, eff }: Props) {
+  const navigate = useNavigate()
   const [spellPickerOpen, setSpellPickerOpen]   = useState(false)
   const [expandedSpellId, setExpandedSpellId]   = useState<string | null>(null)
   const [spellPickerQuery, setSpellPickerQuery] = useState('')
@@ -48,14 +52,16 @@ export function CharacterSpellsTab({ characterId, character, eff }: Props) {
   return (
     <div id="tabpanel-spreuken" role="tabpanel" aria-labelledby="tab-spreuken">
       {!spellAbility ? (
-        <div className="pangu-surface" style={{ padding: '32px 28px', textAlign: 'center' }}>
-          <p style={{ fontFamily: 'var(--font-display)', fontSize: 16, fontWeight: 600, letterSpacing: '0.06em', textTransform: 'uppercase', color: 'var(--ink-soft)', margin: '0 0 8px' }}>Geen toverbaarheid</p>
-          <p style={{ fontSize: 13, color: 'var(--muted)', margin: 0 }}>
-            Stel een toverbaarheids-eigenschap in via{' '}
-            <a href={`/characters/${characterId}/edit`} style={{ color: 'var(--violet)', textDecoration: 'none' }}>Bewerken</a>
-            {' '}om spreukslots te beheren.
-          </p>
-        </div>
+        <EmptyState
+          icon="✦"
+          title="Geen toverbaarheid"
+          description="Stel een toverbaarheids-eigenschap in om spreukslots en spreuken te beheren."
+          action={
+            <Button variant="secondary" size="sm" onClick={() => navigate(`/characters/${characterId}/edit`)}>
+              Naar bewerken
+            </Button>
+          }
+        />
       ) : (
         <div>
           {/* Spellcasting header */}
@@ -237,9 +243,18 @@ export function CharacterSpellsTab({ characterId, character, eff }: Props) {
                 <Spinner size="sm" />
               </div>
             ) : (characterSpells ?? []).length === 0 ? (
-              <p style={{ fontSize: 13, color: 'var(--muted)', fontStyle: 'italic', margin: 0 }}>
-                Nog geen spreuken. Voeg een spreuk uit je bibliotheek toe via de knop hierboven.
-              </p>
+              <EmptyState
+                icon="✦"
+                title="Nog geen spreuken"
+                description="Voeg spreuken uit je bibliotheek toe aan dit karakter."
+                action={
+                  !spellPickerOpen && (
+                    <Button variant="secondary" size="sm" onClick={() => { setSpellPickerOpen(true); setSpellPickerQuery('') }}>
+                      + Spreuk toevoegen
+                    </Button>
+                  )
+                }
+              />
             ) : (() => {
               const grouped = new Map<number, typeof characterSpells>()
               for (const entry of characterSpells ?? []) {
