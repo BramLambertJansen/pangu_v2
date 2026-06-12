@@ -1314,6 +1314,27 @@ body {
 .wdh-desktop {
   display: none;
 }
+.wdh-row {
+  display: flex;
+  align-items: flex-end;
+  gap: 32px;
+}
+.wdh-desc {
+  flex: 1;
+  min-width: 0;
+}
+.wdh-actions {
+  flex-shrink: 0;
+  display: flex;
+  gap: 10px;
+}
+@container (max-width: 600px) {
+  .wdh-row {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 16px;
+  }
+}
 .wdh-btns {
   display: flex;
   flex-direction: column;
@@ -1336,6 +1357,7 @@ body {
     position: relative;
     z-index: 2;
     min-height: 520px;
+    container-type: inline-size;
   }
 }
 
@@ -3168,9 +3190,13 @@ body {
   text-transform: uppercase;
   color: var(--ink);
   margin: 0 0 12px;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+}
+
+.world-hero-v2-badge {
+  position: absolute;
+  top: 20px;
+  right: 24px;
+  z-index: 3;
 }
 
 .world-hero-v2-quote {
@@ -3213,7 +3239,13 @@ body {
     align-items: flex-start;
     gap: 16px;
   }
-  .world-hero-v2-name { white-space: normal; }
+
+  .world-hero-v2-badge {
+    position: static;
+    display: flex;
+    justify-content: flex-end;
+    margin-bottom: 8px;
+  }
 }
 
 /* ════════════════════════════════════════════════════════════════

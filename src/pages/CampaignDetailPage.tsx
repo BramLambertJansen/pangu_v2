@@ -145,7 +145,7 @@ export default function CampaignDetailPage() {
         <div className="world-hero-v2-accent-bar" aria-hidden="true" />
 
         {/* Status badge top-right */}
-        <div style={{ position: 'absolute', top: 20, right: 24, zIndex: 3 }}>
+        <div className="world-hero-v2-badge">
           <StatusBadge
             label={campaignStatusLabel[campaign.status]}
             color={campaignStatusColor[campaign.status]}

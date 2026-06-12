@@ -211,8 +211,8 @@ export function WorldDetailHeader({ world, onCreateCampaign, isCreatingCampaign,
           </h1>
 
           {/* Quote + description left, buttons right */}
-          <div style={{ display: 'flex', alignItems: 'flex-end', gap: 32 }}>
-            <div style={{ flex: 1, minWidth: 0 }}>
+          <div className="wdh-row">
+            <div className="wdh-desc">
               {world.quote && (
                 <p style={{
                   fontFamily: "'Cormorant Garamond', Georgia, serif",
@@ -232,7 +232,7 @@ export function WorldDetailHeader({ world, onCreateCampaign, isCreatingCampaign,
                 </p>
               )}
             </div>
-            <div style={{ flexShrink: 0, display: 'flex', gap: 10 }}>
+            <div className="wdh-actions">
               <Button variant="primary" aria-label={`Nieuwe kroniek aanmaken in ${world.name}`} onClick={onCreateCampaign} disabled={isCreatingCampaign}>
                 {isCreatingCampaign ? 'Aanmaken...' : '+ Nieuwe kroniek'}
               </Button>

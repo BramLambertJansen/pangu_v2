@@ -515,9 +515,9 @@ export default function EncounterRunPage() {
         type: 'character',
         name: char.name,
         initiativeRoll: '',
-        modifier: char.initiative,
-        hpCurrent: char.hp_current,
-        hpMax: char.hp_max,
+        modifier: char.initiative ?? 0,
+        hpCurrent: char.hp_current ?? 0,
+        hpMax: char.hp_max ?? 0,
         character: char,
       })
     }
