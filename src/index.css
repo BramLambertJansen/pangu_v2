@@ -3190,9 +3190,13 @@ body {
   text-transform: uppercase;
   color: var(--ink);
   margin: 0 0 12px;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+}
+
+.world-hero-v2-badge {
+  position: absolute;
+  top: 20px;
+  right: 24px;
+  z-index: 3;
 }
 
 .world-hero-v2-quote {
@@ -3235,7 +3239,13 @@ body {
     align-items: flex-start;
     gap: 16px;
   }
-  .world-hero-v2-name { white-space: normal; }
+
+  .world-hero-v2-badge {
+    position: static;
+    display: flex;
+    justify-content: flex-end;
+    margin-bottom: 8px;
+  }
 }
 
 /* ════════════════════════════════════════════════════════════════
