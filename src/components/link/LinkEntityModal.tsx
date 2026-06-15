@@ -119,7 +119,7 @@ export function LinkEntityModal({ open, onClose, sourceType, sourceId, campaignI
             id={typeId}
             value={targetType}
             onChange={e => setTargetType(e.target.value as LinkableEntityType)}
-            className="pangu-input"
+            className="input"
             style={{ width: '100%' }}
           >
             <option value="">Kies een type…</option>
@@ -142,7 +142,7 @@ export function LinkEntityModal({ open, onClose, sourceType, sourceId, campaignI
             id={relationId}
             value={relation}
             onChange={e => setRelation(e.target.value as LinkRelation)}
-            className="pangu-input"
+            className="input"
             style={{ width: '100%' }}
           >
             <option value="">Kies een relatie…</option>
@@ -168,7 +168,7 @@ export function LinkEntityModal({ open, onClose, sourceType, sourceId, campaignI
             value={search}
             onChange={e => setSearch(e.target.value)}
             placeholder="Naam zoeken…"
-            className="pangu-input"
+            className="input"
             style={{ width: '100%', marginBottom: 12 }}
             autoFocus
           />

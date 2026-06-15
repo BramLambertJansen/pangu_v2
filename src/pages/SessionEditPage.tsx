@@ -126,22 +126,22 @@ export default function SessionEditPage() {
 
         {/* Page header */}
         <header style={{ marginBottom: 40 }}>
-          <p className="pangu-eyebrow">Sessie bewerken</p>
-          <h1 className="pangu-display-xl">{session.name}</h1>
+          <p className="pg-eyebrow">Sessie bewerken</p>
+          <h1 className="pg-display-xl">{session.name}</h1>
           <p style={{ marginTop: 8, fontSize: 14, color: 'var(--ink-soft)' }}>
             Pas de details van deze sessie aan.
           </p>
         </header>
 
         {/* Form */}
-        <div className="pangu-surface" style={{ padding: 28 }}>
+        <div className="surface" style={{ padding: 28 }}>
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
 
             <div>
-              <label className="pangu-label" htmlFor="session-name">Naam</label>
+              <label className="label" htmlFor="session-name">Naam</label>
               <input
                 id="session-name"
-                className="pangu-input"
+                className="input"
                 value={form.name ?? ''}
                 onChange={(e) => set('name', e.target.value)}
                 placeholder="Naam van de sessie"
@@ -149,10 +149,10 @@ export default function SessionEditPage() {
             </div>
 
             <div>
-              <label className="pangu-label" htmlFor="session-subtitle">Subtitel</label>
+              <label className="label" htmlFor="session-subtitle">Subtitel</label>
               <input
                 id="session-subtitle"
-                className="pangu-input"
+                className="input"
                 value={form.subtitle ?? ''}
                 onChange={(e) => set('subtitle', e.target.value || null)}
                 placeholder="Korte beschrijving of tagline"
@@ -160,10 +160,10 @@ export default function SessionEditPage() {
             </div>
 
             <div>
-              <label className="pangu-label" htmlFor={sessionNumberId}>Sessienummer</label>
+              <label className="label" htmlFor={sessionNumberId}>Sessienummer</label>
               <input
                 id={sessionNumberId}
-                className="pangu-input"
+                className="input"
                 type="number"
                 min={1}
                 value={form.session_number ?? ''}
@@ -173,10 +173,10 @@ export default function SessionEditPage() {
             </div>
 
             <div>
-              <label className="pangu-label" htmlFor={sessionDateId}>Datum</label>
+              <label className="label" htmlFor={sessionDateId}>Datum</label>
               <input
                 id={sessionDateId}
-                className="pangu-input"
+                className="input"
                 type="date"
                 value={form.session_date ?? ''}
                 onChange={(e) => set('session_date', e.target.value || null)}
@@ -184,10 +184,10 @@ export default function SessionEditPage() {
             </div>
 
             <div>
-              <label className="pangu-label" htmlFor={statusId}>Status</label>
+              <label className="label" htmlFor={statusId}>Status</label>
               <select
                 id={statusId}
-                className="pangu-select"
+                className="select-trigger"
                 value={form.status ?? 'planned'}
                 onChange={(e) => set('status', e.target.value as SessionStatus)}
               >
@@ -198,10 +198,10 @@ export default function SessionEditPage() {
             </div>
 
             <div className="sm:col-span-2">
-              <label className="pangu-label" htmlFor={descriptionId}>Beschrijving</label>
+              <label className="label" htmlFor={descriptionId}>Beschrijving</label>
               <textarea
                 id={descriptionId}
-                className="pangu-textarea"
+                className="textarea"
                 value={form.description ?? ''}
                 onChange={(e) => set('description', e.target.value || null)}
                 placeholder="Beschrijf de sessie, haar sfeer en achtergrond..."
@@ -210,10 +210,10 @@ export default function SessionEditPage() {
             </div>
 
             <div className="sm:col-span-2">
-              <label className="pangu-label" htmlFor={notesId}>DM notities</label>
+              <label className="label" htmlFor={notesId}>DM notities</label>
               <textarea
                 id={notesId}
-                className="pangu-textarea"
+                className="textarea"
                 value={form.notes ?? ''}
                 onChange={(e) => set('notes', e.target.value || null)}
                 placeholder="Aantekeningen voor de DM: hooks, NPC-namen, verhaalpunten..."
@@ -241,10 +241,10 @@ export default function SessionEditPage() {
 
         {/* Danger zone */}
         <div
-          className="pangu-surface"
+          className="surface"
           style={{ marginTop: 24, padding: 28, borderColor: 'rgb(var(--crimson-rgb) / 0.18)' }}
         >
-          <p className="pangu-section-title" style={{ marginBottom: 4 }}>Gevarenzone</p>
+          <p className="pg-section-title" style={{ marginBottom: 4 }}>Gevarenzone</p>
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 16, paddingTop: 16, borderTop: '1px solid var(--hairline)' }}>
             <div>
               <p style={{ fontSize: 14, color: 'var(--ink-soft)', margin: 0 }}>Sessie verwijderen</p>

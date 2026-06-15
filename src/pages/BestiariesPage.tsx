@@ -75,8 +75,8 @@ export default function BestiariesPage() {
       {/* Page header */}
       <header style={{ marginBottom: 32, display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 16, flexWrap: 'wrap' }}>
         <div>
-          <p className="pangu-eyebrow">Wereld — {world.name}</p>
-          <h1 className="pangu-display-xl">Bestiarium</h1>
+          <p className="pg-eyebrow">Wereld — {world.name}</p>
+          <h1 className="pg-display-xl">Bestiarium</h1>
           <p style={{ marginTop: 8, fontSize: 14, color: 'var(--ink-soft)' }}>
             Catalogiseer de wezens en monsters van deze wereld.
           </p>

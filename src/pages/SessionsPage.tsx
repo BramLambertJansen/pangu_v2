@@ -59,8 +59,8 @@ export default function SessionsPage() {
 
       {/* Page header */}
       <header style={{ marginBottom: 32 }}>
-        <p className="pangu-eyebrow">Kroniek — {campaign.name}</p>
-        <h1 className="pangu-display-xl">Sessies</h1>
+        <p className="pg-eyebrow">Kroniek — {campaign.name}</p>
+        <h1 className="pg-display-xl">Sessies</h1>
         <p style={{ marginTop: 8, fontSize: 14, color: 'var(--ink-soft)' }}>
           Beheer de spelsessies van deze kroniek.
         </p>

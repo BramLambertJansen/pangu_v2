@@ -96,7 +96,7 @@ export function RelatedEntities({ type, id, campaignId }: Props) {
                     ? relationLabel[link.relation]
                     : relationInverseLabel[link.relation]
                   return (
-                    <li key={link.linkId} className="pangu-surface" style={{ padding: '12px 16px', display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'wrap' }}>
+                    <li key={link.linkId} className="surface" style={{ padding: '12px 16px', display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'wrap' }}>
                       <span style={{ fontSize: 12, color: 'var(--muted)', fontStyle: 'italic', flexShrink: 0 }}>{label}</span>
                       <Link
                         to={entityHref(link)}

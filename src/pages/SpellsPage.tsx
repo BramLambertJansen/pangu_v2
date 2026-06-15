@@ -45,8 +45,8 @@ export default function SpellsPage() {
       {/* Page header */}
       <div style={{ marginBottom: 32, display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 16, flexWrap: 'wrap' }}>
         <div>
-          <p className="pangu-eyebrow">Persoonlijke bibliotheek</p>
-          <h1 className="pangu-display-xl">Spreuken</h1>
+          <p className="pg-eyebrow">Persoonlijke bibliotheek</p>
+          <h1 className="pg-display-xl">Spreuken</h1>
           <p style={{ marginTop: 8, fontSize: 14, color: 'var(--ink-soft)' }}>
             Importeer spreuken uit de SRD en bouw je spreukbibliotheek.
           </p>

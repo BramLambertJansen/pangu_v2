@@ -47,7 +47,7 @@ export class ErrorBoundary extends Component<Props, State> {
       >
         <CompassRose size={64} opacity={0.5} />
         <h1
-          className="pangu-display-xl"
+          className="pg-display-xl"
           style={{ marginTop: 24 }}
         >
           Er is iets misgegaan

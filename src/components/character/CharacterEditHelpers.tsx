@@ -14,11 +14,11 @@ interface NumericFieldProps {
 export function NumericField({ id, label, value, onChange, min = 0, max }: NumericFieldProps) {
   return (
     <div>
-      <label className="pangu-label" htmlFor={id}>{label}</label>
+      <label className="label" htmlFor={id}>{label}</label>
       <input
         id={id}
         type="number"
-        className="pangu-input"
+        className="input"
         value={value}
         min={min}
         max={max}
@@ -74,7 +74,7 @@ export function TagInput({ id, label, values, onChange, placeholder, presets }: 
 
   return (
     <div>
-      <label className="pangu-label" htmlFor={id}>{label}</label>
+      <label className="label" htmlFor={id}>{label}</label>
       {presets && presets.length > 0 && (
         <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, marginBottom: 8 }}>
           {presets.map(preset => {

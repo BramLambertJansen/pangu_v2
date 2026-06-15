@@ -52,8 +52,8 @@ export default function LoresPage() {
 
       {/* Page header */}
       <header style={{ marginBottom: 32 }}>
-        <p className="pangu-eyebrow">Kroniek — {campaign.name}</p>
-        <h1 className="pangu-display-xl">Lore</h1>
+        <p className="pg-eyebrow">Kroniek — {campaign.name}</p>
+        <h1 className="pg-display-xl">Lore</h1>
         <p style={{ marginTop: 8, fontSize: 14, color: 'var(--ink-soft)' }}>
           Beheer de lore van deze kroniek.
         </p>

@@ -28,27 +28,27 @@ export function CharacterEditLoreSection({ form, set, onCancel, onSave, isSaving
   return (
     <>
       {/* ── Uiterlijk ── */}
-      <div className="pangu-surface" style={{ padding: 28, marginBottom: 16 }}>
-        <p className="pangu-section-title" style={{ marginBottom: 16 }}>Uiterlijk</p>
+      <div className="surface" style={{ padding: 28, marginBottom: 16 }}>
+        <p className="pg-section-title" style={{ marginBottom: 16 }}>Uiterlijk</p>
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
           <div>
-            <label className="pangu-label" htmlFor={ageId}>Leeftijd</label>
-            <input id={ageId} className="pangu-input" value={form.age ?? ''} onChange={(e) => set('age', e.target.value || null)} placeholder="Bijv. 25 jaar" />
+            <label className="label" htmlFor={ageId}>Leeftijd</label>
+            <input id={ageId} className="input" value={form.age ?? ''} onChange={(e) => set('age', e.target.value || null)} placeholder="Bijv. 25 jaar" />
           </div>
           <div>
-            <label className="pangu-label" htmlFor={heightId}>Lengte</label>
-            <input id={heightId} className="pangu-input" value={form.height ?? ''} onChange={(e) => set('height', e.target.value || null)} placeholder="Bijv. 1,75 m" />
+            <label className="label" htmlFor={heightId}>Lengte</label>
+            <input id={heightId} className="input" value={form.height ?? ''} onChange={(e) => set('height', e.target.value || null)} placeholder="Bijv. 1,75 m" />
           </div>
           <div>
-            <label className="pangu-label" htmlFor={weightId}>Gewicht</label>
-            <input id={weightId} className="pangu-input" value={form.weight ?? ''} onChange={(e) => set('weight', e.target.value || null)} placeholder="Bijv. 70 kg" />
+            <label className="label" htmlFor={weightId}>Gewicht</label>
+            <input id={weightId} className="input" value={form.weight ?? ''} onChange={(e) => set('weight', e.target.value || null)} placeholder="Bijv. 70 kg" />
           </div>
         </div>
         <div style={{ marginTop: 16 }}>
-          <label className="pangu-label" htmlFor={appearanceId}>Uiterlijksbeschrijving</label>
+          <label className="label" htmlFor={appearanceId}>Uiterlijksbeschrijving</label>
           <textarea
             id={appearanceId}
-            className="pangu-textarea"
+            className="textarea"
             value={form.appearance ?? ''}
             onChange={(e) => set('appearance', e.target.value || null)}
             placeholder="Haarkleur, oogkleur, huidkleur, opvallende kenmerken, tatoeages, littekens..."
@@ -58,8 +58,8 @@ export function CharacterEditLoreSection({ form, set, onCancel, onSave, isSaving
       </div>
 
       {/* ── Achtergrond & Persoonlijkheid ── */}
-      <div className="pangu-surface" style={{ padding: 28, marginBottom: 16 }}>
-        <p className="pangu-section-title" style={{ marginBottom: 16 }}>Achtergrond</p>
+      <div className="surface" style={{ padding: 28, marginBottom: 16 }}>
+        <p className="pg-section-title" style={{ marginBottom: 16 }}>Achtergrond</p>
         <div style={{ marginBottom: 16, maxWidth: 360 }}>
           <label className="label" htmlFor={backgroundId}>Achtergrond (D&D)</label>
           <input
@@ -71,10 +71,10 @@ export function CharacterEditLoreSection({ form, set, onCancel, onSave, isSaving
           />
         </div>
         <div>
-          <label className="pangu-label" htmlFor={descriptionId}>Beschrijving</label>
+          <label className="label" htmlFor={descriptionId}>Beschrijving</label>
           <textarea
             id={descriptionId}
-            className="pangu-textarea"
+            className="textarea"
             value={form.description ?? ''}
             onChange={(e) => set('description', e.target.value || null)}
             placeholder="Achtergrondverhaal en uiterlijk van je personage..."
@@ -88,10 +88,10 @@ export function CharacterEditLoreSection({ form, set, onCancel, onSave, isSaving
         </p>
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
           <div>
-            <label className="pangu-label" htmlFor={personalityId}>Persoonlijkheidskenmerken</label>
+            <label className="label" htmlFor={personalityId}>Persoonlijkheidskenmerken</label>
             <textarea
               id={personalityId}
-              className="pangu-textarea"
+              className="textarea"
               value={form.personality_traits ?? ''}
               onChange={(e) => set('personality_traits', e.target.value || null)}
               placeholder="Hoe gedraag je je? Wat zijn je gewoonten en eigenaardigheden?"
@@ -99,10 +99,10 @@ export function CharacterEditLoreSection({ form, set, onCancel, onSave, isSaving
             />
           </div>
           <div>
-            <label className="pangu-label" htmlFor={idealsId}>Idealen</label>
+            <label className="label" htmlFor={idealsId}>Idealen</label>
             <textarea
               id={idealsId}
-              className="pangu-textarea"
+              className="textarea"
               value={form.ideals ?? ''}
               onChange={(e) => set('ideals', e.target.value || null)}
               placeholder="Waar geloof je in? Welke principes sturen je?"
@@ -110,10 +110,10 @@ export function CharacterEditLoreSection({ form, set, onCancel, onSave, isSaving
             />
           </div>
           <div>
-            <label className="pangu-label" htmlFor={bondsId}>Banden</label>
+            <label className="label" htmlFor={bondsId}>Banden</label>
             <textarea
               id={bondsId}
-              className="pangu-textarea"
+              className="textarea"
               value={form.bonds ?? ''}
               onChange={(e) => set('bonds', e.target.value || null)}
               placeholder="Wat verbindt je aan de wereld? Mensen, plekken, doelen?"
@@ -121,10 +121,10 @@ export function CharacterEditLoreSection({ form, set, onCancel, onSave, isSaving
             />
           </div>
           <div>
-            <label className="pangu-label" htmlFor={flawsId}>Gebreken</label>
+            <label className="label" htmlFor={flawsId}>Gebreken</label>
             <textarea
               id={flawsId}
-              className="pangu-textarea"
+              className="textarea"
               value={form.flaws ?? ''}
               onChange={(e) => set('flaws', e.target.value || null)}
               placeholder="Welke zwakheden of fouten heb je?"
@@ -134,10 +134,10 @@ export function CharacterEditLoreSection({ form, set, onCancel, onSave, isSaving
         </div>
 
         <div style={{ marginTop: 16 }}>
-          <label className="pangu-label" htmlFor={notesId}>Privénotities</label>
+          <label className="label" htmlFor={notesId}>Privénotities</label>
           <textarea
             id={notesId}
-            className="pangu-textarea"
+            className="textarea"
             value={form.notes ?? ''}
             onChange={(e) => set('notes', e.target.value || null)}
             placeholder="Persoonlijke aantekeningen, geheimen en doelen van je personage..."

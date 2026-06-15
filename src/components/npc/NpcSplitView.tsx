@@ -85,7 +85,7 @@ export function NpcSplitView({ npcs, factions = [] }: Props) {
             >
               <div aria-hidden="true" style={{
                 position: 'absolute', inset: 0,
-                background: `linear-gradient(135deg, color-mix(in oklab, ${color} 14%, var(--void-2)) 0%, var(--void-2) 100%)`,
+                background: `linear-gradient(135deg, rgb(from ${color} r g b / 0.14) 0%, var(--void-2) 100%)`,
                 display: 'flex', alignItems: 'center', justifyContent: 'center',
                 fontFamily: 'var(--font-display)', fontSize: 80, fontWeight: 700,
                 color, opacity: 0.25,
@@ -105,8 +105,8 @@ export function NpcSplitView({ npcs, factions = [] }: Props) {
                 <span style={{
                   fontSize: 9, fontFamily: 'var(--font-mono)', fontWeight: 700, letterSpacing: '0.12em',
                   padding: '3px 9px', borderRadius: 'var(--r-full)',
-                  background: `color-mix(in oklab, ${color} 18%, transparent)`,
-                  border: `1px solid color-mix(in oklab, ${color} 40%, transparent)`,
+                  background: `rgb(from ${color} r g b / 0.18)`,
+                  border: `1px solid rgb(from ${color} r g b / 0.4)`,
                   color, textTransform: 'uppercase',
                 }}>
                   {npcStatusLabel[selected.status]}

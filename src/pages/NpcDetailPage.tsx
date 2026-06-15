@@ -192,7 +192,7 @@ export default function NpcDetailPage() {
       {/* Description */}
       <OrnateDivider label="Beschrijving" />
       {npc.description ? (
-        <div className="pangu-surface" style={{ padding: 28 }}>
+        <div className="surface" style={{ padding: 28 }}>
           <p style={{
             fontSize: 15, lineHeight: 1.75,
             color: 'var(--ink-soft)', margin: 0,
@@ -211,7 +211,7 @@ export default function NpcDetailPage() {
       <OrnateDivider label="DM-notities" />
       {npc.notes ? (
         <div
-          className="pangu-surface"
+          className="surface"
           style={{
             padding: 28,
             borderColor: 'rgb(var(--gold-rgb) / 0.22)',

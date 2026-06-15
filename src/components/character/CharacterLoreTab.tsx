@@ -9,8 +9,8 @@ export function CharacterLoreTab({ character }: Props) {
   return (
     <div id="tabpanel-lore" role="tabpanel" aria-labelledby="tab-lore">
       {/* Achtergrond */}
-      <div className="pangu-surface" style={{ padding: 28, marginBottom: 16 }}>
-        <p className="pangu-section-title" style={{ marginBottom: 12 }}>Achtergrond</p>
+      <div className="surface" style={{ padding: 28, marginBottom: 16 }}>
+        <p className="pg-section-title" style={{ marginBottom: 12 }}>Achtergrond</p>
         {character.background && (
           <p style={{ fontSize: 12, color: 'var(--muted)', margin: '0 0 6px', fontStyle: 'italic' }}>
             Achtergrond: <span style={{ color: 'var(--ink-soft)', fontStyle: 'normal' }}>{character.background}</span>
@@ -29,8 +29,8 @@ export function CharacterLoreTab({ character }: Props) {
 
       {/* Karaktereigenschappen */}
       {(character.personality_traits || character.ideals || character.bonds || character.flaws) && (
-        <div className="pangu-surface" style={{ padding: 28, marginBottom: 16 }}>
-          <p className="pangu-section-title" style={{ marginBottom: 16 }}>Karaktereigenschappen</p>
+        <div className="surface" style={{ padding: 28, marginBottom: 16 }}>
+          <p className="pg-section-title" style={{ marginBottom: 16 }}>Karaktereigenschappen</p>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: 16 }}>
             {[
               { label: 'Persoonlijkheidskenmerken', value: character.personality_traits },
@@ -49,8 +49,8 @@ export function CharacterLoreTab({ character }: Props) {
 
       {/* Uiterlijk */}
       {(character.age || character.height || character.weight || character.appearance) && (
-        <div className="pangu-surface" style={{ padding: 28, marginBottom: 16 }}>
-          <p className="pangu-section-title" style={{ marginBottom: 12 }}>Uiterlijk</p>
+        <div className="surface" style={{ padding: 28, marginBottom: 16 }}>
+          <p className="pg-section-title" style={{ marginBottom: 12 }}>Uiterlijk</p>
           <div style={{ display: 'flex', gap: 20, flexWrap: 'wrap', marginBottom: character.appearance ? 14 : 0 }}>
             {character.age    && <div><p style={{ fontSize: 10, fontWeight: 700, letterSpacing: '0.14em', textTransform: 'uppercase', color: 'var(--muted)', margin: '0 0 3px' }}>Leeftijd</p><p style={{ fontSize: 14, color: 'var(--ink-soft)', margin: 0 }}>{character.age}</p></div>}
             {character.height && <div><p style={{ fontSize: 10, fontWeight: 700, letterSpacing: '0.14em', textTransform: 'uppercase', color: 'var(--muted)', margin: '0 0 3px' }}>Lengte</p><p style={{ fontSize: 14, color: 'var(--ink-soft)', margin: 0 }}>{character.height}</p></div>}
@@ -64,8 +64,8 @@ export function CharacterLoreTab({ character }: Props) {
 
       {/* Talenten */}
       {(character.feats ?? []).length > 0 && (
-        <div className="pangu-surface" style={{ padding: 28, marginBottom: 16 }}>
-          <p className="pangu-section-title" style={{ marginBottom: 12 }}>Talenten</p>
+        <div className="surface" style={{ padding: 28, marginBottom: 16 }}>
+          <p className="pg-section-title" style={{ marginBottom: 12 }}>Talenten</p>
           <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
             {(character.feats ?? []).map(feat => (
               <span key={feat} style={{ fontSize: 13, padding: '4px 12px', borderRadius: 8, background: 'rgb(var(--violet-rgb) / 0.08)', border: '1px solid rgb(var(--violet-rgb) / 0.25)', color: 'var(--ink-soft)' }}>
@@ -78,8 +78,8 @@ export function CharacterLoreTab({ character }: Props) {
 
       {/* Wapenmeesters */}
       {(character.weapon_masteries ?? []).length > 0 && (
-        <div className="pangu-surface" style={{ padding: 28, marginBottom: 16 }}>
-          <p className="pangu-section-title" style={{ marginBottom: 12 }}>Wapenmeesters</p>
+        <div className="surface" style={{ padding: 28, marginBottom: 16 }}>
+          <p className="pg-section-title" style={{ marginBottom: 12 }}>Wapenmeesters</p>
           <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
             {(character.weapon_masteries ?? []).map(m => (
               <span key={m} style={{ fontSize: 13, padding: '4px 12px', borderRadius: 8, background: 'rgb(var(--gold-rgb) / 0.08)', border: '1px solid rgb(var(--gold-rgb) / 0.25)', color: 'var(--gold)' }}>
@@ -91,8 +91,8 @@ export function CharacterLoreTab({ character }: Props) {
       )}
 
       {/* Privénotities */}
-      <div className="pangu-surface" style={{ padding: 28, borderColor: 'rgb(var(--azure-rgb) / 0.18)', background: 'rgb(var(--azure-rgb) / 0.03)' }}>
-        <p className="pangu-section-title" style={{ marginBottom: 4 }}>✦ Privénotities</p>
+      <div className="surface" style={{ padding: 28, borderColor: 'rgb(var(--azure-rgb) / 0.18)', background: 'rgb(var(--azure-rgb) / 0.03)' }}>
+        <p className="pg-section-title" style={{ marginBottom: 4 }}>✦ Privénotities</p>
         <p style={{ fontSize: 12, color: 'var(--azure)', marginBottom: 16, marginTop: 0 }}>Alleen zichtbaar voor jou</p>
         {character.notes
           ? <p style={{ fontSize: 14, lineHeight: 1.75, color: 'var(--ink-soft)', margin: 0, whiteSpace: 'pre-wrap' }}>{character.notes}</p>

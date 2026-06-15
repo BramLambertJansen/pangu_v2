@@ -224,7 +224,7 @@ export default function EncounterDetailPage() {
           <Spinner size="sm" />
         </div>
       ) : monsters && monsters.length > 0 ? (
-        <div className="pangu-surface" style={{ padding: 0, overflow: 'hidden' }}>
+        <div className="surface" style={{ padding: 0, overflow: 'hidden' }}>
           <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 14 }} role="table" aria-label="Monsters in dit gevecht">
             <thead>
               <tr style={{ borderBottom: '1px solid var(--hairline)' }}>
@@ -307,7 +307,7 @@ export default function EncounterDetailPage() {
       {/* Description */}
       <OrnateDivider label="Beschrijving" />
       {encounter.description ? (
-        <div className="pangu-surface" style={{ padding: 28 }}>
+        <div className="surface" style={{ padding: 28 }}>
           <p style={{
             fontSize: 15, lineHeight: 1.75,
             color: 'var(--ink-soft)', margin: 0,
@@ -326,7 +326,7 @@ export default function EncounterDetailPage() {
       <OrnateDivider label="DM-notities" />
       {encounter.notes ? (
         <div
-          className="pangu-surface"
+          className="surface"
           style={{
             padding: 28,
             borderColor: 'rgb(var(--crimson-rgb) / 0.22)',

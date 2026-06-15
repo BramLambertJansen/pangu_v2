@@ -201,7 +201,7 @@ export default function CharacterDetailPage() {
           </h1>
 
           {/* Level + XP */}
-          <div className="pangu-surface" style={{ padding: '16px 20px', display: 'flex', alignItems: 'center', gap: 20, flexWrap: 'wrap' }}>
+          <div className="surface" style={{ padding: '16px 20px', display: 'flex', alignItems: 'center', gap: 20, flexWrap: 'wrap' }}>
             <div style={{ display: 'flex', alignItems: 'baseline', gap: 6 }}>
               <span style={{ fontFamily: 'var(--font-body)', fontSize: 11, fontWeight: 700, letterSpacing: '0.2em', textTransform: 'uppercase', color: 'var(--gold)' }}>Level</span>
               <span style={{ fontFamily: 'var(--font-display)', fontSize: 42, fontWeight: 700, color: 'var(--gold)', lineHeight: 1 }}>{character.level}</span>
@@ -220,7 +220,7 @@ export default function CharacterDetailPage() {
           {/* Combat stats: HP · AC · Initiative · Speed */}
           <div className="char-combat-grid">
             {/* HP */}
-            <div className="pangu-surface" style={{ padding: '14px', display: 'flex', flexDirection: 'column', gap: 6 }}>
+            <div className="surface" style={{ padding: '14px', display: 'flex', flexDirection: 'column', gap: 6 }}>
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                 <p style={{ fontSize: 10, fontWeight: 700, letterSpacing: '0.16em', textTransform: 'uppercase', color: hpLow ? 'var(--crimson)' : 'var(--muted)', margin: 0 }}>HP</p>
                 {tempHp > 0 && (
@@ -246,7 +246,7 @@ export default function CharacterDetailPage() {
             </div>
 
             {/* AC */}
-            <div className="pangu-surface" style={{ padding: '14px', display: 'flex', flexDirection: 'column', gap: 6 }}>
+            <div className="surface" style={{ padding: '14px', display: 'flex', flexDirection: 'column', gap: 6 }}>
               <p style={{ fontSize: 10, fontWeight: 700, letterSpacing: '0.16em', textTransform: 'uppercase', color: 'var(--muted)', margin: 0 }}>Armor Class</p>
               <p style={{ fontFamily: 'var(--font-display)', fontSize: 32, fontWeight: 700, color: 'var(--ink)', margin: 0, lineHeight: 1 }}>
                 {eff.ac}{acBonus > 0 && <span style={{ fontSize: 13, fontWeight: 400, color: 'var(--teal)', marginLeft: 4 }}>+{acBonus}</span>}
@@ -257,7 +257,7 @@ export default function CharacterDetailPage() {
             </div>
 
             {/* Initiative */}
-            <div className="pangu-surface" style={{ padding: '14px', display: 'flex', flexDirection: 'column', gap: 6 }}>
+            <div className="surface" style={{ padding: '14px', display: 'flex', flexDirection: 'column', gap: 6 }}>
               <p style={{ fontSize: 10, fontWeight: 700, letterSpacing: '0.16em', textTransform: 'uppercase', color: 'var(--muted)', margin: 0 }}>Initiative</p>
               <p style={{ fontFamily: 'var(--font-display)', fontSize: 32, fontWeight: 700, color: 'var(--gold)', margin: 0, lineHeight: 1 }}>
                 {eff.initiative >= 0 ? `+${eff.initiative}` : `${eff.initiative}`}
@@ -266,7 +266,7 @@ export default function CharacterDetailPage() {
             </div>
 
             {/* Speed */}
-            <div className="pangu-surface" style={{ padding: '14px', display: 'flex', flexDirection: 'column', gap: 6 }}>
+            <div className="surface" style={{ padding: '14px', display: 'flex', flexDirection: 'column', gap: 6 }}>
               <p style={{ fontSize: 10, fontWeight: 700, letterSpacing: '0.16em', textTransform: 'uppercase', color: 'var(--muted)', margin: 0 }}>Speed</p>
               <p style={{ fontFamily: 'var(--font-display)', fontSize: 32, fontWeight: 700, color: 'var(--ink)', margin: 0, lineHeight: 1 }}>
                 {eff.speed}<span style={{ fontSize: 16, fontWeight: 400, color: 'var(--muted)', marginLeft: 3 }}>ft</span>

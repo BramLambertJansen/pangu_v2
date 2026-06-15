@@ -96,7 +96,7 @@ export function InvitePanel({ campaignId, campaignName }: InvitePanelProps) {
 
       {/* Invite code card */}
       <div
-        className="pangu-surface"
+        className="surface"
         style={{
           padding: 28,
           borderColor: 'rgb(var(--violet-rgb) / 0.22)',

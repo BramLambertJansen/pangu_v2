@@ -17,6 +17,43 @@ PANGU is een AI-ondersteund campaign management platform voor tabletop RPGs (PWA
 
 ---
 
+## Definition of Done — Harde gates
+
+> Dit zijn **gates, geen suggesties.** Een wijziging is pas *klaar* als élke gate groen is.
+> Afgedwongen door `.claude`-hooks, een git `pre-commit`-hook en CI — bypass is niet toegestaan.
+
+- **GATE build** — `npm run check` (lint + type-check + test) eindigt met exit 0.
+- **GATE styles** — `npm run check:styles:strict` → 0 blokkerende overtredingen (geen hex / gekleurde `rgba` / `color-mix` / `.pangu-*`).
+- **GATE design-system** — alle 4 facetten uit "Design-System-First werkwijze" hieronder zijn voldaan.
+- **GATE a11y** — A11Y-checklist groen op elke gewijzigde pagina (axe: 0 critical/serious).
+- **GATE responsive** — gecontroleerd op 360 / 768 / 1280px: geen horizontale scroll, touch targets ≥ 44×44px.
+- **GATE docs** — `CLAUDE.md` weerspiegelt de wijziging (nieuwe migratie / route / primitive / feature); `npm run check:docs` → exit 0.
+
+Alles in één keer: `npm run check:all` (build + styles-strict + docs). Oproepbaar als `/ship`.
+
+---
+
+## Design-System-First werkwijze (verplicht)
+
+> Hoofdprincipe: **alle ontwikkeling gebeurt met herbruikbare componenten die in het design
+> system van de app leven.** Volg deze loop bij élke UI-wijziging — afwijken is een blocker.
+
+1. **Hergebruiken-eerst.** Doorzoek `src/components/ui/` én de `/design-system`-pagina
+   (`src/pages/DesignSystemPage.tsx`) vóór je UI bouwt. Past een bestaande primitive (of een
+   compositie ervan), gebruik die. Een one-off bouwen terwijl er een primitive bestaat = blocker.
+2. **Nieuwe gedeelde UI = primitive.** Elk herbruikbaar visueel element komt als getypeerde
+   primitive in `src/components/ui/` (`ComponentPropsWithoutRef` + `cn()` + forwardRef waar
+   zinvol). Geen bespoke UI los in `pages/` of feature-componenten.
+3. **Registreren op `/design-system`.** Elke nieuwe primitive wordt toegevoegd aan de
+   `/design-system`-showcase — dat is de levende registry. Een primitive die er niet op staat,
+   is onaf (door de review-agent gecontroleerd).
+4. **Uitsluitend tokens.** Style via canonieke klassen + design-tokens. Geen hex, geen gekleurde
+   `rgb/rgba`, geen `color-mix`. Tints via kanaal-tokens `rgb(var(--x-rgb) / <alpha>)` of relative
+   color `rgb(from var(--token) r g b / <alpha>)`. Toegestane literals: `rgba(0,0,0,…)` schaduwen,
+   `rgba(255,255,255,…)` sheens, munt-/rariteit-datakleuren. Afgedwongen door `check:styles:strict`.
+
+---
+
 ## Tech Stack
 
 | Laag | Technologie |
@@ -111,7 +148,6 @@ src/
 │   └── world/
 │       ├── CompassRose.tsx
 │       ├── WorldCard.tsx      # WorldCard + ForgeWorldCard
-│       ├── WorldDetailDivider.tsx
 │       └── WorldDetailHeader.tsx
 ├── data/
 │   └── dnd5e/               # Statische SRD 5.1-dataset (CC-BY-4.0): races, classes, backgrounds, abilityMethods
@@ -674,6 +710,8 @@ Alle tabellen hebben `committed boolean DEFAULT false` — bestaande rijen zijn 
 | 047 | `047_bestiary_combat_stats.sql` | Volledig D&D stat block op `bestiaries`: `alignment`, `hit_dice`, `proficiency_bonus`, `senses`, `languages`, `saving_throws`, `skills`, `damage_immunities/resistances/vulnerabilities`, `condition_immunities`, `speed_details`; `requires_attunement boolean` op `items` |
 | 048 | `048_entity_image_url.sql` | `image_url text` op `bestiaries` + `items`; `entity-images` public storage bucket aanmaken met RLS policies |
 | 049 | `049_character_background.sql` | `background text` op `characters` (D&D-achtergrond uit de karakter-wizard) |
+| 050 | `050_location_atlas_fields.sql` | `map_x`, `map_y`, `region`, `climate` op `locations` (positionering voor de ConstellationAtlas) |
+| 051 | `051_campaign_map_image.sql` | `map_image_url` op `campaigns` (kaartachtergrond voor de atlas) |
 
 ---
 
@@ -764,6 +802,7 @@ Routes zijn gedefinieerd in `src/routes/index.tsx`. Lazy-loading voor alle pagin
 
 - `requireAuth` — redirect naar `/login` als geen sessie actief
 - `requireAdmin` — redirect naar `/dashboard` als rol ≠ `'admin'`
+- `requireRegistrationEnabled` — blokkeert `/register` wanneer registratie uitstaat (redirect naar `/login`)
 
 ---
 
@@ -772,16 +811,15 @@ Routes zijn gedefinieerd in `src/routes/index.tsx`. Lazy-loading voor alle pagin
 Tests staan in `src/test/`. Framework: **Vitest** met jsdom-environment en `@testing-library/react`.
 
 ```bash
-npm run test        # Vitest (watch mode)
-npm run type-check  # tsc --noEmit
-npm run lint        # ESLint
+npm run test         # Vitest (run-mode, één doorloop)
+npm run test:watch   # Vitest watch-mode
+npm run type-check   # tsc -b
+npm run lint         # ESLint
 ```
 
-Huidige testbestanden:
-- `auth-loaders.test.ts` — route loader logica
-- `Input.test.tsx` — Input component
-- `Modal.test.tsx` — Modal component
-- `useEntityEdit.test.ts` — edit form hook
+De suite dekt o.a. route-loaders, de karakter-wizard (data + state), Open5e-mappers,
+entity-links, equipment-utils, formatters, URL-sanitizing en de UI-primitives. Draai
+`npm run test` voor de actuele set — hier geen bestandenlijst bijhouden (voorkomt drift).
 
 ---
 
@@ -913,7 +951,7 @@ Alle UI is **mobile-first** en werkt op mobiel, tablet en desktop. Dit is een ha
 3. **Geen onnodige abstracties** — drie vergelijkbare regels zijn beter dan een premature helper.
 4. **Foutafhandeling alleen aan systeemgrenzen** — gebruikersinput, externe APIs. Vertrouw interne code en framework-garanties.
 5. **TypeScript strict** — geen `any`, geen `@ts-ignore` zonder uitleg.
-6. **Elke nieuwe feature documenteren** in de Feature Status hieronder.
+6. **`CLAUDE.md` actueel houden** — documenteer elke nieuwe feature in de Feature Status, en werk bij een nieuwe migratie / route / primitive de bijbehorende tabel of sectie bij in dezelfde commit. Geborgd door **GATE docs** (`npm run check:docs`).
 7. **Query logica in `src/hooks/queries/`** — nooit inline TanStack Query in pagina-componenten.
 8. **Status labels/kleuren via `statusMaps`** — nooit hardcoded in componenten.
 9. **Gradients via `pickGradient`** — importeer het juiste palet uit `pickGradient.ts`.
@@ -922,18 +960,24 @@ Alle UI is **mobile-first** en werkt op mobiel, tablet en desktop. Dit is een ha
 12. **Geen directe DB-calls buiten DEV_MODE-context** — `supabase.ts` exporteert de (eventueel gewrapped) client; importeer altijd via `@/lib/supabase`.
 13. **A11Y is niet optioneel** — de volledige A11Y-checklist is een harde exit-eis voor elke feature. Geen merge zonder groene checklist. Voer de axe-scan uit op elke gewijzigde pagina.
 14. **Volledig responsive** — alle componenten werken op mobiel (< 640px), tablet (640–900px) en desktop (> 900px). Zie de Responsiveness-sectie. Geen horizontale scroll, geen afgeknipte elementen.
+15. **Design-System-First** — bouw met herbruikbare primitives uit `src/components/ui/`; nieuwe gedeelde UI wordt een primitive én komt op `/design-system`. Zie de sectie "Design-System-First werkwijze" en **GATE design-system**.
 
 ---
 
 ## Scripts
 
 ```bash
-npm run dev          # Start dev server
-npm run build        # Production build
-npm run preview      # Preview production build
-npm run lint         # ESLint
-npm run type-check   # tsc --noEmit
-npm run test         # Vitest
+npm run dev                 # Start dev server
+npm run build               # Production build
+npm run preview             # Preview production build
+npm run lint                # ESLint
+npm run type-check          # tsc -b
+npm run test                # Vitest (run-mode)
+npm run check               # lint + type-check + test
+npm run check:styles        # Theming-guardrail (warn-modus)
+npm run check:styles:strict # Theming-guardrail (faalt op blokkers)
+npm run check:docs          # Documentatie-drift guard (CLAUDE.md ↔ code)
+npm run check:all           # Alle gates samen — de '/ship'-gate
 ```
 
 ---
@@ -974,6 +1018,24 @@ npm run test         # Vitest
 - [x] `Skeleton` (inline skeleton-loader)
 - [x] `StatusBadge` (status-badge met kleur uit statusMaps)
 - [x] `NotificationCenter` (realtime notificatie-dropdown met unread-teller)
+- [x] `FormField` (label-rij + control-slot + foutmelding/hint; `labelAction` voor AI-knoppen)
+- [x] `Textarea` + `Select` (canonieke form-controls via `FormField`; naast `Input`)
+- [x] `Checkbox` / `Radio` / `Toggle` (custom controls, `aria-checked`, roving tabindex)
+- [x] `SegmentedControl` (radiogroup met pijltjesnavigatie — thema/densiteit/filters)
+- [x] `NumberStepper` (±-stepper voor HP/punten)
+- [x] `IconButton` (icon-only knop, verplichte `aria-label`)
+- [x] `Tabs` (geanimeerde indicator; `variant='pill'|'line'`)
+- [x] `SearchBar` (inline zoekveld met clear-knop)
+- [x] `Chip` (compacte tag/pill met `tone`-varianten)
+- [x] `StatPill` (getal + label voor stat-weergave)
+- [x] `OrnateDivider` (decoratieve sectie-divider)
+- [x] `DiceRoller` (d4–d100 met animatie + worp-historie)
+- [x] `KbdHint` (toetsenbord-hint via `.kbd`)
+- [x] `Starfield` (token-gedreven achtergrond-sterrenveld)
+- [x] `PickProgress` (voortgangspips "x van n gekozen")
+- [x] `SelectableCardGrid` (radio/multi-select kaartraster met roving tabindex)
+- [x] `WizardShell` + `WizardNavBar` (meerstaps-frame + navigatiebalk met validatie-gate)
+- [x] `StubPanel` (placeholder-paneel voor toekomstige features)
 
 ### Authenticatie
 - [x] Login pagina (email + wachtwoord, validatie, redirect op rol)
@@ -1015,7 +1077,7 @@ npm run test         # Vitest
 - [x] Wereld aanmaken — direct aanmaken + redirect naar bewerken
 - [x] Wereld bewerken `/worlds/:id/edit` — naam, subtitle, quote, beschrijving, DM-notities, header image + drag-to-reposition, status
 - [x] Wereld verwijderen — met bevestigingsdialoog
-- [x] Wereld detail `/worlds/:id` — breadcrumbs, WorldDetailHeader, WorldDetailDivider, DM-notities, campaigns lijst, bestiarium-link
+- [x] Wereld detail `/worlds/:id` — breadcrumbs, WorldDetailHeader, DM-notities, campaigns lijst, bestiarium-link
 - [x] Navigatie-item "Werelden" in sidebar
 
 ### Campaigns (DM)
@@ -1289,4 +1351,16 @@ npm run test         # Vitest
 - [x] **Standaardisatie fase 2 (feature-panelen)** — `NotificationCenter` gesplitst + naar `.notif-*` (sibling-buttons i.p.v. genest interactief, 36px delete, `role=status` live region); `SkillsPanel` (`.skill-*`, `data-prof`), `SpellSlots` (`.spell-slot-*`, CSS `:hover`), `SanctumInventory` (`.sanctum-*`, rarity via `--rarity-rgb` kanaal-token, fixt eerder ongeldige CSS), `CombatTracker` (`.combatant-*`), `PlaceAccordion` (`.place-*`, `data-open`), `ReisgezelschapBanner` (`.party-*`) — allemaal zonder literale inline-styles
 - [x] **Capstone — tweede thema + schakel-UI** — `:root[data-theme="ember"]` (warm, ronder; alleen structuur-tokens, accent/densiteit blijven orthogonaal); `ThemeName` union + `THEMES`/`THEME_LABELS` uitgebreid; `SettingsPage` Voorkeuren-tab heeft nu `SegmentedControl` per as (thema/accent/densiteit) gekoppeld aan `useThemeStore`; taal-`<select>` → `Select`
 - [ ] **Fase 2 (DS-v2 tokens)** — DS-v2 als nieuwe basis (alleen token-waarden: rondere radii etc.) — `ember` zet dit al deels in
-- [ ] **Fase 3 (sweep, lopend)** — edit-/detail-/grote pagina's → `FormField`/`Select`/`Textarea`; inline-styles + `.pangu-*` retireren (zie `scripts/check-inline-styles.mjs` baseline)
+- [x] **Fase 3a (theming-sweep)** — alle `.pangu-*` geretireerd (432 voorkomens in TSX + de dode aliassen in `index.css`); `color-mix` → kanaal-tokens / relative color `rgb(from var(--x) r g b / a)`; `check:styles:strict` = 0 blokkers en is nu een harde gate. Decoratieve `pickGradient`-paletten zijn een data-uitzondering (zoals munt-/rariteitkleuren).
+- [ ] **Fase 3b (primitive-sweep, lopend)** — edit-/detail-/grote pagina's → `FormField`/`Select`/`Textarea`; raw-radius (182 niet-blokkerende warns) → `var(--r-*)`
+
+### Agent-inkadering, kwaliteitsgates & documentatie-borging
+> Inkadering van de Claude Code-agent zodat de Definition of Done en de Design-System-First werkwijze automatisch worden afgedwongen i.p.v. te leunen op handmatige discipline. Zie de gelijknamige secties boven in dit document.
+- [x] **Harde gates in CLAUDE.md** — "Definition of Done — Harde gates" + "Design-System-First werkwijze" (boven in dit bestand), inclusief regel #15
+- [x] **`scripts/check-docs.mjs`** (`npm run check:docs`) — doc-drift guard: faalt als een migratie of een `src/components/ui/`-primitive niet in CLAUDE.md staat (automatische rugdekking achter GATE docs)
+- [x] **`npm run check:all`** — samengestelde gate (`check` + `check:styles:strict` + `check:docs`); nieuwe scripts `check:styles:strict` + `check:docs`
+- [x] **`.claude/agents/`** — `test-agent` (technische + visuele/responsive/a11y-gates) en `review-agent` (code/a11y/responsive + DS/docs-review)
+- [x] **`.claude/commands/`** — `/ds-check`, `/review`, `/ship` (het oude `caveman`-command is verwijderd)
+- [x] **`.claude/settings.json` + `.claude/hooks/session-start.sh`** — SessionStart-hook installeert deps en zet `core.hooksPath .githooks` in een verse (web-)sessie
+- [x] **`.githooks/pre-commit`** — harde gate vóór elke commit (`npm run check:all`)
+- [x] **`.github/workflows/ci.yml`** — niet-omzeilbare CI-backstop: lint + type-check + test + `check:styles:strict` + `check:docs`

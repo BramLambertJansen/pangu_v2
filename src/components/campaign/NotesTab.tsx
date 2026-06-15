@@ -21,7 +21,7 @@ export function NotesTab({
       </h2>
       {notes ? (
         <div
-          className="pangu-surface"
+          className="surface"
           style={{
             padding: 28,
             borderColor: 'rgb(var(--gold-rgb) / 0.22)',

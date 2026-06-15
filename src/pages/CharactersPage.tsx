@@ -35,8 +35,8 @@ export default function CharactersPage() {
     <div>
       {/* Page header */}
       <header style={{ marginBottom: 32 }}>
-        <p className="pangu-eyebrow">Spelersperspectief</p>
-        <h1 className="pangu-display-xl">Mijn karakters</h1>
+        <p className="pg-eyebrow">Spelersperspectief</p>
+        <h1 className="pg-display-xl">Mijn karakters</h1>
         <p style={{ marginTop: 8, fontSize: 14, color: 'var(--ink-soft)' }}>
           Beheer jouw personages en karakterbladen.
         </p>

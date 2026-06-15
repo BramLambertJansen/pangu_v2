@@ -1,0 +1,8 @@
+#!/usr/bin/env bash
+# PANGU pre-commit gate — Definition of Done must be green before any commit.
+# Bypass is not permitted as routine; CI re-runs these as a non-bypassable backstop.
+set -euo pipefail
+cd "$(git rev-parse --show-toplevel)"
+
+echo "PANGU gates — running npm run check:all (lint + type-check + test + styles:strict + docs)…"
+npm run check:all

@@ -30,8 +30,8 @@ export function CharacterEditAbilitiesSection({ form, set, cycleSkill, toggleSav
   return (
     <>
       {/* ── Eigenschappen ── */}
-      <div className="pangu-surface" style={{ padding: 28, marginBottom: 16 }}>
-        <p className="pangu-section-title" style={{ marginBottom: 16 }}>Eigenschappen</p>
+      <div className="surface" style={{ padding: 28, marginBottom: 16 }}>
+        <p className="pg-section-title" style={{ marginBottom: 16 }}>Eigenschappen</p>
         <div className="grid grid-cols-2 gap-4 sm:grid-cols-3">
           {ABILITY_SCORES.map(({ key, abbr, label }) => (
             <NumericField
@@ -48,8 +48,8 @@ export function CharacterEditAbilitiesSection({ form, set, cycleSkill, toggleSav
       </div>
 
       {/* ── Reddingsgooien ── */}
-      <div className="pangu-surface" style={{ padding: 28, marginBottom: 16 }}>
-        <p className="pangu-section-title" style={{ marginBottom: 4 }}>Reddingsgooien</p>
+      <div className="surface" style={{ padding: 28, marginBottom: 16 }}>
+        <p className="pg-section-title" style={{ marginBottom: 4 }}>Reddingsgooien</p>
         <p style={{ fontSize: 12, color: 'var(--muted)', marginTop: 0, marginBottom: 20 }}>
           Klik om een reddingsgooi-vaardigheid aan te zetten. Vaardigheidsbonus (+{proficiency}) wordt automatisch meegeteld.
         </p>
@@ -103,8 +103,8 @@ export function CharacterEditAbilitiesSection({ form, set, cycleSkill, toggleSav
       </div>
 
       {/* ── Vaardigheden ── */}
-      <div className="pangu-surface" style={{ padding: 28, marginBottom: 16 }}>
-        <p className="pangu-section-title" style={{ marginBottom: 4 }}>Vaardigheden</p>
+      <div className="surface" style={{ padding: 28, marginBottom: 16 }}>
+        <p className="pg-section-title" style={{ marginBottom: 4 }}>Vaardigheden</p>
         <p style={{ fontSize: 12, color: 'var(--muted)', marginTop: 0, marginBottom: 20 }}>
           1× klik = vaardig (+{proficiency}), 2× klik = expertise (×2 bonus), 3× klik = geen.
         </p>
@@ -179,8 +179,8 @@ export function CharacterEditAbilitiesSection({ form, set, cycleSkill, toggleSav
       </div>
 
       {/* ── Bekwaamheden & Talen ── */}
-      <div className="pangu-surface" style={{ padding: 28, marginBottom: 16 }}>
-        <p className="pangu-section-title" style={{ marginBottom: 4 }}>Bekwaamheden &amp; Talen</p>
+      <div className="surface" style={{ padding: 28, marginBottom: 16 }}>
+        <p className="pg-section-title" style={{ marginBottom: 4 }}>Bekwaamheden &amp; Talen</p>
         <p style={{ fontSize: 12, color: 'var(--muted)', marginBottom: 24 }}>
           Klik op een taal of categorie om toe te voegen, of typ vrij en druk op Enter.
         </p>

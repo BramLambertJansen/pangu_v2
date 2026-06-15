@@ -125,8 +125,8 @@ Return ONLY a raw JSON array with one item — no markdown, no explanation:
       {/* Page header */}
       <div style={{ marginBottom: 32, display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 16, flexWrap: 'wrap' }}>
         <div>
-          <p className="pangu-eyebrow">Kroniek schatkist</p>
-          <h1 className="pangu-display-xl">{campaign.name} — Items</h1>
+          <p className="pg-eyebrow">Kroniek schatkist</p>
+          <h1 className="pg-display-xl">{campaign.name} — Items</h1>
           <p style={{ marginTop: 8, fontSize: 14, color: 'var(--ink-soft)' }}>
             Beheer alle magische items in deze kroniek. Maak items aan en wijs ze toe aan karakters.
           </p>

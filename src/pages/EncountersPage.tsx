@@ -52,8 +52,8 @@ export default function EncountersPage() {
 
       {/* Page header */}
       <header style={{ marginBottom: 32 }}>
-        <p className="pangu-eyebrow">Kroniek — {campaign.name}</p>
-        <h1 className="pangu-display-xl">Gevechten</h1>
+        <p className="pg-eyebrow">Kroniek — {campaign.name}</p>
+        <h1 className="pg-display-xl">Gevechten</h1>
         <p style={{ marginTop: 8, fontSize: 14, color: 'var(--ink-soft)' }}>
           Plan en beheer de gevechten van deze kroniek.
         </p>

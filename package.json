@@ -13,7 +13,10 @@
     "test:watch": "vitest",
     "test:coverage": "vitest run --coverage",
     "check:styles": "node scripts/check-inline-styles.mjs",
-    "check": "npm run lint && npm run type-check && npm run test"
+    "check:styles:strict": "node scripts/check-inline-styles.mjs --strict",
+    "check:docs": "node scripts/check-docs.mjs",
+    "check": "npm run lint && npm run type-check && npm run test",
+    "check:all": "npm run check && npm run check:styles:strict && npm run check:docs"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.49.4",

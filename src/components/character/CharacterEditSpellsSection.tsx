@@ -78,8 +78,8 @@ export function CharacterEditSpellsSection({ form, set }: Props) {
   return (
     <>
       {/* ── Schatkist ── */}
-      <div className="pangu-surface" style={{ padding: 28, marginBottom: 16 }}>
-        <p className="pangu-section-title" style={{ marginBottom: 16 }}>Schatkist</p>
+      <div className="surface" style={{ padding: 28, marginBottom: 16 }}>
+        <p className="pg-section-title" style={{ marginBottom: 16 }}>Schatkist</p>
         <div className="grid grid-cols-2 gap-4 sm:grid-cols-3">
           <NumericField id="char-platinum" label="Platina (pp)"  value={form.platinum ?? 0} onChange={(v) => set('platinum', Math.max(0, v))} />
           <NumericField id="char-gold"     label="Goud (gp)"     value={form.gold ?? 0}     onChange={(v) => set('gold',     Math.max(0, v))} />
@@ -90,15 +90,15 @@ export function CharacterEditSpellsSection({ form, set }: Props) {
       </div>
 
       {/* ── Spreuken ── */}
-      <div className="pangu-surface" style={{ padding: 28, marginBottom: 16 }}>
-        <p className="pangu-section-title" style={{ marginBottom: 4 }}>Spreuken</p>
+      <div className="surface" style={{ padding: 28, marginBottom: 16 }}>
+        <p className="pg-section-title" style={{ marginBottom: 4 }}>Spreuken</p>
         <p style={{ fontSize: 12, color: 'var(--muted)', marginBottom: 20 }}>
           Stel je toverbaarheids-eigenschap in en pas je spreukslots aan per niveau.
         </p>
 
         {/* Spellcasting ability */}
         <div style={{ marginBottom: 20 }}>
-          <label className="pangu-label" htmlFor="char-spell-ability">Toverbaarheids-eigenschap</label>
+          <label className="label" htmlFor="char-spell-ability">Toverbaarheids-eigenschap</label>
           <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginTop: 4 }}>
             <button
               type="button"
@@ -147,7 +147,7 @@ export function CharacterEditSpellsSection({ form, set }: Props) {
         {/* Concentratie */}
         <div style={{ marginBottom: 20, display: 'flex', gap: 12, alignItems: 'flex-start', flexWrap: 'wrap' }}>
           <div>
-            <p className="pangu-label" style={{ marginBottom: 8 }}>Concentratie</p>
+            <p className="label" style={{ marginBottom: 8 }}>Concentratie</p>
             <button
               type="button"
               aria-pressed={form.concentrating ?? false}
@@ -167,10 +167,10 @@ export function CharacterEditSpellsSection({ form, set }: Props) {
           </div>
           {(form.concentrating ?? false) && (
             <div style={{ flex: 1, minWidth: 200 }}>
-              <label className="pangu-label" htmlFor={concentrationSpellId}>Op welke spreuk?</label>
+              <label className="label" htmlFor={concentrationSpellId}>Op welke spreuk?</label>
               <input
                 id={concentrationSpellId}
-                className="pangu-input"
+                className="input"
                 value={form.concentration_spell ?? ''}
                 onChange={(e) => set('concentration_spell', e.target.value || null)}
                 placeholder="Naam van de spreuk..."
@@ -249,8 +249,8 @@ export function CharacterEditSpellsSection({ form, set }: Props) {
       </div>
 
       {/* ── Klasseresources ── */}
-      <div className="pangu-surface" style={{ padding: 28, marginBottom: 16 }}>
-        <p className="pangu-section-title" style={{ marginBottom: 4 }}>Klasseresources</p>
+      <div className="surface" style={{ padding: 28, marginBottom: 16 }}>
+        <p className="pg-section-title" style={{ marginBottom: 4 }}>Klasseresources</p>
         <p style={{ fontSize: 12, color: 'var(--muted)', marginBottom: 16 }}>
           Bijhouden van klasse-specifieke hulpbronnen zoals ki-punten, woede, bardische inspiratie, etc.
         </p>
@@ -281,7 +281,7 @@ export function CharacterEditSpellsSection({ form, set }: Props) {
         <div style={{ display: 'flex', gap: 8, marginBottom: 16 }}>
           <input
             id="custom-resource-input"
-            className="pangu-input"
+            className="input"
             placeholder="Eigen resource naam..."
             style={{ flex: 1 }}
             onKeyDown={(e) => {
@@ -338,8 +338,8 @@ export function CharacterEditSpellsSection({ form, set }: Props) {
       </div>
 
       {/* ── Talenten & Wapenmeesters ── */}
-      <div className="pangu-surface" style={{ padding: 28, marginBottom: 16 }}>
-        <p className="pangu-section-title" style={{ marginBottom: 20 }}>Talenten &amp; Wapenmeesters</p>
+      <div className="surface" style={{ padding: 28, marginBottom: 16 }}>
+        <p className="pg-section-title" style={{ marginBottom: 20 }}>Talenten &amp; Wapenmeesters</p>
         <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
           <TagInput
             id={featsId}

@@ -116,7 +116,7 @@ function DiceRoller() {
   }
 
   return (
-    <div className="pangu-surface" style={{ padding: 20, width: 200, flexShrink: 0 }}>
+    <div className="surface" style={{ padding: 20, width: 200, flexShrink: 0 }}>
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>
         <span style={{ fontSize: 10, fontWeight: 700, letterSpacing: '0.18em', textTransform: 'uppercase', color: 'var(--muted)' }}>
           Dice
@@ -415,8 +415,8 @@ export function CharacterInventoryTab({ characterId, character }: Props) {
 
           {/* Paper-doll equipment overview */}
           {items && items.length > 0 && (
-            <div className="pangu-surface" style={{ padding: 20 }}>
-              <p className="pangu-section-title" style={{ marginBottom: 16 }}>Uitrusting</p>
+            <div className="surface" style={{ padding: 20 }}>
+              <p className="pg-section-title" style={{ marginBottom: 16 }}>Uitrusting</p>
               <SanctumInventory
                 characterId={characterId}
                 items={items}
@@ -471,7 +471,7 @@ export function CharacterInventoryTab({ characterId, character }: Props) {
                 ))}
               </div>
             ) : (
-              <div className="pangu-surface" style={{ padding: 28, textAlign: 'center' }}>
+              <div className="surface" style={{ padding: 28, textAlign: 'center' }}>
                 <p style={{ fontSize: 14, color: 'var(--muted)', fontStyle: 'italic', margin: 0 }}>Geen items in je inventaris.</p>
                 <p style={{ fontSize: 12, color: 'var(--subtle)', margin: '8px 0 0' }}>De DM kan items toewijzen vanuit de kroniek-schatkist.</p>
               </div>
@@ -481,7 +481,7 @@ export function CharacterInventoryTab({ characterId, character }: Props) {
           {/* Right sidebar */}
           <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
             {(character.platinum > 0 || character.gold > 0 || character.electrum > 0 || character.silver > 0 || character.copper > 0) && (
-              <div className="pangu-surface" style={{ padding: '16px 20px', width: 200 }}>
+              <div className="surface" style={{ padding: '16px 20px', width: 200 }}>
                 <p style={{ fontFamily: 'var(--font-body)', fontSize: 10, fontWeight: 700, letterSpacing: '0.18em', textTransform: 'uppercase', color: 'var(--muted)', margin: '0 0 12px' }}>Schatkist</p>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 7 }}>
                   {[
