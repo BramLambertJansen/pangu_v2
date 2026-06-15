@@ -715,6 +715,7 @@ Alle tabellen hebben `committed boolean DEFAULT false` — bestaande rijen zijn 
 | 052 | `052_invite_join_rpc.sql` | Vervangt `invite_code_lookup` + `join_via_invite` policies door SECURITY DEFINER RPC's `get_campaign_by_invite_code` (alleen veilige kolommen) en `join_campaign_via_invite` (valideert code server-side vóór insert in `campaign_members`) |
 | 053 | `053_npc_faction_campaign_check.sql` | Trigger `check_npc_faction_campaign()` op `npcs`: weigert `faction_id` van een factie buiten de eigen `campaign_id` |
 | 054 | `054_entity_links_cleanup.sql` | AFTER DELETE-triggers op alle 9 linkbare tabellen (`cleanup_entity_links()`) — verwijdert `entity_links`-rijen die naar de verwijderde rij verwijzen (polymorfe FK heeft geen ON DELETE CASCADE) |
+| 055 | `055_ai_rpc_grants.sql` | `claim_ai_request`/`increment_ai_usage` controleren nu `auth.uid() = p_user_id`; EXECUTE op alle 3 AI-RPC's ingetrokken van `PUBLIC` en herverleend aan `authenticated` (resp. `service_role` voor `increment_org_groq_usage`) |
 
 ---
 

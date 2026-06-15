@@ -2,21 +2,22 @@ import type { SupabaseClient } from "npm:@supabase/supabase-js@2";
 import { AI_CONFIG } from "./config.ts";
 import type { RouteDecision, UserUsage, OrgUsage } from "./types.ts";
 
-/** Round current UTC time down to the start of the current WINDOW_HOURS block. */
+const WINDOW_MS = AI_CONFIG.WINDOW_HOURS * 60 * 60 * 1000;
+
+/**
+ * Round the current time down to the start of the current WINDOW_HOURS block,
+ * anchored to the Unix epoch. Anchoring to midnight UTC would produce one
+ * shorter window per day whenever 24 isn't divisible by WINDOW_HOURS (e.g. a
+ * 4-hour window at 20:00-24:00 for WINDOW_HOURS=5); the epoch anchor keeps
+ * every window exactly WINDOW_HOURS long.
+ */
 export function getWindowStart(): Date {
-  const now = new Date();
-  const windowHour =
-    Math.floor(now.getUTCHours() / AI_CONFIG.WINDOW_HOURS) * AI_CONFIG.WINDOW_HOURS;
-  const windowStart = new Date(now);
-  windowStart.setUTCHours(windowHour, 0, 0, 0);
-  return windowStart;
+  return new Date(Math.floor(Date.now() / WINDOW_MS) * WINDOW_MS);
 }
 
 /** Return the timestamp when the current window expires. */
 export function getWindowEnd(windowStart: Date): Date {
-  const end = new Date(windowStart);
-  end.setUTCHours(end.getUTCHours() + AI_CONFIG.WINDOW_HOURS);
-  return end;
+  return new Date(windowStart.getTime() + WINDOW_MS);
 }
 
 /**
