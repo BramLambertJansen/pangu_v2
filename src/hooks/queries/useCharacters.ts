@@ -35,7 +35,7 @@ export function useCreateCharacter() {
   const user = useAuthStore(s => s.user)
 
   return useMutation({
-    mutationFn: async () => {
+    mutationFn: async (campaignId?: string) => {
       if (!user) throw new Error('Niet ingelogd')
       const { data, error } = await supabase
         .from('characters')
@@ -43,6 +43,7 @@ export function useCreateCharacter() {
           user_id: user.id,
           name: 'Nieuw karakter',
           status: 'active',
+          campaign_id: campaignId ?? null,
         })
         .select()
         .single()
@@ -51,6 +52,9 @@ export function useCreateCharacter() {
     },
     onSuccess: (newCharacter) => {
       queryClient.invalidateQueries({ queryKey: queryKeys.characters.all })
+      if (newCharacter.campaign_id) {
+        queryClient.invalidateQueries({ queryKey: queryKeys.characters.byCampaign(newCharacter.campaign_id) })
+      }
       navigate(`/characters/${newCharacter.id}/edit`, { state: { isNew: true } })
     },
     onError: () => toast.error('Karakter aanmaken mislukt'),

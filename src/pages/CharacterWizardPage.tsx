@@ -20,7 +20,7 @@ export default function CharacterWizardPage() {
           campaignId={campaignId}
           onComplete={(id) => navigate(`/characters/${id}`)}
           onCancel={() => navigate('/characters')}
-          onSkip={() => createCharacter.mutate()}
+          onSkip={() => createCharacter.mutate(campaignId)}
           skipLoading={createCharacter.isPending}
         />
       </main>

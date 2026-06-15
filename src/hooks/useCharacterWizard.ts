@@ -1,4 +1,4 @@
-import { useCallback, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import {
   createEmptyDraft,
   firstInvalidStepIndex,
@@ -31,6 +31,8 @@ function restoreState(userId: string, campaignId: string | null): WizardState | 
     if (parsed.v !== STORAGE_VERSION || !parsed.draft) return null
     // merge over een leeg draft zodat later toegevoegde velden defaults krijgen
     const draft: WizardDraft = { ...createEmptyDraft(campaignId), ...parsed.draft }
+    // de kroniek uit de route wint van een herstelde draft uit een andere context
+    if (campaignId !== null) draft.campaignId = campaignId
     if (draft.raceId && !getRace(draft.raceId)) draft.raceId = null
     if (draft.classId && !getClass(draft.classId)) draft.classId = null
     if (draft.backgroundId && !getBackground(draft.backgroundId)) draft.backgroundId = null
@@ -54,6 +56,10 @@ function persistState(userId: string, state: WizardState) {
   } catch {
     // storage vol/geblokkeerd — wizard blijft werken zonder hervatten
   }
+}
+
+function hasDraftProgress(draft: WizardDraft): boolean {
+  return draft.name.trim().length > 0 || draft.raceId !== null || draft.classId !== null
 }
 
 export function clearWizardDraft(userId: string) {
@@ -96,6 +102,18 @@ export function useCharacterWizard(
   const [state, setState] = useState<WizardState>(
     () => restoreState(userId, campaignId) ?? { draft: createEmptyDraft(campaignId), stepIndex: 0 },
   )
+  const userIdRef = useRef(userId)
+
+  // userId is 'anon' totdat auth hydrateert; herstel dan alsnog de echte
+  // draft van deze gebruiker, mits er onder de placeholder nog niets is ingevuld.
+  useEffect(() => {
+    if (userIdRef.current === userId) return
+    userIdRef.current = userId
+    setState((prev) => {
+      if (hasDraftProgress(prev.draft)) return prev
+      return restoreState(userId, campaignId) ?? { draft: createEmptyDraft(campaignId), stepIndex: 0 }
+    })
+  }, [userId, campaignId])
 
   const update = useCallback(
     (updater: (prev: WizardState) => WizardState) => {
@@ -178,8 +196,7 @@ export function useCharacterWizard(
     steps: WIZARD_STEPS,
     maxReachableIndex,
     validation: validateStep(stepId, draft),
-    hasProgress:
-      draft.name.trim().length > 0 || draft.raceId !== null || draft.classId !== null,
+    hasProgress: hasDraftProgress(draft),
     patch,
     selectRace,
     selectClass,
