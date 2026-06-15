@@ -680,8 +680,8 @@ Return ONLY a raw JSON array — no markdown, no explanation, just the array:
                         letterSpacing: '0.14em', textTransform: 'uppercase',
                         color: rarityColor,
                         padding: '3px 8px',
-                        background: `color-mix(in srgb, ${rarityColor} 12%, var(--surface-2))`,
-                        border: `1px solid color-mix(in srgb, ${rarityColor} 25%, transparent)`,
+                        background: `linear-gradient(rgb(from ${rarityColor} r g b / 0.12), rgb(from ${rarityColor} r g b / 0.12)), var(--surface-2)`,
+                        border: `1px solid rgb(from ${rarityColor} r g b / 0.25)`,
                         borderRadius: 'var(--r-full)',
                       }}>
                         {itemRarityLabel[item.rarity]}

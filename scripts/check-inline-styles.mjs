@@ -11,7 +11,9 @@
  *
  * Allowed (per docs/design-system/03 contract): rgba(0,0,0,…) shadows and
  * rgba(255,255,255,…) sheens are theme-independent; coin/rarity data colors are
- * meaning-driven and stay literal.
+ * meaning-driven and stay literal; pickGradient.ts holds decorative per-entity
+ * gradient DATA (see ALLOWED_RGB_FILES). Theme-following tints use channel tokens
+ * `rgb(var(--x-rgb) / a)` or relative color `rgb(from var(--x) r g b / a)`.
  *
  * Usage:  node scripts/check-inline-styles.mjs [--strict]
  *   default  report only, exit 0   (warn phase)
@@ -30,6 +32,12 @@ const ALLOWED_HEX = new Set(['#e5e7eb', '#c0a060', '#b87333'])
 
 /** `pangu-*` tokens that are storage-key / app-state namespaces, not style aliases. */
 const KEEP_PANGU = new Set(['pangu-dev-mode', 'pangu-dev-db', 'pangu-wizard'])
+
+/** Files whose colored literals are decorative gradient DATA — deterministic
+ *  per-entity multi-stop palettes with off-palette endpoints, not theme skin.
+ *  Treated like coin/rarity data colors. Theme-following tints use channel
+ *  tokens / rgb(from var(--x) …) instead; these stay literal by design. */
+const ALLOWED_RGB_FILES = new Set(['src/utils/pickGradient.ts'])
 
 /** rgb/rgba triplets that are theme-independent (neutral shadow / sheen). */
 function isNeutralRgb(inner) {
@@ -68,6 +76,7 @@ for (const file of files) {
       const inner = m[1]
       if (inner.includes('var(')) continue
       if (isNeutralRgb(inner)) continue
+      if (ALLOWED_RGB_FILES.has(rel)) continue
       if (/[0-9]/.test(inner.trim()[0] ?? '')) blocking['literal-rgb'].push(`${where}  ${m[0]}`)
     }
     if (line.includes('color-mix(')) blocking['color-mix'].push(where)

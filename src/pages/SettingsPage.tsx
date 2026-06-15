@@ -441,9 +441,9 @@ function ProviderKeyCard({
             textTransform: 'uppercase',
             padding: '3px 10px',
             borderRadius: 'var(--r-full)',
-            background: isSet ? 'color-mix(in srgb, var(--teal) 15%, transparent)' : 'color-mix(in srgb, var(--muted) 12%, transparent)',
+            background: isSet ? 'rgb(from var(--teal) r g b / 0.15)' : 'rgb(from var(--muted) r g b / 0.12)',
             color: isSet ? 'var(--teal)' : 'var(--muted)',
-            border: `1px solid ${isSet ? 'color-mix(in srgb, var(--teal) 30%, transparent)' : 'var(--hairline)'}`,
+            border: `1px solid ${isSet ? 'rgb(from var(--teal) r g b / 0.3)' : 'var(--hairline)'}`,
           }}
           aria-label={isSet ? 'Sleutel ingesteld' : 'Sleutel niet ingesteld'}
         >
@@ -543,7 +543,7 @@ function AISleutelsTab() {
         style={{
           padding: '16px 20px',
           borderLeft: '3px solid var(--violet)',
-          background: 'color-mix(in srgb, var(--violet) 6%, var(--surface))',
+          background: 'linear-gradient(rgb(from var(--violet) r g b / 0.06), rgb(from var(--violet) r g b / 0.06)), var(--surface)',
         }}
       >
         <p style={{ fontSize: 13, color: 'var(--ink-soft)', lineHeight: 1.6 }}>
@@ -773,7 +773,7 @@ function PanguTab() {
         {testResult && (
           <div className="rounded-lg p-4 space-y-3" style={{ background: 'var(--surface-2)', border: '1px solid var(--hairline)' }} role="status" aria-live="polite">
             <div className="flex flex-wrap items-center gap-2">
-              <span className="rounded-full px-2.5 py-0.5 text-xs font-semibold" style={{ background: `color-mix(in srgb, ${PROVIDER_COLORS[testResult.provider]} 15%, transparent)`, color: PROVIDER_COLORS[testResult.provider], border: `1px solid color-mix(in srgb, ${PROVIDER_COLORS[testResult.provider]} 35%, transparent)` }}>
+              <span className="rounded-full px-2.5 py-0.5 text-xs font-semibold" style={{ background: `rgb(from ${PROVIDER_COLORS[testResult.provider]} r g b / 0.15)`, color: PROVIDER_COLORS[testResult.provider], border: `1px solid rgb(from ${PROVIDER_COLORS[testResult.provider]} r g b / 0.35)` }}>
                 {PROVIDER_LABELS[testResult.provider]}
               </span>
               <span className="text-xs" style={{ color: 'var(--muted)' }}>{testResult.model}</span>
@@ -827,7 +827,7 @@ export default function SettingsPage() {
           items={tabs.map((tab) => ({
             id: tab.id,
             label: tab.special ? (
-              <span style={{ color: activeTab === tab.id ? 'var(--violet)' : 'color-mix(in srgb, var(--violet) 60%, var(--muted))' }}>
+              <span style={{ color: activeTab === tab.id ? 'var(--violet)' : 'rgb(from var(--violet) r g b / 0.6)' }}>
                 <span aria-hidden="true" style={{ display: 'inline-block', width: 6, height: 6, borderRadius: '50%', background: 'var(--violet)', marginRight: 6, verticalAlign: 'middle', opacity: 0.8 }} />
                 {tab.label}
               </span>

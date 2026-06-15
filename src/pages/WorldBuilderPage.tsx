@@ -409,7 +409,7 @@ export default function WorldBuilderPage() {
           className="surface"
           style={{
             padding: 28,
-            background: 'color-mix(in srgb, var(--violet) 6%, var(--surface))',
+            background: 'linear-gradient(rgb(from var(--violet) r g b / 0.06), rgb(from var(--violet) r g b / 0.06)), var(--surface)',
             borderColor: 'rgb(var(--violet-rgb) / 0.2)',
           }}
         >
@@ -545,7 +545,7 @@ export default function WorldBuilderPage() {
             <div style={{
               marginTop: 20,
               padding: '16px 18px',
-              background: 'color-mix(in srgb, var(--teal) 7%, var(--surface))',
+              background: 'linear-gradient(rgb(from var(--teal) r g b / 0.07), rgb(from var(--teal) r g b / 0.07)), var(--surface)',
               border: '1px solid rgb(var(--teal-rgb) / 0.2)',
               borderRadius: 12,
             }}>

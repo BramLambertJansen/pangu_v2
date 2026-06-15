@@ -95,7 +95,7 @@ export const DmCharacterPanel = memo(function DmCharacterPanel({ character, item
           overflow: 'hidden',
           background: portraitUrl
             ? 'var(--void)'
-            : `color-mix(in srgb, ${accent} 15%, var(--surface-2))`,
+            : `linear-gradient(rgb(from ${accent} r g b / 0.15), rgb(from ${accent} r g b / 0.15)), var(--surface-2)`,
         }}>
           {portraitUrl && (
             <img
@@ -527,7 +527,7 @@ export const DmCharacterPanel = memo(function DmCharacterPanel({ character, item
                 <div key={item.id} style={{
                   display: 'flex', alignItems: 'center', justifyContent: 'space-between',
                   padding: '5px 9px', borderRadius: 8,
-                  background: `color-mix(in srgb, ${accent} 6%, var(--surface-2))`,
+                  background: `linear-gradient(rgb(from ${accent} r g b / 0.06), rgb(from ${accent} r g b / 0.06)), var(--surface-2)`,
                   border: `1px solid ${accent}33`,
                 }}>
                   <span style={{ fontSize: 11, fontWeight: 600, color: 'var(--ink)', fontFamily: 'var(--font-body)' }}>

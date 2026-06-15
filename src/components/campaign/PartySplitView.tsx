@@ -130,7 +130,7 @@ export function PartySplitView({ characters }: Props) {
             ) : (
               <div aria-hidden="true" style={{
                 position: 'absolute', inset: 0,
-                background: `linear-gradient(135deg, color-mix(in oklab, ${accent} 18%, var(--void-2)) 0%, var(--void-2) 100%)`,
+                background: `linear-gradient(135deg, rgb(from ${accent} r g b / 0.18) 0%, var(--void-2) 100%)`,
                 display: 'flex', alignItems: 'center', justifyContent: 'center',
                 fontFamily: 'var(--font-display)', fontSize: 80, fontWeight: 700,
                 color: accent, opacity: 0.35,

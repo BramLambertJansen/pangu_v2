@@ -292,7 +292,7 @@ export const PartyMemberRow = memo(function PartyMemberRow({ character, selected
         alignItems: 'stretch',
         borderRadius: 'var(--r-xl)',
         border: `1px solid ${selected ? accent : 'var(--hairline)'}`,
-        background: selected ? `color-mix(in srgb, ${accent} 6%, var(--surface))` : 'var(--surface)',
+        background: selected ? `linear-gradient(rgb(from ${accent} r g b / 0.06), rgb(from ${accent} r g b / 0.06)), var(--surface)` : 'var(--surface)',
         cursor: 'pointer',
         userSelect: 'none',
         transition: 'border-color var(--t-fast), box-shadow var(--t-fast), background var(--t-fast)',
@@ -320,7 +320,7 @@ export const PartyMemberRow = memo(function PartyMemberRow({ character, selected
           flexShrink: 0,
           background: portraitUrl
             ? 'var(--void)'
-            : `color-mix(in srgb, ${accent} 12%, var(--surface-2))`,
+            : `linear-gradient(rgb(from ${accent} r g b / 0.12), rgb(from ${accent} r g b / 0.12)), var(--surface-2)`,
           overflow: 'hidden',
           position: 'relative',
         }}

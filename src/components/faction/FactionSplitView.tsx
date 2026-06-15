@@ -15,7 +15,7 @@ function pipColor(faction: Faction, i: number): string {
   const color = factionReputationColor[faction.reputation]
   const idx = reputationIndex(faction.reputation)
   if (i < idx) return color
-  if (i === idx) return `color-mix(in oklab, ${color} 42%, transparent)`
+  if (i === idx) return `rgb(from ${color} r g b / 0.42)`
   return 'var(--surface-3)'
 }
 
@@ -65,8 +65,8 @@ export function FactionSplitView({ factions, npcs = [] }: Props) {
                   width: 44, height: 44, borderRadius: '50%', flexShrink: 0,
                   display: 'flex', alignItems: 'center', justifyContent: 'center',
                   fontFamily: 'var(--font-display)', fontSize: 18, fontWeight: 700, color: acc,
-                  background: `color-mix(in oklab, ${acc} 12%, transparent)`,
-                  border: `1px solid color-mix(in oklab, ${acc} 28%, transparent)`,
+                  background: `rgb(from ${acc} r g b / 0.12)`,
+                  border: `1px solid rgb(from ${acc} r g b / 0.28)`,
                 }} aria-hidden="true">
                   {f.name[0]?.toUpperCase()}
                 </div>
@@ -99,7 +99,7 @@ export function FactionSplitView({ factions, npcs = [] }: Props) {
           >
             <div aria-hidden="true" style={{
               position: 'absolute', inset: 0,
-              background: `linear-gradient(135deg, color-mix(in oklab, ${accent} 18%, var(--void)) 0%, var(--void) 100%)`,
+              background: `linear-gradient(135deg, rgb(from ${accent} r g b / 0.18) 0%, var(--void) 100%)`,
             }} />
             <div className="party-split-portrait-scrim" aria-hidden="true" />
             <div aria-hidden="true" style={{
@@ -122,8 +122,8 @@ export function FactionSplitView({ factions, npcs = [] }: Props) {
               <span style={{
                 fontSize: 9, fontFamily: 'var(--font-mono)', fontWeight: 700, letterSpacing: '0.12em',
                 padding: '3px 9px', borderRadius: 'var(--r-full)',
-                background: `color-mix(in oklab, ${accent} 18%, transparent)`,
-                border: `1px solid color-mix(in oklab, ${accent} 40%, transparent)`,
+                background: `rgb(from ${accent} r g b / 0.18)`,
+                border: `1px solid rgb(from ${accent} r g b / 0.4)`,
                 color: accent, textTransform: 'uppercase',
               }}>
                 {factionReputationLabel[selected.reputation]}
@@ -214,8 +214,8 @@ export function FactionSplitView({ factions, npcs = [] }: Props) {
                           width: 22, height: 22, borderRadius: '50%', flexShrink: 0,
                           display: 'flex', alignItems: 'center', justifyContent: 'center',
                           fontFamily: 'var(--font-display)', fontSize: 10, color: accent,
-                          background: `color-mix(in oklab, ${accent} 12%, transparent)`,
-                          border: `1px solid color-mix(in oklab, ${accent} 26%, transparent)`,
+                          background: `rgb(from ${accent} r g b / 0.12)`,
+                          border: `1px solid rgb(from ${accent} r g b / 0.26)`,
                         }} aria-hidden="true">
                           {m.name[0]?.toUpperCase()}
                         </div>

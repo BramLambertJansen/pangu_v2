@@ -266,8 +266,8 @@ export default function LoreEditPage() {
                   aria-live="polite"
                   style={{
                     marginTop: 8, padding: '12px 14px',
-                    background: 'color-mix(in srgb, var(--violet) 8%, var(--surface-2))',
-                    border: '1px solid color-mix(in srgb, var(--violet) 25%, transparent)',
+                    background: 'linear-gradient(rgb(from var(--violet) r g b / 0.08), rgb(from var(--violet) r g b / 0.08)), var(--surface-2)',
+                    border: '1px solid rgb(from var(--violet) r g b / 0.25)',
                     borderRadius: 8,
                   }}
                 >
