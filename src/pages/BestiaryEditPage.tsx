@@ -27,11 +27,11 @@ interface NumericFieldProps {
 function NumericField({ id, label, value, onChange, min = 0 }: NumericFieldProps) {
   return (
     <div>
-      <label className="pangu-label" htmlFor={id}>{label}</label>
+      <label className="label" htmlFor={id}>{label}</label>
       <input
         id={id}
         type="number"
-        className="pangu-input"
+        className="input"
         value={value}
         min={min}
         onChange={(e) => {
@@ -221,16 +221,16 @@ export default function BestiaryEditPage() {
 
         {/* Page header */}
         <header style={{ marginBottom: 40 }}>
-          <p className="pangu-eyebrow">Wezen bewerken</p>
-          <h1 className="pangu-display-xl">{bestiaryData.name}</h1>
+          <p className="pg-eyebrow">Wezen bewerken</p>
+          <h1 className="pg-display-xl">{bestiaryData.name}</h1>
           <p style={{ marginTop: 8, fontSize: 14, color: 'var(--ink-soft)' }}>
             Pas de details van dit wezen aan.
           </p>
         </header>
 
         {/* Afbeelding */}
-        <div className="pangu-surface" style={{ padding: 28, marginBottom: 16 }}>
-          <p className="pangu-section-title" style={{ marginBottom: 4 }}>Afbeelding</p>
+        <div className="surface" style={{ padding: 28, marginBottom: 16 }}>
+          <p className="pg-section-title" style={{ marginBottom: 4 }}>Afbeelding</p>
           <p style={{ fontSize: 13, color: 'var(--muted)', marginBottom: 20, marginTop: 0 }}>
             Voeg een illustratie toe van dit wezen. Maximaal 5 MB.
           </p>
@@ -315,15 +315,15 @@ export default function BestiaryEditPage() {
         </div>
 
         {/* Basis */}
-        <div className="pangu-surface" style={{ padding: 28, marginBottom: 16 }}>
-          <p className="pangu-section-title" style={{ marginBottom: 20 }}>Basis</p>
+        <div className="surface" style={{ padding: 28, marginBottom: 16 }}>
+          <p className="pg-section-title" style={{ marginBottom: 20 }}>Basis</p>
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
 
             <div>
-              <label className="pangu-label" htmlFor="bestiary-name">Naam</label>
+              <label className="label" htmlFor="bestiary-name">Naam</label>
               <input
                 id="bestiary-name"
-                className="pangu-input"
+                className="input"
                 value={form.name ?? ''}
                 onChange={(e) => set('name', e.target.value)}
                 placeholder="Naam van het wezen"
@@ -331,10 +331,10 @@ export default function BestiaryEditPage() {
             </div>
 
             <div>
-              <label className="pangu-label" htmlFor="bestiary-subtitle">Subtitel</label>
+              <label className="label" htmlFor="bestiary-subtitle">Subtitel</label>
               <input
                 id="bestiary-subtitle"
-                className="pangu-input"
+                className="input"
                 value={form.subtitle ?? ''}
                 onChange={(e) => set('subtitle', e.target.value || null)}
                 placeholder="Bijnaam of beschrijvende term"
@@ -342,10 +342,10 @@ export default function BestiaryEditPage() {
             </div>
 
             <div>
-              <label className="pangu-label" htmlFor={creatureTypeId}>Type</label>
+              <label className="label" htmlFor={creatureTypeId}>Type</label>
               <input
                 id={creatureTypeId}
-                className="pangu-input"
+                className="input"
                 value={form.creature_type ?? ''}
                 onChange={(e) => set('creature_type', e.target.value || null)}
                 placeholder="Bijv. Ondood, Draak, Beest, Mensachtige..."
@@ -353,10 +353,10 @@ export default function BestiaryEditPage() {
             </div>
 
             <div>
-              <label className="pangu-label" htmlFor={threatLevelId}>Dreigingsniveau</label>
+              <label className="label" htmlFor={threatLevelId}>Dreigingsniveau</label>
               <input
                 id={threatLevelId}
-                className="pangu-input"
+                className="input"
                 value={form.threat_level ?? ''}
                 onChange={(e) => set('threat_level', e.target.value || null)}
                 placeholder="Bijv. CR 5, Dodelijk, Laag..."
@@ -364,10 +364,10 @@ export default function BestiaryEditPage() {
             </div>
 
             <div>
-              <label className="pangu-label" htmlFor={habitatId}>Leefgebied</label>
+              <label className="label" htmlFor={habitatId}>Leefgebied</label>
               <input
                 id={habitatId}
-                className="pangu-input"
+                className="input"
                 value={form.habitat ?? ''}
                 onChange={(e) => set('habitat', e.target.value || null)}
                 placeholder="Bijv. Woud, Kerker, Oceaan..."
@@ -375,10 +375,10 @@ export default function BestiaryEditPage() {
             </div>
 
             <div>
-              <label className="pangu-label" htmlFor={statusId}>Status</label>
+              <label className="label" htmlFor={statusId}>Status</label>
               <select
                 id={statusId}
-                className="pangu-select"
+                className="select-trigger"
                 value={form.status ?? 'draft'}
                 onChange={(e) => set('status', e.target.value as BestiaryStatus)}
               >
@@ -392,8 +392,8 @@ export default function BestiaryEditPage() {
         </div>
 
         {/* Statistieken */}
-        <div className="pangu-surface" style={{ padding: 28, marginBottom: 16 }}>
-          <p className="pangu-section-title" style={{ marginBottom: 20 }}>Gevechtsstats</p>
+        <div className="surface" style={{ padding: 28, marginBottom: 16 }}>
+          <p className="pg-section-title" style={{ marginBottom: 20 }}>Gevechtsstats</p>
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3">
             <NumericField id="bestiary-hp"    label="HP"                  value={form.hp    ?? 10} onChange={(v) => set('hp',    v)} min={0} />
             <NumericField id="bestiary-ac"    label="Wapenrusting (AC)"   value={form.ac    ?? 10} onChange={(v) => set('ac',    v)} min={0} />
@@ -402,8 +402,8 @@ export default function BestiaryEditPage() {
         </div>
 
         {/* Ability scores */}
-        <div className="pangu-surface" style={{ padding: 28, marginBottom: 16 }}>
-          <p className="pangu-section-title" style={{ marginBottom: 20 }}>Eigenschappen</p>
+        <div className="surface" style={{ padding: 28, marginBottom: 16 }}>
+          <p className="pg-section-title" style={{ marginBottom: 20 }}>Eigenschappen</p>
           <div className="grid grid-cols-2 gap-4 sm:grid-cols-3">
             <NumericField id="bestiary-str" label="Sterkte (STR)"       value={form.stat_str ?? 10} onChange={(v) => set('stat_str', v)} min={1} />
             <NumericField id="bestiary-dex" label="Behendigheid (DEX)"  value={form.stat_dex ?? 10} onChange={(v) => set('stat_dex', v)} min={1} />
@@ -415,15 +415,15 @@ export default function BestiaryEditPage() {
         </div>
 
         {/* Description & Notes */}
-        <div className="pangu-surface" style={{ padding: 28 }}>
-          <p className="pangu-section-title" style={{ marginBottom: 20 }}>Beschrijving & Notities</p>
+        <div className="surface" style={{ padding: 28 }}>
+          <p className="pg-section-title" style={{ marginBottom: 20 }}>Beschrijving & Notities</p>
           <div className="grid grid-cols-1 gap-4">
 
             <div>
-              <label className="pangu-label" htmlFor={descriptionId}>Beschrijving</label>
+              <label className="label" htmlFor={descriptionId}>Beschrijving</label>
               <textarea
                 id={descriptionId}
-                className="pangu-textarea"
+                className="textarea"
                 value={form.description ?? ''}
                 onChange={(e) => set('description', e.target.value || null)}
                 placeholder="Beschrijf het wezen: uiterlijk, gedrag, gevaren en bijzonderheden..."
@@ -432,10 +432,10 @@ export default function BestiaryEditPage() {
             </div>
 
             <div>
-              <label className="pangu-label" htmlFor={notesId}>DM-notities</label>
+              <label className="label" htmlFor={notesId}>DM-notities</label>
               <textarea
                 id={notesId}
-                className="pangu-textarea"
+                className="textarea"
                 value={form.notes ?? ''}
                 onChange={(e) => set('notes', e.target.value || null)}
                 placeholder="Aantekeningen voor de DM: tactieken, zwakheden, loot, verborgen eigenschappen..."
@@ -466,10 +466,10 @@ export default function BestiaryEditPage() {
 
         {/* Danger zone */}
         <div
-          className="pangu-surface"
+          className="surface"
           style={{ marginTop: 24, padding: 28, borderColor: 'rgb(var(--crimson-rgb) / 0.18)' }}
         >
-          <p className="pangu-section-title" style={{ marginBottom: 4 }}>Gevarenzone</p>
+          <p className="pg-section-title" style={{ marginBottom: 4 }}>Gevarenzone</p>
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 16, paddingTop: 16, borderTop: '1px solid var(--hairline)' }}>
             <div>
               <p style={{ fontSize: 14, color: 'var(--ink-soft)', margin: 0 }}>Wezen verwijderen</p>

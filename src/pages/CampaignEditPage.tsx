@@ -183,8 +183,8 @@ export default function CampaignEditPage() {
 
         {/* Page header */}
         <header style={{ marginBottom: 40 }}>
-          <p className="pangu-eyebrow">Kroniek bewerken</p>
-          <h1 className="pangu-display-xl">{campaign.name}</h1>
+          <p className="pg-eyebrow">Kroniek bewerken</p>
+          <h1 className="pg-display-xl">{campaign.name}</h1>
           <p style={{ marginTop: 8, fontSize: 14, color: 'var(--ink-soft)' }}>
             Pas de details van deze kroniek aan.
           </p>
@@ -240,13 +240,13 @@ export default function CampaignEditPage() {
         )}
 
         {/* Form */}
-        <div className="pangu-surface" style={{ padding: 28 }}>
+        <div className="surface" style={{ padding: 28 }}>
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             <div>
-              <label className="pangu-label" htmlFor="campaign-name">Naam</label>
+              <label className="label" htmlFor="campaign-name">Naam</label>
               <input
                 id="campaign-name"
-                className="pangu-input"
+                className="input"
                 value={form.name ?? ''}
                 onChange={(e) => set('name', e.target.value)}
                 placeholder="Naam van de kroniek"
@@ -254,10 +254,10 @@ export default function CampaignEditPage() {
             </div>
 
             <div>
-              <label className="pangu-label" htmlFor="campaign-subtitle">Subtitel</label>
+              <label className="label" htmlFor="campaign-subtitle">Subtitel</label>
               <input
                 id="campaign-subtitle"
-                className="pangu-input"
+                className="input"
                 value={form.subtitle ?? ''}
                 onChange={(e) => set('subtitle', e.target.value || null as unknown as string)}
                 placeholder="Korte beschrijving of tagline"
@@ -265,10 +265,10 @@ export default function CampaignEditPage() {
             </div>
 
             <div>
-              <label className="pangu-label" htmlFor={statusId}>Status</label>
+              <label className="label" htmlFor={statusId}>Status</label>
               <select
                 id={statusId}
-                className="pangu-select"
+                className="select-trigger"
                 value={form.status ?? 'draft'}
                 onChange={(e) => set('status', e.target.value as CampaignStatus)}
               >
@@ -279,10 +279,10 @@ export default function CampaignEditPage() {
             </div>
 
             <div>
-              <label className="pangu-label" htmlFor={headerImageId}>Header afbeelding (URL)</label>
+              <label className="label" htmlFor={headerImageId}>Header afbeelding (URL)</label>
               <input
                 id={headerImageId}
-                className="pangu-input"
+                className="input"
                 type="url"
                 value={form.header_image ?? ''}
                 onChange={(e) => set('header_image', e.target.value || null as unknown as string)}
@@ -291,10 +291,10 @@ export default function CampaignEditPage() {
             </div>
 
             <div className="sm:col-span-2">
-              <label className="pangu-label" htmlFor={descriptionId}>Beschrijving</label>
+              <label className="label" htmlFor={descriptionId}>Beschrijving</label>
               <textarea
                 id={descriptionId}
-                className="pangu-textarea"
+                className="textarea"
                 value={form.description ?? ''}
                 onChange={(e) => set('description', e.target.value || null as unknown as string)}
                 placeholder="Beschrijf de kroniek, haar sfeer en achtergrond..."
@@ -303,10 +303,10 @@ export default function CampaignEditPage() {
             </div>
 
             <div className="sm:col-span-2">
-              <label className="pangu-label" htmlFor={notesId}>DM-notities</label>
+              <label className="label" htmlFor={notesId}>DM-notities</label>
               <textarea
                 id={notesId}
-                className="pangu-textarea"
+                className="textarea"
                 value={form.notes ?? ''}
                 onChange={(e) => set('notes', e.target.value || null as unknown as string)}
                 placeholder="Geheimen, hints, campagne-aantekeningen..."
@@ -382,7 +382,7 @@ export default function CampaignEditPage() {
           {/* URL input */}
           <div style={{ marginBottom: 16 }}>
             <label
-              className="pangu-label"
+              className="label"
               htmlFor="map-image-url"
               style={{ display: 'block', marginBottom: 6 }}
             >
@@ -390,7 +390,7 @@ export default function CampaignEditPage() {
             </label>
             <input
               id="map-image-url"
-              className="pangu-input"
+              className="input"
               type="url"
               value={(form.map_image_url as string | null) ?? ''}
               onChange={(e) => set('map_image_url', e.target.value || null)}
@@ -425,10 +425,10 @@ export default function CampaignEditPage() {
 
         {/* Danger zone */}
         <div
-          className="pangu-surface"
+          className="surface"
           style={{ marginTop: 24, padding: 28, borderColor: 'rgb(var(--crimson-rgb) / 0.18)' }}
         >
-          <p className="pangu-section-title" style={{ marginBottom: 4 }}>Gevarenzone</p>
+          <p className="pg-section-title" style={{ marginBottom: 4 }}>Gevarenzone</p>
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 16, paddingTop: 16, borderTop: '1px solid var(--hairline)' }}>
             <div>
               <p style={{ fontSize: 14, color: 'var(--ink-soft)', margin: 0 }}>Kroniek verwijderen</p>

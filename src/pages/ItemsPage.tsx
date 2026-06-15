@@ -36,8 +36,8 @@ export default function ItemsPage() {
       {/* Header */}
       <div style={{ marginBottom: 32, display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 16, flexWrap: 'wrap' }}>
         <div>
-          <p className="pangu-eyebrow">SRD Compendium</p>
-          <h1 className="pangu-display-xl">Items</h1>
+          <p className="pg-eyebrow">SRD Compendium</p>
+          <h1 className="pg-display-xl">Items</h1>
           <p style={{ marginTop: 8, fontSize: 14, color: 'var(--ink-soft)' }}>
             Importeer magische items uit de SRD naar een kroniek.
           </p>

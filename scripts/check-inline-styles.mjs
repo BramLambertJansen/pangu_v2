@@ -28,6 +28,9 @@ const STRICT = process.argv.includes('--strict')
 /** Literal hex colors that are meaning-driven data, not theme skin. */
 const ALLOWED_HEX = new Set(['#e5e7eb', '#c0a060', '#b87333'])
 
+/** `pangu-*` tokens that are storage-key / app-state namespaces, not style aliases. */
+const KEEP_PANGU = new Set(['pangu-dev-mode', 'pangu-dev-db', 'pangu-wizard'])
+
 /** rgb/rgba triplets that are theme-independent (neutral shadow / sheen). */
 function isNeutralRgb(inner) {
   const head = inner.replace(/\s+/g, '').split(',').slice(0, 3).join(',')
@@ -69,7 +72,7 @@ for (const file of files) {
     }
     if (line.includes('color-mix(')) blocking['color-mix'].push(where)
     for (const m of line.matchAll(PANGU_RE)) {
-      if (m[0] === 'pangu-dev-mode') continue // app-state class, not a style alias
+      if (KEEP_PANGU.has(m[0])) continue // storage-key / app-state namespaces, not style aliases
       blocking['pangu-class'].push(`${where}  ${m[0]}`)
     }
     if (RADIUS_RE.test(line)) warns['raw-radius'].push(where)

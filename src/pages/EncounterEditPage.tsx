@@ -201,22 +201,22 @@ export default function EncounterEditPage() {
 
         {/* Page header */}
         <header style={{ marginBottom: 40 }}>
-          <p className="pangu-eyebrow">Gevecht bewerken</p>
-          <h1 className="pangu-display-xl">{encounterData.name}</h1>
+          <p className="pg-eyebrow">Gevecht bewerken</p>
+          <h1 className="pg-display-xl">{encounterData.name}</h1>
           <p style={{ marginTop: 8, fontSize: 14, color: 'var(--ink-soft)' }}>
             Pas de details en monsters van dit gevecht aan.
           </p>
         </header>
 
         {/* ── Part A: Entity fields ────────────────────── */}
-        <div className="pangu-surface" style={{ padding: 28 }}>
+        <div className="surface" style={{ padding: 28 }}>
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
 
             <div>
-              <label className="pangu-label" htmlFor="encounter-name">Naam</label>
+              <label className="label" htmlFor="encounter-name">Naam</label>
               <input
                 id="encounter-name"
-                className="pangu-input"
+                className="input"
                 value={form.name ?? ''}
                 onChange={(e) => set('name', e.target.value)}
                 placeholder="Naam van het gevecht"
@@ -224,10 +224,10 @@ export default function EncounterEditPage() {
             </div>
 
             <div>
-              <label className="pangu-label" htmlFor={subtitleId}>Subtitel</label>
+              <label className="label" htmlFor={subtitleId}>Subtitel</label>
               <input
                 id={subtitleId}
-                className="pangu-input"
+                className="input"
                 value={form.subtitle ?? ''}
                 onChange={(e) => set('subtitle', e.target.value || null)}
                 placeholder="Korte omschrijving of sfeerwoorden"
@@ -235,10 +235,10 @@ export default function EncounterEditPage() {
             </div>
 
             <div>
-              <label className="pangu-label" htmlFor={environmentId}>Omgeving</label>
+              <label className="label" htmlFor={environmentId}>Omgeving</label>
               <input
                 id={environmentId}
-                className="pangu-input"
+                className="input"
                 value={form.environment ?? ''}
                 onChange={(e) => set('environment', e.target.value || null)}
                 placeholder="Bijv. Kerker, Bos, Stad, Tempel..."
@@ -246,10 +246,10 @@ export default function EncounterEditPage() {
             </div>
 
             <div>
-              <label className="pangu-label" htmlFor={difficultyId}>Moeilijkheidsgraad</label>
+              <label className="label" htmlFor={difficultyId}>Moeilijkheidsgraad</label>
               <input
                 id={difficultyId}
-                className="pangu-input"
+                className="input"
                 value={form.difficulty ?? ''}
                 onChange={(e) => set('difficulty', e.target.value || null)}
                 placeholder="Bijv. Gemakkelijk, Normaal, Moeilijk, Dodelijk..."
@@ -257,10 +257,10 @@ export default function EncounterEditPage() {
             </div>
 
             <div>
-              <label className="pangu-label" htmlFor={statusId}>Status</label>
+              <label className="label" htmlFor={statusId}>Status</label>
               <select
                 id={statusId}
-                className="pangu-select"
+                className="select-trigger"
                 value={form.status ?? 'draft'}
                 onChange={(e) => set('status', e.target.value as EncounterStatus)}
               >
@@ -271,10 +271,10 @@ export default function EncounterEditPage() {
             </div>
 
             <div>
-              <label className="pangu-label" htmlFor={sessionId}>Sessie (optioneel)</label>
+              <label className="label" htmlFor={sessionId}>Sessie (optioneel)</label>
               <select
                 id={sessionId}
-                className="pangu-select"
+                className="select-trigger"
                 value={form.session_id ?? ''}
                 onChange={(e) => set('session_id', e.target.value || null)}
               >
@@ -288,10 +288,10 @@ export default function EncounterEditPage() {
             </div>
 
             <div className="sm:col-span-2">
-              <label className="pangu-label" htmlFor={descriptionId}>Beschrijving</label>
+              <label className="label" htmlFor={descriptionId}>Beschrijving</label>
               <textarea
                 id={descriptionId}
-                className="pangu-textarea"
+                className="textarea"
                 value={form.description ?? ''}
                 onChange={(e) => set('description', e.target.value || null)}
                 placeholder="Beschrijf de setting, de inzet, de sfeer van dit gevecht..."
@@ -300,10 +300,10 @@ export default function EncounterEditPage() {
             </div>
 
             <div className="sm:col-span-2">
-              <label className="pangu-label" htmlFor={notesId}>DM notities</label>
+              <label className="label" htmlFor={notesId}>DM notities</label>
               <textarea
                 id={notesId}
-                className="pangu-textarea"
+                className="textarea"
                 value={form.notes ?? ''}
                 onChange={(e) => set('notes', e.target.value || null)}
                 placeholder="Tactieken, verrassingen, triggers, doelen voor de monsters..."
@@ -330,10 +330,10 @@ export default function EncounterEditPage() {
         </div>
 
         {/* ── Part B: Monster list ─────────────────────── */}
-        <div className="pangu-surface" style={{ marginTop: 24, padding: 28 }}>
+        <div className="surface" style={{ marginTop: 24, padding: 28 }}>
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 20, flexWrap: 'wrap', gap: 12 }}>
             <div>
-              <p className="pangu-section-title" style={{ marginBottom: 2 }}>Monsters</p>
+              <p className="pg-section-title" style={{ marginBottom: 2 }}>Monsters</p>
               <p style={{ fontSize: 13, color: 'var(--muted)', margin: 0 }}>
                 {monsters.length === 0 ? 'Nog geen monsters toegevoegd.' : `${monsters.length} soort${monsters.length !== 1 ? 'en' : ''} geselecteerd`}
               </p>
@@ -453,7 +453,7 @@ export default function EncounterEditPage() {
                 <label htmlFor={searchId} className="sr-only">Zoek monster</label>
                 <input
                   id={searchId}
-                  className="pangu-input"
+                  className="input"
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}
                   placeholder="Zoek op naam..."
@@ -531,10 +531,10 @@ export default function EncounterEditPage() {
 
         {/* Danger zone */}
         <div
-          className="pangu-surface"
+          className="surface"
           style={{ marginTop: 24, padding: 28, borderColor: 'rgb(var(--crimson-rgb) / 0.18)' }}
         >
-          <p className="pangu-section-title" style={{ marginBottom: 4 }}>Gevarenzone</p>
+          <p className="pg-section-title" style={{ marginBottom: 4 }}>Gevarenzone</p>
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 16, paddingTop: 16, borderTop: '1px solid var(--hairline)' }}>
             <div>
               <p style={{ fontSize: 14, color: 'var(--ink-soft)', margin: 0 }}>Gevecht verwijderen</p>

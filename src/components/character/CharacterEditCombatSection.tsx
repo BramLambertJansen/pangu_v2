@@ -14,8 +14,8 @@ export function CharacterEditCombatSection({ form, set }: Props) {
   return (
     <>
       {/* ── Gevechtsstats ── */}
-      <div className="pangu-surface" style={{ padding: 28, marginBottom: 16 }}>
-        <p className="pangu-section-title" style={{ marginBottom: 16 }}>Gevechtsstats</p>
+      <div className="surface" style={{ padding: 28, marginBottom: 16 }}>
+        <p className="pg-section-title" style={{ marginBottom: 16 }}>Gevechtsstats</p>
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
           <NumericField
             id="char-hp-current"
@@ -67,8 +67,8 @@ export function CharacterEditCombatSection({ form, set }: Props) {
       </div>
 
       {/* ── Zintuigen & Alternatieve snelheden ── */}
-      <div className="pangu-surface" style={{ padding: 28, marginBottom: 16 }}>
-        <p className="pangu-section-title" style={{ marginBottom: 4 }}>Zintuigen &amp; Alternatieve snelheden</p>
+      <div className="surface" style={{ padding: 28, marginBottom: 16 }}>
+        <p className="pg-section-title" style={{ marginBottom: 4 }}>Zintuigen &amp; Alternatieve snelheden</p>
         <p style={{ fontSize: 12, color: 'var(--muted)', marginBottom: 20 }}>
           Vlieg-, zwem- en klimsnelheid worden apart bijgehouden; 0 = niet van toepassing.
         </p>
@@ -80,10 +80,10 @@ export function CharacterEditCombatSection({ form, set }: Props) {
           <NumericField id="char-burrow-speed"  label="Graafsnelheid (ft)" value={form.burrow_speed ?? 0}  onChange={(v) => set('burrow_speed',  Math.max(0, v))} />
         </div>
         <div style={{ marginTop: 16 }}>
-          <label className="pangu-label" htmlFor={specialSensesId}>Speciale zintuigen</label>
+          <label className="label" htmlFor={specialSensesId}>Speciale zintuigen</label>
           <input
             id={specialSensesId}
-            className="pangu-input"
+            className="input"
             value={form.special_senses ?? ''}
             onChange={(e) => set('special_senses', e.target.value || null)}
             placeholder="Bijv. Waarzicht 30 ft, Trillingszin 10 ft..."
@@ -92,15 +92,15 @@ export function CharacterEditCombatSection({ form, set }: Props) {
       </div>
 
       {/* ── Gevechtstoestand ── */}
-      <div className="pangu-surface" style={{ padding: 28, marginBottom: 16 }}>
-        <p className="pangu-section-title" style={{ marginBottom: 4 }}>Gevechtstoestand</p>
+      <div className="surface" style={{ padding: 28, marginBottom: 16 }}>
+        <p className="pg-section-title" style={{ marginBottom: 4 }}>Gevechtstoestand</p>
         <p style={{ fontSize: 12, color: 'var(--muted)', marginBottom: 20 }}>
           Huidige toestand in het gevecht: inspiratie, uitputting, trefferdobbelstenen en stervensgooien.
         </p>
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {/* Inspiratie toggle */}
           <div>
-            <p className="pangu-label" style={{ marginBottom: 8 }}>Inspiratie</p>
+            <p className="label" style={{ marginBottom: 8 }}>Inspiratie</p>
             <button
               type="button"
               aria-pressed={isInspired}
@@ -157,7 +157,7 @@ export function CharacterEditCombatSection({ form, set }: Props) {
 
           {/* Doodssprongen — successen */}
           <div>
-            <p className="pangu-label" style={{ marginBottom: 8 }}>Stervensgooien — successen</p>
+            <p className="label" style={{ marginBottom: 8 }}>Stervensgooien — successen</p>
             <div style={{ display: 'flex', gap: 8 }}>
               {[1, 2, 3].map(n => {
                 const filled = (form.death_save_successes ?? 0) >= n
@@ -188,7 +188,7 @@ export function CharacterEditCombatSection({ form, set }: Props) {
 
           {/* Doodssprongen — mislukkingen */}
           <div>
-            <p className="pangu-label" style={{ marginBottom: 8 }}>Stervensgooien — mislukkingen</p>
+            <p className="label" style={{ marginBottom: 8 }}>Stervensgooien — mislukkingen</p>
             <div style={{ display: 'flex', gap: 8 }}>
               {[1, 2, 3].map(n => {
                 const filled = (form.death_save_failures ?? 0) >= n

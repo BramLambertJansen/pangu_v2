@@ -42,34 +42,34 @@ export function CharacterEditBasicSection({
   return (
     <>
       {/* ── Basisinfo ── */}
-      <div className="pangu-surface" style={{ padding: 28, marginBottom: 16 }}>
-        <p className="pangu-section-title" style={{ marginBottom: 16 }}>Basisinfo</p>
+      <div className="surface" style={{ padding: 28, marginBottom: 16 }}>
+        <p className="pg-section-title" style={{ marginBottom: 16 }}>Basisinfo</p>
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
           <div>
-            <label className="pangu-label" htmlFor="char-name">Naam</label>
+            <label className="label" htmlFor="char-name">Naam</label>
             <input
               id="char-name"
-              className="pangu-input"
+              className="input"
               value={form.name ?? ''}
               onChange={(e) => set('name', e.target.value)}
               placeholder="Naam van je personage"
             />
           </div>
           <div>
-            <label className="pangu-label" htmlFor={subtitleId}>Subtitel</label>
+            <label className="label" htmlFor={subtitleId}>Subtitel</label>
             <input
               id={subtitleId}
-              className="pangu-input"
+              className="input"
               value={form.subtitle ?? ''}
               onChange={(e) => set('subtitle', e.target.value || null)}
               placeholder="Bijnaam of tagline"
             />
           </div>
           <div>
-            <label className="pangu-label" htmlFor={statusId}>Status</label>
+            <label className="label" htmlFor={statusId}>Status</label>
             <select
               id={statusId}
-              className="pangu-select"
+              className="select-trigger"
               value={form.status ?? 'active'}
               onChange={(e) => set('status', e.target.value as CharacterStatus)}
             >
@@ -79,10 +79,10 @@ export function CharacterEditBasicSection({
             </select>
           </div>
           <div>
-            <label className="pangu-label" htmlFor={campaignSelectId}>Kroniek</label>
+            <label className="label" htmlFor={campaignSelectId}>Kroniek</label>
             <select
               id={campaignSelectId}
-              className="pangu-select"
+              className="select-trigger"
               value={form.campaign_id ?? ''}
               onChange={(e) => set('campaign_id', e.target.value || null)}
             >
@@ -96,10 +96,10 @@ export function CharacterEditBasicSection({
 
         {/* Portrait URL + draggable reposition preview */}
         <div style={{ marginTop: 16 }}>
-          <label className="pangu-label" htmlFor={portraitUrlId}>Portret (URL)</label>
+          <label className="label" htmlFor={portraitUrlId}>Portret (URL)</label>
           <input
             id={portraitUrlId}
-            className="pangu-input"
+            className="input"
             type="url"
             value={form.portrait_url ?? ''}
             onChange={(e) => set('portrait_url', e.target.value || null)}
@@ -153,34 +153,34 @@ export function CharacterEditBasicSection({
       </div>
 
       {/* ── Karakter ── */}
-      <div className="pangu-surface" style={{ padding: 28, marginBottom: 16 }}>
-        <p className="pangu-section-title" style={{ marginBottom: 16 }}>Karakter</p>
+      <div className="surface" style={{ padding: 28, marginBottom: 16 }}>
+        <p className="pg-section-title" style={{ marginBottom: 16 }}>Karakter</p>
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
           <div>
-            <label className="pangu-label" htmlFor={classId}>Klasse</label>
+            <label className="label" htmlFor={classId}>Klasse</label>
             <input
               id={classId}
-              className="pangu-input"
+              className="input"
               value={form.character_class ?? ''}
               onChange={(e) => set('character_class', e.target.value || null)}
               placeholder="Bijv. Barbaar, Magiër, Schurk..."
             />
           </div>
           <div>
-            <label className="pangu-label" htmlFor={subclassId}>Subklasse</label>
+            <label className="label" htmlFor={subclassId}>Subklasse</label>
             <input
               id={subclassId}
-              className="pangu-input"
+              className="input"
               value={form.character_subclass ?? ''}
               onChange={(e) => set('character_subclass', e.target.value || null)}
               placeholder="Bijv. Razernijpad, Waarzegger..."
             />
           </div>
           <div>
-            <label className="pangu-label" htmlFor={raceId}>Ras / Soort</label>
+            <label className="label" htmlFor={raceId}>Ras / Soort</label>
             <input
               id={raceId}
-              className="pangu-input"
+              className="input"
               value={form.character_race ?? ''}
               onChange={(e) => set('character_race', e.target.value || null)}
               placeholder="Bijv. Mens, Elf, Dwerg..."
@@ -195,10 +195,10 @@ export function CharacterEditBasicSection({
             max={20}
           />
           <div>
-            <label className="pangu-label" htmlFor="char-hit-die">Trefferdobbelsteen</label>
+            <label className="label" htmlFor="char-hit-die">Trefferdobbelsteen</label>
             <select
               id="char-hit-die"
-              className="pangu-select"
+              className="select-trigger"
               value={form.hit_die ?? 'd8'}
               onChange={(e) => set('hit_die', e.target.value as HitDie)}
             >
@@ -208,10 +208,10 @@ export function CharacterEditBasicSection({
             </select>
           </div>
           <div>
-            <label className="pangu-label" htmlFor={alignmentId}>Uitlijning</label>
+            <label className="label" htmlFor={alignmentId}>Uitlijning</label>
             <input
               id={alignmentId}
-              className="pangu-input"
+              className="input"
               value={form.alignment ?? ''}
               onChange={(e) => set('alignment', e.target.value || null)}
               placeholder="Bijv. Wettig goed, Neutraal, Chaotisch kwaad..."
@@ -221,8 +221,8 @@ export function CharacterEditBasicSection({
       </div>
 
       {/* ── Ervaring ── */}
-      <div className="pangu-surface" style={{ padding: 28, marginBottom: 16 }}>
-        <p className="pangu-section-title" style={{ marginBottom: 16 }}>Ervaring</p>
+      <div className="surface" style={{ padding: 28, marginBottom: 16 }}>
+        <p className="pg-section-title" style={{ marginBottom: 16 }}>Ervaring</p>
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
           <NumericField
             id="char-xp"

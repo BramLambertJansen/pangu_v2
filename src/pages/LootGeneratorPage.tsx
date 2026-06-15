@@ -271,7 +271,7 @@ Return ONLY a raw JSON array — no markdown, no explanation, just the array:
       </div>
 
       {/* Controls panel */}
-      <div className="pangu-surface" style={{ padding: 28, marginBottom: 28 }}>
+      <div className="surface" style={{ padding: 28, marginBottom: 28 }}>
 
         {/* Shortcut chips */}
         <p style={{
@@ -548,7 +548,7 @@ Return ONLY a raw JSON array — no markdown, no explanation, just the array:
       {/* Parse error fallback */}
       {parseError && rawFallback && (
         <div
-          className="pangu-surface"
+          className="surface"
           style={{ padding: 24, marginBottom: 24, borderColor: 'rgb(var(--crimson-rgb) / 0.3)' }}
         >
           <p style={{
@@ -650,7 +650,7 @@ Return ONLY a raw JSON array — no markdown, no explanation, just the array:
                 <div
                   key={item._key}
                   role="listitem"
-                  className="pangu-surface"
+                  className="surface"
                   style={{
                     padding: '20px 24px',
                     display: 'flex', alignItems: 'flex-start', gap: 20,

@@ -201,7 +201,7 @@ export default function BestiaryDetailPage() {
 
       {/* Stat block */}
       <OrnateDivider label="Statistieken" />
-      <div className="pangu-surface" style={{ padding: 24 }}>
+      <div className="surface" style={{ padding: 24 }}>
         {/* Combat stats */}
         <div style={{ display: 'flex', gap: 32, flexWrap: 'wrap', marginBottom: 20 }}>
           {[
@@ -265,7 +265,7 @@ export default function BestiaryDetailPage() {
         bestiary.condition_immunities || bestiary.speed_details) && (
         <>
           <OrnateDivider label="Aanvullende Statistieken" />
-          <div className="pangu-surface" style={{ padding: 24 }}>
+          <div className="surface" style={{ padding: 24 }}>
             <dl style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(240px, 1fr))', gap: '12px 24px', margin: 0 }}>
               {([
                 ['Uitlijning', bestiary.alignment],
@@ -306,7 +306,7 @@ export default function BestiaryDetailPage() {
         return (
           <div key={section}>
             <OrnateDivider label={labels[section]} />
-            <div className="pangu-surface" style={{ padding: 24, display: 'flex', flexDirection: 'column', gap: 16 }}>
+            <div className="surface" style={{ padding: 24, display: 'flex', flexDirection: 'column', gap: 16 }}>
               {entries.map((entry, i) => (
                 <div key={i}>
                   <p style={{ margin: '0 0 4px', fontSize: 14, fontWeight: 700, color: 'var(--ink)' }}>
@@ -325,7 +325,7 @@ export default function BestiaryDetailPage() {
       {(bestiary.legendary_actions?.length || bestiary.legendary_desc) && (
         <div>
           <OrnateDivider label="Legendarische Acties" />
-          <div className="pangu-surface" style={{ padding: 24, display: 'flex', flexDirection: 'column', gap: 16 }}>
+          <div className="surface" style={{ padding: 24, display: 'flex', flexDirection: 'column', gap: 16 }}>
             {bestiary.legendary_desc && (
               <p style={{ margin: 0, fontSize: 14, lineHeight: 1.7, color: 'var(--ink-soft)', fontStyle: 'italic' }}>
                 {bestiary.legendary_desc}
@@ -348,7 +348,7 @@ export default function BestiaryDetailPage() {
       {(bestiary.lair_actions as BestiaryAction[] | null)?.length && (
         <div>
           <OrnateDivider label="Hol Acties" />
-          <div className="pangu-surface" style={{ padding: 24, display: 'flex', flexDirection: 'column', gap: 16 }}>
+          <div className="surface" style={{ padding: 24, display: 'flex', flexDirection: 'column', gap: 16 }}>
             {(bestiary.lair_actions as BestiaryAction[]).map((entry, i) => (
               <div key={i}>
                 <p style={{ margin: '0 0 4px', fontSize: 14, fontWeight: 700, color: 'var(--ink)' }}>
@@ -366,7 +366,7 @@ export default function BestiaryDetailPage() {
       {/* Description */}
       <OrnateDivider label="Beschrijving" />
       {bestiary.description ? (
-        <div className="pangu-surface" style={{ padding: 28 }}>
+        <div className="surface" style={{ padding: 28 }}>
           <p style={{
             fontSize: 15, lineHeight: 1.75,
             color: 'var(--ink-soft)', margin: 0,
@@ -385,7 +385,7 @@ export default function BestiaryDetailPage() {
       <OrnateDivider label="DM-notities" />
       {bestiary.notes ? (
         <div
-          className="pangu-surface"
+          className="surface"
           style={{
             padding: 28,
             borderColor: 'rgb(var(--gold-rgb) / 0.22)',

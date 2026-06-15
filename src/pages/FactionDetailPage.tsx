@@ -186,7 +186,7 @@ export default function FactionDetailPage() {
       {faction.motto && (
         <>
           <OrnateDivider label="Motto" />
-          <div className="pangu-surface" style={{ padding: 28 }}>
+          <div className="surface" style={{ padding: 28 }}>
             <p style={{
               fontFamily: "'Cormorant Garamond', Georgia, serif",
               fontStyle: 'italic',
@@ -204,7 +204,7 @@ export default function FactionDetailPage() {
       {faction.goals && (
         <>
           <OrnateDivider label="Doelen" />
-          <div className="pangu-surface" style={{ padding: 28 }}>
+          <div className="surface" style={{ padding: 28 }}>
             <p style={{
               fontSize: 15, lineHeight: 1.75,
               color: 'var(--ink-soft)', margin: 0,
@@ -219,7 +219,7 @@ export default function FactionDetailPage() {
       {/* Description */}
       <OrnateDivider label="Beschrijving" />
       {faction.description ? (
-        <div className="pangu-surface" style={{ padding: 28 }}>
+        <div className="surface" style={{ padding: 28 }}>
           <p style={{
             fontSize: 15, lineHeight: 1.75,
             color: 'var(--ink-soft)', margin: 0,
@@ -237,7 +237,7 @@ export default function FactionDetailPage() {
       {/* Members */}
       <OrnateDivider label={`Leden (${members?.length ?? 0})`} />
       {members && members.length > 0 ? (
-        <div className="pangu-surface" style={{ padding: 20 }}>
+        <div className="surface" style={{ padding: 20 }}>
           <ul style={{ display: 'flex', flexDirection: 'column', gap: 4, listStyle: 'none', padding: 0, margin: 0 }}>
             {members.map((npc) => (
               <li key={npc.id}>
@@ -307,7 +307,7 @@ export default function FactionDetailPage() {
       <OrnateDivider label="DM-notities" />
       {faction.notes ? (
         <div
-          className="pangu-surface"
+          className="surface"
           style={{
             padding: 28,
             borderColor: 'rgb(var(--gold-rgb) / 0.22)',

@@ -44,11 +44,11 @@ function BonusInput({
   const displayVal = value ?? 0
   return (
     <div>
-      <label className="pangu-label" htmlFor={id} style={{ fontSize: 11 }}>{label}</label>
+      <label className="label" htmlFor={id} style={{ fontSize: 11 }}>{label}</label>
       <input
         id={id}
         type="number"
-        className="pangu-input"
+        className="input"
         value={displayVal}
         onChange={(e) => {
           const n = parseInt(e.target.value, 10)
@@ -344,8 +344,8 @@ export default function ItemEditPage() {
 
         {/* Page header */}
         <header style={{ marginBottom: 40 }}>
-          <p className="pangu-eyebrow">Item bewerken</p>
-          <h1 className="pangu-display-xl">
+          <p className="pg-eyebrow">Item bewerken</p>
+          <h1 className="pg-display-xl">
             {itemData.is_magical && <span style={{ color: 'var(--gold)', marginRight: 8 }}>✦</span>}
             {itemData.name}
           </h1>
@@ -355,8 +355,8 @@ export default function ItemEditPage() {
         </header>
 
         {/* ── Afbeelding ── */}
-        <div className="pangu-surface" style={{ padding: 28, marginBottom: 16 }}>
-          <p className="pangu-section-title" style={{ marginBottom: 4 }}>Afbeelding</p>
+        <div className="surface" style={{ padding: 28, marginBottom: 16 }}>
+          <p className="pg-section-title" style={{ marginBottom: 4 }}>Afbeelding</p>
           <p style={{ fontSize: 13, color: 'var(--muted)', marginBottom: 20, marginTop: 0 }}>
             Voeg een illustratie toe van dit item. Maximaal 5 MB.
           </p>
@@ -418,12 +418,12 @@ export default function ItemEditPage() {
             </div>
             <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
               <div>
-                <label className="pangu-label" htmlFor="image-prompt-extra" style={{ fontSize: 11 }}>
+                <label className="label" htmlFor="image-prompt-extra" style={{ fontSize: 11 }}>
                   Verfijn prompt <span style={{ color: 'var(--subtle)', fontWeight: 400 }}>(optioneel)</span>
                 </label>
                 <input
                   id="image-prompt-extra"
-                  className="pangu-input"
+                  className="input"
                   style={{ fontSize: 13 }}
                   value={imagePromptExtra}
                   onChange={(e) => setImagePromptExtra(e.target.value)}
@@ -458,15 +458,15 @@ export default function ItemEditPage() {
         </div>
 
         {/* ── Basisgegevens ── */}
-        <div className="pangu-surface" style={{ padding: 28, marginBottom: 16 }}>
-          <p className="pangu-section-title" style={{ marginBottom: 20 }}>Basisgegevens</p>
+        <div className="surface" style={{ padding: 28, marginBottom: 16 }}>
+          <p className="pg-section-title" style={{ marginBottom: 20 }}>Basisgegevens</p>
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
 
             <div>
-              <label className="pangu-label" htmlFor="item-name">Naam</label>
+              <label className="label" htmlFor="item-name">Naam</label>
               <input
                 id="item-name"
-                className="pangu-input"
+                className="input"
                 value={form.name ?? ''}
                 onChange={(e) => set('name', e.target.value)}
                 placeholder="Naam van het item"
@@ -474,10 +474,10 @@ export default function ItemEditPage() {
             </div>
 
             <div>
-              <label className="pangu-label" htmlFor={typeId}>Type</label>
+              <label className="label" htmlFor={typeId}>Type</label>
               <select
                 id={typeId}
-                className="pangu-select"
+                className="select-trigger"
                 value={form.item_type ?? 'misc'}
                 onChange={(e) => set('item_type', e.target.value as ItemType)}
               >
@@ -488,10 +488,10 @@ export default function ItemEditPage() {
             </div>
 
             <div>
-              <label className="pangu-label" htmlFor={rarityId}>Zeldzaamheid</label>
+              <label className="label" htmlFor={rarityId}>Zeldzaamheid</label>
               <select
                 id={rarityId}
-                className="pangu-select"
+                className="select-trigger"
                 value={form.rarity ?? 'common'}
                 onChange={(e) => set('rarity', e.target.value as ItemRarity)}
               >
@@ -502,11 +502,11 @@ export default function ItemEditPage() {
             </div>
 
             <div>
-              <label className="pangu-label" htmlFor={quantityId}>Aantal</label>
+              <label className="label" htmlFor={quantityId}>Aantal</label>
               <input
                 id={quantityId}
                 type="number"
-                className="pangu-input"
+                className="input"
                 value={form.quantity ?? 1}
                 min={1}
                 onChange={(e) => {
@@ -517,11 +517,11 @@ export default function ItemEditPage() {
             </div>
 
             <div>
-              <label className="pangu-label" htmlFor={weightId}>Gewicht (pond)</label>
+              <label className="label" htmlFor={weightId}>Gewicht (pond)</label>
               <input
                 id={weightId}
                 type="number"
-                className="pangu-input"
+                className="input"
                 value={form.weight ?? ''}
                 min={0}
                 step={0.1}
@@ -540,10 +540,10 @@ export default function ItemEditPage() {
             />
 
             <div className="sm:col-span-2">
-              <label className="pangu-label" htmlFor={descriptionId}>Beschrijving</label>
+              <label className="label" htmlFor={descriptionId}>Beschrijving</label>
               <textarea
                 id={descriptionId}
-                className="pangu-textarea"
+                className="textarea"
                 value={form.description ?? ''}
                 onChange={(e) => set('description', e.target.value || null)}
                 placeholder="Beschrijf het item: uiterlijk, werking, geschiedenis..."
@@ -570,9 +570,9 @@ export default function ItemEditPage() {
         </div>
 
         {/* ── Eigenschappen & bonussen ── */}
-        <div className="pangu-surface" style={{ padding: 28, marginBottom: 16 }}>
+        <div className="surface" style={{ padding: 28, marginBottom: 16 }}>
           <div style={{ display: 'flex', alignItems: 'baseline', gap: 10, marginBottom: 4 }}>
-            <p className="pangu-section-title" style={{ margin: 0 }}>Eigenschappen & bonussen</p>
+            <p className="pg-section-title" style={{ margin: 0 }}>Eigenschappen & bonussen</p>
             {hasAnyBonus && (
               <span style={{
                 fontSize: 10, fontWeight: 700, letterSpacing: '0.14em', textTransform: 'uppercase',
@@ -623,11 +623,11 @@ export default function ItemEditPage() {
                 <BonusInput id="bonus-attack" label="Aanvalsbonus" value={props.attack_bonus} onChange={(v) => setBonus('attack_bonus', v || undefined)} />
                 <BonusInput id="bonus-damage" label="Schadesbonus" value={props.damage_bonus} onChange={(v) => setBonus('damage_bonus', v || undefined)} />
                 <div>
-                  <label className="pangu-label" htmlFor={damageDiceId} style={{ fontSize: 11 }}>Schadevorm</label>
+                  <label className="label" htmlFor={damageDiceId} style={{ fontSize: 11 }}>Schadevorm</label>
                   <input
                     id={damageDiceId}
                     type="text"
-                    className="pangu-input"
+                    className="input"
                     value={props.damage_dice ?? ''}
                     onChange={(e) => setBonus('damage_dice', e.target.value || undefined)}
                     placeholder="bijv. 1d8"
@@ -671,7 +671,7 @@ export default function ItemEditPage() {
                 {skillBonusEntries.map(([skill, bonus]) => (
                   <div key={skill} style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
                     <select
-                      className="pangu-select"
+                      className="select-trigger"
                       style={{ flex: 1 }}
                       value={skill}
                       onChange={(e) => {
@@ -688,7 +688,7 @@ export default function ItemEditPage() {
                     </select>
                     <input
                       type="number"
-                      className="pangu-input"
+                      className="input"
                       style={{ width: 80, textAlign: 'center' }}
                       value={bonus}
                       onChange={(e) => {
@@ -737,17 +737,17 @@ export default function ItemEditPage() {
         </div>
 
         {/* ── Toewijzen aan karakter ── */}
-        <div className="pangu-surface" style={{ padding: 28, marginBottom: 16 }}>
-          <p className="pangu-section-title" style={{ marginBottom: 4 }}>Toewijzen aan karakter</p>
+        <div className="surface" style={{ padding: 28, marginBottom: 16 }}>
+          <p className="pg-section-title" style={{ marginBottom: 4 }}>Toewijzen aan karakter</p>
           <p style={{ fontSize: 13, color: 'var(--muted)', marginBottom: 20, marginTop: 0 }}>
             Geef dit item aan een karakter in deze kroniek. Laat leeg om het in de DM-schatkist te houden.
           </p>
 
           <div style={{ maxWidth: 360 }}>
-            <label className="pangu-label" htmlFor={assignId}>Karakter</label>
+            <label className="label" htmlFor={assignId}>Karakter</label>
             <select
               id={assignId}
-              className="pangu-select"
+              className="select-trigger"
               value={form.character_id ?? ''}
               onChange={(e) => {
                 set('character_id', e.target.value || null)
@@ -774,10 +774,10 @@ export default function ItemEditPage() {
 
         {/* ── Gevarenzone ── */}
         <div
-          className="pangu-surface"
+          className="surface"
           style={{ marginTop: 8, padding: 28, borderColor: 'rgb(var(--crimson-rgb) / 0.18)' }}
         >
-          <p className="pangu-section-title" style={{ marginBottom: 4 }}>Gevarenzone</p>
+          <p className="pg-section-title" style={{ marginBottom: 4 }}>Gevarenzone</p>
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 16, paddingTop: 16, borderTop: '1px solid var(--hairline)' }}>
             <div>
               <p style={{ fontSize: 14, color: 'var(--ink-soft)', margin: 0 }}>Item verwijderen</p>

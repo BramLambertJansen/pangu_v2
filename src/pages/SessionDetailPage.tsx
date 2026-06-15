@@ -196,7 +196,7 @@ export default function SessionDetailPage() {
       {/* Description */}
       <OrnateDivider label="Beschrijving" />
       {session.description ? (
-        <div className="pangu-surface" style={{ padding: 28 }}>
+        <div className="surface" style={{ padding: 28 }}>
           <p style={{
             fontSize: 15, lineHeight: 1.75,
             color: 'var(--ink-soft)', margin: 0,
@@ -217,7 +217,7 @@ export default function SessionDetailPage() {
           <OrnateDivider label="DM-notities" />
           {session.notes ? (
             <div
-              className="pangu-surface"
+              className="surface"
               style={{
                 padding: 28,
                 borderColor: 'rgb(var(--gold-rgb) / 0.22)',

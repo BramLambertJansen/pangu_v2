@@ -127,21 +127,21 @@ export default function FactionEditPage() {
         />
 
         <header style={{ marginBottom: 40 }}>
-          <p className="pangu-eyebrow">Factie bewerken</p>
-          <h1 className="pangu-display-xl">{factionData.name}</h1>
+          <p className="pg-eyebrow">Factie bewerken</p>
+          <h1 className="pg-display-xl">{factionData.name}</h1>
           <p style={{ marginTop: 8, fontSize: 14, color: 'var(--ink-soft)' }}>
             Pas de details van deze organisatie aan.
           </p>
         </header>
 
-        <div className="pangu-surface" style={{ padding: 28 }}>
+        <div className="surface" style={{ padding: 28 }}>
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
 
             <div>
-              <label className="pangu-label" htmlFor={nameId}>Naam</label>
+              <label className="label" htmlFor={nameId}>Naam</label>
               <input
                 id={nameId}
-                className="pangu-input"
+                className="input"
                 value={form.name ?? ''}
                 onChange={(e) => set('name', e.target.value)}
                 placeholder="Naam van de organisatie"
@@ -149,10 +149,10 @@ export default function FactionEditPage() {
             </div>
 
             <div>
-              <label className="pangu-label" htmlFor={subtitleId}>Subtitel</label>
+              <label className="label" htmlFor={subtitleId}>Subtitel</label>
               <input
                 id={subtitleId}
-                className="pangu-input"
+                className="input"
                 value={form.subtitle ?? ''}
                 onChange={(e) => set('subtitle', e.target.value || null)}
                 placeholder="Bijnaam of tagline"
@@ -160,10 +160,10 @@ export default function FactionEditPage() {
             </div>
 
             <div>
-              <label className="pangu-label" htmlFor={typeId}>Type</label>
+              <label className="label" htmlFor={typeId}>Type</label>
               <select
                 id={typeId}
-                className="pangu-select"
+                className="select-trigger"
                 value={form.type ?? ''}
                 onChange={(e) => set('type', (e.target.value as FactionType) || null)}
               >
@@ -175,10 +175,10 @@ export default function FactionEditPage() {
             </div>
 
             <div>
-              <label className="pangu-label" htmlFor={reputationId}>Houding tegenover de party</label>
+              <label className="label" htmlFor={reputationId}>Houding tegenover de party</label>
               <select
                 id={reputationId}
-                className="pangu-select"
+                className="select-trigger"
                 value={form.reputation ?? 'neutral'}
                 onChange={(e) => set('reputation', e.target.value as FactionReputation)}
               >
@@ -189,10 +189,10 @@ export default function FactionEditPage() {
             </div>
 
             <div>
-              <label className="pangu-label" htmlFor={statusId}>Status</label>
+              <label className="label" htmlFor={statusId}>Status</label>
               <select
                 id={statusId}
-                className="pangu-select"
+                className="select-trigger"
                 value={form.status ?? 'draft'}
                 onChange={(e) => set('status', e.target.value as FactionStatus)}
               >
@@ -203,10 +203,10 @@ export default function FactionEditPage() {
             </div>
 
             <div>
-              <label className="pangu-label" htmlFor={mottoId}>Motto</label>
+              <label className="label" htmlFor={mottoId}>Motto</label>
               <input
                 id={mottoId}
-                className="pangu-input"
+                className="input"
                 value={form.motto ?? ''}
                 onChange={(e) => set('motto', e.target.value || null)}
                 placeholder="Het motto of de spreuk van de organisatie"
@@ -214,10 +214,10 @@ export default function FactionEditPage() {
             </div>
 
             <div className="sm:col-span-2">
-              <label className="pangu-label" htmlFor={goalsId}>Doelen</label>
+              <label className="label" htmlFor={goalsId}>Doelen</label>
               <textarea
                 id={goalsId}
-                className="pangu-textarea"
+                className="textarea"
                 value={form.goals ?? ''}
                 onChange={(e) => set('goals', e.target.value || null)}
                 placeholder="Wat wil deze organisatie bereiken? Machtsovername, bescherming, winst..."
@@ -226,10 +226,10 @@ export default function FactionEditPage() {
             </div>
 
             <div className="sm:col-span-2">
-              <label className="pangu-label" htmlFor={descriptionId}>Beschrijving</label>
+              <label className="label" htmlFor={descriptionId}>Beschrijving</label>
               <textarea
                 id={descriptionId}
-                className="pangu-textarea"
+                className="textarea"
                 value={form.description ?? ''}
                 onChange={(e) => set('description', e.target.value || null)}
                 placeholder="Geschiedenis, structuur, bekende leden en reputatie..."
@@ -238,10 +238,10 @@ export default function FactionEditPage() {
             </div>
 
             <div className="sm:col-span-2">
-              <label className="pangu-label" htmlFor={notesId}>DM-notities</label>
+              <label className="label" htmlFor={notesId}>DM-notities</label>
               <textarea
                 id={notesId}
-                className="pangu-textarea"
+                className="textarea"
                 value={form.notes ?? ''}
                 onChange={(e) => set('notes', e.target.value || null)}
                 placeholder="Verborgen agenda's, geheime leden, toekomstige plannen..."
@@ -271,10 +271,10 @@ export default function FactionEditPage() {
         </div>
 
         <div
-          className="pangu-surface"
+          className="surface"
           style={{ marginTop: 24, padding: 28, borderColor: 'rgb(var(--crimson-rgb) / 0.18)' }}
         >
-          <p className="pangu-section-title" style={{ marginBottom: 4 }}>Gevarenzone</p>
+          <p className="pg-section-title" style={{ marginBottom: 4 }}>Gevarenzone</p>
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 16, paddingTop: 16, borderTop: '1px solid var(--hairline)' }}>
             <div>
               <p style={{ fontSize: 14, color: 'var(--ink-soft)', margin: 0 }}>Factie verwijderen</p>

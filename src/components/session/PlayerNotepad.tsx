@@ -76,7 +76,7 @@ export function PlayerNotepad({ sessionId, campaignId }: Props) {
 
   return (
     <div
-      className="pangu-surface"
+      className="surface"
       style={{
         padding: 24,
         borderColor: 'rgb(var(--violet-rgb) / 0.22)',

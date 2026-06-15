@@ -65,7 +65,7 @@ export function CharacterSpellsTab({ characterId, character, eff }: Props) {
       ) : (
         <div>
           {/* Spellcasting header */}
-          <div className="pangu-surface" style={{ padding: '20px 24px', marginBottom: 16 }}>
+          <div className="surface" style={{ padding: '20px 24px', marginBottom: 16 }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 24, flexWrap: 'wrap' }}>
               <div>
                 <p style={{ fontSize: 10, fontWeight: 700, letterSpacing: '0.16em', textTransform: 'uppercase', color: 'var(--muted)', margin: '0 0 2px' }}>Toverbaarheid</p>
@@ -99,8 +99,8 @@ export function CharacterSpellsTab({ characterId, character, eff }: Props) {
           </div>
 
           {/* Spell slots */}
-          <div className="pangu-surface" style={{ padding: 24 }}>
-            <p className="pangu-section-title" style={{ marginBottom: 4 }}>Spreukslots</p>
+          <div className="surface" style={{ padding: 24 }}>
+            <p className="pg-section-title" style={{ marginBottom: 4 }}>Spreukslots</p>
             <p style={{ fontSize: 12, color: 'var(--muted)', marginTop: 0, marginBottom: 16 }}>
               Klik op een slot om het te gebruiken of te herstellen.
             </p>
@@ -130,9 +130,9 @@ export function CharacterSpellsTab({ characterId, character, eff }: Props) {
           </div>
 
           {/* Known spells */}
-          <div className="pangu-surface" style={{ padding: 24, marginTop: 16 }}>
+          <div className="surface" style={{ padding: 24, marginTop: 16 }}>
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
-              <p className="pangu-section-title" style={{ margin: 0 }}>Gekende Spreuken</p>
+              <p className="pg-section-title" style={{ margin: 0 }}>Gekende Spreuken</p>
               <button
                 type="button"
                 onClick={() => { setSpellPickerOpen(v => !v); setSpellPickerQuery('') }}

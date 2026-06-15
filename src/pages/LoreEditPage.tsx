@@ -167,22 +167,22 @@ export default function LoreEditPage() {
 
         {/* Page header */}
         <header style={{ marginBottom: 40 }}>
-          <p className="pangu-eyebrow">Lore bewerken</p>
-          <h1 className="pangu-display-xl">{loreData.name}</h1>
+          <p className="pg-eyebrow">Lore bewerken</p>
+          <h1 className="pg-display-xl">{loreData.name}</h1>
           <p style={{ marginTop: 8, fontSize: 14, color: 'var(--ink-soft)' }}>
             Pas de details van dit lore-item aan.
           </p>
         </header>
 
         {/* Form */}
-        <div className="pangu-surface" style={{ padding: 28 }}>
+        <div className="surface" style={{ padding: 28 }}>
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
 
             <div>
-              <label className="pangu-label" htmlFor="lore-name">Naam</label>
+              <label className="label" htmlFor="lore-name">Naam</label>
               <input
                 id="lore-name"
-                className="pangu-input"
+                className="input"
                 value={form.name ?? ''}
                 onChange={(e) => set('name', e.target.value)}
                 placeholder="Naam van het lore-item"
@@ -190,10 +190,10 @@ export default function LoreEditPage() {
             </div>
 
             <div>
-              <label className="pangu-label" htmlFor="lore-subtitle">Subtitel</label>
+              <label className="label" htmlFor="lore-subtitle">Subtitel</label>
               <input
                 id="lore-subtitle"
-                className="pangu-input"
+                className="input"
                 value={form.subtitle ?? ''}
                 onChange={(e) => set('subtitle', e.target.value || null)}
                 placeholder="Korte omschrijving of tagline"
@@ -201,10 +201,10 @@ export default function LoreEditPage() {
             </div>
 
             <div>
-              <label className="pangu-label" htmlFor={loreCategoryId}>Categorie</label>
+              <label className="label" htmlFor={loreCategoryId}>Categorie</label>
               <input
                 id={loreCategoryId}
-                className="pangu-input"
+                className="input"
                 value={form.lore_category ?? ''}
                 onChange={(e) => set('lore_category', e.target.value || null)}
                 placeholder="Bijv. Mythe, Legende, Factie, Religie, Magie..."
@@ -212,10 +212,10 @@ export default function LoreEditPage() {
             </div>
 
             <div>
-              <label className="pangu-label" htmlFor={statusId}>Status</label>
+              <label className="label" htmlFor={statusId}>Status</label>
               <select
                 id={statusId}
-                className="pangu-select"
+                className="select-trigger"
                 value={form.status ?? 'draft'}
                 onChange={(e) => set('status', e.target.value as LoreStatus)}
               >
@@ -227,7 +227,7 @@ export default function LoreEditPage() {
 
             <div className="sm:col-span-2">
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 4 }}>
-                <label className="pangu-label" htmlFor={descriptionId} style={{ margin: 0 }}>Beschrijving</label>
+                <label className="label" htmlFor={descriptionId} style={{ margin: 0 }}>Beschrijving</label>
                 <button
                   type="button"
                   onClick={handleGenerateDescription}
@@ -254,7 +254,7 @@ export default function LoreEditPage() {
               </div>
               <textarea
                 id={descriptionId}
-                className="pangu-textarea"
+                className="textarea"
                 value={form.description ?? ''}
                 onChange={(e) => { set('description', e.target.value || null); setAiPreview(null) }}
                 placeholder="Beschrijf dit lore-item, haar oorsprong en betekenis..."
@@ -290,10 +290,10 @@ export default function LoreEditPage() {
             </div>
 
             <div className="sm:col-span-2">
-              <label className="pangu-label" htmlFor={notesId}>DM notities</label>
+              <label className="label" htmlFor={notesId}>DM notities</label>
               <textarea
                 id={notesId}
-                className="pangu-textarea"
+                className="textarea"
                 value={form.notes ?? ''}
                 onChange={(e) => set('notes', e.target.value || null)}
                 placeholder="Aantekeningen voor de DM: verborgen verbanden, plot hooks, geheimen..."
@@ -324,10 +324,10 @@ export default function LoreEditPage() {
 
         {/* Danger zone */}
         <div
-          className="pangu-surface"
+          className="surface"
           style={{ marginTop: 24, padding: 28, borderColor: 'rgb(var(--crimson-rgb) / 0.18)' }}
         >
-          <p className="pangu-section-title" style={{ marginBottom: 4 }}>Gevarenzone</p>
+          <p className="pg-section-title" style={{ marginBottom: 4 }}>Gevarenzone</p>
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 16, paddingTop: 16, borderTop: '1px solid var(--hairline)' }}>
             <div>
               <p style={{ fontSize: 14, color: 'var(--ink-soft)', margin: 0 }}>Lore verwijderen</p>

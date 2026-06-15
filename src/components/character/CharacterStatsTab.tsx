@@ -98,7 +98,7 @@ export function CharacterStatsTab({ character, eff }: Props) {
           aria-label={isInspired ? 'Inspiratie actief — klik om te verwijderen' : 'Geen inspiratie — klik om toe te voegen'}
           onClick={() => toggleInspiration.mutate(!isInspired)}
           disabled={toggleInspiration.isPending}
-          className="pangu-surface"
+          className="surface"
           style={{
             padding: '16px 20px',
             display: 'flex', alignItems: 'center', gap: 12,
@@ -120,7 +120,7 @@ export function CharacterStatsTab({ character, eff }: Props) {
           </div>
         </button>
 
-        <div className="pangu-surface" style={{ padding: '16px 20px' }}>
+        <div className="surface" style={{ padding: '16px 20px' }}>
           <p style={{ fontSize: 10, fontWeight: 700, letterSpacing: '0.16em', textTransform: 'uppercase', color: 'var(--muted)', margin: '0 0 8px' }}>
             Trefferdobbelstenen
           </p>
@@ -144,7 +144,7 @@ export function CharacterStatsTab({ character, eff }: Props) {
         </div>
 
         {exhaustion > 0 && (
-          <div className="pangu-surface" style={{ padding: '16px 20px', borderColor: exhaustion >= 5 ? 'rgb(var(--crimson-rgb) / 0.3)' : 'rgb(var(--gold-rgb) / 0.25)', background: exhaustion >= 5 ? 'rgb(var(--crimson-rgb) / 0.04)' : 'rgb(var(--gold-rgb) / 0.04)' }}>
+          <div className="surface" style={{ padding: '16px 20px', borderColor: exhaustion >= 5 ? 'rgb(var(--crimson-rgb) / 0.3)' : 'rgb(var(--gold-rgb) / 0.25)', background: exhaustion >= 5 ? 'rgb(var(--crimson-rgb) / 0.04)' : 'rgb(var(--gold-rgb) / 0.04)' }}>
             <p style={{ fontSize: 10, fontWeight: 700, letterSpacing: '0.16em', textTransform: 'uppercase', color: exhaustion >= 5 ? 'var(--crimson)' : 'var(--gold)', margin: '0 0 4px' }}>Uitputting</p>
             <p style={{ fontFamily: 'var(--font-display)', fontSize: 32, fontWeight: 700, color: exhaustion >= 5 ? 'var(--crimson)' : 'var(--gold)', margin: '0 0 4px', lineHeight: 1 }}>
               {exhaustion}<span style={{ fontSize: 14, color: 'var(--muted)', fontWeight: 400 }}>/10</span>
@@ -158,7 +158,7 @@ export function CharacterStatsTab({ character, eff }: Props) {
 
       {/* Stervensgooien (bij 0 HP) */}
       {hpCurrent === 0 && (
-        <div className="pangu-surface" style={{ padding: 20, marginBottom: 16, borderColor: 'rgb(var(--crimson-rgb) / 0.3)', background: 'rgb(var(--crimson-rgb) / 0.04)' }}>
+        <div className="surface" style={{ padding: 20, marginBottom: 16, borderColor: 'rgb(var(--crimson-rgb) / 0.3)', background: 'rgb(var(--crimson-rgb) / 0.04)' }}>
           <p style={{ fontSize: 10, fontWeight: 700, letterSpacing: '0.16em', textTransform: 'uppercase', color: 'var(--crimson)', margin: '0 0 14px' }}>
             Stervensgooien
           </p>
@@ -224,7 +224,7 @@ export function CharacterStatsTab({ character, eff }: Props) {
       )}
 
       {/* Passieve stats */}
-      <div className="pangu-surface" style={{ padding: '14px 20px', marginBottom: 16 }}>
+      <div className="surface" style={{ padding: '14px 20px', marginBottom: 16 }}>
         <div style={{ display: 'flex', gap: 24, flexWrap: 'wrap' }}>
           {[
             { label: 'Passieve Waarneming',   value: passivePerception    },
@@ -251,7 +251,7 @@ export function CharacterStatsTab({ character, eff }: Props) {
       </div>
 
       {/* Condities */}
-      <div className="pangu-surface" style={{ padding: '16px 20px', marginBottom: 16 }}>
+      <div className="surface" style={{ padding: '16px 20px', marginBottom: 16 }}>
         <p style={{ fontSize: 10, fontWeight: 700, letterSpacing: '0.16em', textTransform: 'uppercase', color: 'var(--muted)', margin: '0 0 10px' }}>Condities</p>
         <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
           {CONDITIONS.map(cond => {
@@ -281,7 +281,7 @@ export function CharacterStatsTab({ character, eff }: Props) {
 
       {/* Klasseresources */}
       {Object.keys(classResources).length > 0 && (
-        <div className="pangu-surface" style={{ padding: '16px 20px', marginBottom: 16 }}>
+        <div className="surface" style={{ padding: '16px 20px', marginBottom: 16 }}>
           <p style={{ fontSize: 10, fontWeight: 700, letterSpacing: '0.16em', textTransform: 'uppercase', color: 'var(--muted)', margin: '0 0 12px' }}>Klasseresources</p>
           <div style={{ display: 'flex', flexWrap: 'wrap', gap: 12 }}>
             {Object.entries(classResources).map(([name, res]) => (
@@ -302,8 +302,8 @@ export function CharacterStatsTab({ character, eff }: Props) {
       )}
 
       {/* Reddingsgooien */}
-      <div className="pangu-surface" style={{ padding: 24, marginBottom: 16 }}>
-        <p className="pangu-section-title" style={{ marginBottom: 16 }}>Reddingsgooien</p>
+      <div className="surface" style={{ padding: 24, marginBottom: 16 }}>
+        <p className="pg-section-title" style={{ marginBottom: 16 }}>Reddingsgooien</p>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 10 }}>
           {SAVING_THROWS.map(({ label, abbr, statKey }) => {
             const score = eff[statKey.replace('stat_', '') as 'str' | 'dex' | 'con' | 'int' | 'wis' | 'cha']
@@ -348,7 +348,7 @@ export function CharacterStatsTab({ character, eff }: Props) {
           </span>
           <div style={{ flex: 1, height: 1, background: 'var(--hairline)' }} />
         </div>
-        <div className="pangu-surface" style={{ padding: '18px 20px' }}>
+        <div className="surface" style={{ padding: '18px 20px' }}>
           {character.description
             ? <p style={{ fontSize: 14, lineHeight: 1.75, color: 'var(--ink-soft)', margin: 0, whiteSpace: 'pre-wrap' }}>{character.description}</p>
             : <p style={{ fontSize: 13, color: 'var(--muted)', fontStyle: 'italic', margin: 0 }}>Kenmerken worden hier weergegeven wanneer ze zijn toegevoegd.</p>
@@ -358,8 +358,8 @@ export function CharacterStatsTab({ character, eff }: Props) {
 
       {/* Currency */}
       {(character.platinum > 0 || character.gold > 0 || character.electrum > 0 || character.silver > 0 || character.copper > 0) && (
-        <div className="pangu-surface" style={{ padding: 24 }}>
-          <p className="pangu-section-title" style={{ marginBottom: 16 }}>Schatkist</p>
+        <div className="surface" style={{ padding: 24 }}>
+          <p className="pg-section-title" style={{ marginBottom: 16 }}>Schatkist</p>
           <div style={{ display: 'flex', gap: 20, flexWrap: 'wrap' }}>
             {[
               { label: 'Platina', value: character.platinum ?? 0, color: '#e5e7eb', suffix: 'pp' },

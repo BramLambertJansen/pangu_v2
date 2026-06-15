@@ -339,7 +339,7 @@ function SetupSection({
       <p style={{ fontFamily: 'var(--font-body)', fontSize: 11, fontWeight: 700, letterSpacing: '0.18em', textTransform: 'uppercase', color: 'var(--muted)', margin: '0 0 12px' }}>
         {title}
       </p>
-      <div className="pangu-surface" style={{ padding: 0, overflow: 'hidden' }}>
+      <div className="surface" style={{ padding: 0, overflow: 'hidden' }}>
         {entries.map((entry, i) => (
           <div
             key={entry.id}

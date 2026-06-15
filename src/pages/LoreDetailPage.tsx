@@ -169,7 +169,7 @@ export default function LoreDetailPage() {
       {/* Description */}
       <OrnateDivider label="Beschrijving" />
       {lore.description ? (
-        <div className="pangu-surface" style={{ padding: 28 }}>
+        <div className="surface" style={{ padding: 28 }}>
           <p style={{
             fontSize: 15, lineHeight: 1.75,
             color: 'var(--ink-soft)', margin: 0,
@@ -188,7 +188,7 @@ export default function LoreDetailPage() {
       <OrnateDivider label="DM-notities" />
       {lore.notes ? (
         <div
-          className="pangu-surface"
+          className="surface"
           style={{
             padding: 28,
             borderColor: 'rgb(var(--gold-rgb) / 0.22)',

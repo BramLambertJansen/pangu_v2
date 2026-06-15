@@ -38,9 +38,9 @@ export default function WorldsPage() {
     <div>
       {/* Page header */}
       <header style={{ marginBottom: 48 }}>
-        <p className="pangu-eyebrow">De wieg van elk verhaal</p>
+        <p className="pg-eyebrow">De wieg van elk verhaal</p>
         <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', flexWrap: 'wrap', gap: 24 }}>
-          <h1 className="pangu-display-xl">Werelden</h1>
+          <h1 className="pg-display-xl">Werelden</h1>
           <Button
             variant="primary"
             onClick={handleCreate}

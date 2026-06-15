@@ -25,8 +25,8 @@ export function CharacterSkillsTab({ character, eff }: Props) {
         </div>
       )}
 
-      <div className="pangu-surface" style={{ padding: 24 }}>
-        <p className="pangu-section-title" style={{ marginBottom: 4 }}>Vaardigheden</p>
+      <div className="surface" style={{ padding: 24 }}>
+        <p className="pg-section-title" style={{ marginBottom: 4 }}>Vaardigheden</p>
         <p style={{ fontSize: 12, color: 'var(--muted)', marginTop: 0, marginBottom: 20 }}>
           <span style={{ color: 'var(--violet)', fontWeight: 600 }}>●</span> vaardig (+{character.proficiency_bonus ?? 0}) &nbsp;·&nbsp;
           <span style={{ color: 'var(--teal)', fontWeight: 600 }}>◎</span> expertise (×2 bonus)
@@ -48,8 +48,8 @@ export function CharacterSkillsTab({ character, eff }: Props) {
       </div>
 
       {hasAny && (
-        <div className="pangu-surface" style={{ padding: 24, marginTop: 12 }}>
-          <p className="pangu-section-title" style={{ marginBottom: 16 }}>Bekwaamheden &amp; Talen</p>
+        <div className="surface" style={{ padding: 24, marginTop: 12 }}>
+          <p className="pg-section-title" style={{ marginBottom: 16 }}>Bekwaamheden &amp; Talen</p>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
             {[
               { label: 'Talen',                    items: languages  },

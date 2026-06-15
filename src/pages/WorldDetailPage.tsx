@@ -121,7 +121,7 @@ export default function WorldDetailPage() {
       {/* DM notes */}
       {world.notes ? (
         <div
-          className="pangu-surface"
+          className="surface"
           style={{
             padding: 28,
             borderColor: 'rgb(var(--gold-rgb) / 0.22)',

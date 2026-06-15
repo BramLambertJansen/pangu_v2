@@ -174,7 +174,7 @@ export default function CharacterEditPage() {
         />
 
         <header style={{ marginBottom: 28 }}>
-          <h1 className="pangu-display-xl">{characterData.name}</h1>
+          <h1 className="pg-display-xl">{characterData.name}</h1>
           <p style={{ marginTop: 8, fontSize: 14, color: 'var(--ink-soft)' }}>
             Pas de details en stats van je personage aan.
           </p>
@@ -219,10 +219,10 @@ export default function CharacterEditPage() {
 
         {/* Danger zone */}
         <div
-          className="pangu-surface"
+          className="surface"
           style={{ marginBottom: 32, padding: 28, borderColor: 'rgb(var(--crimson-rgb) / 0.18)' }}
         >
-          <p className="pangu-section-title" style={{ marginBottom: 4 }}>Gevarenzone</p>
+          <p className="pg-section-title" style={{ marginBottom: 4 }}>Gevarenzone</p>
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 16, paddingTop: 16, borderTop: '1px solid var(--hairline)' }}>
             <div>
               <p style={{ fontSize: 14, color: 'var(--ink-soft)', margin: 0 }}>Karakter verwijderen</p>

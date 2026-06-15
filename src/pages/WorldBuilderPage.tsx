@@ -241,7 +241,7 @@ export default function WorldBuilderPage() {
       {/* Forge input card */}
       <div
         ref={forgeCardRef}
-        className="pangu-surface"
+        className="surface"
         style={{ padding: 28, marginBottom: 32 }}
       >
         <p style={{
@@ -406,7 +406,7 @@ export default function WorldBuilderPage() {
       {/* Response area */}
       {response ? (
         <div
-          className="pangu-surface"
+          className="surface"
           style={{
             padding: 28,
             background: 'color-mix(in srgb, var(--violet) 6%, var(--surface))',

@@ -137,7 +137,7 @@ function ProfielTab() {
   }
 
   return (
-    <div className="pangu-surface" style={{ padding: 28 }}>
+    <div className="surface" style={{ padding: 28 }}>
       {/* Hidden file input for avatar upload */}
       <input
         ref={fileInputRef}
@@ -178,7 +178,7 @@ function ProfielTab() {
           )}
         </div>
         <div>
-          <h3 className="pangu-display" style={{ fontSize: 20 }}>
+          <h3 className="pg-display" style={{ fontSize: 20 }}>
             {profile?.display_name ?? '—'}
           </h3>
           <p className="mt-1" style={{ fontSize: 13, color: 'var(--muted)' }}>
@@ -200,14 +200,14 @@ function ProfielTab() {
       <div className="settings-form-grid">
         <div>
           <label
-            className="pangu-label"
+            className="label"
             htmlFor="settings-display-name"
           >
             Weergavenaam
           </label>
           <input
             id="settings-display-name"
-            className="pangu-input"
+            className="input"
             value={form.display_name}
             onChange={(e) => {
               setForm((f) => ({ ...f, display_name: e.target.value }))
@@ -224,12 +224,12 @@ function ProfielTab() {
           )}
         </div>
         <div>
-          <label className="pangu-label" htmlFor="settings-pronouns">
+          <label className="label" htmlFor="settings-pronouns">
             Voornaamwoorden
           </label>
           <input
             id="settings-pronouns"
-            className="pangu-input"
+            className="input"
             value={form.pronouns}
             onChange={(e) => setForm((f) => ({ ...f, pronouns: e.target.value }))}
             placeholder="bijv. zij/haar"
@@ -237,24 +237,24 @@ function ProfielTab() {
           />
         </div>
         <div className="span-2" style={{ gridColumn: 'span 2' }}>
-          <label className="pangu-label" htmlFor="settings-email">
+          <label className="label" htmlFor="settings-email">
             E-mailadres
           </label>
           <input
             id="settings-email"
-            className="pangu-input"
+            className="input"
             value={profile?.email ?? ''}
             disabled
             aria-readonly="true"
           />
         </div>
         <div className="span-2" style={{ gridColumn: 'span 2' }}>
-          <label className="pangu-label" htmlFor={bioId}>
+          <label className="label" htmlFor={bioId}>
             Bio
           </label>
           <textarea
             id={bioId}
-            className="pangu-textarea"
+            className="textarea"
             value={form.bio}
             onChange={(e) => setForm((f) => ({ ...f, bio: e.target.value }))}
             placeholder="Een zachte hand aan het stuur. Een zwaar duim op de dobbelstenen."
@@ -426,10 +426,10 @@ function ProviderKeyCard({
   const [showKey, setShowKey] = useState(false)
 
   return (
-    <div className="pangu-surface" style={{ padding: 24 }}>
+    <div className="surface" style={{ padding: 24 }}>
       <div className="flex items-start justify-between gap-4" style={{ marginBottom: 20 }}>
         <div>
-          <p className="pangu-section-title" style={{ marginBottom: 2 }}>{title}</p>
+          <p className="pg-section-title" style={{ marginBottom: 2 }}>{title}</p>
           <p style={{ fontSize: 13, color: 'var(--muted)' }}>{description}</p>
         </div>
         <span
@@ -452,14 +452,14 @@ function ProviderKeyCard({
       </div>
 
       <div>
-        <label className="pangu-label" htmlFor={fieldId}>
+        <label className="label" htmlFor={fieldId}>
           API-sleutel
         </label>
         <div style={{ position: 'relative' }}>
           <input
             id={fieldId}
             type={showKey ? 'text' : 'password'}
-            className="pangu-input"
+            className="input"
             value={keyInput}
             onChange={(e) => setKeyInput(e.target.value)}
             placeholder={isSet ? '••••••••  (voer een nieuwe sleutel in om te vervangen)' : 'sk-...'}
@@ -539,7 +539,7 @@ function AISleutelsTab() {
     <div className="flex flex-col gap-4">
       {/* Info callout */}
       <div
-        className="pangu-surface"
+        className="surface"
         style={{
           padding: '16px 20px',
           borderLeft: '3px solid var(--violet)',
@@ -632,14 +632,14 @@ function AISleutelsTab() {
 
 function OverTab() {
   return (
-    <div className="pangu-surface-glow flex flex-col items-center" style={{ padding: 32, textAlign: 'center' }}>
+    <div className="surface-glow flex flex-col items-center" style={{ padding: 32, textAlign: 'center' }}>
       <CompassRose size={80} opacity={0.7} />
-      <h2 className="pangu-display-lg" style={{ marginTop: 24 }}>PANGU</h2>
-      <p className="pangu-eyebrow" style={{ marginTop: 8, justifyContent: 'center' }}>
+      <h2 className="pg-display-lg" style={{ marginTop: 24 }}>PANGU</h2>
+      <p className="pg-eyebrow" style={{ marginTop: 8, justifyContent: 'center' }}>
         SANCTUM EDITION · II
       </p>
       <p
-        className="pangu-quote"
+        className="pg-quote"
         style={{ maxWidth: 480, margin: '24px auto 0' }}
       >
         "Gebouwd voor Dungeon Masters die liever verhalen vertellen dan bijhouden."
@@ -742,7 +742,7 @@ function PanguTab() {
       <div>
         <div className="flex items-center justify-between gap-4" style={{ marginBottom: 16 }}>
           <div>
-            <p className="pangu-section-title" style={{ marginBottom: 2 }}>Accountbeheer</p>
+            <p className="pg-section-title" style={{ marginBottom: 2 }}>Accountbeheer</p>
             <p style={{ fontSize: 13, color: 'var(--muted)' }}>Overzicht en beheer van alle accounts</p>
           </div>
           <Button onClick={() => setCreateOpen(true)} size="sm">
@@ -754,10 +754,10 @@ function PanguTab() {
       </div>
 
       {/* AI integration test section */}
-      <div className="pangu-surface" style={{ padding: 24 }}>
+      <div className="surface" style={{ padding: 24 }}>
         <div className="flex flex-wrap items-center justify-between gap-3" style={{ marginBottom: 16 }}>
           <div>
-            <p className="pangu-section-title" style={{ marginBottom: 2 }}>AI-integratie</p>
+            <p className="pg-section-title" style={{ marginBottom: 2 }}>AI-integratie</p>
             <p style={{ fontSize: 13, color: 'var(--muted)' }}>Test de cascaderende AI-providers (Groq → Gemini)</p>
           </div>
           <Button
@@ -811,8 +811,8 @@ export default function SettingsPage() {
     <div style={{ display: 'flex', justifyContent: 'center', width: '100%' }}><div style={{ maxWidth: 820, width: '100%' }}>
       {/* Page header */}
       <header style={{ marginBottom: 40 }}>
-        <p className="pangu-eyebrow">Configuratie</p>
-        <h1 className="pangu-display-xl">Instellingen</h1>
+        <p className="pg-eyebrow">Configuratie</p>
+        <h1 className="pg-display-xl">Instellingen</h1>
         <p style={{ marginTop: 8, fontSize: 14, color: 'var(--ink-soft)' }}>
           Pas het Sanctum aan naar jouw wensen.
         </p>

@@ -58,9 +58,9 @@ export default function CampaignsPage() {
     <div>
       {/* Page header */}
       <header style={{ marginBottom: 48 }}>
-        <p className="pangu-eyebrow">De loop der avonturen</p>
+        <p className="pg-eyebrow">De loop der avonturen</p>
         <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', flexWrap: 'wrap', gap: 24 }}>
-          <h1 className="pangu-display-xl">Kronieken</h1>
+          <h1 className="pg-display-xl">Kronieken</h1>
           <Button
             variant="secondary"
             onClick={() => navigate('/worlds')}
