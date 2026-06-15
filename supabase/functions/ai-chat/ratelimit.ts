@@ -102,8 +102,9 @@ export function routeRequest(
     return { provider: "groq", model: AI_CONFIG.GROQ_MODEL };
   }
 
-  // When Groq is unavailable, allow the full window quota on Gemini.
-  const geminiLimit = groqAvailable
+  // When Groq is unavailable (or its org-wide soft cap is exhausted), allow
+  // the full window quota on Gemini.
+  const geminiLimit = groqAvailable && !groqOrgExhausted
     ? AI_CONFIG.GEMINI_REQUESTS_PER_WINDOW
     : AI_CONFIG.FREE_REQUESTS_PER_WINDOW;
 
