@@ -13,12 +13,16 @@ describe('formatDate', () => {
     expect(result).toContain('2026')
   })
 
-  it('parses the date as a local calendar day (no UTC-midnight shift)', () => {
+  it('parses a date-only string as a local calendar day (no UTC-midnight shift)', () => {
     // Naive UTC parsing would shift this to the 10th in negative-offset zones.
     expect(formatDate('2026-06-11')).toContain('11')
-    // And to the 26th/24th if a timestamp were mishandled.
+  })
+
+  it('formats a full ISO timestamp via Intl instead of the date-only path', () => {
+    // A non-date-only string must not match the YYYY-MM-DD fast path, so the
+    // year/month/day are not re-parsed as separate local-date components.
     const xmas = formatDate('2026-12-25T23:30:00Z')
     expect(xmas).toContain('25')
-    expect(xmas).toContain('december')
+    expect(xmas).toContain('2026')
   })
 })

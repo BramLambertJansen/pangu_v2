@@ -86,3 +86,20 @@ export function formatModifier(score: number): string {
 export function formatSign(n: number): string {
   return n >= 0 ? `+${n}` : String(n)
 }
+
+/** Converts a character's coinage to its total value in gold pieces (pp=10gp, ep=0.5gp, sp=0.1gp, cp=0.01gp). */
+export function goldEquivalent(coins: {
+  platinum?: number | null
+  gold?: number | null
+  electrum?: number | null
+  silver?: number | null
+  copper?: number | null
+}): number {
+  const total =
+    (coins.platinum ?? 0) * 10 +
+    (coins.gold ?? 0) +
+    (coins.electrum ?? 0) * 0.5 +
+    (coins.silver ?? 0) * 0.1 +
+    (coins.copper ?? 0) * 0.01
+  return Math.round(total * 100) / 100
+}

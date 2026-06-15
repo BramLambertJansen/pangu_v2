@@ -18,18 +18,15 @@ export function useDraftGC(
     const cutoff = new Date(Date.now() - 30 * 60 * 1000).toISOString()
     void (async () => {
       try {
-        const { data } = await supabase
+        // Delete directly against the same predicates (no select-then-delete by id):
+        // avoids both a TOCTOU race where a draft gets committed between select and
+        // delete, and the implicit ~1000-row cap on a select-then-.in() round trip.
+        await supabase
           .from(table as Parameters<typeof supabase.from>[0])
-          .select('id')
+          .delete()
           .eq(filterKey, filterValue)
           .eq('committed', false)
           .lt('created_at', cutoff)
-        if (data?.length) {
-          await supabase
-            .from(table as Parameters<typeof supabase.from>[0])
-            .delete()
-            .in('id', data.map((r: { id: string }) => r.id))
-        }
       } catch (err) {
         console.warn('[GC] draft cleanup failed:', err)
       }

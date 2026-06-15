@@ -846,7 +846,7 @@ export default function SettingsPage() {
         {activeTab === 'prefs' && <VoorkeurenTab />}
         {activeTab === 'ai' && <AISleutelsTab />}
         {activeTab === 'about' && <OverTab />}
-        {activeTab === 'pangu' && <PanguTab />}
+        {activeTab === 'pangu' && profile?.role === 'admin' && <PanguTab />}
       </div>
     </div></div>
   )

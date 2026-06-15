@@ -127,6 +127,10 @@ export default function CampaignEditPage() {
     const worldId = campaign?.world_id ?? worldIdFromState
     const previousMapUrl = campaign?.map_image_url ?? null
     const nextMapUrl = (form.map_image_url as string | null | undefined) ?? null
+    if (nextMapUrl && !sanitizeImageUrl(nextMapUrl)) {
+      toast.error('Ongeldige kaart-URL: gebruik een HTTPS-link naar een afbeelding.')
+      return
+    }
     toast.promise(
       saveCampaign.mutateAsync({ ...form, worldId }).then(async () => {
         setCommitted(true)

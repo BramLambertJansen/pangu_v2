@@ -265,6 +265,7 @@
   --ink: #f6efe4;
   --ink-soft: #ddd0bd;
   --muted: #ab9c85;
+  --muted-rgb: 171 156 133;
   --subtle: #5e5040;
   --hairline: rgba(245, 200, 66, 0.12);
   --hairline-strong: rgba(245, 200, 66, 0.26);
@@ -1195,8 +1196,8 @@ body {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 0 var(--sp-3);
-    height: 48px;
+    padding: env(safe-area-inset-top, 0px) var(--sp-3) 0;
+    height: calc(48px + env(safe-area-inset-top, 0px));
     position: fixed;
     top: 0;
     left: 0;
@@ -1227,8 +1228,8 @@ body {
   }
 
   .main-content {
-    /* 48px clears the fixed topbar; sides 16px; bottom respects iOS home indicator */
-    padding: calc(48px + var(--sp-4)) var(--sp-4) max(var(--sp-16), env(safe-area-inset-bottom, var(--sp-16))) !important;
+    /* 48px clears the fixed topbar (plus notch inset); sides 16px; bottom respects iOS home indicator */
+    padding: calc(48px + env(safe-area-inset-top, 0px) + var(--sp-4)) var(--sp-4) max(var(--sp-16), env(safe-area-inset-bottom, var(--sp-16))) !important;
   }
 
   .settings-form-grid {
