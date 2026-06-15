@@ -6,6 +6,7 @@ import { useAuthStore } from '@/stores/auth.store'
 import { Input } from '@/components/ui/Input'
 import { Button } from '@/components/ui/Button'
 import { DEV_MODE } from '@/lib/constants'
+import { sanitizeRedirectPath } from '@/utils/sanitizeUrl'
 import type { Profile } from '@/types/database.types'
 
 export default function LoginPage() {
@@ -52,7 +53,8 @@ export default function LoginPage() {
 
     setUser(data.user)
 
-    const redirectTo = searchParams.get('redirect') ?? (profile?.role === 'admin' ? '/admin' : '/dashboard')
+    const defaultRedirect = profile?.role === 'admin' ? '/admin' : '/dashboard'
+    const redirectTo = sanitizeRedirectPath(searchParams.get('redirect'), defaultRedirect)
     navigate(redirectTo, { replace: true })
   }
 

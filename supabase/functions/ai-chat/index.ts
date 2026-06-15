@@ -185,8 +185,10 @@ Deno.serve(async (req: Request) => {
     // attribution drift that does not affect the total quota enforcement.
 
     if (usedProvider === "groq") {
-      incrementOrgGroqUsage(supabaseService).catch((err) =>
-        console.warn("incrementOrgGroqUsage failed (non-fatal):", err)
+      EdgeRuntime.waitUntil(
+        incrementOrgGroqUsage(supabaseService).catch((err) =>
+          console.warn("incrementOrgGroqUsage failed (non-fatal):", err)
+        )
       );
     }
 

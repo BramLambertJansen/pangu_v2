@@ -393,7 +393,7 @@ import { useWorldBestiaries } from '@/hooks/queries/useWorldBestiaries'
 import { useEncounterMonsters } from '@/hooks/queries/useEncounterMonsters'
 import { useMySessionNote, useSessionPlayerNotes, useSavePlayerNote } from '@/hooks/queries/usePlayerNotes'
 import { useUserAISettings, useSetByokKey } from '@/hooks/queries/useUserAISettings'
-import { useCampaignInvite, useSetInviteCode, useCampaignByInviteCode, useJoinCampaign, useJoinWithCharacter, useJoinAndCreateCharacter, useCampaignMembers } from '@/hooks/queries/useCampaignInvite'
+import { useCampaignInvite, useSetInviteCode, useCampaignByInviteCode, useJoinWithCharacter, useJoinAndCreateCharacter, useCampaignMembers } from '@/hooks/queries/useCampaignInvite'
 import { useNotifications, useMarkNotificationRead, useMarkAllNotificationsRead, useDeleteNotification } from '@/hooks/queries/useNotifications'
 import { useUnassignedCharacters } from '@/hooks/queries/useCharacters'
 ```
@@ -712,6 +712,9 @@ Alle tabellen hebben `committed boolean DEFAULT false` — bestaande rijen zijn 
 | 049 | `049_character_background.sql` | `background text` op `characters` (D&D-achtergrond uit de karakter-wizard) |
 | 050 | `050_location_atlas_fields.sql` | `map_x`, `map_y`, `region`, `climate` op `locations` (positionering voor de ConstellationAtlas) |
 | 051 | `051_campaign_map_image.sql` | `map_image_url` op `campaigns` (kaartachtergrond voor de atlas) |
+| 052 | `052_invite_join_rpc.sql` | Vervangt `invite_code_lookup` + `join_via_invite` policies door SECURITY DEFINER RPC's `get_campaign_by_invite_code` (alleen veilige kolommen) en `join_campaign_via_invite` (valideert code server-side vóór insert in `campaign_members`) |
+| 053 | `053_npc_faction_campaign_check.sql` | Trigger `check_npc_faction_campaign()` op `npcs`: weigert `faction_id` van een factie buiten de eigen `campaign_id` |
+| 054 | `054_entity_links_cleanup.sql` | AFTER DELETE-triggers op alle 9 linkbare tabellen (`cleanup_entity_links()`) — verwijdert `entity_links`-rijen die naar de verwijderde rij verwijzen (polymorfe FK heeft geen ON DELETE CASCADE) |
 
 ---
 
@@ -1309,7 +1312,7 @@ npm run check:all           # Alle gates samen — de '/ship'-gate
 - [x] `src/types/campaign_member.types.ts` — `CampaignMember` + `CampaignMemberWithProfile` interfaces
 - [x] `src/utils/inviteCode.ts` — `generateInviteCode()`: leesbare codes (`WOLF-4532`) met 60 fantasy-themed woorden + 4-cijferig getal
 - [x] `src/lib/queryKeys.ts` — `campaigns.invite(id)`, `campaigns.members(id)`, `invites.byCode(code)` toegevoegd
-- [x] `src/hooks/queries/useCampaignInvite.ts` — `useCampaignInvite` (fetch invite_code), `useSetInviteCode` (genereer/revoke), `useCampaignByInviteCode` (lookup via code), `useJoinCampaign`, `useJoinWithCharacter`, `useJoinAndCreateCharacter`, `useCampaignMembers`
+- [x] `src/hooks/queries/useCampaignInvite.ts` — `useCampaignInvite` (fetch invite_code), `useSetInviteCode` (genereer/revoke), `useCampaignByInviteCode` (lookup via security-definer RPC `get_campaign_by_invite_code`), `useJoinWithCharacter`, `useJoinAndCreateCharacter` (beide joinen via RPC `join_campaign_via_invite`), `useCampaignMembers`
 - [x] `src/hooks/queries/useCharacters.ts` — `useUnassignedCharacters()` toegevoegd (karakters zonder campaign_id, voor join-flow)
 - [x] `src/components/campaign/InvitePanel.tsx` — genereer/revoke/kopieer uitnodigingscode; ledenlijst met e-mailadressen
 - [x] `src/pages/JoinPage.tsx` — twee-staps flow: valideer code → toon campaign → selecteer/maak karakter → deelnemen; redirect naar login als niet geauthenticeerd

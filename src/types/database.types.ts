@@ -1372,7 +1372,14 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      get_campaign_by_invite_code: {
+        Args: { p_invite_code: string }
+        Returns: { id: string; name: string; subtitle: string | null; status: string }[]
+      }
+      join_campaign_via_invite: {
+        Args: { p_invite_code: string }
+        Returns: { id: string; name: string; subtitle: string | null; status: string }[]
+      }
     }
     Enums: {
       [_ in never]: never

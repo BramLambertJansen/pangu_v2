@@ -14,6 +14,13 @@ function editionToSlug(edition: SrdEdition): string {
   return edition === '2024' ? SRD_SLUG_2024 : SRD_SLUG_2014
 }
 
+// Prefix the Open5e key/slug with its edition so the same creature/item/spell
+// key from both the 2014 and 2024 SRDs can coexist under the
+// (world_id|campaign_id, source_slug) unique indexes (migration 041).
+export function buildSourceSlug(edition: SrdEdition, key: string): string {
+  return `${editionToSlug(edition)}:${key}`
+}
+
 // Open5e v2 returns some fields as { slug, label } objects instead of plain strings.
 function toStr(val: unknown): string {
   if (val == null) return ''
@@ -231,7 +238,7 @@ export function mapMonsterToBestiary(
     stat_wis: monster.wisdom ?? ab?.wisdom ?? 10,
     stat_cha: monster.charisma ?? ab?.charisma ?? 10,
     source: edition === '2024' ? 'srd-2024' : 'srd',
-    source_slug: monster.key ?? monster.slug ?? '',
+    source_slug: buildSourceSlug(edition, monster.key ?? monster.slug ?? ''),
     alignment: monster.alignment || null,
     hit_dice: monster.hit_dice || null,
     proficiency_bonus: monster.proficiency_bonus ?? null,
@@ -308,7 +315,7 @@ export function mapSpellToSpell(spell: Open5eSpell, userId: string, edition: Srd
     higher_level: spell.higher_level || null,
     classes: resolveSpellClasses(spell),
     source: edition === '2024' ? 'srd-2024' : 'srd',
-    source_slug: spell.key ?? spell.slug ?? '',
+    source_slug: buildSourceSlug(edition, spell.key ?? spell.slug ?? ''),
   }
 }
 
@@ -354,6 +361,6 @@ export function mapMagicItemToItem(
     committed: true,
     requires_attunement: requiresAttunement,
     source: edition === '2024' ? 'srd-2024' : 'srd',
-    source_slug: magicItem.key ?? magicItem.slug ?? '',
+    source_slug: buildSourceSlug(edition, magicItem.key ?? magicItem.slug ?? ''),
   }
 }

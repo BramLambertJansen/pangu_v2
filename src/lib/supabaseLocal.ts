@@ -16,6 +16,7 @@
  *   .not(field, 'is', null)                         — NOT NULL filter
  *   .insert({}).select().single()                   — insert + return
  *   .insert([])                                     — bulk insert
+ *   .upsert({}, { onConflict: 'col' })              — insert or update by conflict column(s)
  *   .update({}).eq('id', id)
  *   .delete().eq('id', id)
  *   .delete().eq('other_field', val)                — bulk delete by field
@@ -39,7 +40,7 @@ type Filter =
   | { type: 'not-is-null'; field: string }
   | { type: 'is-null'; field: string }
 
-type Operation = 'select' | 'insert' | 'update' | 'delete'
+type Operation = 'select' | 'insert' | 'update' | 'delete' | 'upsert'
 
 class LocalQueryBuilder {
   private _table: string
@@ -51,6 +52,7 @@ class LocalQueryBuilder {
   private _singleMode: 'none' | 'single' | 'maybeSingle' = 'none'
   private _payload?: unknown
   private _returnData = false
+  private _onConflict?: string
 
   constructor(table: string) {
     this._table = table
@@ -59,7 +61,7 @@ class LocalQueryBuilder {
   // ── Query builder methods ────────────────────────────────────────────────
 
   select(columns = '*'): this {
-    if (this._op === 'insert' || this._op === 'update') {
+    if (this._op === 'insert' || this._op === 'update' || this._op === 'upsert') {
       // Called after insert/update to request the inserted/updated row back
       this._returnData = true
     } else {
@@ -135,6 +137,13 @@ class LocalQueryBuilder {
   update(payload: Row): this {
     this._op = 'update'
     this._payload = payload
+    return this
+  }
+
+  upsert(payload: unknown, options?: { onConflict?: string }): this {
+    this._op = 'upsert'
+    this._payload = payload
+    this._onConflict = options?.onConflict
     return this
   }
 
@@ -305,6 +314,25 @@ class LocalQueryBuilder {
           }
         }
         return { data: null, error: null }
+      }
+
+      if (this._op === 'upsert') {
+        const items = Array.isArray(this._payload)
+          ? (this._payload as Row[])
+          : [this._payload as Row]
+        const conflictCols = (this._onConflict ?? 'id').split(',').map((c) => c.trim())
+        const results = items.map((item) => {
+          const existing = (localDb.getAll(this._table) as Row[]).find((row) =>
+            conflictCols.every((col) => row[col] === item[col]),
+          )
+          return existing
+            ? localDb.update(this._table, existing.id as string, item)
+            : localDb.insert(this._table, item)
+        })
+
+        if (!this._returnData) return { data: null, error: null }
+        if (this._singleMode === 'single') return { data: results[0], error: null }
+        return { data: results, error: null }
       }
 
       if (this._op === 'delete') {

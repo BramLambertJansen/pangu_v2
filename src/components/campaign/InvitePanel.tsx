@@ -129,16 +129,18 @@ export function InvitePanel({ campaignId, campaignName }: InvitePanelProps) {
         ) : (
           <>
             {/* Code display */}
-            <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 16 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 16, flexWrap: 'wrap' }}>
               <span style={{
                 fontFamily: 'var(--font-body)',
-                fontSize: 28, fontWeight: 700,
+                fontSize: 'clamp(16px, 5vw, 28px)', fontWeight: 700,
                 letterSpacing: '0.12em',
                 color: 'var(--ink)',
                 background: 'rgb(var(--violet-rgb) / 0.08)',
                 border: '1px solid rgb(var(--violet-rgb) / 0.2)',
                 borderRadius: 8,
                 padding: '10px 20px',
+                wordBreak: 'break-word',
+                maxWidth: '100%',
               }}>
                 {inviteCode}
               </span>

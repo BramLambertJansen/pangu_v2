@@ -560,7 +560,7 @@ function AISleutelsTab() {
         fieldId="ai-openai-key"
         onSave={(key) => {
           setByokKey.mutate(
-            { provider: 'openai', key, currentKeys: byokKeys },
+            { provider: 'openai', key },
             {
               onSuccess: ({ key: saved }) =>
                 toast.success(saved ? 'OpenAI-sleutel opgeslagen' : 'OpenAI-sleutel gewist'),
@@ -570,7 +570,7 @@ function AISleutelsTab() {
         }}
         onClear={() => {
           setByokKey.mutate(
-            { provider: 'openai', key: null, currentKeys: byokKeys },
+            { provider: 'openai', key: null },
             {
               onSuccess: () => toast.success('OpenAI-sleutel gewist'),
               onError: () => toast.error('Wissen mislukt'),
@@ -596,7 +596,7 @@ function AISleutelsTab() {
         fieldId="ai-anthropic-key"
         onSave={(key) => {
           setByokKey.mutate(
-            { provider: 'anthropic', key, currentKeys: byokKeys },
+            { provider: 'anthropic', key },
             {
               onSuccess: ({ key: saved }) =>
                 toast.success(saved ? 'Anthropic-sleutel opgeslagen' : 'Anthropic-sleutel gewist'),
@@ -606,7 +606,7 @@ function AISleutelsTab() {
         }}
         onClear={() => {
           setByokKey.mutate(
-            { provider: 'anthropic', key: null, currentKeys: byokKeys },
+            { provider: 'anthropic', key: null },
             {
               onSuccess: () => toast.success('Anthropic-sleutel gewist'),
               onError: () => toast.error('Wissen mislukt'),

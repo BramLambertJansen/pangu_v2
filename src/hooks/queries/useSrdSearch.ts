@@ -3,7 +3,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { toast } from 'sonner'
 import { supabase } from '@/lib/supabase'
 import { queryKeys } from '@/lib/queryKeys'
-import { searchMonsters, searchMagicItems, searchSpells, fetchMonsterDetail, fetchSpellDetail, fetchMagicItemDetail, mapMonsterToBestiary, mapMagicItemToItem, mapSpellToSpell } from '@/lib/open5e'
+import { searchMonsters, searchMagicItems, searchSpells, fetchMonsterDetail, fetchSpellDetail, fetchMagicItemDetail, mapMonsterToBestiary, mapMagicItemToItem, mapSpellToSpell, buildSourceSlug } from '@/lib/open5e'
 import type { SrdEdition } from '@/lib/open5e'
 import { useAuthStore } from '@/stores/auth.store'
 import type { Open5eMonster, Open5eMagicItem, Open5eSpell } from '@/types/open5e.types'
@@ -46,15 +46,16 @@ export function useImportSpell() {
     mutationFn: async ({ spell, edition = '2014' }: { spell: Open5eSpell; edition?: SrdEdition }) => {
       if (!user) throw new Error('Niet ingelogd')
 
+      const rawSlug = spell.key ?? spell.slug ?? ''
       const { data: existing } = await supabase
         .from('spells')
         .select('id')
-        .eq('source_slug', spell.key ?? spell.slug ?? '')
+        .eq('source_slug', buildSourceSlug(edition, rawSlug))
         .eq('user_id', user.id)
         .maybeSingle()
       if (existing) throw new Error('Deze spreuk is al in je bibliotheek.')
 
-      const fullSpell = await fetchSpellDetail(spell.key ?? spell.slug ?? '')
+      const fullSpell = await fetchSpellDetail(rawSlug)
 
       const { data, error } = await supabase
         .from('spells')
@@ -85,17 +86,17 @@ export function useImportMonster(worldId: string) {
     mutationFn: async ({ monster, edition = '2014' }: { monster: Open5eMonster; edition?: SrdEdition }) => {
       if (!user) throw new Error('Niet ingelogd')
 
-      const sourceSlug = monster.key ?? monster.slug ?? ''
+      const rawSlug = monster.key ?? monster.slug ?? ''
       const { data: existing } = await supabase
         .from('bestiaries')
         .select('id')
         .eq('world_id', worldId)
-        .eq('source_slug', sourceSlug)
+        .eq('source_slug', buildSourceSlug(edition, rawSlug))
         .maybeSingle()
       if (existing) throw new Error('Dit wezen is al geïmporteerd in dit bestiarium.')
 
       // Fetch full detail to get complete description (list endpoint may omit it)
-      const fullMonster = await fetchMonsterDetail(sourceSlug)
+      const fullMonster = await fetchMonsterDetail(rawSlug)
 
       const { data, error } = await supabase
         .from('bestiaries')
@@ -123,15 +124,16 @@ export function useImportMagicItem(campaignId: string) {
 
   return useMutation({
     mutationFn: async ({ magicItem, edition = '2014' }: { magicItem: Open5eMagicItem; edition?: SrdEdition }) => {
+      const rawSlug = magicItem.key ?? magicItem.slug ?? ''
       const { data: existing } = await supabase
         .from('items')
         .select('id')
         .eq('campaign_id', campaignId)
-        .eq('source_slug', magicItem.key ?? magicItem.slug ?? '')
+        .eq('source_slug', buildSourceSlug(edition, rawSlug))
         .maybeSingle()
       if (existing) throw new Error('Dit item is al geïmporteerd in deze kroniek.')
 
-      const fullItem = await fetchMagicItemDetail(magicItem.key ?? magicItem.slug ?? '')
+      const fullItem = await fetchMagicItemDetail(rawSlug)
 
       const { data, error } = await supabase
         .from('items')

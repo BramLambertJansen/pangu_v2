@@ -27,23 +27,27 @@ export default function JoinPage() {
   }
 
   async function handleConfirm() {
-    if (!campaign || !user) return
+    if (!campaign || !user || !code) return
 
     try {
       if (selectedCharacter) {
-        await joinWithCharacter.mutateAsync({ campaignId: campaign.id, userId: user.id, characterId: selectedCharacter.id })
+        await joinWithCharacter.mutateAsync({ campaignId: campaign.id, inviteCode: code, characterId: selectedCharacter.id })
         toast.success(`Je hebt '${campaign.name}' betreden!`)
         navigate('/dashboard')
       } else {
-        const newChar = await joinAndCreate.mutateAsync({ campaignId: campaign.id, userId: user.id })
+        const newChar = await joinAndCreate.mutateAsync({ campaignId: campaign.id, userId: user.id, inviteCode: code })
         toast.success(`Je hebt '${campaign.name}' betreden!`)
         navigate(`/characters/${newChar.id}/edit`, { state: { isNew: true, joinCampaignId: campaign.id } })
       }
     } catch (err: unknown) {
       const errCode = (err as { code?: string })?.code
+      const errMessage = err instanceof Error ? err.message : undefined
       if (errCode === '23505') {
         toast.error('Je bent al lid van deze kroniek.')
         setStep('invite')
+      } else if (errMessage === 'Karakter is al toegewezen aan een kroniek.') {
+        toast.error(errMessage)
+        setSelectedCharacter(null)
       } else {
         toast.error('Deelnemen mislukt. Probeer het opnieuw.')
       }

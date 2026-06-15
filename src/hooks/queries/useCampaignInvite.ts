@@ -63,31 +63,12 @@ export function useCampaignByInviteCode(code: string | undefined) {
     queryKey: queryKeys.invites.byCode(code!),
     queryFn: async () => {
       const { data, error } = await supabase
-        .from('campaigns')
-        .select('id, name, subtitle, status')
-        .eq('invite_code', code!)
-        .maybeSingle()
+        .rpc('get_campaign_by_invite_code', { p_invite_code: code! })
       if (error) throw error
-      return data
+      return data?.[0] ?? null
     },
     enabled: !!code,
     staleTime: 2 * STALE.detail,
-  })
-}
-
-export function useJoinCampaign() {
-  const queryClient = useQueryClient()
-
-  return useMutation({
-    mutationFn: async ({ campaignId, userId }: { campaignId: string; userId: string }) => {
-      const { error } = await supabase
-        .from('campaign_members')
-        .insert({ campaign_id: campaignId, user_id: userId })
-      if (error) throw error
-    },
-    onSuccess: (_data, { campaignId }) => {
-      queryClient.invalidateQueries({ queryKey: queryKeys.campaigns.members(campaignId) })
-    },
   })
 }
 
@@ -95,18 +76,21 @@ export function useJoinWithCharacter() {
   const queryClient = useQueryClient()
 
   return useMutation({
-    mutationFn: async ({ campaignId, userId, characterId }: { campaignId: string; userId: string; characterId: string }) => {
-      const { error: memberError } = await supabase
-        .from('campaign_members')
-        .insert({ campaign_id: campaignId, user_id: userId })
-      if (memberError) throw memberError
-
-      const { error: charError } = await supabase
+    mutationFn: async ({ campaignId, inviteCode, characterId }: { campaignId: string; inviteCode: string; characterId: string }) => {
+      const { data: assigned, error: charError } = await supabase
         .from('characters')
         .update({ campaign_id: campaignId })
         .eq('id', characterId)
         .is('campaign_id', null)
+        .select('id')
       if (charError) throw charError
+      if (!assigned || assigned.length === 0) {
+        throw new Error('Karakter is al toegewezen aan een kroniek.')
+      }
+
+      const { error: joinError } = await supabase
+        .rpc('join_campaign_via_invite', { p_invite_code: inviteCode })
+      if (joinError) throw joinError
     },
     onSuccess: (_data, { campaignId }) => {
       queryClient.invalidateQueries({ queryKey: queryKeys.campaigns.members(campaignId) })
@@ -119,16 +103,22 @@ export function useJoinAndCreateCharacter() {
   const queryClient = useQueryClient()
 
   return useMutation({
-    mutationFn: async ({ campaignId, userId }: { campaignId: string; userId: string }) => {
+    mutationFn: async ({ campaignId, userId, inviteCode }: { campaignId: string; userId: string; inviteCode: string }) => {
       const { data, error: charError } = await supabase
         .from('characters')
         .insert({ user_id: userId, campaign_id: campaignId, name: 'Nieuw karakter', status: 'active' })
         .select()
         .single()
       if (charError) throw charError
+
+      const { error: joinError } = await supabase
+        .rpc('join_campaign_via_invite', { p_invite_code: inviteCode })
+      if (joinError) throw joinError
+
       return data as unknown as Character
     },
-    onSuccess: () => {
+    onSuccess: (_data, { campaignId }) => {
+      queryClient.invalidateQueries({ queryKey: queryKeys.campaigns.members(campaignId) })
       queryClient.invalidateQueries({ queryKey: queryKeys.characters.all })
     },
   })
