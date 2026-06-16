@@ -718,6 +718,7 @@ Entity-tabellen (worlds, campaigns, sessions, locations, npcs, lore, bestiaries,
 | 054 | `054_entity_links_cleanup.sql` | AFTER DELETE-triggers op alle 9 linkbare tabellen (`cleanup_entity_links()`) — verwijdert `entity_links`-rijen die naar de verwijderde rij verwijzen (polymorfe FK heeft geen ON DELETE CASCADE) |
 | 055 | `055_ai_rpc_grants.sql` | `claim_ai_request`/`increment_ai_usage` controleren nu `auth.uid() = p_user_id`; EXECUTE op alle 3 AI-RPC's ingetrokken van `PUBLIC` en herverleend aan `authenticated` (resp. `service_role` voor `increment_org_groq_usage`) |
 | 056 | `056_backfill_legacy_byok.sql` | Backfill van legacy `profiles.openai_api_key`/`anthropic_api_key` (023) naar `user_ai_settings.byok_keys` (024), daarna kolommen verwijderd — ai-chat las deze legacy kolommen nooit |
+| 057 | `057_character_spells_spell_owner_check.sql` | Verscherpt `character_spells` INSERT-beleid: WITH CHECK verifieert nu ook dat `spell_id` toebehoort aan de geauthenticeerde gebruiker, voorkomt cross-user spreuk-referenties |
 
 ---
 
