@@ -35,13 +35,14 @@ export default function CampaignsPage() {
   const navigate = useNavigate()
   const user = useAuthStore(s => s.user)
 
-  const { data: worlds, isLoading: worldsLoading } = useWorlds()
-  const { data: campaigns, isLoading: campaignsLoading } = useAllCampaignsWithWorlds()
+  const { data: worlds, isLoading: worldsLoading, isError: worldsError } = useWorlds()
+  const { data: campaigns, isLoading: campaignsLoading, isError: campaignsError } = useAllCampaignsWithWorlds()
   const createCampaign = useCreateCampaign()
 
   useDraftGC('campaigns', 'user_id', user?.id)
 
   const isLoading = worldsLoading || campaignsLoading
+  const isError = worldsError || campaignsError
 
   function handleCreate(worldId: string) {
     toast.promise(createCampaign.mutateAsync(worldId), {
@@ -52,7 +53,7 @@ export default function CampaignsPage() {
   }
 
   const worldGroups = worlds && campaigns ? buildWorldGroups(worlds, campaigns) : []
-  const hasNoWorlds = !isLoading && (!worlds || worlds.length === 0)
+  const hasNoWorlds = !isLoading && !isError && (!worlds || worlds.length === 0)
 
   return (
     <div>
@@ -83,6 +84,16 @@ export default function CampaignsPage() {
         >
           <EntityCardSkeleton count={4} />
         </ul>
+      ) : isError ? (
+        <EmptyState
+          title="Laden mislukt"
+          description="Kronieken konden niet worden geladen. Controleer je verbinding en probeer het opnieuw."
+          action={
+            <Button variant="primary" onClick={() => window.location.reload()}>
+              Opnieuw proberen
+            </Button>
+          }
+        />
       ) : hasNoWorlds ? (
         <EmptyState
           title="Nog geen werelden"

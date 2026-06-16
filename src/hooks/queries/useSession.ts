@@ -88,6 +88,7 @@ export function useSaveSession(id: string) {
         queryClient.invalidateQueries({ queryKey: queryKeys.sessions.byCampaign(form.campaign_id) })
       }
       queryClient.invalidateQueries({ queryKey: queryKeys.sessions.detail(id) })
+      queryClient.invalidateQueries({ queryKey: queryKeys.sessions.detailFull(id) })
     },
     onError: () => toast.error('Opslaan mislukt'),
   })
@@ -102,6 +103,7 @@ export function useDeleteSession(id: string) {
     },
     onSuccess: (_, { campaignId }) => {
       queryClient.removeQueries({ queryKey: queryKeys.sessions.detail(id) })
+      queryClient.removeQueries({ queryKey: queryKeys.sessions.detailFull(id) })
       if (campaignId) queryClient.invalidateQueries({ queryKey: queryKeys.sessions.byCampaign(campaignId) })
     },
     onError: () => toast.error('Verwijderen mislukt'),

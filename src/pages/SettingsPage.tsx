@@ -516,7 +516,10 @@ function ProviderKeyCard({
         <Button
           variant="primary"
           onClick={() => {
-            if (keyInput.trim()) onSave(keyInput.trim())
+            if (keyInput.trim()) {
+              onSave(keyInput.trim())
+              setKeyInput('')
+            }
           }}
           loading={isSavePending}
           disabled={!keyInput.trim() || isClearPending}
