@@ -469,7 +469,7 @@ export default function EncounterEditPage() {
               </div>
 
               <div
-                style={{ maxHeight: 'min(280px, calc(100dvh - 260px))', overflowY: 'auto' }}
+                style={{ maxHeight: 'max(120px, min(280px, calc(100dvh - 260px)))', overflowY: 'auto' }}
                 role="listbox"
                 aria-label="Beschikbare monsters"
               >

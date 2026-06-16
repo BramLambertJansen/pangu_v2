@@ -29,6 +29,7 @@ import { useCampaignFactions, useCreateCampaignFaction } from '@/hooks/queries/u
 import { sanitizeImageUrl } from '@/utils/sanitizeUrl'
 import { pickGradient, coverGradients } from '@/utils/pickGradient'
 import { campaignStatusLabel, campaignStatusColor } from '@/lib/statusMaps'
+import { goldEquivalent } from '@/utils/dnd5e'
 import { StatusBadge } from '@/components/ui/StatusBadge'
 import { useAuthStore } from '@/stores/auth.store'
 
@@ -212,7 +213,7 @@ export default function CampaignDetailPage() {
             partyVitals={{
               avgLevel: Math.round(characters.reduce((s, c) => s + c.level, 0) / characters.length),
               totalHp:  characters.reduce((s, c) => s + c.hp_current, 0),
-              treasury: characters.reduce((s, c) => s + (c.gold ?? 0), 0),
+              treasury: Math.round(characters.reduce((s, c) => s + goldEquivalent(c), 0) * 100) / 100,
             }}
             partyMembers={characters.map(c => ({ id: c.id, name: c.name }))}
           />

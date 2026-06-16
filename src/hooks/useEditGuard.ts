@@ -50,6 +50,15 @@ export function useEditGuard({
     }
   }, [blocker.state])
 
+  // Once the form is clean again (e.g. a route component is reused for a
+  // different entity that loads as committed + non-dirty), re-arm the
+  // blocker so a later confirmed leave doesn't permanently bypass it.
+  useEffect(() => {
+    if (!shouldBlock) {
+      leaveConfirmedRef.current = false
+    }
+  }, [shouldBlock])
+
   // Prevent browser close/refresh when there's something to lose
   useEffect(() => {
     if (!shouldBlock) return

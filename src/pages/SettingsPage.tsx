@@ -516,7 +516,10 @@ function ProviderKeyCard({
         <Button
           variant="primary"
           onClick={() => {
-            if (keyInput.trim()) onSave(keyInput.trim())
+            if (keyInput.trim()) {
+              onSave(keyInput.trim())
+              setKeyInput('')
+            }
           }}
           loading={isSavePending}
           disabled={!keyInput.trim() || isClearPending}
@@ -560,7 +563,7 @@ function AISleutelsTab() {
         fieldId="ai-openai-key"
         onSave={(key) => {
           setByokKey.mutate(
-            { provider: 'openai', key, currentKeys: byokKeys },
+            { provider: 'openai', key },
             {
               onSuccess: ({ key: saved }) =>
                 toast.success(saved ? 'OpenAI-sleutel opgeslagen' : 'OpenAI-sleutel gewist'),
@@ -570,7 +573,7 @@ function AISleutelsTab() {
         }}
         onClear={() => {
           setByokKey.mutate(
-            { provider: 'openai', key: null, currentKeys: byokKeys },
+            { provider: 'openai', key: null },
             {
               onSuccess: () => toast.success('OpenAI-sleutel gewist'),
               onError: () => toast.error('Wissen mislukt'),
@@ -596,7 +599,7 @@ function AISleutelsTab() {
         fieldId="ai-anthropic-key"
         onSave={(key) => {
           setByokKey.mutate(
-            { provider: 'anthropic', key, currentKeys: byokKeys },
+            { provider: 'anthropic', key },
             {
               onSuccess: ({ key: saved }) =>
                 toast.success(saved ? 'Anthropic-sleutel opgeslagen' : 'Anthropic-sleutel gewist'),
@@ -606,7 +609,7 @@ function AISleutelsTab() {
         }}
         onClear={() => {
           setByokKey.mutate(
-            { provider: 'anthropic', key: null, currentKeys: byokKeys },
+            { provider: 'anthropic', key: null },
             {
               onSuccess: () => toast.success('Anthropic-sleutel gewist'),
               onError: () => toast.error('Wissen mislukt'),
@@ -846,7 +849,7 @@ export default function SettingsPage() {
         {activeTab === 'prefs' && <VoorkeurenTab />}
         {activeTab === 'ai' && <AISleutelsTab />}
         {activeTab === 'about' && <OverTab />}
-        {activeTab === 'pangu' && <PanguTab />}
+        {activeTab === 'pangu' && profile?.role === 'admin' && <PanguTab />}
       </div>
     </div></div>
   )

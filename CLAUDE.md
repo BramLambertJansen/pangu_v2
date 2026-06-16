@@ -366,7 +366,7 @@ Elk feature-domein heeft een map: `campaign/`, `session/`, `world/`, `admin/`, `
 - `StoryArcTracker` — tijdlijn-visualisatie van alle sessies in een kroniek; sessienummers als Romeinse cijfers; `onForge` callback voor nieuwe sessie
 
 **DM-preview panels:**
-- `DmBestiaryPanel` (`src/components/bestiary/`) — compact scrollable stat block: initiative, AC, HP, ability scores, saving throws, skills, damage immunities, actions, legendary actions
+- `DmBestiaryPanel` (`src/components/bestiary/`) — compact scrollable stat block: AC, HP, snelheid, ability scores (met modifier), leefgebied, beschrijving, DM-notities; link naar volledig statblok
 - `DmNpcPanel` (`src/components/npc/`) — compact NPC-preview: naam/titel/status badge, beschrijving excerpt, biografie
 - `DmCharacterPanel` (`src/components/character/`) — compact karakter-preview: portret, HP/AC/speed, ability scores, saving throws, skills, spell slots, uitrusting, condities
 
@@ -393,7 +393,7 @@ import { useWorldBestiaries } from '@/hooks/queries/useWorldBestiaries'
 import { useEncounterMonsters } from '@/hooks/queries/useEncounterMonsters'
 import { useMySessionNote, useSessionPlayerNotes, useSavePlayerNote } from '@/hooks/queries/usePlayerNotes'
 import { useUserAISettings, useSetByokKey } from '@/hooks/queries/useUserAISettings'
-import { useCampaignInvite, useSetInviteCode, useCampaignByInviteCode, useJoinCampaign, useJoinWithCharacter, useJoinAndCreateCharacter, useCampaignMembers } from '@/hooks/queries/useCampaignInvite'
+import { useCampaignInvite, useSetInviteCode, useCampaignByInviteCode, useJoinWithCharacter, useJoinAndCreateCharacter, useCampaignMembers } from '@/hooks/queries/useCampaignInvite'
 import { useNotifications, useMarkNotificationRead, useMarkAllNotificationsRead, useDeleteNotification } from '@/hooks/queries/useNotifications'
 import { useUnassignedCharacters } from '@/hooks/queries/useCharacters'
 ```
@@ -582,9 +582,10 @@ type LoreStatus = 'draft' | 'active' | 'archived'
 // bestiary.types.ts
 type BestiaryStatus = 'draft' | 'active' | 'archived'
 interface BestiaryAction { name: string, desc: string }
-// Bestiary has extended stat block: alignment, hit_dice, proficiency_bonus, senses, languages,
+// Bestiary has extended stat block: alignment, hit_dice, senses, languages,
 // saving_throws, skills, damage_immunities, damage_resistances, damage_vulnerabilities,
 // condition_immunities, speed_details (all string | null)
+// proficiency_bonus (integer | null)
 // special_abilities, actions, bonus_actions, reactions, legendary_actions, lair_actions (BestiaryAction[] | null)
 // legendary_desc (string | null), image_url (string | null)
 
@@ -649,13 +650,13 @@ interface Notification { id, user_id, type: NotificationType, title, message, re
 | `factions` | campaign | Facties en organisaties binnen een kroniek |
 | `entity_links` | campaign | Generieke relaties tussen entiteiten (bidirectioneel) |
 
-Alle tabellen hebben `committed boolean DEFAULT false` — bestaande rijen zijn `true`, nieuwe forge-aanmaak start als `false` (redirect naar edit voor invulling).
+Entity-tabellen (worlds, campaigns, sessions, locations, npcs, lore, bestiaries, characters, encounters, items, quests, factions) hebben `committed boolean DEFAULT false` — bestaande rijen zijn `true`, nieuwe forge-aanmaak start als `false` (redirect naar edit voor invulling). Uitzondering: `campaign_members`, `notifications`, `spells`, `character_spells`, `entity_links` en `player_notes` hebben geen `committed` kolom.
 
 ### Storage buckets
 
 | Bucket | Toegang | Gebruik |
 |---|---|---|
-| `entity-images` | Publiek lezen; auth upload/update/delete (pad bevat user_id) | Custom artwork voor bestiaries en items (`image_url` kolom) |
+| `entity-images` | Publiek lezen; auth insert (alleen bucket-id check); auth update/delete (pad moet user_id bevatten) | Custom artwork voor bestiaries en items (`image_url` kolom) |
 
 ### Migraties (chronologisch)
 
@@ -712,6 +713,12 @@ Alle tabellen hebben `committed boolean DEFAULT false` — bestaande rijen zijn 
 | 049 | `049_character_background.sql` | `background text` op `characters` (D&D-achtergrond uit de karakter-wizard) |
 | 050 | `050_location_atlas_fields.sql` | `map_x`, `map_y`, `region`, `climate` op `locations` (positionering voor de ConstellationAtlas) |
 | 051 | `051_campaign_map_image.sql` | `map_image_url` op `campaigns` (kaartachtergrond voor de atlas) |
+| 052 | `052_invite_join_rpc.sql` | Vervangt `invite_code_lookup` + `join_via_invite` policies door SECURITY DEFINER RPC's `get_campaign_by_invite_code` (alleen veilige kolommen) en `join_campaign_via_invite` (valideert code server-side vóór insert in `campaign_members`) |
+| 053 | `053_npc_faction_campaign_check.sql` | Trigger `check_npc_faction_campaign()` op `npcs`: weigert `faction_id` van een factie buiten de eigen `campaign_id` |
+| 054 | `054_entity_links_cleanup.sql` | AFTER DELETE-triggers op alle 9 linkbare tabellen (`cleanup_entity_links()`) — verwijdert `entity_links`-rijen die naar de verwijderde rij verwijzen (polymorfe FK heeft geen ON DELETE CASCADE) |
+| 055 | `055_ai_rpc_grants.sql` | `claim_ai_request`/`increment_ai_usage` controleren nu `auth.uid() = p_user_id`; EXECUTE op alle 3 AI-RPC's ingetrokken van `PUBLIC` en herverleend aan `authenticated` (resp. `service_role` voor `increment_org_groq_usage`) |
+| 056 | `056_backfill_legacy_byok.sql` | Backfill van legacy `profiles.openai_api_key`/`anthropic_api_key` (023) naar `user_ai_settings.byok_keys` (024), daarna kolommen verwijderd — ai-chat las deze legacy kolommen nooit |
+| 057 | `057_character_spells_spell_owner_check.sql` | Verscherpt `character_spells` INSERT-beleid: WITH CHECK verifieert nu ook dat `spell_id` toebehoort aan de geauthenticeerde gebruiker, voorkomt cross-user spreuk-referenties |
 
 ---
 
@@ -723,13 +730,13 @@ Alle tabellen hebben `committed boolean DEFAULT false` — bestaande rijen zijn 
 const { ask, loading, windowRemaining, windowResetsAt, lastProvider, lastModel } = useAI()
 
 // Gebruik
-await ask({ messages: [{ role: 'user', content: prompt }] })
+await ask([{ role: 'user', content: prompt }])
 ```
 
 ### Backend (`supabase/functions/ai-chat/`)
 
 - **Cascaderende free-tier providers:** Groq (llama-3.3-70b) → Gemini 2.5 Flash-Lite
-- **BYOK:** Anthropic + OpenAI via `byok_keys jsonb` op het gebruikersprofiel
+- **BYOK:** Anthropic + OpenAI via `byok_keys jsonb` op `user_ai_settings` (gelezen + geschreven via `useUserAISettings` / `useSetByokKey`)
 - **Per-user rate limiting:** configureerbaar via `config.ts` (standaard 5 req / 5 uur)
 - **Org-level Groq soft cap:** configureerbaar max requests/dag
 - **Usage tracking:** `ai_usage` (per user), `ai_org_usage` (org-breed)
@@ -872,8 +879,8 @@ De review-agent beoordeelt drie dimensies van elke wijziging. Bevindingen van ca
 
 ### 3. Responsive review
 
-- Visuele inspectie op alle drie breakpoints (< 640px, 640–900px, > 900px)
-- Sidebar/navigatie-gedrag correct: 240px left rail op desktop, bottom bar op mobiel
+- Visuele inspectie op drie representatieve widths (360px, 768px, 1280px)
+- Sidebar/navigatie-gedrag correct: mobile top bar + slide-out sidebar op < 768px, 240px left rail op ≥ 768px
 - Grids en lijsten breken correct af; geen overlappende of afgeknipte elementen
 - Touch targets ≥ 44×44px op alle interactieve elementen op mobiel
 - Formulieren en modals bruikbaar en scrollbaar op smal scherm
@@ -929,9 +936,8 @@ Alle UI is **mobile-first** en werkt op mobiel, tablet en desktop. Dit is een ha
 
 | Breakpoint | Breedte | Navigatie |
 |---|---|---|
-| Mobiel | < 640px | Bottom navigation bar (64px hoogte) |
-| Tablet | 640–900px | Bottom navigation bar (64px hoogte) |
-| Desktop | > 900px | Left sidebar rail (240px breedte), inklapbaar |
+| Mobiel | < 768px | Mobile top bar (64px hoogte) + slide-out sidebar (hamburgermenu) |
+| Desktop | ≥ 768px | Left sidebar rail (240px breedte), inklapbaar |
 
 ### Regels
 
@@ -957,9 +963,9 @@ Alle UI is **mobile-first** en werkt op mobiel, tablet en desktop. Dit is een ha
 9. **Gradients via `pickGradient`** — importeer het juiste palet uit `pickGradient.ts`.
 10. **`useEntityEdit` voor edit-pagina's** — standaard hook voor form state, dirty tracking, delete dialoog.
 11. **Equipment logica via `equipmentUtils`** — nooit slot-labels, -icons of stat-calculaties hardcoden; gebruik `EQUIPMENT_SLOT_LABELS`, `ALLOWED_SLOTS_BY_TYPE`, `calculateEffectiveStats`, etc.
-12. **Geen directe DB-calls buiten DEV_MODE-context** — `supabase.ts` exporteert de (eventueel gewrapped) client; importeer altijd via `@/lib/supabase`.
+12. **Importeer de Supabase client altijd via `@/lib/supabase`** — nooit een eigen client instantiëren; `supabase.ts` exporteert de (eventueel gewrapped) client. DB-calls in `src/hooks/queries/` zijn expliciet toegestaan mits ze de client importeren via `@/lib/supabase`.
 13. **A11Y is niet optioneel** — de volledige A11Y-checklist is een harde exit-eis voor elke feature. Geen merge zonder groene checklist. Voer de axe-scan uit op elke gewijzigde pagina.
-14. **Volledig responsive** — alle componenten werken op mobiel (< 640px), tablet (640–900px) en desktop (> 900px). Zie de Responsiveness-sectie. Geen horizontale scroll, geen afgeknipte elementen.
+14. **Volledig responsive** — alle componenten werken op mobiel (< 768px) en desktop (≥ 768px). Zie de Responsiveness-sectie. Geen horizontale scroll, geen afgeknipte elementen.
 15. **Design-System-First** — bouw met herbruikbare primitives uit `src/components/ui/`; nieuwe gedeelde UI wordt een primitive én komt op `/design-system`. Zie de sectie "Design-System-First werkwijze" en **GATE design-system**.
 
 ---
@@ -1062,7 +1068,7 @@ npm run check:all           # Alle gates samen — de '/ship'-gate
 - [x] Voorkeuren-tab — sessieherinneringen, geluidseffecten, autosave, lore-suggesties, taal (nl/en/de/fr)
 - [x] Info-tab — PANGU branding, versie, status, licentie
 - [x] Preferences store (Zustand, per-gebruiker geïsoleerd via user ID)
-- [x] BYOK keys — Anthropic + OpenAI API keys opslaan via `byok_keys jsonb` op profiel (`023_profile_ai_keys.sql`)
+- [x] BYOK keys — Anthropic + OpenAI API keys opslaan in `user_ai_settings.byok_keys jsonb`; gelezen + geschreven via `useUserAISettings` / `useSetByokKey` (`056_backfill_legacy_byok.sql`)
 
 ### Dashboard
 - [x] Dashboard pagina `/dashboard` — recent: 4 werelden, 4 actieve campaigns, 6 geplande sessies
@@ -1294,10 +1300,10 @@ npm run check:all           # Alle gates samen — de '/ship'-gate
 - [x] Migratie `047_bestiary_combat_stats.sql` — volledig D&D stat block: `alignment`, `hit_dice`, `proficiency_bonus`, `senses`, `languages`, `saving_throws`, `skills`, `damage_immunities`, `damage_resistances`, `damage_vulnerabilities`, `condition_immunities`, `speed_details`; `requires_attunement boolean` op `items`
 - [x] `src/types/bestiary.types.ts` — `BestiaryAction` interface + alle nieuwe kolommen op `Bestiary`
 - [x] `src/types/item.types.ts` — `requires_attunement: boolean` toegevoegd
-- [x] `src/components/bestiary/DmBestiaryPanel.tsx` — compact scrollable stat block preview voor DM (initiative, AC, HP, ability scores, saves, skills, immunities, actions, legendary actions)
+- [x] `src/components/bestiary/DmBestiaryPanel.tsx` — compact scrollable stat block preview voor DM (AC, HP, snelheid, ability scores met modifier, leefgebied, beschrijving, DM-notities)
 
 ### Entity Images (Custom Artwork)
-- [x] Migratie `048_entity_image_url.sql` — `image_url text` op `bestiaries` + `items`; `entity-images` public storage bucket met RLS (auth upload, public read, owner update/delete)
+- [x] Migratie `048_entity_image_url.sql` — `image_url text` op `bestiaries` + `items`; `entity-images` public storage bucket met RLS (auth insert op bucket, owner update/delete met pad-check, public read)
 - [x] `src/types/bestiary.types.ts` — `image_url: string | null` toegevoegd
 - [x] `src/types/item.types.ts` — `image_url: string | null` toegevoegd
 
@@ -1309,7 +1315,7 @@ npm run check:all           # Alle gates samen — de '/ship'-gate
 - [x] `src/types/campaign_member.types.ts` — `CampaignMember` + `CampaignMemberWithProfile` interfaces
 - [x] `src/utils/inviteCode.ts` — `generateInviteCode()`: leesbare codes (`WOLF-4532`) met 60 fantasy-themed woorden + 4-cijferig getal
 - [x] `src/lib/queryKeys.ts` — `campaigns.invite(id)`, `campaigns.members(id)`, `invites.byCode(code)` toegevoegd
-- [x] `src/hooks/queries/useCampaignInvite.ts` — `useCampaignInvite` (fetch invite_code), `useSetInviteCode` (genereer/revoke), `useCampaignByInviteCode` (lookup via code), `useJoinCampaign`, `useJoinWithCharacter`, `useJoinAndCreateCharacter`, `useCampaignMembers`
+- [x] `src/hooks/queries/useCampaignInvite.ts` — `useCampaignInvite` (fetch invite_code), `useSetInviteCode` (genereer/revoke), `useCampaignByInviteCode` (lookup via security-definer RPC `get_campaign_by_invite_code`), `useJoinWithCharacter`, `useJoinAndCreateCharacter` (beide joinen via RPC `join_campaign_via_invite`), `useCampaignMembers`
 - [x] `src/hooks/queries/useCharacters.ts` — `useUnassignedCharacters()` toegevoegd (karakters zonder campaign_id, voor join-flow)
 - [x] `src/components/campaign/InvitePanel.tsx` — genereer/revoke/kopieer uitnodigingscode; ledenlijst met e-mailadressen
 - [x] `src/pages/JoinPage.tsx` — twee-staps flow: valideer code → toon campaign → selecteer/maak karakter → deelnemen; redirect naar login als niet geauthenticeerd

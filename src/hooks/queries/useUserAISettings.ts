@@ -29,17 +29,19 @@ export function useUserAISettings(userId: string | undefined) {
 export function useSetByokKey(userId: string | undefined) {
   const queryClient = useQueryClient()
   return useMutation({
-    mutationFn: async ({
-      provider,
-      key,
-      currentKeys,
-    }: {
-      provider: string
-      key: string | null
-      currentKeys: Record<string, string>
-    }) => {
+    mutationFn: async ({ provider, key }: { provider: string; key: string | null }) => {
       if (!userId) throw new Error('no_user')
-      const newKeys = { ...currentKeys }
+
+      // Re-fetch the latest row instead of trusting render-time state, so
+      // concurrent saves of two providers don't clobber each other's keys.
+      const { data: existing, error: fetchError } = await supabase
+        .from('user_ai_settings')
+        .select('byok_keys')
+        .eq('user_id', userId)
+        .maybeSingle()
+      if (fetchError) throw fetchError
+
+      const newKeys = { ...((existing as Pick<UserAISettings, 'byok_keys'> | null)?.byok_keys ?? {}) }
       if (key === null) {
         delete newKeys[provider]
       } else {

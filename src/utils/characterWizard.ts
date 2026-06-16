@@ -12,13 +12,16 @@ import type { SrdClass } from '@/types/srd5e.types'
 import type { WizardDraft, WizardStepId } from '@/types/character_wizard.types'
 import type { SpellSlots } from '@/types/character.types'
 
+// Achtergrond vóór vaardigheden: de vaardigheden-stap markeert skills die al via
+// de achtergrond vaardig zijn (dubbele keuzes uitsluiten) — dat werkt alleen als
+// de achtergrond op dat moment al gekozen is.
 export const WIZARD_STEPS: { id: WizardStepId; label: string }[] = [
   { id: 'basis', label: 'Basis' },
   { id: 'ras', label: 'Ras' },
   { id: 'klasse', label: 'Klasse' },
   { id: 'eigenschappen', label: 'Eigenschappen' },
-  { id: 'vaardigheden', label: 'Vaardigheden' },
   { id: 'achtergrond', label: 'Achtergrond' },
+  { id: 'vaardigheden', label: 'Vaardigheden' },
   { id: 'spreuken', label: 'Spreuken' },
   { id: 'overzicht', label: 'Overzicht' },
 ]

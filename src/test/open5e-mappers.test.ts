@@ -148,7 +148,7 @@ describe('mapMonsterToBestiary', () => {
     expect(result.creature_type).toBe('monstrosity')
     expect(result.threat_level).toBe('CR 3')
     expect(result.source).toBe('srd')
-    expect(result.source_slug).toBe('owlbear')
+    expect(result.source_slug).toBe('srd-2014:owlbear')
     expect(result.committed).toBe(true)
     expect(result.status).toBe('active')
     expect(result.subtitle).toBeNull()
@@ -177,6 +177,14 @@ describe('mapMonsterToBestiary', () => {
   it('handles fractional CR', () => {
     const result = mapMonsterToBestiary({ ...owlbear, challenge_rating: '1/2' }, 'w', 'u')
     expect(result.threat_level).toBe('CR 1/2')
+  })
+
+  it('prefixes source_slug with the edition so 2014 and 2024 keys cannot collide', () => {
+    const v2014 = mapMonsterToBestiary(owlbear, 'w', 'u', '2014')
+    const v2024 = mapMonsterToBestiary(owlbear, 'w', 'u', '2024')
+    expect(v2014.source_slug).toBe('srd-2014:owlbear')
+    expect(v2024.source_slug).toBe('srd-2024:owlbear')
+    expect(v2024.source).toBe('srd-2024')
   })
 })
 
@@ -229,7 +237,7 @@ describe('mapSpellToSpell', () => {
     expect(result.concentration).toBe(false)
     expect(result.ritual).toBe(false)
     expect(result.source).toBe('srd')
-    expect(result.source_slug).toBe('fireball')
+    expect(result.source_slug).toBe('srd-2014:fireball')
   })
 
   it('maps classes from comma-separated string', () => {
@@ -273,7 +281,7 @@ describe('mapMagicItemToItem', () => {
     expect(result.rarity).toBe('uncommon')
     expect(result.is_magical).toBe(true)
     expect(result.source).toBe('srd')
-    expect(result.source_slug).toBe('bag-of-holding')
+    expect(result.source_slug).toBe('srd-2014:bag-of-holding')
     expect(result.committed).toBe(true)
     expect(result.character_id).toBeNull()
     expect(result.equipped_slot).toBeNull()

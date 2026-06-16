@@ -25,7 +25,7 @@ const shortcuts: Shortcut[] = [
       </svg>
     ),
     buildPrompt: (name) =>
-      `Create a rich, atmospheric location for the world "${name}". Give it a compelling name, describe its physical environment, unique characteristics, and why adventurers might be drawn here. Include a sense of mystery or danger. Write 2-3 paragraphs.`,
+      `Creëer een rijke, sfeervolle locatie voor de wereld "${name}". Geef het een aansprekende naam, beschrijf de fysieke omgeving, unieke kenmerken, en waarom avonturiers hierheen getrokken zouden worden. Voeg een gevoel van mysterie of gevaar toe. Schrijf 2-3 paragrafen.`,
   },
   {
     id: 'npc',
@@ -38,7 +38,7 @@ const shortcuts: Shortcut[] = [
       </svg>
     ),
     buildPrompt: (name) =>
-      `Create a memorable NPC for the world "${name}". Give them a name, a role or profession, a striking physical trait, a strong motivation, and a secret or hidden agenda. Make them feel real and three-dimensional. Write 2-3 paragraphs.`,
+      `Creëer een gedenkwaardige NPC voor de wereld "${name}". Geef ze een naam, een rol of beroep, een opvallend fysiek kenmerk, een sterke motivatie, en een geheim of verborgen agenda. Maak ze levensecht en driedimensionaal. Schrijf 2-3 paragrafen.`,
   },
   {
     id: 'quest',
@@ -52,7 +52,7 @@ const shortcuts: Shortcut[] = [
       </svg>
     ),
     buildPrompt: (name) =>
-      `Design a compelling quest hook for the world "${name}". Include a quest name, a gripping opening scenario that pulls players in, the main objective, one or two complications, and a meaningful reward. Write 2-3 paragraphs.`,
+      `Ontwerp een meeslepende questhaak voor de wereld "${name}". Bedenk een questnaam, een spannend openingsscenario dat spelers meteen grijpt, het hoofddoel, een of twee complicaties, en een betekenisvolle beloning. Schrijf 2-3 paragrafen.`,
   },
   {
     id: 'twist',
@@ -63,7 +63,7 @@ const shortcuts: Shortcut[] = [
       </svg>
     ),
     buildPrompt: (name) =>
-      `Invent a surprising plot twist for an adventure in the world "${name}". The twist should recontextualise something the players thought they understood, raise the stakes, and open up new story possibilities. Write 1-2 paragraphs.`,
+      `Verzin een verrassende plotwending voor een avontuur in de wereld "${name}". De wending moet iets dat de spelers dachten te begrijpen in een ander daglicht plaatsen, de inzet verhogen, en nieuwe verhaalmogelijkheden openen. Schrijf 1-2 paragrafen.`,
   },
   {
     id: 'rumour',
@@ -76,7 +76,7 @@ const shortcuts: Shortcut[] = [
       </svg>
     ),
     buildPrompt: (name) =>
-      `Write an intriguing tavern rumour that adventurers might overhear in the world "${name}". It should hint at a larger mystery, local danger, or opportunity — but leave enough ambiguity that it could be true or false. Write 1 short paragraph, in-world voice.`,
+      `Schrijf een intrigerend kroeggerucht dat avonturiers zouden kunnen opvangen in de wereld "${name}". Het moet hinten naar een groter mysterie, lokaal gevaar, of een kans — maar laat genoeg twijfel of het waar of onwaar is. Schrijf 1 korte paragraaf, in de stem van de wereld.`,
   },
   {
     id: 'loot',
@@ -88,7 +88,7 @@ const shortcuts: Shortcut[] = [
       </svg>
     ),
     buildPrompt: (name) =>
-      `Describe a unique magical item found in the world "${name}". Give it a name, evocative appearance, origin story, and one or two interesting properties or powers. Make it feel like it belongs to this world specifically. Write 1-2 paragraphs.`,
+      `Beschrijf een uniek magisch voorwerp gevonden in de wereld "${name}". Geef het een naam, een sprekend uiterlijk, een ontstaansverhaal, en een of twee interessante eigenschappen of krachten. Laat het voelen alsof het specifiek bij deze wereld hoort. Schrijf 1-2 paragrafen.`,
   },
 ]
 

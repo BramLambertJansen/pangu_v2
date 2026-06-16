@@ -40,7 +40,11 @@ const BackIcon = () => (
 
 function Separator({ variant }: { variant: BreadcrumbVariant }) {
   if (variant === 'arcane') {
-    return <span className="sep-glyph" aria-hidden="true">✦</span>
+    return (
+      <li className="sep" aria-hidden="true">
+        <span className="sep-glyph">✦</span>
+      </li>
+    )
   }
   return (
     <li className="sep" aria-hidden="true">
@@ -105,7 +109,10 @@ export function Breadcrumbs({
   if (collapse) {
     const start = collapse.start ?? 1
     const end = collapse.end ?? -1
-    const normalisedEnd = end < 0 ? resolvedItems.length + end : end
+    // Negative `end` counts from the end of the original path (including an
+    // implicitly-promoted terminal `current` item), not the already-shrunk
+    // `resolvedItems` — otherwise promotion shifts the collapse window by one.
+    const normalisedEnd = end < 0 ? items.length + end : end
     if (normalisedEnd > start && resolvedItems.length > start) {
       beforeItems = resolvedItems.slice(0, start)
       collapsedItems = resolvedItems.slice(start, normalisedEnd)
