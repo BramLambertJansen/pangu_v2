@@ -366,7 +366,7 @@ Elk feature-domein heeft een map: `campaign/`, `session/`, `world/`, `admin/`, `
 - `StoryArcTracker` — tijdlijn-visualisatie van alle sessies in een kroniek; sessienummers als Romeinse cijfers; `onForge` callback voor nieuwe sessie
 
 **DM-preview panels:**
-- `DmBestiaryPanel` (`src/components/bestiary/`) — compact scrollable stat block: initiative, AC, HP, ability scores, saving throws, skills, damage immunities, actions, legendary actions
+- `DmBestiaryPanel` (`src/components/bestiary/`) — compact scrollable stat block: AC, HP, snelheid, ability scores (met modifier), leefgebied, beschrijving, DM-notities; link naar volledig statblok
 - `DmNpcPanel` (`src/components/npc/`) — compact NPC-preview: naam/titel/status badge, beschrijving excerpt, biografie
 - `DmCharacterPanel` (`src/components/character/`) — compact karakter-preview: portret, HP/AC/speed, ability scores, saving throws, skills, spell slots, uitrusting, condities
 
@@ -582,9 +582,10 @@ type LoreStatus = 'draft' | 'active' | 'archived'
 // bestiary.types.ts
 type BestiaryStatus = 'draft' | 'active' | 'archived'
 interface BestiaryAction { name: string, desc: string }
-// Bestiary has extended stat block: alignment, hit_dice, proficiency_bonus, senses, languages,
+// Bestiary has extended stat block: alignment, hit_dice, senses, languages,
 // saving_throws, skills, damage_immunities, damage_resistances, damage_vulnerabilities,
 // condition_immunities, speed_details (all string | null)
+// proficiency_bonus (integer | null)
 // special_abilities, actions, bonus_actions, reactions, legendary_actions, lair_actions (BestiaryAction[] | null)
 // legendary_desc (string | null), image_url (string | null)
 
@@ -649,13 +650,13 @@ interface Notification { id, user_id, type: NotificationType, title, message, re
 | `factions` | campaign | Facties en organisaties binnen een kroniek |
 | `entity_links` | campaign | Generieke relaties tussen entiteiten (bidirectioneel) |
 
-Alle tabellen hebben `committed boolean DEFAULT false` — bestaande rijen zijn `true`, nieuwe forge-aanmaak start als `false` (redirect naar edit voor invulling).
+Entity-tabellen (worlds, campaigns, sessions, locations, npcs, lore, bestiaries, characters, encounters, items, quests, factions) hebben `committed boolean DEFAULT false` — bestaande rijen zijn `true`, nieuwe forge-aanmaak start als `false` (redirect naar edit voor invulling). Uitzondering: `campaign_members`, `notifications`, `spells`, `character_spells`, `entity_links` en `player_notes` hebben geen `committed` kolom.
 
 ### Storage buckets
 
 | Bucket | Toegang | Gebruik |
 |---|---|---|
-| `entity-images` | Publiek lezen; auth upload/update/delete (pad bevat user_id) | Custom artwork voor bestiaries en items (`image_url` kolom) |
+| `entity-images` | Publiek lezen; auth insert (alleen bucket-id check); auth update/delete (pad moet user_id bevatten) | Custom artwork voor bestiaries en items (`image_url` kolom) |
 
 ### Migraties (chronologisch)
 
@@ -728,13 +729,13 @@ Alle tabellen hebben `committed boolean DEFAULT false` — bestaande rijen zijn 
 const { ask, loading, windowRemaining, windowResetsAt, lastProvider, lastModel } = useAI()
 
 // Gebruik
-await ask({ messages: [{ role: 'user', content: prompt }] })
+await ask([{ role: 'user', content: prompt }])
 ```
 
 ### Backend (`supabase/functions/ai-chat/`)
 
 - **Cascaderende free-tier providers:** Groq (llama-3.3-70b) → Gemini 2.5 Flash-Lite
-- **BYOK:** Anthropic + OpenAI via `byok_keys jsonb` op het gebruikersprofiel
+- **BYOK:** Anthropic + OpenAI via `byok_keys jsonb` op `user_ai_settings` (gelezen + geschreven via `useUserAISettings` / `useSetByokKey`)
 - **Per-user rate limiting:** configureerbaar via `config.ts` (standaard 5 req / 5 uur)
 - **Org-level Groq soft cap:** configureerbaar max requests/dag
 - **Usage tracking:** `ai_usage` (per user), `ai_org_usage` (org-breed)
@@ -877,8 +878,8 @@ De review-agent beoordeelt drie dimensies van elke wijziging. Bevindingen van ca
 
 ### 3. Responsive review
 
-- Visuele inspectie op alle drie breakpoints (< 640px, 640–900px, > 900px)
-- Sidebar/navigatie-gedrag correct: 240px left rail op desktop, bottom bar op mobiel
+- Visuele inspectie op drie representatieve widths (360px, 768px, 1280px)
+- Sidebar/navigatie-gedrag correct: mobile top bar + slide-out sidebar op < 768px, 240px left rail op ≥ 768px
 - Grids en lijsten breken correct af; geen overlappende of afgeknipte elementen
 - Touch targets ≥ 44×44px op alle interactieve elementen op mobiel
 - Formulieren en modals bruikbaar en scrollbaar op smal scherm
@@ -934,9 +935,8 @@ Alle UI is **mobile-first** en werkt op mobiel, tablet en desktop. Dit is een ha
 
 | Breakpoint | Breedte | Navigatie |
 |---|---|---|
-| Mobiel | < 640px | Bottom navigation bar (64px hoogte) |
-| Tablet | 640–900px | Bottom navigation bar (64px hoogte) |
-| Desktop | > 900px | Left sidebar rail (240px breedte), inklapbaar |
+| Mobiel | < 768px | Mobile top bar (64px hoogte) + slide-out sidebar (hamburgermenu) |
+| Desktop | ≥ 768px | Left sidebar rail (240px breedte), inklapbaar |
 
 ### Regels
 
@@ -962,9 +962,9 @@ Alle UI is **mobile-first** en werkt op mobiel, tablet en desktop. Dit is een ha
 9. **Gradients via `pickGradient`** — importeer het juiste palet uit `pickGradient.ts`.
 10. **`useEntityEdit` voor edit-pagina's** — standaard hook voor form state, dirty tracking, delete dialoog.
 11. **Equipment logica via `equipmentUtils`** — nooit slot-labels, -icons of stat-calculaties hardcoden; gebruik `EQUIPMENT_SLOT_LABELS`, `ALLOWED_SLOTS_BY_TYPE`, `calculateEffectiveStats`, etc.
-12. **Geen directe DB-calls buiten DEV_MODE-context** — `supabase.ts` exporteert de (eventueel gewrapped) client; importeer altijd via `@/lib/supabase`.
+12. **Importeer de Supabase client altijd via `@/lib/supabase`** — nooit een eigen client instantiëren; `supabase.ts` exporteert de (eventueel gewrapped) client. DB-calls in `src/hooks/queries/` zijn expliciet toegestaan mits ze de client importeren via `@/lib/supabase`.
 13. **A11Y is niet optioneel** — de volledige A11Y-checklist is een harde exit-eis voor elke feature. Geen merge zonder groene checklist. Voer de axe-scan uit op elke gewijzigde pagina.
-14. **Volledig responsive** — alle componenten werken op mobiel (< 640px), tablet (640–900px) en desktop (> 900px). Zie de Responsiveness-sectie. Geen horizontale scroll, geen afgeknipte elementen.
+14. **Volledig responsive** — alle componenten werken op mobiel (< 768px) en desktop (≥ 768px). Zie de Responsiveness-sectie. Geen horizontale scroll, geen afgeknipte elementen.
 15. **Design-System-First** — bouw met herbruikbare primitives uit `src/components/ui/`; nieuwe gedeelde UI wordt een primitive én komt op `/design-system`. Zie de sectie "Design-System-First werkwijze" en **GATE design-system**.
 
 ---
@@ -1067,7 +1067,7 @@ npm run check:all           # Alle gates samen — de '/ship'-gate
 - [x] Voorkeuren-tab — sessieherinneringen, geluidseffecten, autosave, lore-suggesties, taal (nl/en/de/fr)
 - [x] Info-tab — PANGU branding, versie, status, licentie
 - [x] Preferences store (Zustand, per-gebruiker geïsoleerd via user ID)
-- [x] BYOK keys — Anthropic + OpenAI API keys opslaan via `byok_keys jsonb` op profiel (`023_profile_ai_keys.sql`)
+- [x] BYOK keys — Anthropic + OpenAI API keys opslaan in `user_ai_settings.byok_keys jsonb`; gelezen + geschreven via `useUserAISettings` / `useSetByokKey` (`056_backfill_legacy_byok.sql`)
 
 ### Dashboard
 - [x] Dashboard pagina `/dashboard` — recent: 4 werelden, 4 actieve campaigns, 6 geplande sessies
@@ -1299,10 +1299,10 @@ npm run check:all           # Alle gates samen — de '/ship'-gate
 - [x] Migratie `047_bestiary_combat_stats.sql` — volledig D&D stat block: `alignment`, `hit_dice`, `proficiency_bonus`, `senses`, `languages`, `saving_throws`, `skills`, `damage_immunities`, `damage_resistances`, `damage_vulnerabilities`, `condition_immunities`, `speed_details`; `requires_attunement boolean` op `items`
 - [x] `src/types/bestiary.types.ts` — `BestiaryAction` interface + alle nieuwe kolommen op `Bestiary`
 - [x] `src/types/item.types.ts` — `requires_attunement: boolean` toegevoegd
-- [x] `src/components/bestiary/DmBestiaryPanel.tsx` — compact scrollable stat block preview voor DM (initiative, AC, HP, ability scores, saves, skills, immunities, actions, legendary actions)
+- [x] `src/components/bestiary/DmBestiaryPanel.tsx` — compact scrollable stat block preview voor DM (AC, HP, snelheid, ability scores met modifier, leefgebied, beschrijving, DM-notities)
 
 ### Entity Images (Custom Artwork)
-- [x] Migratie `048_entity_image_url.sql` — `image_url text` op `bestiaries` + `items`; `entity-images` public storage bucket met RLS (auth upload, public read, owner update/delete)
+- [x] Migratie `048_entity_image_url.sql` — `image_url text` op `bestiaries` + `items`; `entity-images` public storage bucket met RLS (auth insert op bucket, owner update/delete met pad-check, public read)
 - [x] `src/types/bestiary.types.ts` — `image_url: string | null` toegevoegd
 - [x] `src/types/item.types.ts` — `image_url: string | null` toegevoegd
 
