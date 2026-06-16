@@ -111,7 +111,11 @@ export function useDeleteFaction(id: string) {
     onSuccess: (_, { campaignId }) => {
       queryClient.removeQueries({ queryKey: queryKeys.factions.detail(id) })
       queryClient.removeQueries({ queryKey: queryKeys.factions.detailFull(id) })
-      if (campaignId) queryClient.invalidateQueries({ queryKey: queryKeys.factions.byCampaign(campaignId) })
+      queryClient.removeQueries({ queryKey: queryKeys.factions.members(id) })
+      if (campaignId) {
+        queryClient.invalidateQueries({ queryKey: queryKeys.factions.byCampaign(campaignId) })
+        queryClient.invalidateQueries({ queryKey: queryKeys.npcs.byCampaign(campaignId) })
+      }
     },
     onError: () => toast.error('Verwijderen mislukt'),
   })
